@@ -57,8 +57,7 @@ export class MenuComponent {
         { title: 'Estados', path: 'estados' },
         { title: 'Crear Data', path: 'crear-data' },
         { title: 'Checklist', path: 'checklist' },
-        { title: 'Data Sostenimiento', path: 'data-sostenimiento' },
-
+        { title: 'Checklist Carguio', path: 'checklist-telemando' },
       ],
     },
     {

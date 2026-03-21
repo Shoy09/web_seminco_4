@@ -11,6 +11,7 @@ import { PlanProduccionListComponent } from './Components/Planes mensuales/Plan 
 import { UsuarioComponent } from './Components/Usuario/usuario/usuario.component';
 import { AutocadMineroComponent } from './Components/autocad-minero/autocad-minero.component';
 import { CheckListListaComponent } from './Components/Crear datos/check list/check-list-lista/check-list-lista.component';
+import { ChecklistTelemandoListaComponent } from './Components/Crear datos/check List Carguip/checklist-telemando-lista/checklist-telemando-lista.component';
 
 
 
@@ -32,6 +33,7 @@ export const routes: Routes = [
       { path: 'perfil', component: UsuarioComponent },
       { path: 'autocad', component: AutocadMineroComponent },
       { path: 'checklist', component: CheckListListaComponent },
+      { path: 'checklist-telemando', component: ChecklistTelemandoListaComponent },
 
     ]
   },

@@ -7,6 +7,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { EquipoService } from '../../../services/equipo.service';
 import { TipoPerforacionService } from '../../../services/tipo-perforacion.service';
 import { LoadingDialogComponent } from '../../Reutilizables/loading-dialog/loading-dialog.component';
+import { TipoEquipoService } from '../../../services/tipo-equipo.service';
+import { SeccionService } from '../../../services/seccion.service';
 
 
 @Component({
@@ -37,7 +39,9 @@ datoOriginal: any = null;
     private tipoPerforacionService: TipoPerforacionService, 
     private equipoService: EquipoService,
     private FechasPlanMensualService: FechasPlanMensualService,
-    public dialog: MatDialog
+    private tipoEquipoService: TipoEquipoService,
+    public dialog: MatDialog,
+    private seccionService: SeccionService,
   ) {} // Inyecta los servicios
 
   ngOnInit() {
@@ -68,48 +72,28 @@ datoOriginal: any = null;
       label: 'Proceso', 
       tipo: 'select', 
       opciones: [
-        'PERFORACIÓN TALADROS LARGOS',
-        'PERFORACIÓN HORIZONTAL',
-        'SOSTENIMIENTO',
-        'SERVICIOS AUXILIARES',
-        'CARGUÍO',
-        'SERVICIO AUXILIAR MIXER',
-        'SERVICIO AUXILIAR LANZADOR'
+        'PERFORACIÓN TALADROS LARGOS', 'PERFORACIÓN HORIZONTAL', 'EMPERNADOR', 'SCISSOR', 'SCALAMIN', 'ROMPEBANCOS', 'ANFOCHANGER', 'SCOOPTRAM', 'DUMPER'
       ]
     },
   ]
 },
 {
-  nombre: 'Origen/Destino',
+  nombre: 'Secciones',
   icon: 'mas.svg',
-  tipo: 'OrigenDestino',
+  tipo: 'Seccion',
   datos: [],
   campos: [
     { 
-      nombre: 'operacion', 
-      label: 'Operación', 
+      nombre: 'proceso',
+      label: 'Proceso',
       tipo: 'select',
-      opciones: ['CARGUÍO', 'ACARREO', 'SERVICIO AUXILIAR MIXER', 'SERVICIO AUXILIAR LANZADOR'] 
+      opciones: [
+        'PERFORACIÓN TALADROS LARGOS', 'PERFORACIÓN HORIZONTAL', 'EMPERNADOR', 'SCISSOR', 'SCALAMIN', 'ROMPEBANCOS', 'ANFOCHANGER', 'SCOOPTRAM', 'DUMPER'
+      ]
     },
     { 
-      nombre: 'tipo', 
-      label: 'Tipo', 
-      tipo: 'select',
-      opciones: ['Origen', 'Destino']
-    },
-    { 
-      nombre: 'tipo_labor',
-      label: 'Tipo Labor', 
-      tipo: 'text' 
-    },
-    { 
-      nombre: 'labor',
-      label: 'Labor', 
-      tipo: 'text'
-    },
-    { 
-      nombre: 'ala',
-      label: 'Ala', 
+      nombre: 'nombre',
+      label: 'Nombre de la Sección',
       tipo: 'text'
     }
   ]
@@ -121,7 +105,14 @@ datoOriginal: any = null;
       datos: [],
       campos: [
         { nombre: 'nombre', label: 'Nombre', tipo: 'text' },
-        { nombre: 'proceso', label: 'Proceso', tipo: 'text' },
+        { 
+      nombre: 'proceso',
+      label: 'Proceso',
+      tipo: 'select',
+      opciones: [
+        'PERFORACIÓN TALADROS LARGOS', 'PERFORACIÓN HORIZONTAL', 'EMPERNADOR', 'SCISSOR', 'SCALAMIN', 'ROMPEBANCOS', 'ANFOCHANGER', 'SCOOPTRAM', 'DUMPER'
+      ]
+    },
         { nombre: 'codigo', label: 'Código', tipo: 'text' },
         { nombre: 'marca', label: 'Marca', tipo: 'text' },
         { nombre: 'modelo', label: 'Modelo', tipo: 'text' },
@@ -133,14 +124,14 @@ datoOriginal: any = null;
       ]
     },
     {
-      nombre: 'Empresa',
-      icon: 'mas.svg',
-      tipo: 'Empresa',
-      datos: [],
-      campos: [
-        { nombre: 'nombre', label: 'Empresa', tipo: 'text' },
-      ]
-    },
+  nombre: 'Tipo de Equipo',
+  icon: 'mas.svg',
+  tipo: 'Tipo de Equipo',
+  datos: [],
+  campos: [
+    { nombre: 'nombre', label: 'Nombre del Tipo de Equipo', tipo: 'text' }
+  ]
+},
     {
       nombre: 'Fechas Plan Mensual',
       icon: 'mas.svg',
@@ -150,118 +141,6 @@ datoOriginal: any = null;
         { nombre: 'mes', label: 'Mes', tipo: 'text' },
       ]
     },
-//     {
-//   nombre: 'Toneladas',
-//   icon: 'mas.svg',
-//   tipo: 'Toneladas',
-//   datos: [],
-//   campos: [
-//     { nombre: 'fecha', label: 'Fecha', tipo: 'date' },
-//     { nombre: 'zona', label: 'Zona', tipo: 'text' },
-//     { nombre: 'tipo', label: 'Tipo', tipo: 'text' },
-//     { nombre: 'labor', label: 'Labor', tipo: 'text' },
-//     { nombre: 'toneladas', label: 'Toneladas', tipo: 'number' }
-//   ]
-// },
-{
-  nombre: 'Tipo de Acero',
-  icon: 'mas.svg',
-  tipo: 'Tipo de Acero',
-  datos: [],
-  campos: [
-    { 
-      nombre: 'proceso', 
-      label: 'Proceso', 
-      tipo: 'select', 
-      opciones: [
-        'PERFORACIÓN TALADROS LARGOS',
-        'PERFORACIÓN HORIZONTAL',
-        'SOSTENIMIENTO',
-        'SERVICIOS AUXILIARES',
-        'CARGUÍO'
-      ]
-    },
-    { 
-      nombre: 'tipo_acero', 
-      label: 'Tipo de Acero', 
-      tipo: 'text'
-    }
-  ]
-},
-{
-  nombre: 'Acero',
-  icon: 'mas.svg',
-  tipo: 'Acero',
-  datos: [],
-  campos: [
-    { 
-      nombre: 'proceso', 
-      label: 'Proceso', 
-      tipo: 'select', 
-      opciones: [
-      ]
-    },
-    { nombre: 'codigo', label: 'Código', tipo: 'text' },
-    { 
-      nombre: 'tipo_acero', 
-      label: 'Tipo de Acero', 
-      tipo: 'select', 
-      opciones: [
-      ]
-    },
-    { nombre: 'descripcion', label: 'Descripción', tipo: 'text' },
-    { nombre: 'precio', label: 'Precio', tipo: 'number' },
-    { 
-      nombre: 'rendimiento', 
-      label: 'Rendimiento', 
-      tipo: 'number',
-      step: '0.01',
-      placeholder: 'Ej: 98.75'
-    }
-  ]
-},
-{
-  nombre: 'Jefe Guardia Acero',
-  icon: 'mas.svg',
-  tipo: 'JefeGuardiaAcero',
-  datos: [],
-  campos: [
-    { nombre: 'jefe_de_guardia', label: 'Nombre', tipo: 'text' },
-    { 
-      nombre: 'turno', 
-      label: 'Turno', 
-      tipo: 'select',
-      opciones: ['DIA', 'NOCHE']
-    },
-    { 
-      nombre: 'activo', 
-      label: 'Activo', 
-      tipo: 'select',
-      opciones: ['SI', 'NO']
-    }
-  ]
-},
-{
-  nombre: 'Operador Acero',
-  icon: 'mas.svg',
-  tipo: 'OperadorAcero',
-  datos: [],
-  campos: [
-    { nombre: 'operador', label: 'Nombre', tipo: 'text' },
-    { 
-      nombre: 'turno', 
-      label: 'Turno', 
-      tipo: 'select',
-      opciones: ['DIA', 'NOCHE']
-    },
-    { 
-      nombre: 'activo', 
-      label: 'Activo', 
-      tipo: 'select',
-      opciones: ['SI', 'NO']
-    }
-  ]
-}
     
   ];  
 
@@ -333,7 +212,23 @@ actualizarDatos() {
         },
         error: (err) => console.error('Error al actualizar Fecha Plan Mensual:', err)
       });
-    }
+    }else if (this.modalContenido.tipo === 'Tipo de Equipo') {
+  this.tipoEquipoService.updateTipo(id, datosActualizados).subscribe({
+    next: (data) => {
+      this.modalContenido.datos[this.indiceEditando] = data;
+      this.cancelarEdicion();
+    },
+    error: (err) => console.error('Error al actualizar Tipo de Equipo:', err)
+  });
+}else if (this.modalContenido.tipo === 'Seccion') {
+  this.seccionService.updateSeccion(id, datosActualizados).subscribe({
+    next: (data) => {
+      this.modalContenido.datos[this.indiceEditando] = data;
+      this.cancelarEdicion();
+    },
+    error: (err) => console.error('Error al actualizar Sección:', err)
+  });
+}
 
     // Agregar más casos según necesites, como 'Fechas Plan Mensual', 'Toneladas', etc.
   }
@@ -530,7 +425,21 @@ private buscarHojaExcel(workbook: any, nombresPosibles: string[]): string {
         },
         error: (err) => console.error('Error al cargar:', err)
       });
-    }
+    }else if (button.tipo === 'Tipo de Equipo') {
+  this.tipoEquipoService.getTipos().subscribe({
+    next: (data) => {
+      this.modalContenido.datos = data; // Cargar los tipos de equipo
+    },
+    error: (err) => console.error('Error al cargar Tipo de Equipo:', err)
+  });
+}else if (button.tipo === 'Seccion') {
+  this.seccionService.getSecciones().subscribe({
+    next: (data) => {
+      this.modalContenido.datos = data;
+    },
+    error: (err) => console.error('Error al cargar Secciones:', err)
+  });
+}
 
   }
 
@@ -593,7 +502,21 @@ private buscarHojaExcel(workbook: any, nombresPosibles: string[]): string {
           },
           error: (err) => console.error('Error al guardar Empresa:', err)
         });
-      }
+      }else if (this.modalContenido.tipo === 'Tipo de Equipo') {
+  this.tipoEquipoService.createTipo(nuevoRegistro).subscribe({
+    next: (data) => {
+      this.modalContenido.datos.push(data);
+    },
+    error: (err) => console.error('Error al guardar Tipo de Equipo:', err)
+  });
+}else if (this.modalContenido.tipo === 'Seccion') {
+  this.seccionService.createSeccion(nuevoRegistro).subscribe({
+    next: (data) => {
+      this.modalContenido.datos.push(data);
+    },
+    error: (err) => console.error('Error al guardar Sección:', err)
+  });
+}
 
       this.nuevoDato = {};
     }
@@ -626,7 +549,23 @@ private buscarHojaExcel(workbook: any, nombresPosibles: string[]): string {
         },
         error: (err) => console.error('Error al eliminar accesorio:', err)
       });
-    }
+    }else if (this.modalContenido.tipo === 'Tipo de Equipo') {
+  this.tipoEquipoService.deleteTipo(item.id).subscribe({
+    next: () => {
+      this.modalContenido.datos = this.modalContenido.datos.filter((dato: any) => dato.id !== item.id);
+    },
+    error: (err) => console.error('Error al eliminar Tipo de Equipo:', err)
+  });
+}else if (this.modalContenido.tipo === 'Seccion') {
+  this.seccionService.deleteSeccion(item.id).subscribe({
+    next: () => {
+      this.modalContenido.datos = this.modalContenido.datos.filter(
+        (dato: any) => dato.id !== item.id
+      );
+    },
+    error: (err) => console.error('Error al eliminar Sección:', err)
+  });
+}
 
   }
 

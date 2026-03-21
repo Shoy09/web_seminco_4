@@ -75,13 +75,19 @@ export class OpcionesDialogComponent {
       const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
       // Omitimos la primera fila (encabezados) y procesamos las siguientes
-      const estados: Estado2[] = jsonData.slice(1).map((fila) => ({
-        estado_principal: fila[0] || '',
-        codigo: fila[1] || '',
-        tipo_estado: fila[2] || '',
-        categoria: fila[3] || '',
-        proceso: this.data.proceso // 🔴 Asignamos el proceso automáticamente
-      }));
+      const estados: Estado2[] = jsonData
+  .slice(1)
+  .filter((fila) => {
+    // Verifica que al menos una celda tenga contenido real
+    return fila && fila.some((celda: any) => celda !== null && celda !== undefined && celda !== '');
+  })
+  .map((fila) => ({
+    estado_principal: fila[0] || '',
+    codigo: fila[1] || '',
+    tipo_estado: fila[2] || '',
+    categoria: fila[3] || '',
+    proceso: this.data.proceso
+  }));
 
       if (estados.length === 0) {
         console.warn('No hay estados para procesar.');

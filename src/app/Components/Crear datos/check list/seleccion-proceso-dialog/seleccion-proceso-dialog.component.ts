@@ -15,22 +15,43 @@ import { SeleccionProcesoEstatosDialogComponent } from '../../../Estado/seleccio
 export class SeleccionProcesoDialogComponent {
   procesos = [
   {
-    nombre: 'PERFORACIÓN TALADROS LARGOS',
+  nombre: 'PERFORACIÓN TALADROS LARGOS',
+  categorias: ['ANTES', 'MPI', 'VERIFICAR', 'MPF']
+},
+  {
+    'nombre': 'PERFORACIÓN HORIZONTAL',
     categorias: ['ANTES', 'MPI', 'VERIFICAR', 'MPF']
   },
   {
-    nombre: 'PERFORACIÓN HORIZONTAL',
+    'nombre': 'EMPERNADOR',
     categorias: ['ANTES', 'MPI', 'VERIFICAR', 'MPF']
   },
   {
-    nombre: 'SOSTENIMIENTO',
-    categorias: ['SEGURIDAD', 'EQUIPOS']
+    'nombre': 'SCISSOR',
+    categorias: ['ANTES', 'MPI', 'VERIFICAR', 'MPF']
   },
   {
-    nombre: 'SERVICIOS AUXILIARES',
-    categorias: ['INSPECCIÓN']
-  }
+    'nombre': 'SCALAMIN',
+    categorias: ['ANTES', 'MPI', 'VERIFICAR', 'MPF']
+  },
+  {
+    'nombre': 'ROMPEBANCOS',
+    categorias: ['ANTES', 'MPI', 'VERIFICAR', 'MPF']
+  },
+  {
+    'nombre': 'ANFOCHANGER',
+    categorias: ['ANTES', 'MPI', 'VERIFICAR', 'MPF']
+  },
+  {
+    'nombre': 'SCOOPTRAM',
+    categorias: ['ANTES', 'DESPUES', 'MPI']
+  },
+  {
+    'nombre': 'DUMPER',
+    categorias: ['ANTES', 'DESPUES', 'MPI']
+  },
 ];
+
   constructor(
     public dialogRef: MatDialogRef<SeleccionProcesoEstatosDialogComponent>,
     private dialog: MatDialog // 🟢 Inyectamos MatDialog aquí
