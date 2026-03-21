@@ -1,0 +1,84 @@
+.table-responsive {
+  overflow-x: auto;
+  padding: 10px 30px 100px;
+  background-color: rgba(138, 138, 138, 0.096);
+  margin: 10px 30px; 
+  border-radius: 15px;
+}
+
+.main-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 12px;
+}
+
+.main-table th {
+  color: #888;
+  font-weight: 500;
+  text-align: left;
+  padding: 15px 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.main-table td {
+  padding: 15px 10px;
+  border-bottom: 1px solid #f5f5f5;
+  color: #555;
+}
+
+.font-bold {
+  font-weight: 700;
+  color: #333;
+}
+
+/* Badge de Estado */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+/* Contenedor de Acciones */
+.action-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-icon {
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 12px;
+}
+
+/* Colores de botones según imagen */
+.edit {
+  background-color: #fff8e1; /* Naranja muy suave */
+  color: #ffa000;
+}
+
+.delete {
+  background-color: #ffebee; /* Rojo muy suave */
+  color: #e53935;
+}
+
+.btn-icon:hover {
+  transform: scale(1.1);
+  filter: brightness(0.95);
+}
+
+.text-center {
+  text-align: center !important;
+}

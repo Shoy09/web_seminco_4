@@ -1,0 +1,432 @@
+/* ================================================== */
+/* --- BOTONES SUPERIORES --- */
+/* ================================================== */
+.container-botones {
+  display: flex;
+  gap: 10px;
+  padding: 20px;
+  flex-wrap: wrap;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  justify-content: center;
+  min-height: 35px;
+  background-color: rgba(138, 138, 138, 0.096);
+  margin: 10px 30px;
+  border-radius: 15px;
+}
+
+.btn-status {
+  display: flex;
+  align-items: center;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  padding: 10px 18px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-transform: uppercase;
+}
+
+.btn-status:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  filter: brightness(1.1);
+}
+
+.btn-status i {
+  margin-right: 8px;
+  font-size: 1.1rem;
+}
+
+.btn-status span {
+  letter-spacing: 0.5px;
+}
+
+/* ================================================== */
+/* --- ESTILOS COMUNES DE MODAL --- */
+/* ================================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.modal-card {
+  border-radius: 12px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+  animation: modalIn 0.3s ease-out;
+  overflow: hidden;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+@keyframes modalIn {
+  from { transform: translateY(-30px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+
+/* ================================================== */
+/* --- 1er MODAL: REGISTRAR OPERACIÓN --- */
+/* ================================================== */
+.op-card {
+  background-color: #f0eff5;
+  width: 90%;
+  max-width: 480px;
+  padding: 30px;
+  text-align: center;
+}
+
+.title {
+  font-size: 22px;
+  color: #333;
+  margin: 0 0 5px 0;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 20px;
+}
+
+.status-info {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.form-container .input-group {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.custom-select {
+  width: 100%;
+  padding: 12px;
+  border: 1.5px solid #a0a0a0;
+  border-radius: 8px;
+  background: transparent;
+  appearance: none;
+  font-size: 15px;
+  color: #555;
+}
+
+.floating-label {
+  position: absolute;
+  top: -9px;
+  left: 15px;
+  background-color: #f0eff5;
+  padding: 0 6px;
+  font-size: 12px;
+  color: #666;
+  font-weight: 600;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  pointer-events: none;
+}
+
+.helper-text {
+  text-align: left;
+  font-size: 11px;
+  color: #888;
+  margin: -10px 0 25px 5px;
+}
+
+.button-group {
+  display: flex;
+  gap: 15px;
+}
+
+.btn-outline {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #2196f3;
+  background: transparent;
+  color: #2196f3;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-fill {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-fill[disabled] {
+  background-color: #bdc3c7;
+  color: #7f8c8d;
+  cursor: not-allowed;
+}
+
+.footer-note {
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 25px;
+}
+
+/* ================================================== */
+/* --- 2do MODAL: FORMULARIO DE PERFORACIÓN --- */
+/* ================================================== */
+.perf-overlay {
+  align-items: flex-start;
+  padding: 16px;               /* ← reduce el padding-top anterior */
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+.perf-card {
+  background-color: white;
+  width: 95%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;            /* ← elimina margen extra */
+  max-height: calc(100vh - 32px); /* ← limita la altura a la ventana */
+  overflow: hidden;            /* ← el card no se desborda */
+}
+
+/* Encabezado */
+.perf-header {
+  background-color: #2b6777;
+  color: white;
+  padding: 15px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon { font-size: 1.3rem; }
+
+.header-title {
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.editable-badge {
+  background-color: #8bc34a;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Formulario */
+.perf-form {
+  padding: 12px 20px;          /* ← reduce padding vertical */
+  overflow-y: auto;            /* ← si el contenido no entra, scroll SOLO aquí */
+  flex: 1;                     /* ← ocupa el espacio restante tras el header */
+}
+
+.form-section {
+  border: 1px solid #e0e6ed;
+  border-radius: 8px;
+  margin-bottom: 10px;         /* ← reduce separación entre secciones */
+  padding: 10px 16px;          /* ← reduce padding interno */
+}
+
+.section-legend {
+  font-size: 13px;
+  color: #44566c;
+  font-weight: 600;
+  padding: 0 10px;
+}
+
+.section-legend .icon {
+  margin-right: 8px;
+  font-size: 1.1rem;
+}
+
+/* Filas de inputs */
+.row-inputs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+}
+
+.row-inputs.two-cols   { grid-template-columns: repeat(2, 1fr); }
+.row-inputs.three-cols { grid-template-columns: repeat(3, 1fr); }
+
+/* Wrapper unificado para cada campo */
+.input-with-icon,
+.input-group-stack {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Icono interior */
+.icon-inside {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a0acba;
+  font-size: 1rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.icon-rotated    { transform: translateY(-50%) rotate(90deg); }
+.icon-rotated-45 { transform: translateY(-50%) rotate(-45deg); }
+
+/* Icono flotante sobre el borde (sección Taladros) */
+.icon-stack {
+  position: absolute;
+  left: 10px;
+  top: -10px;
+  background: white;
+  padding: 0 4px;
+  color: #2b6777;
+  font-size: 0.9rem;
+}
+
+/* ── INPUTS Y SELECTS UNIFICADOS ── */
+/* ── INPUTS Y SELECTS UNIFICADOS ── */
+.perf-select,
+.perf-input {
+  width: 100%;
+  padding: 10px 12px;          /* ← mismo padding sin depender del icono */
+  border: 1.5px solid #c8d1db;
+  border-radius: 8px;
+  background: #fafbfc;
+  appearance: none;
+  font-size: 13px;
+  color: #333;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;      /* ← evita desbordamientos de ancho */
+}
+
+.perf-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a0acba' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;         /* ← espacio para que el texto no tape la flecha */
+  cursor: pointer;
+}
+
+/* Inputs CON icono interior — solo los selects del form los usan */
+.input-with-icon .perf-select,
+.input-with-icon .perf-input {
+  padding-left: 36px;          /* ← el padding extra solo cuando hay icono */
+}
+
+.perf-select:hover,
+.perf-input:hover {
+  border-color: rgba(43, 103, 119, 0.6);
+}
+
+.perf-select:focus,
+.perf-input:focus {
+  border-color: #2b6777;
+  box-shadow: 0 0 0 3px rgba(43, 103, 119, 0.12);
+  outline: none;
+  background: #fff;
+}
+
+/* Inputs sin icono interior */
+.perf-input.no-icon {
+  padding-left: 12px;
+}
+
+/* Validación */
+.perf-select.ng-invalid.ng-touched {
+  border-color: #f44336;
+}
+
+.validation-error {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 10px;
+  border-radius: 6px;
+  margin: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Pie del formulario */
+.perf-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.btn-cancelar {
+  border: none;
+  background: transparent;
+  color: #7f8c8d;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-cancelar:hover { background: #f5f5f5; }
+
+.btn-guardar {
+  border: none;
+  background-color: #2b6777;
+  color: white;
+  padding: 10px 25px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-guardar:hover { background-color: #1a414b; }
+
+/* ================================================== */
+/* --- RESPONSIVO --- */
+/* ================================================== */
+@media (max-width: 900px) {
+  .row-inputs,
+  .row-inputs.three-cols,
+  .row-inputs.four-cols {
+    grid-template-columns: 1fr 1fr;
+  }
+}

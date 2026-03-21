@@ -1,0 +1,204 @@
+<div class="container-botones">
+  <button 
+    *ngFor="let btn of botones" 
+    class="btn-status" 
+    [style.background-color]="btn.color"
+    (click)="accion(btn.value)">
+    <i class="fas" [ngClass]="btn.icon"></i>
+    <span>{{ btn.label }}</span>
+  </button>
+</div>
+
+<div class="modal-overlay" *ngIf="mostrarFormOperacion">
+  <div class="modal-card op-card">
+    <h2 class="title">REGISTRAR OPERACIÓN</h2>
+    <p class="subtitle">Última hora: 07:00</p>
+
+    <div class="status-info">
+      <i class="fas fa-info-circle"></i>
+      <span>Estado: {{ estadoSeleccionado }}</span>
+    </div>
+
+    <form class="form-container">
+      <div class="input-group">
+        <select class="custom-select" name="codigo" [(ngModel)]="estadoSeleccionado" required>
+          <option value="" disabled selected>Código (*)</option>
+          <option value="104">104</option>
+        </select>
+        <i class="fas fa-caret-down select-arrow"></i>
+      </div>
+
+      <div class="input-group has-label">
+        <label class="floating-label">Hora Inicio (*)</label>
+        <select class="custom-select">
+          <option value="">Seleccione > 07:00</option>
+          <option value="07:30">07:30</option>
+        </select>
+        <i class="fas fa-caret-down select-arrow"></i>
+      </div>
+      
+      <p class="helper-text">
+        <i class="far fa-clock"></i> Solo horas posteriores a 07:00
+      </p>
+
+      <div class="button-group">
+        <button type="button" class="btn-outline" (click)="cerrarFormOperacion()">Limpiar</button>
+        
+        <button type="button" 
+                class="btn-fill" 
+                [disabled]="!estadoSeleccionado || estadoSeleccionado === 'REGISTRAR OPERACIÓN'"
+                (click)="confirmarOperacion()">
+          Crear
+        </button>
+      </div>
+    </form>
+    <p class="footer-note">(*) Los campos con asterisco son obligatorios.</p>
+  </div>
+</div>
+
+<div class="modal-overlay perf-overlay" *ngIf="mostrarFormPerforacion">
+  <div class="modal-card perf-card">
+    
+    <div class="perf-header">
+      <div class="header-left">
+        <i class="far fa-file-alt header-icon"></i>
+        <h1 class="header-title">Formulario de Perforación</h1>
+      </div>
+      <div class="header-right">
+        <span class="editable-badge">• EDITABLE</span>
+      </div>
+    </div>
+
+    <div class="validation-error" *ngIf="formularioInvalido">
+      <i class="fas fa-exclamation-triangle"></i>
+      Complete los campos obligatorios de Ubicación (*).
+    </div>
+
+    <form class="perf-form">
+      
+      <fieldset class="form-section">
+        <legend class="section-legend"><i class="fas fa-map-marker-alt icon"></i> Ubicación</legend>
+        <div class="row-inputs">
+          <div class="input-with-icon">
+            <i class="far fa-edit icon-inside"></i>
+            <select class="perf-select" [(ngModel)]="datosPerforacion.ubicacion.nivel" name="nivel" required>
+              <option value="" disabled selected>Nivel (*)</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+            </select>
+          </div>
+          <div class="input-with-icon">
+            <i class="fas fa-screwdriver-wrench icon-inside"></i>
+            <select class="perf-select" [(ngModel)]="datosPerforacion.ubicacion.tipoLabor" name="tipoLabor" required>
+              <option value="" disabled selected>Tipo Labor (*)</option>
+              <option value="RAMPA">RAMPA</option>
+              <option value="GALERIA">GALERIA</option>
+            </select>
+          </div>
+          <div class="input-with-icon">
+            <i class="fas fa-warehouse icon-inside"></i>
+            <select class="perf-select" [(ngModel)]="datosPerforacion.ubicacion.labor" name="labor" required>
+              <option value="" disabled selected>Labor (*)</option>
+              <option value="RAMPA 1">RAMPA 1</option>
+              <option value="GALERIA A">GALERIA A</option>
+            </select>
+          </div>
+          <div class="input-with-icon">
+            <i class="fas fa-code-branch icon-inside icon-rotated"></i>
+            <select class="perf-select" [(ngModel)]="datosPerforacion.ubicacion.ala" name="ala">
+              <option value="" selected>Ala</option>
+              <option value="NORTE">NORTE</option>
+              <option value="SUR">SUR</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="form-section">
+        <legend class="section-legend"><i class="fas fa-bolt icon"></i> Taladros</legend>
+        <div class="row-inputs four-cols">
+          <div class="input-group-stack">
+            <i class="fas fa-th icon-stack"></i>
+            <input type="number" class="perf-input" placeholder="Producción" [(ngModel)]="datosPerforacion.taladros.produccion" name="produccion">
+          </div>
+          <div class="input-group-stack">
+            <i class="fas fa-th icon-stack"></i>
+            <input type="number" class="perf-input" placeholder="Rimados" [(ngModel)]="datosPerforacion.taladros.rimados" name="rimados">
+          </div>
+          <div class="input-group-stack">
+            <i class="fas fa-th icon-stack"></i>
+            <input type="number" class="perf-input" placeholder="Alivio" [(ngModel)]="datosPerforacion.taladros.alivio" name="alivio">
+          </div>
+          <div class="input-group-stack">
+            <i class="fas fa-th icon-stack"></i>
+            <input type="number" class="perf-input" placeholder="Repaso" [(ngModel)]="datosPerforacion.taladros.repaso" name="repaso">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="form-section">
+        <legend class="section-legend"><i class="fas fa-ruler-vertical icon"></i> Barras</legend>
+        <div class="row-inputs two-cols">
+          <div class="input-with-icon">
+            <i class="fas fa-sort-amount-up-alt icon-inside"></i>
+            <input type="text" class="perf-input" placeholder="Longitud (m)" [(ngModel)]="datosPerforacion.barras.longitud" name="longitud">
+          </div>
+          <div class="input-with-icon">
+            <i class="fas fa-list-ol icon-inside"></i>
+            <input type="number" class="perf-input" placeholder="N° Barras" [(ngModel)]="datosPerforacion.barras.nBarra" name="nBarra">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="form-section">
+        <legend class="section-legend"><i class="fas fa-tools icon"></i> Pernos</legend>
+        <div class="row-inputs three-cols">
+          <div class="input-with-icon">
+            <i class="fas fa-mortar-pestle icon-inside"></i>
+            <select class="perf-select" [(ngModel)]="datosPerforacion.pernos.tipo" name="tipoPerno">
+              <option value="" disabled selected>Tipo Pernos</option>
+              <option value="HELICOIDAL">HELICOIDAL</option>
+            </select>
+          </div>
+          <div class="input-with-icon">
+            <i class="fas fa-text-height icon-inside"></i>
+            <input type="text" class="perf-input" placeholder="Log Pernos" [(ngModel)]="datosPerforacion.pernos.log" name="logPerno">
+          </div>
+          <div class="input-with-icon">
+            <i class="fas fa-list-ul icon-inside"></i>
+            <input type="number" class="perf-input" placeholder="N° Pernos Instalados" [(ngModel)]="datosPerforacion.pernos.nInstalados" name="nInstalados">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="form-section">
+        <legend class="section-legend"><i class="fas fa-border-all icon"></i> Malla y Sistemático</legend>
+        <div class="row-inputs three-cols">
+          <div class="input-with-icon">
+            <i class="fas fa-hashtag icon-inside"></i>
+            <input type="text" class="perf-input" placeholder="Tipo Malla" [(ngModel)]="datosPerforacion.malla.tipo" name="tipoMalla">
+          </div>
+          <div class="input-with-icon">
+            <i class="fas fa-ruler-combined icon-inside"></i>
+            <input type="text" class="perf-input" placeholder="MTS2 Malla" [(ngModel)]="datosPerforacion.malla.mts2" name="mts2Malla">
+          </div>
+          <div class="input-with-icon">
+            <i class="fas fa-chart-area icon-inside icon-rotated-45"></i>
+            <select class="perf-select" [(ngModel)]="datosPerforacion.malla.sistematicoPuntual" name="sistematico">
+              <option value="" disabled selected>Sistemático/Puntual</option>
+              <option value="SISTEMATICO">SISTEMATICO</option>
+              <option value="PUNTUAL">PUNTUAL</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="perf-footer-actions">
+        <button type="button" class="btn-cancelar" (click)="cerrarFormPerforacion()">Cancelar</button>
+        <button type="button" class="btn-guardar" (click)="guardarPerforacion()">
+          <i class="fas fa-save"></i> Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
