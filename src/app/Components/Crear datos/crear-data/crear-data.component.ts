@@ -9,6 +9,9 @@ import { TipoPerforacionService } from '../../../services/tipo-perforacion.servi
 import { LoadingDialogComponent } from '../../Reutilizables/loading-dialog/loading-dialog.component';
 import { TipoEquipoService } from '../../../services/tipo-equipo.service';
 import { SeccionService } from '../../../services/seccion.service';
+import { LongitudBarrasService } from '../../../services/longitud-barras.service';
+import { PernosService } from '../../../services/pernos.service';
+import { MallasService } from '../../../services/mallas.service';
 
 
 @Component({
@@ -42,6 +45,9 @@ datoOriginal: any = null;
     private tipoEquipoService: TipoEquipoService,
     public dialog: MatDialog,
     private seccionService: SeccionService,
+    private longitudBarrasService: LongitudBarrasService,
+  private pernosService: PernosService,
+  private mallasService: MallasService,
   ) {} // Inyecta los servicios
 
   ngOnInit() {
@@ -130,6 +136,42 @@ datoOriginal: any = null;
   datos: [],
   campos: [
     { nombre: 'nombre', label: 'Nombre del Tipo de Equipo', tipo: 'text' }
+  ]
+},
+{
+  nombre: 'Longitud de Barras',
+  icon: 'mas.svg',
+  tipo: 'Longitud Barras',
+  datos: [],
+  campos: [
+    { 
+      nombre: 'proceso',
+      label: 'Proceso',
+      tipo: 'select',
+      opciones: [
+        'PERFORACIÓN TALADROS LARGOS', 'PERFORACIÓN HORIZONTAL'
+      ]
+    },
+    { nombre: 'longitud_pies', label: 'Longitud (pies)', tipo: 'number' }
+  ]
+},
+{
+  nombre: 'Pernos',
+  icon: 'mas.svg',
+  tipo: 'Pernos',
+  datos: [],
+  campos: [
+    { nombre: 'tipo_perno', label: 'Tipo de Perno', tipo: 'text' },
+    { nombre: 'longitud', label: 'Longitud', tipo: 'number' }
+  ]
+},
+{
+  nombre: 'Mallas',
+  icon: 'mas.svg',
+  tipo: 'Mallas',
+  datos: [],
+  campos: [
+    { nombre: 'tipo_malla', label: 'Tipo de Malla', tipo: 'text' }
   ]
 },
     {
@@ -227,6 +269,32 @@ actualizarDatos() {
       this.cancelarEdicion();
     },
     error: (err) => console.error('Error al actualizar Sección:', err)
+  });
+}else if (this.modalContenido.tipo === 'Longitud Barras') {
+  this.longitudBarrasService.update(id, datosActualizados).subscribe({
+    next: (data) => {
+      this.modalContenido.datos[this.indiceEditando] = data;
+      this.cancelarEdicion();
+    },
+    error: (err) => console.error('Error al actualizar Longitud Barras:', err)
+  });
+}
+else if (this.modalContenido.tipo === 'Pernos') {
+  this.pernosService.update(id, datosActualizados).subscribe({
+    next: (data) => {
+      this.modalContenido.datos[this.indiceEditando] = data;
+      this.cancelarEdicion();
+    },
+    error: (err) => console.error('Error al actualizar Perno:', err)
+  });
+}
+else if (this.modalContenido.tipo === 'Mallas') {
+  this.mallasService.update(id, datosActualizados).subscribe({
+    next: (data) => {
+      this.modalContenido.datos[this.indiceEditando] = data;
+      this.cancelarEdicion();
+    },
+    error: (err) => console.error('Error al actualizar Malla:', err)
   });
 }
 
@@ -439,6 +507,29 @@ private buscarHojaExcel(workbook: any, nombresPosibles: string[]): string {
     },
     error: (err) => console.error('Error al cargar Secciones:', err)
   });
+}else if (button.tipo === 'Longitud Barras') {
+  this.longitudBarrasService.getAll().subscribe({
+    next: (data) => {
+      this.modalContenido.datos = data;
+    },
+    error: (err) => console.error('Error al cargar Longitud Barras:', err)
+  });
+}
+else if (button.tipo === 'Pernos') {
+  this.pernosService.getAll().subscribe({
+    next: (data) => {
+      this.modalContenido.datos = data;
+    },
+    error: (err) => console.error('Error al cargar Pernos:', err)
+  });
+}
+else if (button.tipo === 'Mallas') {
+  this.mallasService.getAll().subscribe({
+    next: (data) => {
+      this.modalContenido.datos = data;
+    },
+    error: (err) => console.error('Error al cargar Mallas:', err)
+  });
 }
 
   }
@@ -516,6 +607,29 @@ private buscarHojaExcel(workbook: any, nombresPosibles: string[]): string {
     },
     error: (err) => console.error('Error al guardar Sección:', err)
   });
+}else if (this.modalContenido.tipo === 'Longitud Barras') {
+  this.longitudBarrasService.create(nuevoRegistro).subscribe({
+    next: (data) => {
+      this.modalContenido.datos.push(data);
+    },
+    error: (err) => console.error('Error al guardar Longitud Barras:', err)
+  });
+}
+else if (this.modalContenido.tipo === 'Pernos') {
+  this.pernosService.create(nuevoRegistro).subscribe({
+    next: (data) => {
+      this.modalContenido.datos.push(data);
+    },
+    error: (err) => console.error('Error al guardar Perno:', err)
+  });
+}
+else if (this.modalContenido.tipo === 'Mallas') {
+  this.mallasService.create(nuevoRegistro).subscribe({
+    next: (data) => {
+      this.modalContenido.datos.push(data);
+    },
+    error: (err) => console.error('Error al guardar Malla:', err)
+  });
 }
 
       this.nuevoDato = {};
@@ -564,6 +678,35 @@ private buscarHojaExcel(workbook: any, nombresPosibles: string[]): string {
       );
     },
     error: (err) => console.error('Error al eliminar Sección:', err)
+  });
+}else if (this.modalContenido.tipo === 'Longitud Barras') {
+  this.longitudBarrasService.delete(item.id).subscribe({
+    next: () => {
+      this.modalContenido.datos = this.modalContenido.datos.filter(
+        (dato: any) => dato.id !== item.id
+      );
+    },
+    error: (err) => console.error('Error al eliminar Longitud Barras:', err)
+  });
+}
+else if (this.modalContenido.tipo === 'Pernos') {
+  this.pernosService.delete(item.id).subscribe({
+    next: () => {
+      this.modalContenido.datos = this.modalContenido.datos.filter(
+        (dato: any) => dato.id !== item.id
+      );
+    },
+    error: (err) => console.error('Error al eliminar Perno:', err)
+  });
+}
+else if (this.modalContenido.tipo === 'Mallas') {
+  this.mallasService.delete(item.id).subscribe({
+    next: () => {
+      this.modalContenido.datos = this.modalContenido.datos.filter(
+        (dato: any) => dato.id !== item.id
+      );
+    },
+    error: (err) => console.error('Error al eliminar Malla:', err)
   });
 }
 
