@@ -180,7 +180,6 @@ export class UsuariosComponent implements OnInit {
             !cargo ||
             !area ||
             !rol ||
-            !clasificacion ||
             !password
           ) {
             usuariosInvalidos.push({
@@ -226,7 +225,7 @@ export class UsuariosComponent implements OnInit {
         });
 
         if (usuariosValidos.length > 0) {
-          this.enviarUsuarios(usuariosValidos, usuariosInvalidos);
+          this.enviarUsuariosBulk(usuariosValidos, usuariosInvalidos);
         } else {
           alert('No hay usuarios válidos para enviar.');
         }
@@ -240,60 +239,31 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
-enviarUsuarios(
+enviarUsuariosBulk(
   usuarios: Usuario[],
   usuariosInvalidos: { nombre: string; dni: string }[]
 ) {
-  let totalUsuarios = usuarios.length;
-  let usuariosProcesados = 0;
-  let errores: { nombre: string; dni: string; motivo?: string }[] = [];
-
   const dialogRef = this.dialog.open(LoadingDialogComponent, {
     disableClose: true,
   });
 
-  // Si no hay usuarios para procesar, cierra inmediato
-  if (totalUsuarios === 0) {
-    dialogRef.close();
-    this.mostrarErrores(usuariosInvalidos);
-    return;
-  }
+  this.usuarioService.crearUsuariosBulk(usuarios).subscribe({
+    next: (res) => {
+      dialogRef.close();
 
-  const subscriptions: Subscription[] = [];
-
-  usuarios.forEach((usuario) => {
-    const sub = this.usuarioService.crearUsuario(usuario).subscribe({
-      next: () => {
-        usuariosProcesados++;
-        this.verificarCompletado(
-          usuariosProcesados,
-          totalUsuarios,
-          dialogRef,
-          usuariosInvalidos,
-          errores
-        );
-      },
-      error: (error) => {
-        errores.push({
-          nombre: usuario.nombres || 'Desconocido',
-          dni: usuario.codigo_dni || 'Sin DNI',
-          motivo: error.message || 'Error al crear usuario'
-        });
-        usuariosProcesados++;
-        this.verificarCompletado(
-          usuariosProcesados,
-          totalUsuarios,
-          dialogRef,
-          usuariosInvalidos,
-          errores
-        );
+      if (usuariosInvalidos.length > 0) {
+        this.mostrarErrores(usuariosInvalidos);
       }
-    });
-    subscriptions.push(sub);
-  });
 
-  // Para manejar la desuscripción si el componente se destruye
-  return () => subscriptions.forEach(sub => sub.unsubscribe());
+      alert(`✅ ${usuarios.length} usuarios procesados correctamente`);
+      this.obtenerUsuarios();
+    },
+    error: (error) => {
+      dialogRef.close();
+      console.error(error);
+      alert('❌ Error en carga masiva');
+    }
+  });
 }
 
 private verificarCompletado(

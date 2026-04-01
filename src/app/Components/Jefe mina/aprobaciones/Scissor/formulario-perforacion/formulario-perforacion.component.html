@@ -1,0 +1,194 @@
+<div class="modal-overlay perf-overlay" *ngIf="visible">
+  <div class="modal-card perf-card">
+    <div class="perf-header">
+      <div class="header-left">
+        <i class="far fa-file-alt header-icon"></i>
+        <h1 class="header-title">Formulario de Operación</h1>
+      </div>
+      <div class="header-right">
+        <span class="editable-badge">• EDITABLE</span>
+      </div>
+    </div>
+
+    <div class="validation-error" *ngIf="formularioInvalido">
+      <i class="fas fa-exclamation-triangle"></i>
+      Complete los campos obligatorios de Origen o Destino (Nivel y Labor).
+    </div>
+
+    <form class="perf-form">
+      <!-- 🔥 SECCIÓN ORIGEN -->
+      <fieldset class="form-section">
+        <legend class="section-legend">
+          <i class="fas fa-play-circle icon"></i> Origen
+        </legend>
+        <div class="row-inputs">
+          <div class="input-field">
+            <label class="field-label">
+              <i class="fas fa-layer-group label-icon"></i>
+              Nivel
+            </label>
+            <select
+              class="perf-select"
+              [(ngModel)]="datosOperacion.origen.nivel"
+              name="origenNivel"
+            >
+              <option value="">Seleccionar nivel</option>
+              <option *ngFor="let n of niveles" [value]="n">{{ n }}</option>
+            </select>
+          </div>
+          
+          <div class="input-field">
+            <label class="field-label">
+              <i class="fas fa-screwdriver-wrench label-icon"></i>
+              Tipo Labor
+            </label>
+            <select
+              class="perf-select"
+              [(ngModel)]="datosOperacion.origen.tipoLabor"
+              name="origenTipoLabor"
+            >
+              <option value="">Seleccionar tipo labor</option>
+              <option *ngFor="let t of tiposLabor" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+          
+          <div class="input-field">
+            <label class="field-label">
+              <i class="fas fa-warehouse label-icon"></i>
+              Labor
+            </label>
+            <select
+              class="perf-select"
+              [(ngModel)]="datosOperacion.origen.labor"
+              name="origenLabor"
+            >
+              <option value="">Seleccionar labor</option>
+              <option *ngFor="let l of labores" [value]="l">{{ l }}</option>
+            </select>
+          </div>
+          
+          <div class="input-field">
+            <label class="field-label">
+              <i class="fas fa-code-branch label-icon"></i>
+              Ala
+            </label>
+            <select
+              class="perf-select"
+              [(ngModel)]="datosOperacion.origen.ala"
+              name="origenAla"
+            >
+              <option value="">Seleccionar ala (opcional)</option>
+              <option *ngFor="let a of alas" [value]="a">{{ a || 'Sin ala' }}</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- 🔥 SECCIÓN DESTINO -->
+      <fieldset class="form-section">
+        <legend class="section-legend">
+          <i class="fas fa-stop-circle icon"></i> Destino
+        </legend>
+        <div class="row-inputs">
+          <div class="input-field">
+            <label class="field-label">
+              <i class="fas fa-layer-group label-icon"></i>
+              Nivel
+            </label>
+            <select
+              class="perf-select"
+              [(ngModel)]="datosOperacion.destino.nivel"
+              name="destinoNivel"
+            >
+              <option value="">Seleccionar nivel</option>
+              <option *ngFor="let n of niveles" [value]="n">{{ n }}</option>
+            </select>
+          </div>
+          
+          <div class="input-field">
+            <label class="field-label">
+              <i class="fas fa-screwdriver-wrench label-icon"></i>
+              Tipo Labor
+            </label>
+            <select
+              class="perf-select"
+              [(ngModel)]="datosOperacion.destino.tipoLabor"
+              name="destinoTipoLabor"
+            >
+              <option value="">Seleccionar tipo labor</option>
+              <option *ngFor="let t of tiposLabor" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+          
+          <div class="input-field">
+            <label class="field-label">
+              <i class="fas fa-warehouse label-icon"></i>
+              Labor
+            </label>
+            <select
+              class="perf-select"
+              [(ngModel)]="datosOperacion.destino.labor"
+              name="destinoLabor"
+            >
+              <option value="">Seleccionar labor</option>
+              <option *ngFor="let l of labores" [value]="l">{{ l }}</option>
+            </select>
+          </div>
+          
+          <div class="input-field">
+            <label class="field-label">
+              <i class="fas fa-code-branch label-icon"></i>
+              Ala
+            </label>
+            <select
+              class="perf-select"
+              [(ngModel)]="datosOperacion.destino.ala"
+              name="destinoAla"
+            >
+              <option value="">Seleccionar ala (opcional)</option>
+              <option *ngFor="let a of alas" [value]="a">{{ a || 'Sin ala' }}</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- 🔥 SECCIÓN OBSERVACIONES -->
+      <fieldset class="form-section">
+        <legend class="section-legend">
+          <i class="fas fa-comment icon"></i> Observaciones
+        </legend>
+
+        <div class="input-field textarea-field">
+          <label class="field-label">
+            <i class="fas fa-pen label-icon"></i>
+            Observaciones adicionales
+          </label>
+          <textarea
+            class="perf-input perf-textarea"
+            rows="3"
+            placeholder="Ingrese observaciones importantes sobre la operación..."
+            [(ngModel)]="datosOperacion.observaciones"
+            name="observaciones"
+          ></textarea>
+        </div>
+      </fieldset>
+
+      <div class="perf-footer-actions">
+        <button
+          type="button"
+          class="btn-cancelar"
+          (click)="cerrarFormPerforacion()"
+        >
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn-guardar"
+          (click)="guardarPerforacion()"
+        >
+          <i class="fas fa-save"></i> Guardar cambios
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

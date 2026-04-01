@@ -12,6 +12,7 @@ import { SeccionService } from '../../../services/seccion.service';
 import { LongitudBarrasService } from '../../../services/longitud-barras.service';
 import { PernosService } from '../../../services/pernos.service';
 import { MallasService } from '../../../services/mallas.service';
+import { OrigenDestinoService } from '../../../services/origen-destino.service';
 
 
 @Component({
@@ -37,6 +38,7 @@ datoOriginal: any = null;
     { nombre: 'Reporte B', year: '2024', mes: 'Enero' },
     { nombre: 'Reporte C', year: '2024', mes: 'Enero' }
   ];
+  
 
   constructor(
     private tipoPerforacionService: TipoPerforacionService, 
@@ -48,6 +50,7 @@ datoOriginal: any = null;
     private longitudBarrasService: LongitudBarrasService,
   private pernosService: PernosService,
   private mallasService: MallasService,
+  private origenDestinoService: OrigenDestinoService,
   ) {} // Inyecta los servicios
 
   ngOnInit() {
@@ -100,6 +103,34 @@ datoOriginal: any = null;
     { 
       nombre: 'nombre',
       label: 'Nombre de la Sección',
+      tipo: 'text'
+    }
+  ]
+},
+{
+  nombre: 'Origen - Destino',
+  icon: 'mas.svg',
+  tipo: 'OrigenDestino',
+  datos: [],
+  campos: [
+    { 
+      nombre: 'proceso',
+      label: 'Proceso',
+      tipo: 'select',
+      opciones: [
+        'SCOOPTRAM',
+        'DUMPER'
+      ]
+    },
+    { 
+      nombre: 'tipo',
+      label: 'Tipo',
+      tipo: 'select',
+      opciones: ['ORIGEN', 'DESTINO'] 
+    },
+    { 
+      nombre: 'nombre',
+      label: 'Nombre',
       tipo: 'text'
     }
   ]
@@ -295,6 +326,14 @@ else if (this.modalContenido.tipo === 'Mallas') {
       this.cancelarEdicion();
     },
     error: (err) => console.error('Error al actualizar Malla:', err)
+  });
+}else if (this.modalContenido.tipo === 'OrigenDestino') {
+  this.origenDestinoService.update(id, datosActualizados).subscribe({
+    next: (data) => {
+      this.modalContenido.datos[this.indiceEditando] = data;
+      this.cancelarEdicion();
+    },
+    error: (err) => console.error('Error al actualizar OrigenDestino:', err)
   });
 }
 
@@ -530,6 +569,13 @@ else if (button.tipo === 'Mallas') {
     },
     error: (err) => console.error('Error al cargar Mallas:', err)
   });
+}else if (button.tipo === 'OrigenDestino') {
+  this.origenDestinoService.getAll().subscribe({
+    next: (data) => {
+      this.modalContenido.datos = data;
+    },
+    error: (err) => console.error('Error al cargar OrigenDestino:', err)
+  });
 }
 
   }
@@ -630,6 +676,13 @@ else if (this.modalContenido.tipo === 'Mallas') {
     },
     error: (err) => console.error('Error al guardar Malla:', err)
   });
+}else if (this.modalContenido.tipo === 'OrigenDestino') {
+  this.origenDestinoService.create(nuevoRegistro).subscribe({
+    next: (data) => {
+      this.modalContenido.datos.push(data);
+    },
+    error: (err) => console.error('Error al guardar OrigenDestino:', err)
+  });
 }
 
       this.nuevoDato = {};
@@ -707,6 +760,15 @@ else if (this.modalContenido.tipo === 'Mallas') {
       );
     },
     error: (err) => console.error('Error al eliminar Malla:', err)
+  });
+}else if (this.modalContenido.tipo === 'OrigenDestino') {
+  this.origenDestinoService.delete(item.id).subscribe({
+    next: () => {
+      this.modalContenido.datos = this.modalContenido.datos.filter(
+        (dato: any) => dato.id !== item.id
+      );
+    },
+    error: (err) => console.error('Error al eliminar OrigenDestino:', err)
   });
 }
 

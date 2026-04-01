@@ -24,6 +24,10 @@ export class UsuarioService {
     return this.apiService.postDatos(this.endpoint, usuario);
   }
 
+  crearUsuariosBulk(usuarios: Usuario[]): Observable<any> {
+  return this.apiService.postDatos(`${this.endpoint}/bulk`, { usuarios });
+}
+
   actualizarUsuario(id: number, usuario: Usuario): Observable<any> {
     return this.apiService.putDatos(`${this.endpoint}/${id}`, usuario);
   }

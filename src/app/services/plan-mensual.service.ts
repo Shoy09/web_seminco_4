@@ -7,7 +7,7 @@ import { PlanMensual } from '../models/plan-mensual.model';
   providedIn: 'root'
 })
 export class PlanMensualService {
-  private baseUrl = 'PlamMensual'; // Asegúrate de que coincide con tu backend
+  private baseUrl = 'PlanMensual'; // Asegúrate de que coincide con tu backend
   private planesActualizados = new BehaviorSubject<boolean>(false);
 
   constructor(private apiService: ApiService) {}

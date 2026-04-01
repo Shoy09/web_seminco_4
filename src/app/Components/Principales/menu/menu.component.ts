@@ -19,25 +19,13 @@ export class MenuComponent {
       title: 'Dashboard',
       icon: 'das.svg',
       subItems: [
-        { title: 'Perforación Taladros Largos', path: 'taladro-largo-grafico' },
-        { title: 'Servicio Lanzador', path: 'servicio-lanzador' },
-        { title: 'Servicio Mixer', path: 'servicio-mixer' },
-        { title: 'Acarreo', path: 'servicio-volquetes' },
-        { title: "Sostenimiento", path:'sostenimiento'},
-
-        // 🔐 NUEVAS RUTAS CON ROLES
-        {
-          title: 'Reporte Gerencial',
-          path: 'sostenimiento-1',
-        },
-        {
-          title: 'Panel Supervisor',
-          path: 'sostenimiento-2',
-        },
-        {
-          title: 'Control Especial',
-          path: 'sostenimiento-3',
-        }
+        // { title: 'Perforación Taladros Largos', path: 'taladro-largo-grafico' },
+        // { title: 'Servicio Lanzador', path: 'servicio-lanzador' },
+        // { title: 'Servicio Mixer', path: 'servicio-mixer' },
+        // { title: 'Acarreo', path: 'servicio-volquetes' },
+        // { title: "Sostenimiento", path:'sostenimiento'},
+        //{title: "Jefe de mina", path: 'jefe-mina'},
+        { title: 'Reporte Indicadores', path: 'power-bi' },
       ],
     },
     {
