@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FormOperacionComponent } from './form-operacion.component';
+import { DialogEstadoComponent } from './dialog-estado.component';
 
-describe('FormOperacionComponent', () => {
-  let component: FormOperacionComponent;
-  let fixture: ComponentFixture<FormOperacionComponent>;
+describe('DialogEstadoComponent', () => {
+  let component: DialogEstadoComponent;
+  let fixture: ComponentFixture<DialogEstadoComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FormOperacionComponent]
+      imports: [DialogEstadoComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(FormOperacionComponent);
+    fixture = TestBed.createComponent(DialogEstadoComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

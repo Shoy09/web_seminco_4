@@ -3,10 +3,13 @@
     <div class="perf-header">
       <div class="header-left">
         <i class="far fa-file-alt header-icon"></i>
-        <h1 class="header-title">Formulario de Perforación</h1>
+        <h1 class="header-title">Formulario de Empernador</h1>
       </div>
       <div class="header-right">
         <span class="editable-badge">• EDITABLE</span>
+        <span class="estado-badge" [class]="estado.toLowerCase()">
+          {{ estado }}
+        </span>
       </div>
     </div>
 
@@ -16,6 +19,7 @@
     </div>
 
     <form class="perf-form">
+      <!-- SECCIÓN UBICACIÓN (siempre visible) -->
       <fieldset class="form-section">
         <legend class="section-legend">
           <i class="fas fa-map-marker-alt icon"></i> Ubicación
@@ -26,14 +30,17 @@
               <i class="fas fa-layer-group label-icon"></i>
               Nivel <span class="required-star">*</span>
             </label>
-            <select
-              class="perf-select"
+            <input
+              type="text"
+              class="perf-input"
+              placeholder="Ej: 4100"
               [(ngModel)]="datosPerforacion.ubicacion.nivel"
               name="nivel"
-            >
-              <option value="" disabled>Seleccionar nivel</option>
-              <option *ngFor="let n of niveles" [value]="n">{{ n }}</option>
-            </select>
+              list="nivelesList"
+            />
+            <datalist id="nivelesList">
+              <option *ngFor="let n of niveles" [value]="n"></option>
+            </datalist>
           </div>
           
           <div class="input-field">
@@ -41,14 +48,17 @@
               <i class="fas fa-screwdriver-wrench label-icon"></i>
               Tipo Labor <span class="required-star">*</span>
             </label>
-            <select
-              class="perf-select"
+            <input
+              type="text"
+              class="perf-input"
+              placeholder="Ej: CX, RAMPA, GALERIA"
               [(ngModel)]="datosPerforacion.ubicacion.tipoLabor"
               name="tipoLabor"
-            >
-              <option value="" disabled>Seleccionar tipo labor</option>
-              <option *ngFor="let t of tiposLabor" [value]="t">{{ t }}</option>
-            </select>
+              list="tiposLaborList"
+            />
+            <datalist id="tiposLaborList">
+              <option *ngFor="let t of tiposLabor" [value]="t"></option>
+            </datalist>
           </div>
           
           <div class="input-field">
@@ -56,14 +66,17 @@
               <i class="fas fa-warehouse label-icon"></i>
               Labor <span class="required-star">*</span>
             </label>
-            <select
-              class="perf-select"
+            <input
+              type="text"
+              class="perf-input"
+              placeholder="Ej: 640"
               [(ngModel)]="datosPerforacion.ubicacion.labor"
               name="labor"
-            >
-              <option value="" disabled>Seleccionar labor</option>
-              <option *ngFor="let l of labores" [value]="l">{{ l }}</option>
-            </select>
+              list="laboresList"
+            />
+            <datalist id="laboresList">
+              <option *ngFor="let l of labores" [value]="l"></option>
+            </datalist>
           </div>
           
           <div class="input-field">
@@ -71,19 +84,23 @@
               <i class="fas fa-code-branch label-icon"></i>
               Ala
             </label>
-            <select
-              class="perf-select"
+            <input
+              type="text"
+              class="perf-input"
+              placeholder="Ej: NORTE, SUR (opcional)"
               [(ngModel)]="datosPerforacion.ubicacion.ala"
               name="ala"
-            >
-              <option value="">Seleccionar ala (opcional)</option>
-              <option *ngFor="let a of alas" [value]="a">{{ a }}</option>
-            </select>
+              list="alasList"
+            />
+            <datalist id="alasList">
+              <option *ngFor="let a of alas" [value]="a"></option>
+            </datalist>
           </div>
         </div>
       </fieldset>
-
-      <fieldset class="form-section">
+      
+      <!-- SECCIÓN PERNOS (solo OPERATIVO) -->
+      <fieldset class="form-section" *ngIf="mostrarCamposCompletos">
         <legend class="section-legend">
           <i class="fas fa-tools icon"></i> Pernos
         </legend>
@@ -133,7 +150,8 @@
         </div>
       </fieldset>
 
-      <fieldset class="form-section">
+      <!-- SECCIÓN MALLA (solo OPERATIVO) -->
+      <fieldset class="form-section" *ngIf="mostrarCamposCompletos">
         <legend class="section-legend">
           <i class="fas fa-border-all icon"></i> Malla y Sistemático
         </legend>
@@ -177,6 +195,7 @@
         </div>
       </fieldset>
 
+      <!-- SECCIÓN OBSERVACIONES (siempre visible) -->
       <fieldset class="form-section">
         <legend class="section-legend">
           <i class="fas fa-comment icon"></i> Observaciones

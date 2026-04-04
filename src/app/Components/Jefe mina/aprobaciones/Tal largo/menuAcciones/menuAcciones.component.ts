@@ -79,12 +79,19 @@ export class MenuAccionesComponent implements OnInit, OnChanges {
 
   // 🔥 Inicializa Horómetros
   inicializarHorometros(data: any) {
-    this.filasHorometro = [
-      { nombre: 'Diesel', inicial: data.diesel.inicio, final: data.diesel.final, op: data.diesel.op, inop: data.diesel.inop },
-      { nombre: 'Eléctrico', inicial: data.electrico.inicio, final: data.electrico.final, op: data.electrico.op, inop: data.electrico.inop },
-      { nombre: 'Percusión', inicial: data.percusion.inicio, final: data.percusion.final, op: data.percusion.op, inop: data.percusion.inop },
-    ];
-  }
+  const map = (item: any) => ({
+    inicial: Number(item?.inicio ?? 0),
+    final: Number(item?.final ?? 0),
+    op: item?.op === true || item?.op === 1,
+    inop: item?.inop === true || item?.inop === 1,
+  });
+
+  this.filasHorometro = [
+    { nombre: 'Diesel', ...map(data?.diesel) },
+    { nombre: 'Eléctrico', ...map(data?.electrico) },
+    { nombre: 'Percusión', ...map(data?.percusion) },
+  ];
+}
 
   // 🔥 Inicializa Condiciones de equipo
   inicializarCondiciones(data: any) {
@@ -102,7 +109,7 @@ export class MenuAccionesComponent implements OnInit, OnChanges {
   this.itemsChecklist = data.map(item => ({
     categoria: item.categoria || 'General',
     descripcion: item.descripcion || 'Item',
-    decision: item.decision === 1,      // convertimos 1/0 a true/false
+    decision: Number(item.decision) === 1,    // convertimos 1/0 a true/false
     observacion: item.observacion || ''
   }));
 }
@@ -149,12 +156,17 @@ inicializarLlantas(data: any) {
 
   // 🔥 Guardar acciones
   guardarHorometros() {
-  console.log('Horómetros:', this.filasHorometro);
+  const map = (item: any) => ({
+    inicio: Number(item.inicial ?? 0),
+    final: Number(item.final ?? 0),
+    op: item.op ? 1 : 0,
+    inop: item.inop ? 1 : 0,
+  });
 
   const data = {
-    diesel: this.filasHorometro[0],
-    electrico: this.filasHorometro[1],
-    percusion: this.filasHorometro[2],
+    diesel: map(this.filasHorometro[0]),
+    electrico: map(this.filasHorometro[1]),
+    percusion: map(this.filasHorometro[2]),
   };
 
   this.dataChange.emit({ tipo: 'horometros', data });

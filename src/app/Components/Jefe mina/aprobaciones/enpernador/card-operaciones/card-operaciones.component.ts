@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { OperacionBase } from '../../../../../models/OperacionBase.models';
+import { EquipoService } from '../../../../../services/equipo.service';
+import { SeccionService } from '../../../../../services/seccion.service';
 
 @Component({
   selector: 'app-card-operaciones',
@@ -11,102 +12,191 @@ import { OperacionBase } from '../../../../../models/OperacionBase.models';
   templateUrl: './card-operaciones.component.html',
   styleUrls: ['./card-operaciones.component.css']
 })
-export class CardOperacionesComponent implements OnChanges {
+export class CardOperacionesComponent implements OnChanges, OnInit {
 
-  // 🔥 RECIBE LA DATA REAL
   @Input() data!: any;
+  @Output() dataChange = new EventEmitter<any>();
+
+  isDirty = false;
+
+  private readonly PROCESO = 'EMPERNADOR'; // 🔥 Cambiado para empernador
 
   formValues: Record<string, any> = {
     fecha: '',
     turno: '',
     equipo: '',
     codigo: '',
+    modelo_equipo: '',
     operador: '',
     jefeGuardia: '',
     seccion: '',
+    tipo_equipo: '',
     tiposEquipo: { diesel: false, electrico: false }
   };
 
   campos = [
-    { key: 'turno',       options: ['DÍA', 'NOCHE'] },
-    { key: 'equipo',      options: ['ZTTT', 'XRRR'] },
-    { key: 'codigo',      options: ['T12', 'T15'] },
+    { key: 'turno', options: ['DÍA', 'NOCHE'] },
+    { key: 'equipo', options: [] },
+    { key: 'codigo', options: [] },
+    { key: 'modelo_equipo', options: [] },
     { key: 'jefeGuardia', options: ['6666 6666', '7777 7777'] },
-    { key: 'seccion',     options: ['Sección A', 'Sección B'] },
+    { key: 'seccion', options: [] },
   ];
 
   tiposEquipo = [
-    { label: 'Diesel',    value: 'diesel' },
+    { label: 'Diesel', value: 'diesel' },
     { label: 'Eléctrico', value: 'electrico' }
   ];
 
+  constructor(
+    private equipoService: EquipoService,
+    private seccionService: SeccionService
+  ) {}
+
+  // 🔥 INIT
+  ngOnInit(): void {
+    this.cargarEquipos();
+    this.cargarSecciones();
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
-  if (changes['data'] && this.data) {
-    this.cargarDatos();
-    //console.log('🔥 DATA MAPEADA:', this.data);
+    if (changes['data']?.currentValue) {
+      if (this.isDirty) return;
+      this.cargarDatos();
+    }
   }
-}
 
-cargarDatos() {
+  // 🔥 ===============================
+  // 🔹 EQUIPOS
+  // 🔥 ===============================
+  cargarEquipos() {
+    this.equipoService.getEquiposByProceso(this.PROCESO)
+      .subscribe({
+        next: (equipos: any[]) => {
+          const nombres = equipos.map(e => e.nombre);
+          const codigos = equipos.map(e => e.codigo);
+          const modelos = equipos.map(e => e.modelo);
 
-  this.agregarOpcionSiNoExiste('equipo', this.data.equipo);
-  this.agregarOpcionSiNoExiste('codigo', this.data.codigo);
-  this.agregarOpcionSiNoExiste('seccion', this.data.seccion);
+          this.mergeOpciones('equipo', nombres);
+          this.mergeOpciones('codigo', codigos);
+          this.mergeOpciones('modelo_equipo', modelos);
 
-  this.formValues = {
-    fecha: this.data.fecha,
-    turno: this.data.turno,
-    equipo: this.data.equipo,
-    codigo: this.data.codigo,
-    operador: this.data.operador,
-    jefeGuardia: this.data.jefeGuardia,
-    seccion: this.data.seccion,
-    tiposEquipo: this.mapearTipoEquipo(this.data.tipo_equipo)
-  };
-}
-
-agregarOpcionSiNoExiste(key: string, valor: string) {
-  const campo = this.campos.find(c => c.key === key);
-
-  if (!campo) return;
-
-  if (valor && !campo.options.includes(valor)) {
-    campo.options = [valor, ...campo.options];
+          // 🔥 asegurar valores actuales si ya hay data
+          this.ensureCurrentValues();
+        },
+        error: err => console.error('Error equipos:', err)
+      });
   }
-}
 
-mapearTipoEquipo(tipo: any) {
-  if (tipo && typeof tipo === 'object') {
+  // 🔥 ===============================
+  // 🔹 SECCIONES
+  // 🔥 ===============================
+  cargarSecciones() {
+    this.seccionService.getSeccionesByProceso(this.PROCESO)
+      .subscribe({
+        next: (secciones: any[]) => {
+          const nombres = secciones.map(s => s.nombre);
+          this.mergeOpciones('seccion', nombres);
 
-    // 🔥 normalizamos claves a minúsculas
-    const tipoNormalizado: any = {};
+          // 🔥 asegurar valores actuales
+          this.ensureCurrentValues();
+        },
+        error: err => console.error('Error secciones:', err)
+      });
+  }
 
-    Object.keys(tipo).forEach(key => {
-      tipoNormalizado[key.toLowerCase()] = tipo[key];
+  // 🔥 ===============================
+  // 🔹 HELPERS PRO
+  // 🔥 ===============================
+
+  // 👉 mezcla opciones sin perder las anteriores
+  mergeOpciones(key: string, nuevas: string[]) {
+    const campo = this.campos.find(c => c.key === key);
+    if (!campo) return;
+
+    const actuales = campo.options || [];
+    campo.options = [...new Set([...actuales, ...nuevas])];
+  }
+
+  // 👉 asegura que lo que viene en data SIEMPRE exista en options
+  ensureCurrentValues() {
+    if (!this.data) return;
+
+    this.agregarOpcionSiNoExiste('equipo', this.data.equipo);
+    this.agregarOpcionSiNoExiste('codigo', this.data.codigo);
+    this.agregarOpcionSiNoExiste('modelo_equipo', this.data.modelo_equipo);
+    this.agregarOpcionSiNoExiste('seccion', this.data.seccion);
+  }
+
+  onChange() {
+    this.isDirty = true;
+
+    console.log('🟡 CARD - formValues actualizado:', this.formValues);
+
+    this.dataChange.emit({
+      ...this.formValues
     });
+  }
 
-    return {
-      diesel: !!tipoNormalizado.diesel,
-      electrico: !!tipoNormalizado.electrico
+  cargarDatos() {
+    // 🔥 primero asegura opciones
+    this.ensureCurrentValues();
+
+    this.formValues = {
+      fecha: this.data.fecha,
+      turno: this.data.turno,
+      equipo: this.data.equipo,
+      codigo: this.data.codigo,
+      modelo_equipo: this.data.modelo_equipo,
+      operador: this.data.operador,
+      jefeGuardia: this.data.jefeGuardia,
+      seccion: this.data.seccion,
+      tipo_equipo: this.data.tipo_equipo || '',
+      tiposEquipo: this.mapearTipoEquipo(this.data.tipo_equipo)
     };
   }
 
-  // 🔥 fallback string
-  if (typeof tipo === 'string') {
-    return {
-      diesel: tipo.toLowerCase().includes('diesel'),
-      electrico: tipo.toLowerCase().includes('electrico')
-    };
+  agregarOpcionSiNoExiste(key: string, valor: string) {
+    if (!valor) return;
+
+    const campo = this.campos.find(c => c.key === key);
+    if (!campo) return;
+
+    if (!campo.options.includes(valor)) {
+      campo.options = [valor, ...campo.options];
+    }
   }
 
-  return {
-    diesel: false,
-    electrico: false
-  };
-}
+  mapearTipoEquipo(tipo: any) {
+    if (tipo && typeof tipo === 'object') {
+      // 🔥 normalizamos claves a minúsculas
+      const tipoNormalizado: any = {};
+
+      Object.keys(tipo).forEach(key => {
+        tipoNormalizado[key.toLowerCase()] = tipo[key];
+      });
+
+      return {
+        diesel: !!tipoNormalizado.diesel,
+        electrico: !!tipoNormalizado.electrico
+      };
+    }
+
+    // 🔥 fallback string
+    if (typeof tipo === 'string') {
+      return {
+        diesel: tipo.toLowerCase().includes('diesel'),
+        electrico: tipo.toLowerCase().includes('electrico')
+      };
+    }
+
+    return {
+      diesel: false,
+      electrico: false
+    };
+  }
 
   getCampo(key: string) {
     return this.campos.find(c => c.key === key) || { key, options: [] };
   }
-
 }

@@ -23,6 +23,8 @@ export class FormularioPerforacionComponent implements OnInit, OnChanges {
   @Input() visible = false;
   @Input() operacion: any;
   @Output() cerrar = new EventEmitter<void>();
+  @Output() guardar = new EventEmitter<any>(); // 🔥 NUEVO: emitir datos guardados
+@Input() estado: string = '';
 
   public formularioInvalido = false;
   public datosPerforacion: DatosPerforacion = this.getInitDatosPerforacion();
@@ -37,9 +39,13 @@ export class FormularioPerforacionComponent implements OnInit, OnChanges {
   ngOnInit() {}
 
   ngOnChanges(changes: SimpleChanges): void {
-  if (changes['operacion'] && this.operacion) {
+    if (changes['operacion'] && this.operacion) {
+      this.cargarDatosOperacion(this.operacion);
+    }
+  }
 
-    const op = this.operacion;
+  cargarDatosOperacion(op: any) {
+    console.log('📥 Datos recibidos en operacion:', op);
 
     // 🔥 UBICACIÓN
     this.datosPerforacion.ubicacion.nivel = op.nivel || '';
@@ -66,7 +72,6 @@ export class FormularioPerforacionComponent implements OnInit, OnChanges {
     this.agregarSiNoExiste(this.labores, op.labor);
     this.agregarSiNoExiste(this.alas, op.ala);
   }
-}
 
   // 🔥 FUNCIÓN REUTILIZABLE
   agregarSiNoExiste(lista: string[], valor: string) {
@@ -85,13 +90,16 @@ export class FormularioPerforacionComponent implements OnInit, OnChanges {
 
   guardarPerforacion() {
     if (this.validarFormulario()) {
-      console.log('Datos guardados:', this.datosPerforacion);
-
-      this.cerrar.emit();
+      console.log('✅ Datos guardados:', this.datosPerforacion);
+      
+      // 🔥 EMITIR LOS DATOS AL PADRE
+      this.guardar.emit(this.datosPerforacion);
+      
       this.formularioInvalido = false;
-
+      this.cerrar.emit(); // Cerrar después de guardar
     } else {
       this.formularioInvalido = true;
+      console.warn('⚠️ Formulario inválido: faltan campos obligatorios');
     }
   }
 
@@ -110,4 +118,8 @@ export class FormularioPerforacionComponent implements OnInit, OnChanges {
       observaciones: ''
     };
   }
+
+  public get mostrarCamposCompletos(): boolean {
+  return this.estado === 'OPERATIVO';
+}
 }

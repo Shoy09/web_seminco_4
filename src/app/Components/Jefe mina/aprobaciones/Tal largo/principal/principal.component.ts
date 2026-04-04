@@ -7,6 +7,8 @@ import { MenuAccionesComponent } from '../menuAcciones/menuAcciones.component';
 import { OperacionesService } from '../../../../../services/operaciones.service';
 import { OperacionBase } from '../../../../../models/OperacionBase.models';
 import { CommonModule } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogEstadoComponent } from '../../dialog-estado/dialog-estado.component';
 
 @Component({
   selector: 'app-principal',
@@ -37,6 +39,7 @@ export class PrincipalTalLargoComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private operacionesService: OperacionesService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -110,30 +113,74 @@ onTablaChange(data: any[]) {
   }
 
 validarCambios() {
+
   const nuevaRaw = this.reconstruirOperacion();
   const original = this.operacionOriginal;
-
-  const nueva = this.parsearNueva(nuevaRaw); // 🔥 AQUÍ está la magia
+  const nueva = this.parsearNueva(nuevaRaw);
 
   const hayCambios = JSON.stringify(nueva) !== JSON.stringify(original);
 
-  const data = {
-    hayCambios,
-    original,
-    nueva
-  };
+  if (!hayCambios) {
+    console.log('⚪ No hay cambios');
+    return;
+  }
 
-  const json = JSON.stringify(data, null, 2);
+  const revisionActual = this.operacion.revisado ?? 0;
 
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = window.URL.createObjectURL(blob);
+  if (revisionActual >= 3) {
+    alert('🚫 Máximo de revisiones alcanzado');
+    return;
+  }
 
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'comparacion-operacion.json';
-  a.click();
+  // 🔥 ABRIR DIALOG
+  const dialogRef = this.dialog.open(DialogEstadoComponent, {
+    width: '350px'
+  });
 
-  window.URL.revokeObjectURL(url);
+  dialogRef.afterClosed().subscribe((estadoSeleccionado: number | null) => {
+
+    if (estadoSeleccionado == null) {
+      console.log('❌ Cancelado');
+      return;
+    }
+
+    // 🔥 definir campo observación
+    let campoObservacion = '';
+
+    switch (revisionActual) {
+      case 0: campoObservacion = 'observaciones_jefe'; break;
+      case 1: campoObservacion = 'observaciones_jefe2'; break;
+      case 2: campoObservacion = 'observaciones_jefe3'; break;
+    }
+
+    // 🔥 payload final
+    const payload: any = {
+      ...nuevaRaw,
+      [campoObservacion]: JSON.stringify(original),
+      revisado: revisionActual + 1,
+
+      // 🔥 AQUÍ METES EL RESULTADO
+      aprobacion: estadoSeleccionado
+    };
+
+    console.log('📦 PAYLOAD:', payload);
+
+    this.loading = true;
+
+    this.operacionesService.actualizar(this.tipo, this.operacion.id!, payload)
+      .subscribe({
+        next: () => {
+          this.obtenerOperacion();
+          alert(`✅ Actualizado (Rev ${revisionActual + 1})`);
+        },
+        error: (err) => {
+          console.error(err);
+          this.loading = false;
+          alert('❌ Error');
+        }
+      });
+
+  });
 }
 
  parsearNueva(nueva: any) {
@@ -176,7 +223,7 @@ validarCambios() {
 
     registros: JSON.stringify(this.tablaData),
 
-    horometros: JSON.stringify(this.horometrosData),
+    horometros: JSON.stringify(this.formatearHorometros(this.horometrosData)),
 
     condiciones_equipo: JSON.stringify({
       aceiteMotor: this.condicionesData.aceiteMotor,
@@ -190,7 +237,12 @@ validarCambios() {
       noOp: this.condicionesData.noOperativo,
     }),
 
-    check_list: JSON.stringify(this.checkListData),
+    check_list: JSON.stringify(
+  this.checkListData.map(item => ({
+    ...item,
+    decision: item.decision ? 1 : 0 // 🔥 conversión clave
+  }))
+),
 
     control_llantas: JSON.stringify({
       numero1: this.llantasData.numero1,
@@ -198,6 +250,23 @@ validarCambios() {
       numero3: this.llantasData.numero3,
       numero4: this.llantasData.numero4,
     }),
+  };
+}
+
+formatearHorometros(data: any) {
+  if (!data) return null;
+
+  const map = (item: any) => ({
+    inicio: Number(item?.inicial ?? 0),
+    final: Number(item?.final ?? 0),
+    op: !!item?.op,
+    inop: !!item?.inop,
+  });
+
+  return {
+    diesel: data.diesel ? map(data.diesel) : null,
+    electrico: data.electrico ? map(data.electrico) : null,
+    percusion: data.percusion ? map(data.percusion) : null,
   };
 }
 

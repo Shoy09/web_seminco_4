@@ -24,7 +24,7 @@ export class MenuComponent {
         // { title: 'Servicio Mixer', path: 'servicio-mixer' },
         // { title: 'Acarreo', path: 'servicio-volquetes' },
         // { title: "Sostenimiento", path:'sostenimiento'},
-        //{title: "Jefe de mina", path: 'jefe-mina'},
+        {title: "Jefe de mina", path: 'jefe-mina'},
         { title: 'Reporte Indicadores', path: 'power-bi' },
       ],
     },

@@ -41,4 +41,7 @@ export class EquipoService {
   getEquiposActualizados(): Observable<boolean> {
     return this.equiposActualizados.asObservable();
   }
+  getEquiposByProceso(proceso: string): Observable<Equipo[]> {
+  return this.apiService.getDatos(`${this.baseUrl}/proceso/${proceso}`);
+}
 }

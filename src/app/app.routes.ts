@@ -22,13 +22,13 @@ import { OperacionesListRompebancosComponent } from './Components/Jefe mina/ROMP
 import { OperacionesListEmpernadorComponent } from './Components/Jefe mina/Empernador/operaciones-list/operaciones-list.component';
 import { OperacionesListDumperComponent } from './Components/Jefe mina/DUMPER/operaciones-list/operaciones-list.component';
 import { OperacionesListAnfochaComponent } from './Components/Jefe mina/ANFOCHANGER/operaciones-list/operaciones-list.component';
-import { PrincipalSostenimientoComponent } from './Components/Jefe mina/aprobaciones/enpernador/principal/principal.component';
 import { PrincipalTalLargoComponent } from './Components/Jefe mina/aprobaciones/Tal largo/principal/principal.component';
 import { PrincipalTalHorizontalComponent } from './Components/Jefe mina/aprobaciones/Tal horizontal/principal/principal.component';
 import { PrincipalScoopsComponent } from './Components/Jefe mina/aprobaciones/Scoop/principal/principal.component';
 import { PrincipalScissorComponent } from './Components/Jefe mina/aprobaciones/Scissor/principal/principal.component';
 import { PrincipalRompebancosComponent } from './Components/Jefe mina/aprobaciones/Rompebancos/principal/principal.component';
 import { PowerBiPublicComponent } from './Components/Dashboard/Pu-PowerBi/power-bi-public/power-bi-public.component';
+import { PrincipalSostenimientoComponent } from './Components/Jefe mina/aprobaciones/enpernador/principal/principal.component';
 
 
 

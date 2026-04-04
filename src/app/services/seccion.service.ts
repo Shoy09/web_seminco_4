@@ -43,4 +43,9 @@ export class SeccionService {
     return this.seccionesActualizadas.asObservable();
   }
 
+  getSeccionesByProceso(proceso: string): Observable<Seccion[]> {
+  const procesoEncoded = encodeURIComponent(proceso);
+  return this.apiService.getDatos(`${this.baseUrl}/proceso/${procesoEncoded}`);
+}
+
 }

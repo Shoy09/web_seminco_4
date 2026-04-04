@@ -43,10 +43,18 @@ getById(
   data: Partial<OperacionBase>
 ): Observable<{ ok: boolean; data: OperacionBase }> {
   return this.apiService.putDatos(
-    `${this.baseUrl}/${tipo}/${id}`,
+    `${this.baseUrl}/update/${tipo}/${id}`,
     data
   ).pipe(
     tap(() => this.notificarActualizacion())
+  );
+}
+
+getAll(
+  tipo: string
+): Observable<{ ok: boolean; data: OperacionBase[] }> {
+  return this.apiService.getDatos(
+    `${this.baseUrl}/${tipo}`
   );
 }
 

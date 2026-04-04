@@ -11,72 +11,64 @@ import { FormsModule } from '@angular/forms';
 })
 export class FormularioOperacionComponent implements OnInit, OnChanges {
 
-  // 🔥 INPUTS DESDE EL PADRE
   @Input() visible = false;
   @Input() estadoSeleccionado = '';
   @Input() codigoSeleccionado = '';
   @Input() horaInicioSeleccionado = '';
   
-
-  // 🔥 OUTPUTS
+  // 🔥 OUTPUTS MODIFICADOS
   @Output() cerrarForm = new EventEmitter<void>();
-  @Output() confirmar = new EventEmitter<void>();
+  @Output() confirmar = new EventEmitter<any>(); // 🔥 Emitir datos, no solo void
 
-  // 🔥 LISTA DINÁMICA
   public codigos: string[] = ['104', '105', '106'];
-public horas: string[] = ['07:30'];
+  public horas: string[] = ['07:30'];
+  
+  // 🔥 Datos del formulario
+  public formData = {
+    estado: '',
+    codigo: '',
+    horaInicio: ''
+  };
 
   constructor() {}
 
   ngOnInit() {}
 
   ngOnChanges(changes: SimpleChanges): void {
-
-  //console.log('📥 Cambios detectados:', changes);
-
-  if (changes['estadoSeleccionado']) {
-    //console.log('🟢 Estado recibido:', this.estadoSeleccionado);
-  }
-
-  if (changes['codigoSeleccionado']) {
-    //console.log('🔢 Código recibido:', this.codigoSeleccionado);
-  }
-
-  if (changes['horaInicioSeleccionado']) {
-    //console.log('⏰ Hora inicio recibida:', this.horaInicioSeleccionado);
-  }
-
-  // 🔥 CÓDIGO DINÁMICO
-  if (changes['codigoSeleccionado'] && this.codigoSeleccionado) {
-
-    const codigo = this.codigoSeleccionado.trim();
-    const existe = this.codigos.includes(codigo);
-
-    if (!existe) {
-      this.codigos.push(codigo);
-      //console.log('✅ Código agregado:', codigo);
+    // Cargar datos cuando llegan del padre
+    if (changes['estadoSeleccionado'] && this.estadoSeleccionado) {
+      this.formData.estado = this.estadoSeleccionado;
+    }
+    
+    if (changes['codigoSeleccionado'] && this.codigoSeleccionado) {
+      this.formData.codigo = this.codigoSeleccionado;
+      this.agregarSiNoExiste(this.codigos, this.codigoSeleccionado);
+    }
+    
+    if (changes['horaInicioSeleccionado'] && this.horaInicioSeleccionado) {
+      this.formData.horaInicio = this.horaInicioSeleccionado;
+      this.agregarSiNoExiste(this.horas, this.horaInicioSeleccionado);
     }
   }
 
-  // 🔥 HORA DINÁMICA (LO NUEVO)
-  if (changes['horaInicioSeleccionado'] && this.horaInicioSeleccionado) {
-
-    const hora = this.horaInicioSeleccionado.trim();
-    const existe = this.horas.includes(hora);
-
-    if (!existe) {
-      this.horas.push(hora);
-      //console.log('✅ Hora agregada:', hora);
+  agregarSiNoExiste(lista: string[], valor: string) {
+    if (!valor) return;
+    const limpio = valor.trim();
+    if (limpio && !lista.includes(limpio)) {
+      lista.push(limpio);
     }
   }
-}
 
   cerrarFormOperacion() {
     this.cerrarForm.emit();
   }
 
   confirmarOperacion() {
-    this.confirmar.emit();
+    // 🔥 Emitir los datos actualizados
+    this.confirmar.emit({
+      estado: this.formData.estado,
+      codigo: this.formData.codigo,
+      horaInicio: this.formData.horaInicio
+    });
   }
-
 }

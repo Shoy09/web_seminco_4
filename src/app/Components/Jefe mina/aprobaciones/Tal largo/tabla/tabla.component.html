@@ -61,6 +61,7 @@
 <app-formulario-perforacion
   [visible]="mostrarPerforacion"
   [operacion]="operacionSeleccionada"
+  [estado]="registroEnEdicion?.estado || ''"
   (guardar)="onGuardarPerforacion($event)"
   (cerrar)="mostrarPerforacion = false">
 </app-formulario-perforacion>

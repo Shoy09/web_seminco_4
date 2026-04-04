@@ -6,19 +6,34 @@ import { FormularioPerforacionComponent } from "../formulario-perforacion/formul
 
 // tabla.component.ts
 interface Operacion {
+  // Ubicación
   nivel: string;
   tipo_labor: string;
   labor: string;
   ala: string;
-  observaciones?: string;
-  // 🔥 Campos de perforación que realmente existen
-  tal_prod?: string;
-  tal_rimados?: string;
-  tal_alivio?: string;
-  tal_repaso?: string;
-  long_barras?: string;
-  num_barras?: string;
-  tipo_perforacion?: string;
+  
+  // 🔥 NUEVOS: Metros perforados (no más "tal_xxx")
+  metros_perforados_produccion: string;
+  metros_perforados_rimados: string;
+  metros_perforados_alivio: string;
+  metros_perforados_repaso: string;
+  
+  // 🔥 NUEVOS: Número de taladros
+  n_taladros_produccion: string;
+  n_taladros_rimados: string;
+  n_taladros_alivio: string;
+  n_taladros_repaso: string;
+  
+  // Barras
+  long_barras: string;
+  num_barras: string;
+  
+  // Perforación
+  tipo_perforacion: string;
+  tipo_perforacion_id: number | null;
+  
+  // Observaciones
+  observaciones: string;
 }
 
 interface Registro {
@@ -29,7 +44,7 @@ interface Registro {
   horaFin: string;
   color: string;
   operacion: Operacion;
-  indiceOriginal: number; // 🔥 Guardamos el índice original
+  indiceOriginal: number;
 }
 
 @Component({
@@ -42,7 +57,7 @@ interface Registro {
 export class TablaComponent implements OnChanges {
 
   @Input() data: any[] = [];
-  @Output() dataChange = new EventEmitter<any[]>(); // 🔥 EMITIR CAMBIOS
+  @Output() dataChange = new EventEmitter<any[]>();
 
   public datos: Registro[] = [];
   public mostrarOperacion = false;
@@ -51,13 +66,12 @@ export class TablaComponent implements OnChanges {
   public horaInicioSeleccionado = '';
   public codigoSeleccionado = '';
   public operacionSeleccionada: Operacion | null = null;
-  
-  public registroEnEdicion: Registro | null = null; // 🔥 Guardar qué registro editamos
+  public registroEnEdicion: Registro | null = null;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data) {
       this.mapearDatos();
-      console.log('🔥 DATA TABLA:', this.data);
+      console.log('🔥 DATA RECIBIDA:', this.data);
     }
   }
 
@@ -69,12 +83,30 @@ export class TablaComponent implements OnChanges {
       horaInicio: item.hora_inicio,
       horaFin: item.hora_final || '--:--',
       color: this.getColorEstado(item.estado),
-      indiceOriginal: index, // 🔥 Guardar índice
+      indiceOriginal: index,
       operacion: item.operacion || {
+        // Ubicación
         nivel: '',
         tipo_labor: '',
         labor: '',
         ala: '',
+        // Metros perforados
+        metros_perforados_produccion: '',
+        metros_perforados_rimados: '',
+        metros_perforados_alivio: '',
+        metros_perforados_repaso: '',
+        // Número de taladros
+        n_taladros_produccion: '',
+        n_taladros_rimados: '',
+        n_taladros_alivio: '',
+        n_taladros_repaso: '',
+        // Barras
+        long_barras: '',
+        num_barras: '',
+        // Perforación
+        tipo_perforacion: '',
+        tipo_perforacion_id: null,
+        // Observaciones
         observaciones: ''
       }
     }));
@@ -89,8 +121,7 @@ export class TablaComponent implements OnChanges {
   }
 
   onEdit(item: Registro) {
-    console.log('Editando:', item);
-    this.registroEnEdicion = item; // 🔥 Guardar registro
+    this.registroEnEdicion = item;
     this.estadoSeleccionado = item.estado;
     this.codigoSeleccionado = item.codigo;
     this.horaInicioSeleccionado = item.horaInicio;
@@ -98,85 +129,79 @@ export class TablaComponent implements OnChanges {
   }
 
   onExecute(item: Registro) {
-    console.log('Ejecutando:', item);
-    this.registroEnEdicion = item; // 🔥 Guardar registro
+    this.registroEnEdicion = item;
     this.operacionSeleccionada = item.operacion;
     this.mostrarPerforacion = true;
   }
 
   onDelete(item: Registro) {
     console.log('Borrando:', item);
-    // Si implementas borrado, también debes emitir cambios
   }
 
-  // 🔥 NUEVO: Manejar cambios desde formulario-operacion
   onConfirmarOperacion(datosActualizados: any) {
     if (this.registroEnEdicion) {
-      // Actualizar el registro local
       this.registroEnEdicion.estado = datosActualizados.estado;
       this.registroEnEdicion.codigo = datosActualizados.codigo;
       this.registroEnEdicion.horaInicio = datosActualizados.horaInicio;
-      
-      // Actualizar el color según el nuevo estado
       this.registroEnEdicion.color = this.getColorEstado(datosActualizados.estado);
-      
-      // Emitir cambios al padre
       this.emitirCambios();
     }
-    
     this.cerrarFormOperacion();
   }
 
-  // 🔥 NUEVO: Manejar cambios desde formulario-perforacion
-  // tabla.component.ts
-onGuardarPerforacion(datosPerforacion: any) {
-  if (this.registroEnEdicion) {
-    // ✅ Guardar SOLO los campos que existen en tu estructura
-    this.registroEnEdicion.operacion = {
-      // Ubicación
-      nivel: datosPerforacion.ubicacion.nivel,
-      tipo_labor: datosPerforacion.ubicacion.tipoLabor,
-      labor: datosPerforacion.ubicacion.labor,
-      ala: datosPerforacion.ubicacion.ala,
+  // 🔥 ACTUALIZADO: Manejar datos de perforación con nueva estructura
+  onGuardarPerforacion(datosPerforacion: any) {
+    if (this.registroEnEdicion) {
+      this.registroEnEdicion.operacion = {
+        ...this.registroEnEdicion.operacion,
+        
+        // 📍 Ubicación
+        nivel: datosPerforacion.ubicacion.nivel,
+        tipo_labor: datosPerforacion.ubicacion.tipoLabor,
+        labor: datosPerforacion.ubicacion.labor,
+        ala: datosPerforacion.ubicacion.ala,
+        
+        // 🔥 METROS PERFORADOS (nuevos campos)
+        metros_perforados_produccion: datosPerforacion.metrosPerforados.produccion,
+        metros_perforados_rimados: datosPerforacion.metrosPerforados.rimados,
+        metros_perforados_alivio: datosPerforacion.metrosPerforados.alivio,
+        metros_perforados_repaso: datosPerforacion.metrosPerforados.repaso,
+        
+        // 🔥 NÚMERO DE TALADROS (nuevos campos)
+        n_taladros_produccion: datosPerforacion.numeroTaladros.produccion,
+        n_taladros_rimados: datosPerforacion.numeroTaladros.rimados,
+        n_taladros_alivio: datosPerforacion.numeroTaladros.alivio,
+        n_taladros_repaso: datosPerforacion.numeroTaladros.repaso,
+        
+        // 🔥 BARRAS
+        long_barras: datosPerforacion.barras.longitud,
+        num_barras: datosPerforacion.barras.numero,
+        
+        // 🔥 TIPO PERFORACIÓN
+        tipo_perforacion: datosPerforacion.tipoPerforacion.nombre,
+        tipo_perforacion_id: datosPerforacion.tipoPerforacion.id,
+        
+        // 📝 Observaciones
+        observaciones: datosPerforacion.observaciones
+      };
       
-      // Taladros
-      tal_prod: datosPerforacion.taladros.produccion,
-      tal_rimados: datosPerforacion.taladros.rimados,
-      tal_alivio: datosPerforacion.taladros.alivio,
-      tal_repaso: datosPerforacion.taladros.repaso,
-      
-      // Barras
-      long_barras: datosPerforacion.barras.longitud,
-      num_barras: datosPerforacion.barras.nBarra,
-      
-      // Tipo perforación
-      tipo_perforacion: datosPerforacion.tipoPerforacion,
-      
-      // Observaciones
-      observaciones: datosPerforacion.observaciones
-    };
-    
-    console.log('✅ Operación actualizada:', this.registroEnEdicion.operacion);
-    
-    // Emitir cambios al padre
-    this.emitirCambios();
+      console.log('✅ Perforación guardada:', this.registroEnEdicion.operacion);
+      this.emitirCambios();
+    }
+    this.cerrarFormPerforacion();
   }
-  
-  this.cerrarFormPerforacion();
-}
 
-  // 🔥 Emitir el array completo actualizado
   emitirCambios() {
-    // Reconstruir el array en el formato original
     const dataActualizada = this.datos.map(registro => ({
       numero: registro.nro,
       estado: registro.estado,
       codigo: registro.codigo,
       hora_inicio: registro.horaInicio,
       hora_final: registro.horaFin === '--:--' ? null : registro.horaFin,
-      operacion: registro.operacion
+      operacion: registro.operacion  // ✅ Incluye todos los nuevos campos
     }));
     
+    console.log('📤 EMITIENDO:', dataActualizada);
     this.dataChange.emit(dataActualizada);
   }
 
