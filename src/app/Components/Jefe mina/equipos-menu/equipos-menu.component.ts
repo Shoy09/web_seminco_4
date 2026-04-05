@@ -35,42 +35,42 @@ export class EquiposMenuComponent {
       icono: 'fas fa-wrench',
       color: '#e74c3c'
     },
-    { 
-      nombre: 'SCISSOR', 
-      ruta: '/Dashboard/jefe-mina/scissor',
-      icono: 'fas fa-cut',
-      color: '#f39c12'
-    },
-    { 
-      nombre: 'SCALAMIN', 
-      ruta: '/Dashboard/jefe-mina/scalamin',
-      icono: 'fas fa-chart-line',
-      color: '#9b59b6'
-    },
-    { 
-      nombre: 'ROMPEBANCOS', 
-      ruta: '/Dashboard/jefe-mina/rompebancos',
-      icono: 'fas fa-hammer',
-      color: '#e67e22'
-    },
-    { 
-      nombre: 'ANFOCHANGER', 
-      ruta: '/Dashboard/jefe-mina/anfochanger',
-      icono: 'fas fa-truck',
-      color: '#1abc9c'
-    },
-    { 
-      nombre: 'SCOOPTRAM', 
-      ruta: '/Dashboard/jefe-mina/scooptram',
-      icono: 'fas fa-tractor',
-      color: '#34495e'
-    },
-    { 
-      nombre: 'DUMPER', 
-      ruta: '/Dashboard/jefe-mina/dumper',
-      icono: 'fas fa-dump-truck',
-      color: '#7f8c8d'
-    }
+    // { 
+    //   nombre: 'SCISSOR', 
+    //   ruta: '/Dashboard/jefe-mina/scissor',
+    //   icono: 'fas fa-cut',
+    //   color: '#f39c12'
+    // },
+    // { 
+    //   nombre: 'SCALAMIN', 
+    //   ruta: '/Dashboard/jefe-mina/scalamin',
+    //   icono: 'fas fa-chart-line',
+    //   color: '#9b59b6'
+    // },
+    // { 
+    //   nombre: 'ROMPEBANCOS', 
+    //   ruta: '/Dashboard/jefe-mina/rompebancos',
+    //   icono: 'fas fa-hammer',
+    //   color: '#e67e22'
+    // },
+    // { 
+    //   nombre: 'ANFOCHANGER', 
+    //   ruta: '/Dashboard/jefe-mina/anfochanger',
+    //   icono: 'fas fa-truck',
+    //   color: '#1abc9c'
+    // },
+    // { 
+    //   nombre: 'SCOOPTRAM', 
+    //   ruta: '/Dashboard/jefe-mina/scooptram',
+    //   icono: 'fas fa-tractor',
+    //   color: '#34495e'
+    // },
+    // { 
+    //   nombre: 'DUMPER', 
+    //   ruta: '/Dashboard/jefe-mina/dumper',
+    //   icono: 'fas fa-dump-truck',
+    //   color: '#7f8c8d'
+    // }
   ];
 
   constructor(private router: Router) {}
