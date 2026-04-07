@@ -4,6 +4,8 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { EquipoService } from '../../../../../services/equipo.service';
 import { SeccionService } from '../../../../../services/seccion.service';
+import { UsuarioService } from '../../../../../services/usuario.service';
+import { Usuario } from '../../../../../models/Usuario';
 
 @Component({
   selector: 'app-card-operaciones',
@@ -39,7 +41,7 @@ export class CardOperacionesComponent implements OnChanges, OnInit {
     { key: 'equipo', options: [] },
     { key: 'codigo', options: [] },
     { key: 'modelo_equipo', options: [] },
-    { key: 'jefeGuardia', options: ['6666 6666', '7777 7777'] },
+    { key: 'jefeGuardia', options: [] }, 
     { key: 'seccion', options: [] },
   ];
 
@@ -50,13 +52,15 @@ export class CardOperacionesComponent implements OnChanges, OnInit {
 
   constructor(
     private equipoService: EquipoService,
-    private seccionService: SeccionService
+    private seccionService: SeccionService,
+        private usuarioService: UsuarioService
   ) {}
 
   // 🔥 INIT
   ngOnInit(): void {
     this.cargarEquipos();
     this.cargarSecciones();
+    this.cargarJefesGuardia();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -65,6 +69,28 @@ export class CardOperacionesComponent implements OnChanges, OnInit {
       this.cargarDatos();
     }
   }
+
+    // 🔹 ===============================
+    // 🔹 JEFES DE GUARDIA
+    // 🔹 ===============================
+    cargarJefesGuardia() {
+      this.usuarioService.obtenerJefesGuardia()
+        .subscribe({
+          next: (usuarios: Usuario[]) => {
+            // Combinar apellidos y nombres
+            const nombresCompletos = usuarios.map(u => {
+              return `${u.nombres} ${u.apellidos}`;
+            });
+            
+            this.mergeOpciones('jefeGuardia', nombresCompletos);
+            
+            // 🔥 asegurar valor actual si existe en data
+            this.ensureCurrentValues();
+          },
+          error: err => console.error('Error jefes de guardia:', err)
+        });
+    }
+    
 
   // 🔥 ===============================
   // 🔹 EQUIPOS
@@ -126,6 +152,7 @@ export class CardOperacionesComponent implements OnChanges, OnInit {
     this.agregarOpcionSiNoExiste('codigo', this.data.codigo);
     this.agregarOpcionSiNoExiste('modelo_equipo', this.data.modelo_equipo);
     this.agregarOpcionSiNoExiste('seccion', this.data.seccion);
+    this.agregarOpcionSiNoExiste('jefeGuardia', this.data.jefeGuardia); 
   }
 
   onChange() {

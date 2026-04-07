@@ -257,7 +257,7 @@ formatearHorometros(data: any) {
   if (!data) return null;
 
   const map = (item: any) => ({
-    inicio: Number(item?.inicial ?? 0),
+    inicio: Number(item?.inicio ?? 0),
     final: Number(item?.final ?? 0),
     op: !!item?.op,
     inop: !!item?.inop,

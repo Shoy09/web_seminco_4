@@ -9,7 +9,7 @@ import { ApiService } from './api.service';
 })
 export class UsuarioService {
   private readonly endpoint = 'usuarios/usuarios'; // Define el endpoint específico para usuarios
-
+private readonly endpoint2 = 'usuarios'; 
   constructor(private apiService: ApiService) {}
 
   obtenerUsuarios(): Observable<Usuario[]> {
@@ -49,6 +49,10 @@ actualizarOperacionesAutorizadas(id: number, operaciones: { [key: string]: boole
     operaciones_autorizadas: operaciones
   });
 }
+
+obtenerJefesGuardia(): Observable<Usuario[]> {
+    return this.apiService.getDatos(`${this.endpoint2}/guardia`);
+  }
 
   
 }
