@@ -31,6 +31,8 @@ import { PowerBiPublicComponent } from './Components/Dashboard/Pu-PowerBi/power-
 import { PrincipalSostenimientoComponent } from './Components/Jefe mina/aprobaciones/enpernador/principal/principal.component';
 import { PrincipalGraficoHorizontalComponent } from './Components/Dashboard/graficos/horizontal/principal-grafico-horizontal/principal-grafico-horizontal.component';
 import { ExplosivosComponent } from './Components/Crear datos/explosivos/explosivos.component';
+import { ExplosivosGraficosComponent } from './Components/Dashboard/Explosivos/explosivos-graficos/explosivos-graficos.component';
+import { DashboardPruebaComponent } from './Components/Dashboard/sostenimiento/dashboard-prueba/dashboard-prueba.component';
 
 
 
@@ -82,7 +84,10 @@ export const routes: Routes = [
 { path: 'power-bi', component: PowerBiPublicComponent },
 { path: 'grafico-horizontal', component: PrincipalGraficoHorizontalComponent },
 
+{ path: 'grafico-sostenimiento', component: DashboardPruebaComponent },
+
 { path: 'explosivos', component: ExplosivosComponent },
+{ path: 'explosivos-graficos', component: ExplosivosGraficosComponent },
     ]
   },
 

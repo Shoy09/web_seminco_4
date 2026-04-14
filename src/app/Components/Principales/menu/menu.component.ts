@@ -26,6 +26,8 @@ export class MenuComponent {
         // { title: "Sostenimiento", path:'sostenimiento'},
         {title: "Jefe de mina", path: 'jefe-mina'},
         { title: 'Reporte Indicadores', path: 'power-bi' },
+        { title: 'Explosivos', path: 'explosivos-graficos' },
+        { title: 'Gráfico Sostenimiento', path: 'grafico-sostenimiento' },
         // { title: 'Gráfico Horizontal', path: 'grafico-horizontal' },
       ],
     },
