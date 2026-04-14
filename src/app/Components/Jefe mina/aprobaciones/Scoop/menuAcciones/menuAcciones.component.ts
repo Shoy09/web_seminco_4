@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 interface AccionItem {
@@ -22,12 +22,24 @@ export class MenuAccionesComponent implements OnInit, OnChanges {
   @Input() condicionesData: any;
   @Input() checkListData: any[] = [];
   @Input() llantasData: any;
+  @Input() programaTrabajoData: any;
+  
+  // 🔥 Outputs para comunicar cambios al padre
+  @Output() actualizarClick = new EventEmitter<void>();
+  @Output() dataChange = new EventEmitter<any>();
 
   // 🔥 Arrays usados en los modales
   public filasHorometro: any[] = [];
   public condicionesEquipo: any[] = [];
   public itemsChecklist: any[] = [];
   public llantasInspeccion: any[] = [];
+public programaTrabajoLocal: any;
+  // 🔥 Copias locales para edición (para no modificar directamente los inputs)
+  private horometrosDataBackup: any;
+  private condicionesDataBackup: any;
+  private checkListDataBackup: any[] = [];
+  private llantasDataBackup: any;
+  private programaTrabajoDataBackup: any;
 
   // 🔥 Acciones del menú
   public acciones: AccionItem[] = [
@@ -35,7 +47,8 @@ export class MenuAccionesComponent implements OnInit, OnChanges {
     { id: 'condiciones', texto: 'Condiciones de equipo', icono: 'fa-screwdriver-wrench' },
     { id: 'checklist', texto: 'CheckList', icono: 'fa-list-check' },
     { id: 'presion', texto: 'Presión de llantas', icono: 'fa-truck-field' },
-    { id: 'actualizar', texto: 'Actualizar registro', icono: 'fa-arrows-rotate' }
+    { id: 'programaTrabajo', texto: 'Programa Trabajo', icono: 'fa-calendar-check' },
+    { id: 'actualizar', texto: 'Actualizar registro', icono: 'fa-arrows-rotate' },
   ];
   public accionSeleccionada: string = '';
 
@@ -44,6 +57,7 @@ export class MenuAccionesComponent implements OnInit, OnChanges {
   public mostrarModalCondiciones: boolean = false;
   public mostrarModalChecklist: boolean = false;
   public mostrarModalInspeccion: boolean = false;
+  public mostrarModalProgramaTrabajo: boolean = false;
 
   // 🔥 Imagen de inspección de llantas
   public imagenEquipoUrl: string = 'inspec-visual/image-prueba.jpeg';
@@ -57,32 +71,53 @@ export class MenuAccionesComponent implements OnInit, OnChanges {
   // 🔥 Detecta cambios en los Inputs y actualiza arrays
   ngOnChanges(changes: SimpleChanges) {
     if (changes['horometrosData'] && this.horometrosData) {
+      this.horometrosDataBackup = JSON.parse(JSON.stringify(this.horometrosData));
       this.inicializarHorometros(this.horometrosData);
     }
 
     if (changes['condicionesData'] && this.condicionesData) {
+      this.condicionesDataBackup = JSON.parse(JSON.stringify(this.condicionesData));
       this.inicializarCondiciones(this.condicionesData);
       console.log('📥 Condiciones recibidas del padre:', this.condicionesData);
     }
 
-     if (changes['checkListData'] && this.checkListData) {
-    this.inicializarChecklist(this.checkListData);
-    console.log('📥 CheckList recibida del padre:', this.checkListData);
+    if (changes['checkListData'] && this.checkListData) {
+      this.checkListDataBackup = JSON.parse(JSON.stringify(this.checkListData));
+      this.inicializarChecklist(this.checkListData);
+      console.log('📥 CheckList recibida del padre:', this.checkListData);
+    }
+
+    if (changes['llantasData'] && this.llantasData) {
+      this.llantasDataBackup = JSON.parse(JSON.stringify(this.llantasData));
+      this.inicializarLlantas(this.llantasData);
+      console.log('📥 Llantas recibidas del padre:', this.llantasData);
+    }
+
+    if (changes['programaTrabajoData'] && this.programaTrabajoData) {
+  this.programaTrabajoDataBackup = JSON.parse(JSON.stringify(this.programaTrabajoData));
+  this.inicializarProgramaTrabajo(this.programaTrabajoData);
+  console.log('📥 Programa Trabajo recibido:', this.programaTrabajoData);
+}
   }
 
-     if (changes['llantasData'] && this.llantasData) {
-    this.inicializarLlantas(this.llantasData);
-    console.log('📥 Llantas recibidas del padre:', this.llantasData);
-  }
-  }
+  inicializarProgramaTrabajo(data: any) {
+  this.programaTrabajoLocal = {
+    n_cucharas_programado: data?.n_cucharas_programado ?? 0,
+    n_cucharas_realizado: data?.n_cucharas_realizado ?? 0
+  };
+}
 
-  // 🔥 Inicializa Horómetros
+  // 🔥 Inicializa Horómetros (SOSTENIMIENTO)
   inicializarHorometros(data: any) {
+    const map = (item: any) => ({
+      inicial: Number(item?.inicio ?? 0),
+      final: Number(item?.final ?? 0),
+      op: item?.op === true || item?.op === 1,
+      inop: item?.inop === true || item?.inop === 1,
+    });
+
     this.filasHorometro = [
-      { nombre: 'Diesel', inicial: data.diesel.inicio, final: data.diesel.final, op: data.diesel.op, inop: data.diesel.inop },
-      { nombre: 'Eléctrico', inicial: data.electrico.inicio, final: data.electrico.final, op: data.electrico.op, inop: data.electrico.inop },
-      { nombre: 'Percusión', inicial: data.percusion.inicio, final: data.percusion.final, op: data.percusion.op, inop: data.percusion.inop },
-      { nombre: 'Empernador', inicial: data.empernador.inicio, final: data.empernador.final, op: data.empernador.op, inop: data.empernador.inop }
+      { nombre: 'horometro', ...map(data?.horometro) },
     ];
   }
 
@@ -99,21 +134,21 @@ export class MenuAccionesComponent implements OnInit, OnChanges {
   }
 
   inicializarChecklist(data: any[]) {
-  this.itemsChecklist = data.map(item => ({
-    categoria: item.categoria || 'General',
-    descripcion: item.descripcion || 'Item',
-    decision: item.decision === 1,      // convertimos 1/0 a true/false
-    observacion: item.observacion || ''
-  }));
-}
+    this.itemsChecklist = data.map(item => ({
+      categoria: item.categoria || 'General',
+      descripcion: item.descripcion || 'Item',
+      decision: item.decision === true || item.decision === 1,
+      observacion: item.observacion || ''
+    }));
+  }
 
-inicializarLlantas(data: any) {
-  // Convertimos cada propiedad en un objeto con id y estado
-  this.llantasInspeccion = Object.keys(data).map(key => ({
-    id: key,
-    estado: data[key] === true  // true/false
-  }));
-}
+  inicializarLlantas(data: any) {
+    // Convertimos cada propiedad en un objeto con id y estado
+    this.llantasInspeccion = Object.keys(data).map(key => ({
+      id: key,
+      estado: data[key] === true
+    }));
+  }
 
   // 🔥 Manejo de selección de acción
   seleccionarAccion(id: string) {
@@ -132,6 +167,12 @@ inicializarLlantas(data: any) {
       case 'presion':
         this.mostrarModalInspeccion = true;
         break;
+      case 'actualizar':
+        this.actualizarClick.emit(); // 🔥 AVISA AL PADRE
+        break;
+      case 'programaTrabajo':
+      this.mostrarModalProgramaTrabajo = true;
+        break;
     }
   }
 
@@ -141,27 +182,79 @@ inicializarLlantas(data: any) {
     this.mostrarModalCondiciones = false;
     this.mostrarModalChecklist = false;
     this.mostrarModalInspeccion = false;
+    this.mostrarModalProgramaTrabajo = false;
     this.accionSeleccionada = '';
   }
 
-  // 🔥 Guardar acciones
+  guardarProgramaTrabajo() {
+  const data = {
+    n_cucharas_programado: Number(this.programaTrabajoLocal?.n_cucharas_programado ?? 0),
+    n_cucharas_realizado: Number(this.programaTrabajoLocal?.n_cucharas_realizado ?? 0)
+  };
+
+  console.log('🟢 Programa Trabajo guardado:', data);
+
+  this.dataChange.emit({
+    tipo: 'programaTrabajo',
+    data
+  });
+
+  this.cerrarModales();
+}
+
+  // 🔥 Guardar Horómetros y emitir cambios
   guardarHorometros() {
-    console.log('Horómetros:', this.filasHorometro);
+    const map = (item: any) => ({
+      inicio: Number(item.inicial ?? 0),
+      final: Number(item.final ?? 0),
+      op: item.op ? 1 : 0,
+      inop: item.inop ? 1 : 0,
+    });
+
+    const data = {
+      horometro: map(this.filasHorometro[0]),
+    };
+
+    console.log('🟢 Horómetros guardados:', data);
+    this.dataChange.emit({ tipo: 'horometros', data });
     this.cerrarModales();
   }
 
+  // 🔥 Guardar Condiciones y emitir cambios
   guardarCondiciones() {
-    console.log('Condiciones:', this.condicionesEquipo);
-    this.cerrarModales();
-  }
+  console.log('Condiciones:', this.condicionesData);
 
+  this.dataChange.emit({
+    tipo: 'condiciones',
+    data: this.condicionesData
+  });
+
+  this.cerrarModales();
+}
+
+  // 🔥 Guardar Checklist y emitir cambios
   guardarChecklist() {
-    console.log('Checklist:', this.itemsChecklist);
+    const data = this.itemsChecklist.map(item => ({
+      categoria: item.categoria,
+      descripcion: item.descripcion,
+      decision: item.decision ? 1 : 0,
+      observacion: item.observacion
+    }));
+
+    console.log('🟢 Checklist guardado:', data);
+    this.dataChange.emit({ tipo: 'checklist', data });
     this.cerrarModales();
   }
 
+  // 🔥 Guardar Inspección de llantas y emitir cambios
   guardarInspeccion() {
-    console.log('Inspección visual guardada');
+    const data = this.llantasInspeccion.reduce((acc: any, item: any) => {
+      acc[item.id] = item.estado;
+      return acc;
+    }, {});
+
+    console.log('🟢 Llantas guardadas:', data);
+    this.dataChange.emit({ tipo: 'llantas', data });
     this.cerrarModales();
   }
 

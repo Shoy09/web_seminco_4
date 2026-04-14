@@ -59,12 +59,12 @@ export class EquiposMenuComponent {
     //   icono: 'fas fa-truck',
     //   color: '#1abc9c'
     // },
-    // { 
-    //   nombre: 'SCOOPTRAM', 
-    //   ruta: '/Dashboard/jefe-mina/scooptram',
-    //   icono: 'fas fa-tractor',
-    //   color: '#34495e'
-    // },
+    { 
+      nombre: 'SCOOPTRAM', 
+      ruta: '/Dashboard/jefe-mina/scooptram',
+      icono: 'fas fa-tractor',
+      color: '#34495e'
+    },
     // { 
     //   nombre: 'DUMPER', 
     //   ruta: '/Dashboard/jefe-mina/dumper',

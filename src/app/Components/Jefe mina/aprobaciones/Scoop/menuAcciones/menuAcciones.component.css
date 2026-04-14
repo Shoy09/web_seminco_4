@@ -557,3 +557,72 @@ tbody td {
 .pos-2 { bottom: 0; right: 0; }
 .pos-3 { top: 0; left: 0; }
 .pos-4 { bottom: 0; left: 0; }
+
+
+/* 🔥 REUTILIZA estructura base existente */
+
+.row-inputs {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.input-field {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 🔹 Labels */
+.field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 🔹 Inputs */
+.input-form {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background: #fff;
+}
+
+/* Hover */
+.input-form:hover {
+  border-color: #bdbdbd;
+}
+
+/* Focus */
+.input-form:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
+}
+
+/* 🔹 Contenedor del modal body */
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 🔹 Ajuste visual para inputs numéricos */
+input[type="number"]::-webkit-inner-spin-button {
+  opacity: 1;
+}
+
+/* 🔹 Responsive */
+@media (max-width: 600px) {
+  .row-inputs {
+    flex-direction: column;
+  }
+}

@@ -240,3 +240,54 @@
     </div>
   </div>
 </div>
+
+<div class="modal-overlay" *ngIf="mostrarModalProgramaTrabajo">
+  <div class="modal-card">
+
+    <div class="modal-header">
+      <div class="header-left">
+        <i class="fa-solid fa-calendar-check header-icon"></i>
+        <h1 class="header-title">Programa de Trabajo</h1>
+      </div>
+      <span class="editable-badge">EDITABLE</span>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="row-inputs">
+        <div class="input-field">
+          <label class="field-label">
+            <i class="fa-solid fa-cubes"></i> Cucharas Programadas
+          </label>
+          <input
+            type="number"
+            class="input-form"
+            [(ngModel)]="programaTrabajoLocal.n_cucharas_programado"
+            placeholder="Cantidad programada"
+          />
+        </div>
+
+        <div class="input-field">
+          <label class="field-label">
+            <i class="fa-solid fa-cubes"></i> Cucharas Realizadas
+          </label>
+          <input
+            type="number"
+            class="input-form"
+            [(ngModel)]="programaTrabajoLocal.n_cucharas_realizado"
+            placeholder="Cantidad realizada"
+          />
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModales()">Cancelar</button>
+      <button class="btn-guardar" (click)="guardarProgramaTrabajo()">
+        <i class="fa-solid fa-floppy-disk"></i> Guardar
+      </button>
+    </div>
+
+  </div>
+</div>

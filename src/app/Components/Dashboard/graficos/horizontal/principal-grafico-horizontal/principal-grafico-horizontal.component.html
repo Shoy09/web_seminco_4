@@ -1,0 +1,36 @@
+<div class="filtro-fechas">
+  <div class="campo">
+    <label>Fecha inicio</label>
+    <input type="date" [(ngModel)]="fechaInicio">
+  </div>
+
+  <div class="campo">
+    <label>Fecha fin</label>
+    <input type="date" [(ngModel)]="fechaFin">
+  </div>
+
+  <button class="btn-aplicar" (click)="aplicarFiltro()">
+    Aplicar
+  </button>
+
+  <button class="btn-aplicar" (click)="quitarFiltro()">
+    Quitar filtro
+  </button>
+</div>
+
+<div class="graficos-container">
+  <app-avance-fase [data]="dataAvanceFase"></app-avance-fase>
+  <app-resumen [data]="resumen"></app-resumen>
+  <app-disparos-equipo [data]="dataDisparosEquipo"></app-disparos-equipo>
+  <app-disparos-dia></app-disparos-dia>
+  <app-rendimiento-equipo></app-rendimiento-equipo>
+  <app-demoras-operativas></app-demoras-operativas>
+  <app-horas-no-operativas></app-horas-no-operativas>
+  <app-horas-de-mantenimiento></app-horas-de-mantenimiento>
+  <app-metros-perforados-disparo></app-metros-perforados-disparo>
+  <app-perforado-equipo></app-perforado-equipo>
+  <app-mhr-equipo></app-mhr-equipo>
+  <app-horometros-jumbos></app-horometros-jumbos>
+  <h1>SEGUNDA HOJA</h1>
+  <app-horas-inicio-perforacion></app-horas-inicio-perforacion>
+</div>

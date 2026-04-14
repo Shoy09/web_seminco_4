@@ -26,6 +26,7 @@ export class MenuComponent {
         // { title: "Sostenimiento", path:'sostenimiento'},
         {title: "Jefe de mina", path: 'jefe-mina'},
         { title: 'Reporte Indicadores', path: 'power-bi' },
+        // { title: 'Gráfico Horizontal', path: 'grafico-horizontal' },
       ],
     },
     {
@@ -46,6 +47,7 @@ export class MenuComponent {
         { title: 'Crear Data', path: 'crear-data' },
         { title: 'Checklist', path: 'checklist' },
         { title: 'Checklist Carguio', path: 'checklist-telemando' },
+        { title: 'Explosivos', path: 'explosivos' },
       ],
     },
     {

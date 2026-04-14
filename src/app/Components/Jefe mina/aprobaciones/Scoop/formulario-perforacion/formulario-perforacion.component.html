@@ -3,10 +3,13 @@
     <div class="perf-header">
       <div class="header-left">
         <i class="far fa-file-alt header-icon"></i>
-        <h1 class="header-title">Formulario de Perforación</h1>
+        <h1 class="header-title">Formulario de Operación</h1>
       </div>
       <div class="header-right">
         <span class="editable-badge">• EDITABLE</span>
+        <span class="estado-badge" [class]="estado.toLowerCase()">
+          {{ estado }}
+        </span>
       </div>
     </div>
 
@@ -16,54 +19,65 @@
     </div>
 
     <form class="perf-form">
+      <!-- SECCIÓN UBICACIÓN (siempre visible) -->
       <fieldset class="form-section">
         <legend class="section-legend">
-          <i class="fas fa-map-marker-alt icon"></i> Ubicación
+          <i class="fas fa-map-marker-alt icon"></i> Ubicación de Inicio
+          <span class="required-star" *ngIf="mostrarCamposCompletos">*</span>
         </legend>
         <div class="row-inputs">
           <div class="input-field">
             <label class="field-label">
               <i class="fas fa-layer-group label-icon"></i>
-              Nivel <span class="required-star">*</span>
+              Nivel <span class="required-star" *ngIf="mostrarCamposCompletos">*</span>
             </label>
-            <select
-              class="perf-select"
-              [(ngModel)]="datosPerforacion.ubicacion.nivel"
-              name="nivel"
-            >
-              <option value="" disabled>Seleccionar nivel</option>
-              <option *ngFor="let n of niveles" [value]="n">{{ n }}</option>
-            </select>
+            <input
+              type="text"
+              class="perf-input"
+              placeholder="Ej: 1400"
+              [(ngModel)]="datosPerforacion.ubicacion.nivel_inicio"
+              name="nivel_inicio"
+              list="nivelesList"
+            />
+            <datalist id="nivelesList">
+              <option *ngFor="let n of niveles" [value]="n"></option>
+            </datalist>
           </div>
           
           <div class="input-field">
             <label class="field-label">
               <i class="fas fa-screwdriver-wrench label-icon"></i>
-              Tipo Labor <span class="required-star">*</span>
+              Tipo Labor <span class="required-star" *ngIf="mostrarCamposCompletos">*</span>
             </label>
-            <select
-              class="perf-select"
-              [(ngModel)]="datosPerforacion.ubicacion.tipoLabor"
-              name="tipoLabor"
-            >
-              <option value="" disabled>Seleccionar tipo labor</option>
-              <option *ngFor="let t of tiposLabor" [value]="t">{{ t }}</option>
-            </select>
+            <input
+              type="text"
+              class="perf-input"
+              placeholder="Ej: SN, RAMPA, GALERIA"
+              [(ngModel)]="datosPerforacion.ubicacion.tipo_labor_inicio"
+              name="tipo_labor_inicio"
+              list="tiposLaborList"
+            />
+            <datalist id="tiposLaborList">
+              <option *ngFor="let t of tiposLabor" [value]="t"></option>
+            </datalist>
           </div>
           
           <div class="input-field">
             <label class="field-label">
               <i class="fas fa-warehouse label-icon"></i>
-              Labor <span class="required-star">*</span>
+              Labor <span class="required-star" *ngIf="mostrarCamposCompletos">*</span>
             </label>
-            <select
-              class="perf-select"
-              [(ngModel)]="datosPerforacion.ubicacion.labor"
-              name="labor"
-            >
-              <option value="" disabled>Seleccionar labor</option>
-              <option *ngFor="let l of labores" [value]="l">{{ l }}</option>
-            </select>
+            <input
+              type="text"
+              class="perf-input"
+              placeholder="Ej: 7022"
+              [(ngModel)]="datosPerforacion.ubicacion.labor_inicio"
+              name="labor_inicio"
+              list="laboresList"
+            />
+            <datalist id="laboresList">
+              <option *ngFor="let l of labores" [value]="l"></option>
+            </datalist>
           </div>
           
           <div class="input-field">
@@ -71,112 +85,72 @@
               <i class="fas fa-code-branch label-icon"></i>
               Ala
             </label>
-            <select
-              class="perf-select"
-              [(ngModel)]="datosPerforacion.ubicacion.ala"
-              name="ala"
-            >
-              <option value="">Seleccionar ala (opcional)</option>
-              <option *ngFor="let a of alas" [value]="a">{{ a }}</option>
-            </select>
-          </div>
-        </div>
-      </fieldset>
-
-      <fieldset class="form-section">
-        <legend class="section-legend">
-          <i class="fas fa-tools icon"></i> Pernos
-        </legend>
-
-        <div class="row-inputs three-cols">
-          <div class="input-field">
-            <label class="field-label">
-              <i class="fas fa-bolt label-icon"></i>
-              Tipo Pernos
-            </label>
             <input
               type="text"
               class="perf-input"
-              placeholder="Ej: Split Set, Swellex"
-              [(ngModel)]="datosPerforacion.pernos.tipo"
-              name="tipoPerno"
+              placeholder="Ej: 3S, NORTE, SUR"
+              [(ngModel)]="datosPerforacion.ubicacion.ala_inicio"
+              name="ala_inicio"
+              list="alasList"
             />
-          </div>
-
-          <div class="input-field">
-            <label class="field-label">
-              <i class="fas fa-chart-line label-icon"></i>
-              Log Pernos
-            </label>
-            <input
-              type="text"
-              class="perf-input"
-              placeholder="Ingrese log de pernos"
-              [(ngModel)]="datosPerforacion.pernos.log"
-              name="logPerno"
-            />
-          </div>
-
-          <div class="input-field">
-            <label class="field-label">
-              <i class="fas fa-hashtag label-icon"></i>
-              N° Pernos Instalados
-            </label>
-            <input
-              type="number"
-              class="perf-input"
-              placeholder="0"
-              [(ngModel)]="datosPerforacion.pernos.nInstalados"
-              name="nInstalados"
-            />
+            <datalist id="alasList">
+              <option *ngFor="let a of alas" [value]="a"></option>
+            </datalist>
           </div>
         </div>
       </fieldset>
 
-      <fieldset class="form-section">
-        <legend class="section-legend">
-          <i class="fas fa-border-all icon"></i> Malla y Sistemático
-        </legend>
+      <!-- SECCIÓN UBICACIÓN DESTINO -->
+<fieldset class="form-section" *ngIf="mostrarCamposCompletos">
+  <legend class="section-legend">
+    <i class="fas fa-map-marker-alt icon"></i> Ubicación de Destino
+  </legend>
 
-        <div class="row-inputs three-cols">
-          <div class="input-field">
-            <label class="field-label">
-              <i class="fas fa-th label-icon"></i>
-              Tipo Malla
-            </label>
-            <input type="text"
-              class="perf-input"
-              placeholder="Ej: Cuadrada, Rectangular"
-              [(ngModel)]="datosPerforacion.malla.tipo"
-              name="tipoMalla">
-          </div>
+  <div class="row-inputs">
+    <div class="input-field">
+      <label class="field-label">
+        <i class="fas fa-location-dot label-icon"></i>
+        Destino
+      </label>
+      <input
+        type="text"
+        class="perf-input"
+        placeholder="Ej: Caja negra"
+        [(ngModel)]="datosPerforacion.ubicacion_destino"
+        name="ubicacion_destino"
+        list="ubicacionesDestinoList"
+      />
+      <datalist id="ubicacionesDestinoList">
+        <option *ngFor="let u of ubicacionesDestino" [value]="u"></option>
+      </datalist>
+    </div>
+  </div>
+</fieldset>
 
-          <div class="input-field">
-            <label class="field-label">
-              <i class="fas fa-ruler-combined label-icon"></i>
-              MTS² Malla
-            </label>
-            <input type="text"
-              class="perf-input"
-              placeholder="Ej: 1.5 x 1.5"
-              [(ngModel)]="datosPerforacion.malla.mts2"
-              name="mts2Malla">
-          </div>
+      <!-- SECCIÓN DATOS OPERACIÓN -->
+<fieldset class="form-section" *ngIf="mostrarCamposCompletos">
+  <legend class="section-legend">
+    <i class="fas fa-chart-line icon"></i> Datos de Operación
+  </legend>
 
-          <div class="input-field">
-            <label class="field-label">
-              <i class="fas fa-draw-polygon label-icon"></i>
-              Sistemático / Puntual
-            </label>
-            <input type="text"
-              class="perf-input"
-              placeholder="Sistemático o Puntual"
-              [(ngModel)]="datosPerforacion.malla.sistematicoPuntual"
-              name="sistematico">
-          </div>
-        </div>
-      </fieldset>
+  <div class="row-inputs">
+    <div class="input-field">
+      <label class="field-label">
+        <i class="fas fa-cubes label-icon"></i>
+        N° Cucharas
+      </label>
+      <input
+        type="number"
+        class="perf-input"
+        placeholder="Cantidad de cucharas"
+        [(ngModel)]="datosPerforacion.n_cucharas"
+        name="n_cucharas"
+      />
+    </div>
+  </div>
+</fieldset>
 
+      <!-- SECCIÓN OBSERVACIONES (siempre visible) -->
       <fieldset class="form-section">
         <legend class="section-legend">
           <i class="fas fa-comment icon"></i> Observaciones
@@ -190,7 +164,7 @@
           <textarea
             class="perf-input perf-textarea"
             rows="3"
-            placeholder="Ingrese observaciones importantes sobre la perforación..."
+            placeholder="Ingrese observaciones importantes sobre la operación..."
             [(ngModel)]="datosPerforacion.observaciones"
             name="observaciones"
           ></textarea>

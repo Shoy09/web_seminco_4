@@ -1,0 +1,68 @@
+.filtro-fechas {
+  display: flex;
+  align-items: end;
+  gap: 16px;
+  padding: 16px 24px;
+  background: white;
+  border-bottom: 1px solid #ddd;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+.campo input {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.btn-aplicar {
+  padding: 8px 16px;
+  background-color: #1677ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-aplicar:hover {
+  background-color: #145bcc;
+}
+/* //-------------------------------- */
+.graficos-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+  padding: 24px;
+  background-color: #f0f2f5;
+}
+
+/* Cada gráfico ocupa todo su espacio */
+.graficos-container > * {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Forzar misma altura visual */
+.graficos-container > * {
+  min-height: 350px;
+}
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .graficos-container {
+    gap: 16px;
+    padding: 16px;
+  }
+}
+
+/* Móviles */
+@media (max-width: 768px) {
+  .graficos-container {
+    grid-template-columns: 1fr;
+  }
+}

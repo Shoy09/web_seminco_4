@@ -38,21 +38,21 @@ export class OperacionesListScooComponent implements OnInit {
   }
 
   cargarDatos() {
-    this.loading = true;
+  this.loading = true;
 
-    this.operacionesService
-      .getPorJefe(this.tipo, this.jefe_guardia)
-      .subscribe({
-        next: (resp: any) => {
-          this.operaciones = resp.data;
-          this.loading = false;
-        },
-        error: (err) => {
-          console.error(err);
-          this.loading = false;
-        }
-      });
-  }
+  this.operacionesService
+    .getAll(this.tipo) // 🔥 cambio aquí
+    .subscribe({
+      next: (resp: any) => {
+        this.operaciones = resp.data;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.loading = false;
+      }
+    });
+}
 
   // Métodos para el estado de aprobación
   getStatusClass(op: OperacionBase): string {

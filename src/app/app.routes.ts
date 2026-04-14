@@ -29,6 +29,8 @@ import { PrincipalScissorComponent } from './Components/Jefe mina/aprobaciones/S
 import { PrincipalRompebancosComponent } from './Components/Jefe mina/aprobaciones/Rompebancos/principal/principal.component';
 import { PowerBiPublicComponent } from './Components/Dashboard/Pu-PowerBi/power-bi-public/power-bi-public.component';
 import { PrincipalSostenimientoComponent } from './Components/Jefe mina/aprobaciones/enpernador/principal/principal.component';
+import { PrincipalGraficoHorizontalComponent } from './Components/Dashboard/graficos/horizontal/principal-grafico-horizontal/principal-grafico-horizontal.component';
+import { ExplosivosComponent } from './Components/Crear datos/explosivos/explosivos.component';
 
 
 
@@ -78,6 +80,9 @@ export const routes: Routes = [
       { path: 'jefe-mina/anfochanger', component: OperacionesListAnfochaComponent },
       
 { path: 'power-bi', component: PowerBiPublicComponent },
+{ path: 'grafico-horizontal', component: PrincipalGraficoHorizontalComponent },
+
+{ path: 'explosivos', component: ExplosivosComponent },
     ]
   },
 

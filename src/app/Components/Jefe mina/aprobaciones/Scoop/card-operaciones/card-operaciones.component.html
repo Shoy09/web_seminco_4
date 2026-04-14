@@ -6,7 +6,7 @@
     <fieldset class="field">
       <legend>Fecha</legend>
       <div class="input-inner">
-        <input type="date" [(ngModel)]="formValues['fecha']">
+        <input type="date" [(ngModel)]="formValues['fecha']" (ngModelChange)="onChange()">
         <span class="icon-gray"></span>
       </div> 
     </fieldset>
@@ -16,7 +16,7 @@
       <legend>Turno</legend>
       <div class="input-inner">
         <span class="icon-color">🕒</span>
-        <select [(ngModel)]="formValues['turno']">
+        <select [(ngModel)]="formValues['turno']" (ngModelChange)="onChange()">
           <option *ngFor="let opt of getCampo('turno').options" [value]="opt">{{ opt }}</option>
         </select>
       </div>
@@ -27,7 +27,7 @@
       <legend>Equipo</legend>
       <div class="input-inner">
         <span class="icon-color">🚜</span>
-        <select [(ngModel)]="formValues['equipo']">
+        <select [(ngModel)]="formValues['equipo']" (ngModelChange)="onChange()">
           <option *ngFor="let opt of getCampo('equipo').options" [value]="opt">{{ opt }}</option>
         </select>
       </div>
@@ -38,18 +38,30 @@
       <legend>Código</legend>
       <div class="input-inner">
         <span class="icon-color">🔢</span>
-        <select [(ngModel)]="formValues['codigo']">
+        <select [(ngModel)]="formValues['codigo']" (ngModelChange)="onChange()">
           <option *ngFor="let opt of getCampo('codigo').options" [value]="opt">{{ opt }}</option>
         </select>
       </div>
     </fieldset>
+    
+    <!-- Capacidad -->
+    <fieldset class="field">
+      <legend>Capacidad</legend>
+      <div class="input-inner">
+        <span class="icon-color">📊</span>
+        <select [(ngModel)]="formValues['capacidad']" (ngModelChange)="onChange()">
+          <option *ngFor="let opt of getCampo('capacidad').options" [value]="opt">{{ opt }}</option>
+        </select>
+      </div>
+    </fieldset>
+
 
     <!-- Tipo de equipo — fijo aquí -->
     <fieldset class="field checks-box">
       <legend>Tipo de equipo</legend>
       <div class="checks-group">
-        <label class="check-item" *ngFor="let tipo of tiposEquipo">
-          <input type="checkbox" [(ngModel)]="formValues['tiposEquipo'][tipo.value]">
+        <label class="check-item" *ngFor="let tipo of tiposEquipo" >
+          <input type="checkbox" [(ngModel)]="formValues['tiposEquipo'][tipo.value]" (ngModelChange)="onChange()">
           {{ tipo.label }}
         </label>
       </div>
@@ -60,7 +72,7 @@
 <fieldset class="field">
   <legend>Operador</legend>
   <div class="input-inner">
-    <input type="text" placeholder="6666 6666" [(ngModel)]="formValues['operador']">
+    <input type="text" placeholder="6666 6666" [(ngModel)]="formValues['operador']" (ngModelChange)="onChange()">
     <span class="icon-gray">👤</span>
   </div>
 </fieldset>
@@ -70,7 +82,7 @@
       <legend>Jefe Guardia</legend>
       <div class="input-inner">
         <span class="icon-color">👤</span>
-        <select [(ngModel)]="formValues['jefeGuardia']">
+        <select [(ngModel)]="formValues['jefeGuardia']" (ngModelChange)="onChange()">
           <option *ngFor="let opt of getCampo('jefeGuardia').options" [value]="opt">{{ opt }}</option>
         </select>
       </div>
@@ -81,7 +93,7 @@
       <legend>Sección</legend>
       <div class="input-inner">
         <span class="icon-color">🗺️</span>
-        <select [(ngModel)]="formValues['seccion']">
+        <select [(ngModel)]="formValues['seccion']" (ngModelChange)="onChange()">
           <option *ngFor="let opt of getCampo('seccion').options" [value]="opt">{{ opt }}</option>
         </select>
       </div>
