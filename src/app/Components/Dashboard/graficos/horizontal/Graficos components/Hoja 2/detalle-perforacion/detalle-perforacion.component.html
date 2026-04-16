@@ -25,8 +25,8 @@
           <td>{{ formatearNumero(item.tal_repaso, 0) }}</td>
           <td>{{ formatearNumero(item.tal_alivio, 0) }}</td>
           <td>{{ formatearNumero(item.long_barras, 2) }}</td>
-          <td>{{ formatearNumero(item.fr_mhr_hp, 2) }}</td>
-          <td>{{ formatearNumero(item.metros_perforados, 2) }}</td>
+          <td>{{ formatearEntero(item.fr_mhr_hp) }}</td>
+          <td>{{ formatear1Decimal(item.metros_perforados) }}</td>
          </tr>
         <tr *ngIf="displayedData.length === 0">
           <td colspan="9" class="no-data">No hay datos disponibles</td>
@@ -41,8 +41,8 @@
           <td><strong>{{ formatearNumero(totales.tal_repaso, 0) }}</strong></td>
           <td><strong>{{ formatearNumero(totales.tal_alivio, 0) }}</strong></td>
           <td><strong>{{ formatearNumero(totales.long_barras, 2) }}</strong></td>
-          <td><strong>{{ formatearNumero(totales.fr_mhr_hp, 2) }}</strong></td>
-          <td><strong>{{ formatearNumero(totales.metros_perforados, 2) }}</strong></td>
+          <td>{{ formatearEntero(totales.fr_mhr_hp) }}</td>
+<td>{{ formatear1Decimal(totales.metros_perforados) }}</td>
          </tr>
       </tfoot>
     </table>

@@ -34,18 +34,15 @@ export class HorasPrimeraPerforacionComponent implements OnChanges {
       hora: this.formatearHora(item.hora_inicio || item.hora || '')
     }));
   }
+  
+formatearHora(horaStr: string): string {
+  if (!horaStr) return '--:--';
 
-  formatearHora(horaStr: string): string {
-  if (!horaStr) return '--:--:--';
+  const parts = horaStr.split(':');
 
-  const [hora, minuto] = horaStr.split(':');
+  const hora = (parts[0] || '0').padStart(2, '0');
+  const minuto = (parts[1] || '0').padStart(2, '0');
 
-  const horaNum = parseInt(hora, 10);
-  const minutoNum = parseInt(minuto, 10);
-
-  const hora24 = horaNum.toString().padStart(2, '0');
-  const minutoStr = minutoNum.toString().padStart(2, '0');
-
-  return `${hora24}:${minutoStr}:00`;
+  return `${hora}:${minuto}`;
 }
 }

@@ -64,4 +64,9 @@ export class DetalleDisparosComponent implements OnChanges {
     if (isNaN(valor)) return '0';
     return valor.toFixed(decimales);
   }
+
+  formatear1Decimal(valor: number): string {
+  if (isNaN(valor)) return '0.0';
+  return valor.toFixed(1);
+}
 }

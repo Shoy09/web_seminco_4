@@ -120,7 +120,7 @@ export class MetrosPerforadosDisparoComponent implements OnChanges {
           label: {
             show: true,
             position: 'top',
-            formatter: (params: any) => `${params.value.toFixed(2)} m`,
+            formatter: (params: any) => `${Math.round(params.value)} m`,
             fontWeight: 'bold',
             fontSize: 12,
             color: '#2980b9'

@@ -84,23 +84,45 @@ export class DemorasOperativasComponent implements OnChanges {
         containLabel: true
       },
       xAxis: {
-        type: 'category',
-        data: actividades,
-        axisLabel: {
-          rotate: 25,
-          interval: 0,
-          fontSize: 10
-        }
-      },
+  type: 'category',
+  data: actividades,
+  axisLabel: {
+    rotate: 0, // 👈 importante: sin rotación si quieres vertical
+    interval: 0,
+    fontSize: 10,
+    formatter: (value: string) => {
+      const words = value.split(' ');
+
+      // máximo 3 líneas
+      const lines = [];
+      for (let i = 0; i < Math.min(words.length, 4); i++) {
+        lines.push(words[i]);
+      }
+
+      let result = lines.join('\n');
+
+      // si hay más palabras -> puntos suspensivos
+      if (words.length > 3) {
+        result += '\n...';
+      }
+
+      return result;
+    }
+  }
+},
       yAxis: {
-        type: 'value',
-        name: 'Duración (horas)',
-        min: 0,
-        max: maxHoras,
-        axisLabel: {
-          formatter: '{value} h'
-        }
-      },
+  type: 'value',
+  name: 'Duración (horas)',   // 👈 AÑADIR ESTO BIEN CONFIGURADO
+  nameLocation: 'middle',
+  nameGap: 45,
+
+  min: 0,
+  max: maxHoras,
+
+  axisLabel: {
+    formatter: '{value} h'
+  }
+},
       series: [
         {
           name: 'Duración promedio',

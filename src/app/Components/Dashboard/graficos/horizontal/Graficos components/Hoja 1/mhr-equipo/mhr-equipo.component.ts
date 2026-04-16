@@ -121,7 +121,7 @@ export class MhrEquipoComponent implements OnChanges {
           label: {
             show: true,
             position: 'top',
-            formatter: (params: any) => `${params.value.toFixed(2)}`,
+            formatter: (params: any) => `${Math.round(params.value)}`,
             fontWeight: 'bold',
             fontSize: 12,
             color: '#c0392b'

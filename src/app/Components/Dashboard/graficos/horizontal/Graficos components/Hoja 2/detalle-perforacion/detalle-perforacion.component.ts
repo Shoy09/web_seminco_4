@@ -59,4 +59,14 @@ export class DetallePerforacionComponent implements OnChanges {
     if (isNaN(valor)) return '0';
     return valor.toFixed(decimales);
   }
+
+  formatearEntero(valor: number): string {
+  if (isNaN(valor)) return '0';
+  return Math.round(valor).toString();
+}
+
+formatear1Decimal(valor: number): string {
+  if (isNaN(valor)) return '0.0';
+  return valor.toFixed(1);
+}
 }

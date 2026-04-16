@@ -26,7 +26,7 @@
           <td class="numero-cell">{{ formatearNumero(item.tal_repaso, 0) }}</td>
           <td class="numero-cell">{{ formatearNumero(item.tal_alivio, 0) }}</td>
           <td class="numero-cell">{{ formatearNumero(item.pies, 2) }}</td>
-          <td class="numero-cell">{{ formatearNumero(item.metros_perforados, 2) }}</td>
+          <td class="numero-cell">{{ formatear1Decimal(item.metros_perforados) }}</td>
         </tr>
         <tr *ngIf="displayedData.length === 0">
           <td colspan="9" class="no-data">No hay datos disponibles</td>
@@ -40,7 +40,7 @@
           <td class="total-num"><strong>{{ formatearNumero(totales.tal_repaso, 0) }}</strong></td>
           <td class="total-num"><strong>{{ formatearNumero(totales.tal_alivio, 0) }}</strong></td>
           <td class="total-num"><strong>{{ formatearNumero(totales.pies, 2) }}</strong></td>
-          <td class="total-num"><strong>{{ formatearNumero(totales.metros_perforados, 2) }}</strong></td>
+          <td class="total-num"><strong>{{ formatear1Decimal(totales.metros_perforados) }}</strong></td>
         </tr>
       </tfoot>
     </table>
