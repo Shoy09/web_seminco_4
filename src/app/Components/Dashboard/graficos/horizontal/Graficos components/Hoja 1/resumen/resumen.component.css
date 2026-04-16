@@ -18,7 +18,7 @@
 /* FORZAR 2 COLUMNAS SIEMPRE */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Esto fuerza exactamente 2 columnas */
+  grid-template-columns: repeat(4, 1fr); /* 🔥 4 columnas */
   gap: 20px;
 }
 
@@ -79,16 +79,22 @@
   color: #f39c12;
 }
 
-/* Responsive: en pantallas muy pequeñas se apilan */
-@media (max-width: 600px) {
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* Tablets */
+@media (max-width: 1024px) {
   .cards-grid {
-    grid-template-columns: 1fr; /* 1 columna en móviles */
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* Para pantallas medianas asegurar 2 columnas */
-@media (min-width: 601px) and (max-width: 1024px) {
+/* Móviles */
+@media (max-width: 600px) {
   .cards-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 }

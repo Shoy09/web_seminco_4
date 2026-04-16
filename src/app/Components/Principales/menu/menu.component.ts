@@ -28,7 +28,7 @@ export class MenuComponent {
         { title: 'Reporte Indicadores', path: 'power-bi' },
         { title: 'Explosivos', path: 'explosivos-graficos' },
         { title: 'Gráfico Sostenimiento', path: 'grafico-sostenimiento' },
-        // { title: 'Gráfico Horizontal', path: 'grafico-horizontal' },
+         { title: 'Gráfico Horizontal', path: 'grafico-horizontal' },
       ],
     },
     {

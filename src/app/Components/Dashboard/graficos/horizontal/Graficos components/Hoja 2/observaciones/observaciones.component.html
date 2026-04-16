@@ -1,0 +1,27 @@
+<div class="table-container">
+  <h3 class="table-title">OBSERVACIONES</h3>
+  
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Operador</th>
+          <th>Equipo</th>
+          <th>Labor</th>
+          <th>Observaciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of displayedData">
+          <td class="operador-cell">{{ item.operador }}</td>
+          <td class="equipo-cell">{{ item.equipo }}</td>
+          <td class="labor-cell">{{ item.labor }}</td>
+          <td class="observacion-cell">{{ item.observacion }}</td>
+        </tr>
+        <tr *ngIf="displayedData.length === 0">
+          <td colspan="4" class="no-data">No hay observaciones registradas</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

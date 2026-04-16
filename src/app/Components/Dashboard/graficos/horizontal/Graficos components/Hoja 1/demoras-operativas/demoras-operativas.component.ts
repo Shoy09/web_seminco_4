@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import * as echarts from 'echarts/core';
 import { BarChart, LineChart } from 'echarts/charts';
@@ -15,177 +15,127 @@ echarts.use([BarChart, LineChart, TitleComponent, TooltipComponent, GridComponen
   templateUrl: './demoras-operativas.component.html',
   styleUrl: './demoras-operativas.component.css'
 })
-export class DemorasOperativasComponent {
-  // Datos de demoras operativas
-  demorasData = {
-    actividades: [
-      'Ingreso - Salida',
-      'Refrigerio',
-      'Traslado de equipo',
-      'Charla',
-      'Traslado al equipo',
-      'Instalación de equipo'
-    ],
-    horas: [1.6, 0.9, 0.6, 0.6, 0.4, 0.4],
-    porcentajes: [35.6, 56.3, 70.0, 82.5, 91.9, 100.0]
-  };
+export class DemorasOperativasComponent implements OnChanges {
 
-  // Escalar los porcentajes al rango de las horas (0-2)
-  // El máximo de horas es 1.6, usaremos 2 como base
-  getScaledPorcentajes() {
-    const maxHoras = 2; // Escala máxima del eje Y
-    return this.demorasData.porcentajes.map(p => (p / 100) * maxHoras);
+  @Input() data: any[] = [];
+
+  chartOptions: any = {};
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['data']) {
+      //console.log('📊 DEMORAS OPERATIVAS RECIBIDAS:', this.data);
+      this.actualizarGrafico();
+    }
   }
 
-  chartOptions: any = {
-    title: {
-      text: 'Demoras Operativas',
-      left: 'center',
-      top: 5,
-      textStyle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#2c3e50'
-      }
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'shadow'
+  actualizarGrafico(): void {
+    if (!this.data || !this.data.length) return;
+
+    // 🔹 Categorías (Tipo Estado)
+    const actividades = this.data.map(item => item.tipo_estado);
+
+    // 🔹 Duración promedio (FR_Duración_Estado_Prom)
+    const horas = this.data.map(item => Number(item.promedio.toFixed(1)));
+
+    // 🔹 % acumulado
+    const porcentajes = this.data.map(item => item.tiempo_acu_pct * 100);
+
+    // 🔹 Escalar línea al eje Y
+    const maxHoras = Math.max(...horas, 1);
+    const porcentajesEscalados = porcentajes.map(p => (p / 100) * maxHoras);
+
+    this.chartOptions = {
+      title: {
+        text: 'Demoras Operativas',
+        left: 'center',
+        top: 5,
+        textStyle: {
+          fontSize: 16,
+          fontWeight: 'bold',
+          color: '#2c3e50'
+        }
       },
-      formatter: (params: any) => {
-        let result = `<strong>${params[0].axisValue}</strong><br/>`;
-        params.forEach((p: any) => {
-          if (p.seriesName === 'Duración promedio') {
-            result += `${p.marker} ${p.seriesName}: ${p.value} h<br/>`;
-          } else {
-            const porcentajeOriginal = this.demorasData.porcentajes[p.dataIndex];
-            result += `${p.marker} ${p.seriesName}: ${porcentajeOriginal}%<br/>`;
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: (params: any) => {
+          let result = `<strong>${params[0].axisValue}</strong><br/>`;
+          params.forEach((p: any) => {
+            if (p.seriesName === 'Duración promedio') {
+              result += `${p.marker} ${p.seriesName}: ${p.value} h<br/>`;
+            } else {
+              const porcentajeOriginal = porcentajes[p.dataIndex];
+              result += `${p.marker} ${p.seriesName}: ${porcentajeOriginal.toFixed(1)}%<br/>`;
+            }
+          });
+          return result;
+        }
+      },
+      legend: {
+        data: ['Duración promedio', 'Porcentaje acumulado'],
+        left: 'left',
+        top: 40
+      },
+      grid: {
+        left: '12%',
+        right: '8%',
+        top: '18%',
+        bottom: '10%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: actividades,
+        axisLabel: {
+          rotate: 25,
+          interval: 0,
+          fontSize: 10
+        }
+      },
+      yAxis: {
+        type: 'value',
+        name: 'Duración (horas)',
+        min: 0,
+        max: maxHoras,
+        axisLabel: {
+          formatter: '{value} h'
+        }
+      },
+      series: [
+        {
+          name: 'Duración promedio',
+          type: 'bar',
+          data: horas,
+          itemStyle: {
+            borderRadius: [5, 5, 0, 0],
+            color: '#3498db'
+          },
+          label: {
+            show: true,
+            position: 'top',
+            formatter: '{c} h'
           }
-        });
-        return result;
-      }
-    },
-    legend: {
-      data: ['Duración promedio', 'Porcentaje acumulado'],
-      left: 'left',
-      top: 40,
-      itemWidth: 30,
-      itemHeight: 14,
-      textStyle: {
-        fontSize: 12,
-        fontWeight: 'bold'
-      }
-    },
-    grid: {
-      left: '12%',
-      right: '8%',
-      top: '18%',
-      bottom: '8%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'category',
-      data: this.demorasData.actividades,
-      axisLabel: {
-        fontSize: 10,
-        fontWeight: '500',
-        rotate: 25,
-        interval: 0,
-        margin: 10
-      },
-      axisLine: {
-        lineStyle: {
-          color: '#333'
-        }
-      }
-    },
-    yAxis: {
-      type: 'value',
-      name: 'Duración (horas)',
-      nameLocation: 'middle',
-      nameGap: 40,
-      min: 0,
-      max: 2,
-      interval: 0.5,
-      axisLabel: {
-        fontSize: 11,
-        formatter: (value: number) => {
-          if (value === 0) return '0 h';
-          if (value === 0.5) return '0.5 h';
-          if (value === 1) return '1.0 h';
-          if (value === 1.5) return '1.5 h';
-          if (value === 2) return '2.0 h';
-          return `${value} h`;
-        }
-      },
-      splitLine: {
-        lineStyle: {
-          type: 'dashed',
-          color: '#ccc'
-        }
-      }
-    },
-    series: [
-      {
-        name: 'Duración promedio',
-        type: 'bar',
-        data: this.demorasData.horas,
-        itemStyle: {
-          borderRadius: [5, 5, 0, 0],
-          color: {
-            type: 'linear',
-            x: 0, y: 0, x2: 0, y2: 1,
-            colorStops: [
-              { offset: 0, color: '#3498db' },
-              { offset: 1, color: '#2980b9' }
-            ]
+        },
+        {
+          name: 'Porcentaje acumulado',
+          type: 'line',
+          data: porcentajesEscalados,
+          symbol: 'circle',
+          symbolSize: 8,
+          lineStyle: {
+            color: '#e74c3c',
+            width: 3
           },
-          shadowColor: 'rgba(0, 0, 0, 0.2)',
-          shadowBlur: 5
-        },
-        label: {
-          show: true,
-          position: 'top',
-          formatter: (params: any) => `${params.value} h`,
-          fontWeight: 'bold',
-          fontSize: 11,
-          color: '#2980b9'
-        },
-        barWidth: '50%'
-      },
-      {
-        name: 'Porcentaje acumulado',
-        type: 'line',
-        data: this.getScaledPorcentajes(),
-        symbol: 'circle',
-        symbolSize: 8,
-        lineStyle: {
-          color: '#e74c3c',
-          width: 3,
-          type: 'solid'
-        },
-        itemStyle: {
-          color: '#e74c3c',
-          borderColor: '#fff',
-          borderWidth: 2
-        },
-        label: {
-          show: true,
-          position: 'top',
-          formatter: (params: any) => {
-            const porcentajeOriginal = this.demorasData.porcentajes[params.dataIndex];
-            return `${porcentajeOriginal}%`;
+          itemStyle: {
+            color: '#e74c3c'
           },
-          fontWeight: 'bold',
-          fontSize: 11,
-          color: '#e74c3c',
-          backgroundColor: 'rgba(255,255,255,0.8)',
-          padding: [2, 5, 2, 5],
-          borderRadius: 3
-        },
-        smooth: false
-      }
-    ]
-  };
+          label: {
+            show: true,
+            position: 'top',
+            formatter: (params: any) => `${porcentajes[params.dataIndex].toFixed(1)}%`
+          }
+        }
+      ]
+    };
+  }
 }

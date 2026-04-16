@@ -22,32 +22,37 @@ export class AvanceFaseComponent implements OnChanges {
   chartOptions: any = {};
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data'] && this.data?.length) {
+
+  if (changes['data']) {
+    console.log('🔥 data cambió:', this.data);
+
+    if (Array.isArray(this.data)) {
       this.generarGrafico();
     }
   }
+}
 
   // =========================================
-  // 🔥 AGRUPAR POR AREA + SUMAR METROS
+  // 🔥 AGRUPAR POR fase + SUMAR METROS
   // =========================================
   generarGrafico() {
     const agrupado: { [key: string]: number } = {};
 
     this.data.forEach(item => {
-      const area = item.area || 'SIN AREA';
+      const fase = item.fase || 'SIN fase';
       const metros = Number(item.metros) || 0;
 
-      if (!agrupado[area]) {
-        agrupado[area] = 0;
+      if (!agrupado[fase]) {
+        agrupado[fase] = 0;
       }
 
-      agrupado[area] += metros;
+      agrupado[fase] += metros;
     });
 
     // 🔥 convertir a formato echarts
-    const dataGrafico = Object.keys(agrupado).map(area => ({
-      name: area,
-      value: Number(agrupado[area].toFixed(2))
+    const dataGrafico = Object.keys(agrupado).map(fase => ({
+      name: fase,
+      value: Number(agrupado[fase].toFixed(2))
     }));
 
     console.log('🔥 DATA GRAFICO PIE:', dataGrafico);

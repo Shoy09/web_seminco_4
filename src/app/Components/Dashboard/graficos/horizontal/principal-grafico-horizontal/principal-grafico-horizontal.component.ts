@@ -20,6 +20,20 @@ import { OperacionesService } from '../../../../../services/operaciones.service'
 import { OperacionBase } from '../../../../../models/OperacionBase.models';
 import { PlanMensual } from '../../../../../models/plan-mensual.model';
 import { FormsModule } from '@angular/forms';
+import { HistorialInicioPerforacionComponent } from "../Graficos components/Hoja 2/historial-inicio-perforacion/historial-inicio-perforacion.component";
+import { HorasFinPerforacionComponent } from "../Graficos components/Hoja 2/horas-fin-perforacion/horas-fin-perforacion.component";
+import { HistorialUltimoPerforacionComponent } from "../Graficos components/Hoja 2/historial-ultimo-perforacion/historial-ultimo-perforacion.component";
+import { HorasPrimeraPerforacionComponent } from "../Graficos components/Hoja 2/horas-primera-perforacion/horas-primera-perforacion.component";
+import { DetallePerforacionComponent } from "../Graficos components/Hoja 2/detalle-perforacion/detalle-perforacion.component";
+import { MejoresOperadoresComponent } from "../Graficos components/Hoja 2/mejores-operadores/mejores-operadores.component";
+import { ObservacionesComponent } from "../Graficos components/Hoja 2/observaciones/observaciones.component";
+import { GanttDiagramComponent } from "../Graficos components/Hoja 2/gantt-diagram/gantt-diagram.component";
+import { DisparosTipoPerforacionComponent } from "../Graficos components/Hoja 2/disparos-tipo-perforacion/disparos-tipo-perforacion.component";
+import { DetalleDisparosComponent } from "../Graficos components/Hoja 2/detalle-disparos/detalle-disparos.component";
+import { RankingOperadorComponent } from "../Graficos components/Hoja 2/ranking-operador/ranking-operador.component";
+import { TotalHorometrosComponent } from "../Graficos components/Hoja 1/total-horometros/total-horometros.component";
+import { ScatterPlotComponent } from "../Graficos components/Hoja 2/scatter-plot/scatter-plot.component";
+import { ScatterTurnosComponent } from "../Graficos components/Hoja 2/scatter-turnos/scatter-turnos.component";
 
 @Component({
   selector: 'app-principal-grafico-horizontal',
@@ -28,9 +42,19 @@ import { FormsModule } from '@angular/forms';
     DisparosDiaComponent, RendimientoEquipoComponent, DemorasOperativasComponent,
     HorasNoOperativasComponent, HorasDeMantenimientoComponent,
     MetrosPerforadosDisparoComponent, PerforadoEquipoComponent,
-    MhrEquipoComponent, HorometrosJumbosComponent, HorasInicioPerforacionComponent,
-    FormsModule 
-  ],
+    MhrEquipoComponent, HorometrosJumbosComponent,
+    FormsModule,
+    HorasPrimeraPerforacionComponent,
+    DetallePerforacionComponent,
+    MejoresOperadoresComponent,
+    ObservacionesComponent,
+    //GanttDiagramComponent,
+    DisparosTipoPerforacionComponent,
+    DetalleDisparosComponent,
+    RankingOperadorComponent,
+    TotalHorometrosComponent,
+    ScatterTurnosComponent
+],
   templateUrl: './principal-grafico-horizontal.component.html',
   styleUrl: './principal-grafico-horizontal.component.css'
 })
@@ -47,17 +71,54 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   // 🔥 DATA FINAL PARA LOS GRAFICOS
   dataAvanceFase: any[] = [];
   dataDisparosEquipo: any[] = [];  // 👈 NUEVO
+dataDisparosDia: any[] = [];
+dataIndicadoresEquipo: any[] = [];
+dataDemorasOperativas: any[] = [];
+dataHorasNoOperativas: any[] = [];
+dataHorasMantenimiento: any[] = [];
+dataMetrosDisparoFR: any[] = [];
+dataMhrEquipo: any[] = [];
+dataHorometrosJumbos: any[] = [];
+dataPromedioPrimeraPerfDiaFR: any[] = [];
+dataPromedioPrimeraPerfDiaFRPorFecha: any[] = [];
+dataPromedioUltimaPerfDiaFR: any[] = [];
+dataPromedioUltimaPerfDiaFRPorFecha: any[] = [];
+dataProcesoLaborFR: any[] = [];
+dataPercusionConMetrosJumbos: any[] = []; 
+dataFrPorOperadorTurno: any[] = [];
+dataLaborFRDetallado: any[] = [];
+dataTipoPerforacion: any[] = [];
+datadetalleDisparos: any[] = [];
+dataHorasNumericas: any[] = [];
 
   // Variables para el filtro de fechas
   fechaInicio: string = '';
   fechaFin: string = '';
-
+turnoSeleccionado: string = '';
   resumen = {
     conteoEquipos: 0,
     metrosPorDisparo: 0,
     nFrentes: 0,
     totalMetros: 0
   };
+
+  actividadesData = [
+  // J-14
+  { recurso: 'J-14', actividad: 'DES', inicio: 12, fin: 16, label: '' },
+  { recurso: 'J-14', actividad: 'FRENTE COMPLETO', inicio: 7, fin: 12, label: '' },
+  { recurso: 'J-14', actividad: 'FRENTE COMPLETO', inicio: 16, fin: 19, label: '' },
+  
+  // J-19
+  { recurso: 'J-19', actividad: 'FRENTE COMPLETO', inicio: 7, fin: 10, label: '' },
+  { recurso: 'J-19', actividad: 'BREASTING', inicio: 10, fin: 14, label: '' },
+  { recurso: 'J-19', actividad: 'FRENTE COMPLETO', inicio: 14, fin: 19, label: '' },
+  
+  // J-20
+  { recurso: 'J-20', actividad: 'DES', inicio: 7, fin: 9, label: 'bombeo de agua' },
+  { recurso: 'J-20', actividad: 'FRENTE COMPLETO', inicio: 9, fin: 13, label: '' },
+  { recurso: 'J-20', actividad: 'BREASTING', inicio: 13, fin: 17, label: '' },
+  { recurso: 'J-20', actividad: 'FRENTE COMPLETO', inicio: 17, fin: 19, label: '' }
+];
 
   constructor(
     private planMensualService: PlanMensualService,
@@ -67,61 +128,84 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
   ngOnInit(): void {
     this.obtenerUltimaFecha();
+
+     // 🔥 SETEO AUTOMÁTICO
+  const hoy = this.getFechaHoy();
+  this.fechaInicio = hoy;
+  this.fechaFin = hoy;
+  this.turnoSeleccionado = this.getTurnoActual();
+
     this.cargarOperaciones();
   }
+
+  private getTurnoActual(): string {
+  const hora = new Date().getHours();
+
+  // Día: 07:00 - 18:59
+  if (hora >= 7 && hora < 19) {
+    return 'DÍA';
+  }
+
+  // Noche: 19:00 - 06:59
+  return 'NOCHE';
+}
+
+private getFechaHoy(): string {
+  const hoy = new Date();
+  const year = hoy.getFullYear();
+  const month = String(hoy.getMonth() + 1).padStart(2, '0');
+  const day = String(hoy.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
   // =========================================
   // 🔥 OPERACIONES
   // =========================================
   cargarOperaciones() {
-    const tipo = 'tal_horizontal';
+  const tipo = 'tal_horizontal';
 
-    this.operacionesService.getAll(tipo).subscribe({
-      next: (resp) => {
-        this.operacionesOriginal = resp.data;
-        this.operacionesFiltradas = [...this.operacionesOriginal];
-        console.log('🔥 DATA OPERACIONES:', this.operacionesOriginal);
+  this.operacionesService.getAll(tipo).subscribe({
+    next: (resp) => {
+      this.operacionesOriginal = resp.data;
 
-        this.procesarTodo();
-      },
-      error: (err) => {
-        console.error('❌ Error al obtener operaciones:', err);
-      }
-    });
-  }
+      console.log('🔥 DATA OPERACIONES:', this.operacionesOriginal);
+
+      // 🔥 SOLO ESTO
+      this.aplicarFiltro();
+    },
+    error: (err) => {
+      //console.error('❌ Error al obtener operaciones:', err);
+    }
+  });
+}
 
   // =========================================
   // 🔥 FILTRO POR FECHA
   // =========================================
   aplicarFiltro() {
-    if (!this.fechaInicio || !this.fechaFin) {
-      console.warn('⚠️ Debes seleccionar ambas fechas');
-      return;
-    }
+  this.operacionesFiltradas = this.operacionesOriginal.filter(op => {
 
-    this.operacionesFiltradas = this.operacionesOriginal.filter(operacion => {
-      if (!operacion.fecha) return false;
-      const fechaOperacion = operacion.fecha;
-      return fechaOperacion >= this.fechaInicio && fechaOperacion <= this.fechaFin;
-    });
+    // 🔹 FECHA (opcional)
+    if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
+    if (this.fechaFin && op.fecha > this.fechaFin) return false;
 
-    console.log('📅 Filtrando por fechas:', this.fechaInicio, 'a', this.fechaFin);
-    console.log('📊 Operaciones originales:', this.operacionesOriginal.length);
-    console.log('📊 Operaciones filtradas:', this.operacionesFiltradas.length);
+    // 🔹 TURNO (opcional)
+    if (this.turnoSeleccionado && op.turno !== this.turnoSeleccionado) return false;
 
-    this.procesarTodo();
-  }
+    return true;
+  });
+
+  this.procesarTodo();
+}
 
   quitarFiltro() {
-    this.operacionesFiltradas = [...this.operacionesOriginal];
-    this.fechaInicio = '';
-    this.fechaFin = '';
-    
-    console.log('🔄 Filtro eliminado, restaurando datos originales');
-    console.log('📊 Operaciones:', this.operacionesFiltradas.length);
-    
-    this.procesarTodo();
-  }
+  this.operacionesFiltradas = [...this.operacionesOriginal];
+  this.fechaInicio = '';
+  this.fechaFin = '';
+  this.turnoSeleccionado = '';
+
+  this.procesarTodo();
+}
 
   // =========================================
   // 🔥 PLAN
@@ -140,7 +224,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('❌ Error al obtener la última fecha:', error);
+        //console.error('❌ Error al obtener la última fecha:', error);
       }
     });
   }
@@ -154,7 +238,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
         this.procesarTodo();
       },
       error: (error) => {
-        console.error('❌ Error al obtener planes mensuales:', error);
+        //console.error('❌ Error al obtener planes mensuales:', error);
       }
     });
   }
@@ -167,9 +251,29 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
     this.dataAvanceFase = this.procesarAvanceFase();
     this.dataDisparosEquipo = this.procesarDisparosEquipo();  // 👈 NUEVO
+    this.dataDisparosDia = this.procesarDisparosDia();
+     this.dataIndicadoresEquipo = this.procesarIndicadoresEquipo();
+     this.dataDemorasOperativas = this.procesarDemorasOperativas();
+     this.dataHorasNoOperativas = this.procesarHorasNoOperativas();
+     this.dataHorasMantenimiento = this.procesarHorasMantenimiento();
+
+     this.dataMetrosDisparoFR = this.procesarMetrosPorDisparoFR();
+     this.dataMhrEquipo = this.procesarMhrEquipo();
+     this.dataHorometrosJumbos = this.procesarHorometrosJumbos() ;
+     this.dataPromedioPrimeraPerfDiaFR = this.procesarPromedioPrimeraPerfDiaFR();
+     this.dataPromedioPrimeraPerfDiaFRPorFecha = this.procesarPromedioPrimeraPerfDiaFRPorFecha();
+     this.dataPromedioUltimaPerfDiaFR = this.procesarPromedioUltimaPerfDiaFR();
+     this.dataPromedioUltimaPerfDiaFRPorFecha = this.procesarPromedioUltimaPerfDiaFRPorFecha();
+     this.dataProcesoLaborFR = this.procesarLaborFR();
+     this.dataPercusionConMetrosJumbos = this.procesarPercusionConMetrosJumbos();
+     this.dataFrPorOperadorTurno = this.procesarFrPorOperadorTurno();
+     this.dataLaborFRDetallado = this.procesarLaborFRDetallado();
+     this.dataTipoPerforacion = this.procesarTipoPerforacion();
+     this.datadetalleDisparos = this.procesarDataPerforacionDetallada();
+     this.dataHorasNumericas = this.procesarHorasNumericas();
     this.procesarResumen();
 
-    console.log('🔥 DATA DISPAROS EQUIPO:', this.dataDisparosEquipo);
+    //console.log('🔥 DATA DISPAROS EQUIPO:', this.dataDisparosEquipo);
   }
 
   // =========================================
@@ -247,7 +351,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
         }
         
       } catch (error) {
-        console.error('Error procesando operación para disparos equipo:', op.id, error);
+        //console.error('Error procesando operación para disparos equipo:', op.id, error);
       }
     });
 
@@ -255,14 +359,54 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     return Array.from(mapaDisparos.values());
 }
 
+ // =========================================
+  // 🔥 DISPARO POR DIA
+  // =========================================
+
+  procesarDisparosDia() {
+  const mapa = new Map<string, number>();
+
+  this.operacionesFiltradas.forEach(op => {
+    try {
+      const registrosArray = op.registros;
+
+      if (Array.isArray(registrosArray) && registrosArray.length > 0) {
+
+        // 🔥 Fecha directa de la operación
+        const fecha = op.fecha || 'SIN_FECHA';
+
+        // 🔥 Contar frentes completos (igual que antes)
+        const nFrentes = this.contarFrentesCompletos(registrosArray);
+
+        if (mapa.has(fecha)) {
+          mapa.set(fecha, mapa.get(fecha)! + nFrentes);
+        } else {
+          mapa.set(fecha, nFrentes);
+        }
+      }
+
+    } catch (error) {
+      //console.error('Error procesando operación para disparos día:', op.id, error);
+    }
+  });
+
+  // 🔥 Convertir a array
+  return Array.from(mapa.entries()).map(([fecha, n_frentes]) => ({
+    fecha,
+    n_frentes
+  }))
+  // 🔥 OPCIONAL: ordenar por fecha
+  .sort((a, b) => a.fecha.localeCompare(b.fecha));
+}
+
   // =========================================
   // 🔥 CALCULO METROS
   // =========================================
   calcularMetrosPerforados(registrosArray: any[]): number {
-    console.log('=== INICIO calcularMetrosPerforados ===');
+    //console.log('=== INICIO calcularMetrosPerforados ===');
     
     if (!Array.isArray(registrosArray)) {
-      console.error('No es un array, es:', typeof registrosArray, registrosArray);
+      //console.error('No es un array, es:', typeof registrosArray, registrosArray);
       return 0;
     }
     
@@ -275,7 +419,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
       }
       
       registrosProcesados++;
-      console.log(`Procesando registro #${registro.numero} (${registro.codigo}) - Estado: ${registro.estado}`);
+      //console.log(`Procesando registro #${registro.numero} (${registro.codigo}) - Estado: ${registro.estado}`);
       
       try {
         const op = registro.operacion || registro;
@@ -290,62 +434,93 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
         const metrosRegistro = totalTaladros * longBarras * 0.3048;
         
         if (totalTaladros > 0) {
-          console.log(`  ✓ ${totalTaladros} taladros × ${longBarras} pies × 0.3048 = ${metrosRegistro.toFixed(2)} metros`);
+          //console.log(`  ✓ ${totalTaladros} taladros × ${longBarras} pies × 0.3048 = ${metrosRegistro.toFixed(2)} metros`);
           totalMetros += metrosRegistro;
         } else {
-          console.log(`  ✗ Sin taladros para perforar`);
+          //console.log(`  ✗ Sin taladros para perforar`);
         }
         
       } catch (error) {
-        console.error(`Error en registro ${registro.numero}:`, error);
+        //console.error(`Error en registro ${registro.numero}:`, error);
       }
     }
     
-    console.log(`📊 RESULTADO: ${registrosProcesados} registros OPERATIVOS → ${totalMetros.toFixed(2)} metros`);
-    console.log('=== FIN cálculo ===\n');
+    //console.log(`📊 RESULTADO: ${registrosProcesados} registros OPERATIVOS → ${totalMetros.toFixed(2)} metros`);
+    //console.log('=== FIN cálculo ===\n');
     
     return totalMetros;
   }
 
   // =========================================
-  // 🔥 FILTRAR AREAS DEL PLAN
+  // 🔥 FILTRAR FASES DEL PLAN
   // =========================================
-  obtenerAreasValidas(): string[] {
-    return this.planesMensuales
-      .filter(p => p.area)
-      .map(p => p.area as string);
-  }
+private crearMapaPlanes(): Map<string, string> {
+
+  const mapa = new Map<string, string>();
+
+  this.planesMensuales.forEach(p => {
+
+    const labor_fr = this.construirLaborFR(
+      p.tipo_labor,
+      p.labor,
+      p.ala
+    );
+
+    if (!p.fase) return;
+
+    // clave: labor_fr → valor: fase
+    mapa.set(labor_fr, p.fase);
+  });
+
+  return mapa;
+}
 
   // =========================================
   // 🔥 DATA PARA GRAFICO AVANCE FASE
   // =========================================
-  procesarAvanceFase() {
-    const areasValidas = this.obtenerAreasValidas();
+procesarAvanceFase() {
 
-    return this.operacionesFiltradas.map(op => {
-      let area = '';
-      let metros = 0;
+  const mapaFases = this.crearMapaPlanes();
 
-      try {
-        const registrosArray = op.registros;
-        
-        if (Array.isArray(registrosArray) && registrosArray.length > 0) {
-          const primerRegistro = registrosArray[0];
-          area = primerRegistro?.operacion?.area || primerRegistro?.area || '';
-          metros = this.calcularMetrosPerforados(registrosArray);
-        }
-        
-      } catch (error) {
-        console.error('Error procesando registros:', error);
-      }
+  const result: any[] = [];
 
-      return {
-        area,
+  this.operacionesFiltradas.forEach(op => {
+
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    registrosArray.forEach(r => {
+
+      const operacion = r?.operacion || {};
+
+      const labor_fr = this.construirLaborFR(
+        operacion?.tipo_labor,
+        operacion?.labor,
+        operacion?.ala
+      );
+
+      // 🔥 JOIN con plan
+      const fase = mapaFases.get(labor_fr);
+
+      if (!fase) return; // solo los válidos del plan
+
+      const metros = this.calcularMetrosPerforados([r]);
+
+      result.push({
+        modelo_equipo: op.modelo_equipo,
+        fase,
+        labor_fr,
         metros
-      };
-    })
-    .filter(item => areasValidas.includes(item.area));
-  }
+      });
+    });
+  });
+
+  return result;
+}
+
+private construirLaborFR(tipo_labor: any, labor: any, ala: any): string {
+  return `${tipo_labor ?? ''}${labor ?? ''}${ala ?? ''}`.trim();
+}
 
   // =========================================
   // SEGUNDO GRAFICO - RESUMEN
@@ -379,7 +554,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
         }
         
       } catch (error) {
-        console.error('Error procesando operación:', op.id, error);
+        //console.error('Error procesando operación:', op.id, error);
       }
     });
 
@@ -392,6 +567,1379 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
       totalMetros: Number(totalMetros.toFixed(2))
     };
     
-    console.log('📊 RESUMEN FINAL:', this.resumen);
+    //console.log('📊 RESUMEN FINAL:', this.resumen);
   }
+
+  //=========================================
+  // 🔥 GRAFICO 5
+  // =========================================
+
+procesarIndicadoresEquipo() {
+  const mapa = new Map<string, any>();
+
+  this.operacionesFiltradas.forEach(op => {
+    try {
+      const registros = op.registros;
+      if (!Array.isArray(registros)) return;
+
+      const key = op.modelo_equipo || 'SIN_EQUIPO';
+
+      const mantenimiento = this.calcularDuracionPorEstado(registros, 'MANTENIMIENTO');
+      const demoras206 = this.calcularDuracionPorEstado(registros, 'DEMORA', '206');
+
+      const horasMantenimiento = mantenimiento + demoras206;
+
+      const horasTrabajadas = this.calcularHorasTrabajadas(op);
+
+      if (mapa.has(key)) {
+        const acc = mapa.get(key);
+
+        acc.n_operaciones += 1;
+        acc.horas_mantenimiento += horasMantenimiento;
+        acc.horas_trabajadas += horasTrabajadas;
+
+      } else {
+        mapa.set(key, {
+          modelo_equipo: key,
+          seccion: op.seccion || 'SIN_SECCION',
+
+          n_operaciones: 1,
+          horas_mantenimiento: horasMantenimiento,
+          horas_trabajadas: horasTrabajadas
+        });
+      }
+
+    } catch (error) {}
+  });
+
+  return Array.from(mapa.values()).map(item => {
+
+    const horasProgramadas = item.n_operaciones * 10;
+
+    // ✅ DM_FR (como DAX)
+    const horasMantenimientoAjustado_dm =
+      item.horas_mantenimiento === 0
+        ? 0.5 * item.n_operaciones
+        : item.horas_mantenimiento;
+
+    const dm_fr =
+      horasProgramadas > 0
+        ? (horasProgramadas - horasMantenimientoAjustado_dm) / horasProgramadas
+        : 0;
+
+    // ✅ UTI_FR (como DAX)
+    const horasMantenimientoAjustado_uti =
+      item.horas_mantenimiento === 0
+        ? 0.5
+        : item.horas_mantenimiento;
+
+    const denominador = horasProgramadas - horasMantenimientoAjustado_uti;
+
+    const uti_fr =
+      denominador > 0
+        ? item.horas_trabajadas / denominador
+        : 0;
+
+    return {
+      modelo_equipo: item.modelo_equipo,
+      seccion: item.seccion,
+
+      DM_FR: Number(dm_fr.toFixed(3)),
+      UTI_FR: Number(uti_fr.toFixed(3))
+    };
+  });
+}
+
+calcularDuracionHoras(horaInicio: string, horaFinal: string): number {
+  if (!horaInicio || !horaFinal) return 0;
+
+  const [h1, m1] = horaInicio.split(':').map(Number);
+  const [h2, m2] = horaFinal.split(':').map(Number);
+
+  const inicio = h1 * 60 + m1;
+  const fin = h2 * 60 + m2;
+
+  return (fin - inicio) / 60; // en horas
+}
+
+calcularDuracionPorEstado(registros: any[], estadoBuscado: string, codigo?: string): number {
+  let total = 0;
+
+  for (const r of registros) {
+    if (r.estado === estadoBuscado) {
+      if (codigo && r.codigo !== codigo) continue;
+
+      total += this.calcularDuracionHoras(r.hora_inicio, r.hora_final);
+    }
+  }
+
+  return total;
+}
+
+calcularHorasTrabajadas(op: any): number {
+  const diesel = op.horometros?.diesel;
+  const electrico = op.horometros?.electrico;
+
+  const difDiesel = diesel ? (diesel.final - diesel.inicio) : 0;
+  const difElectrico = electrico ? (electrico.final - electrico.inicio) : 0;
+
+  return difDiesel + difElectrico;
+}
+
+
+// =========================================
+// Grafico 6
+// =========================================
+procesarDemorasOperativas() {
+  const mapa = new Map<string, any>();
+  const tiposEstados = this.getTiposEstadosMap();
+  const equiposUnicos = new Set<string>();
+
+  // 🔹 RECORRER DATA
+  this.operacionesFiltradas.forEach(op => {
+    const registros = op.registros;
+    if (!Array.isArray(registros)) return;
+
+    // ✅ DISTINCTCOUNT (como DAX: TODOS los equipos)
+    if (op.modelo_equipo) {
+      equiposUnicos.add(op.modelo_equipo);
+    }
+
+    registros.forEach(r => {
+      const tipo = tiposEstados[r.codigo];
+      if (!tipo) return;
+
+      const duracion = this.calcularDuracionHoras(r.hora_inicio, r.hora_final);
+
+      if (!duracion || duracion <= 0) return;
+
+      if (mapa.has(tipo)) {
+        mapa.get(tipo).horas += duracion;
+      } else {
+        mapa.set(tipo, {
+          tipo_estado: tipo,
+          horas: duracion
+        });
+      }
+    });
+  });
+
+  const nEquipos = equiposUnicos.size;
+
+  // 🔹 BASE (equivalente a SUMX + DIVIDE)
+  let resultado = Array.from(mapa.values())
+    .filter(x => x.horas > 0)
+    .map(x => ({
+      tipo_estado: x.tipo_estado,
+      horas: x.horas,
+      promedio: nEquipos > 0 ? x.horas / nEquipos : 0
+    }));
+
+  // 🔥 ORDEN DESC (RANKX DESC)
+  resultado.sort((a, b) => b.horas - a.horas);
+
+  // 🔥 RANK DENSE (igual que DAX)
+  let rank = 1;
+  resultado = resultado.map((item, index, arr) => {
+    if (index > 0 && item.horas < arr[index - 1].horas) {
+      rank = index + 1;
+    }
+
+    return {
+      ...item,
+      rank
+    };
+  });
+
+  // 🔥 ACUMULADO (Tiempo_Acu_FR)
+  let acumulado = 0;
+  const totalHoras = resultado.reduce((sum, x) => sum + x.horas, 0);
+
+  resultado = resultado.map(item => {
+    acumulado += item.horas;
+
+    return {
+      ...item,
+      tiempo_acu: acumulado,
+      tiempo_acu_pct: totalHoras > 0 ? acumulado / totalHoras : 0
+    };
+  });
+
+  return resultado;
+}
+
+getTiposEstadosMap(): Record<string, string> {
+  return {
+    "201": "Falta de Operador",
+    "202": "MpL - mantenimiento preventivo de labor",
+    "203": "Ingreso - Salida",
+    "204": "Charla",
+    "205": "Traslado al equipo",
+    "207": "Refrigerio",
+    "208": "Traslado de equipo",
+    "211": "Instalación de equipo",
+  };
+}
+
+// =========================================
+//GRAFICO 7
+// =========================================
+
+procesarHorasNoOperativas() {
+  const mapa = new Map<string, any>();
+  const tiposEstados = this.getTiposEstadosMapNoOperativa();
+  const equiposUnicos = new Set<string>();
+
+  // 🔹 RECORRER DATA
+  this.operacionesFiltradas.forEach(op => {
+    const registros = op.registros;
+    if (!Array.isArray(registros)) return;
+
+    // ✅ DISTINCTCOUNT (como DAX: TODOS los equipos)
+    if (op.modelo_equipo) {
+      equiposUnicos.add(op.modelo_equipo);
+    }
+
+    registros.forEach(r => {
+      const tipo = tiposEstados[r.codigo];
+      if (!tipo) return;
+
+      const duracion = this.calcularDuracionHoras(r.hora_inicio, r.hora_final);
+
+      if (!duracion || duracion <= 0) return;
+
+      if (mapa.has(tipo)) {
+        mapa.get(tipo).horas += duracion;
+      } else {
+        mapa.set(tipo, {
+          tipo_estado: tipo,
+          horas: duracion
+        });
+      }
+    });
+  });
+
+  const nEquipos = equiposUnicos.size;
+
+  // 🔹 BASE (equivalente a SUMX + DIVIDE)
+  let resultado = Array.from(mapa.values())
+    .filter(x => x.horas > 0)
+    .map(x => ({
+      tipo_estado: x.tipo_estado,
+      horas: x.horas,
+      promedio: nEquipos > 0 ? x.horas / nEquipos : 0
+    }));
+
+  // 🔥 ORDEN DESC (RANKX DESC)
+  resultado.sort((a, b) => b.horas - a.horas);
+
+  // 🔥 RANK DENSE (igual que DAX)
+  let rank = 1;
+  resultado = resultado.map((item, index, arr) => {
+    if (index > 0 && item.horas < arr[index - 1].horas) {
+      rank = index + 1;
+    }
+
+    return {
+      ...item,
+      rank
+    };
+  });
+
+  // 🔥 ACUMULADO (Tiempo_Acu_FR)
+  let acumulado = 0;
+  const totalHoras = resultado.reduce((sum, x) => sum + x.horas, 0);
+
+  resultado = resultado.map(item => {
+    acumulado += item.horas;
+
+    return {
+      ...item,
+      tiempo_acu: acumulado,
+      tiempo_acu_pct: totalHoras > 0 ? acumulado / totalHoras : 0
+    };
+  });
+
+  return resultado;
+}
+
+getTiposEstadosMapNoOperativa(): Record<string, string> {
+  return {
+    "209": "Falta de labor",
+    "210": "Falta de servicios (energía - agua - aire)",
+    "212": "Apoyo en servicios mineros",
+    "213": "Falta de aceros",
+    "214": "Falta de ventilación",
+    "215": "Trabajos varios",
+    "216": "Accidente de equipo",
+    "217": "Recuperación de aceros",
+    
+  };
+}
+
+// =========================================
+//GRAFICO 8
+// =========================================
+
+procesarHorasMantenimiento() {
+  const mapa = new Map<string, any>();
+  const tiposEstados = this.getTiposEstadosMantenimiento();
+  const equiposUnicos = new Set<string>();
+
+  // 🔹 RECORRER DATA
+  this.operacionesFiltradas.forEach(op => {
+    const registros = op.registros;
+    if (!Array.isArray(registros)) return;
+
+    // ✅ DISTINCTCOUNT (como DAX: TODOS los equipos)
+    if (op.modelo_equipo) {
+      equiposUnicos.add(op.modelo_equipo);
+    }
+
+    registros.forEach(r => {
+      const tipo = tiposEstados[r.codigo];
+      if (!tipo) return;
+
+      const duracion = this.calcularDuracionHoras(r.hora_inicio, r.hora_final);
+
+      if (!duracion || duracion <= 0) return;
+
+      if (mapa.has(tipo)) {
+        mapa.get(tipo).horas += duracion;
+      } else {
+        mapa.set(tipo, {
+          tipo_estado: tipo,
+          horas: duracion
+        });
+      }
+    });
+  });
+
+  const nEquipos = equiposUnicos.size;
+
+  // 🔹 BASE (equivalente a SUMX + DIVIDE)
+  let resultado = Array.from(mapa.values())
+    .filter(x => x.horas > 0)
+    .map(x => ({
+      tipo_estado: x.tipo_estado,
+      horas: x.horas,
+      promedio: nEquipos > 0 ? x.horas / nEquipos : 0
+    }));
+
+  // 🔥 ORDEN DESC (RANKX DESC)
+  resultado.sort((a, b) => b.horas - a.horas);
+
+  // 🔥 RANK DENSE (igual que DAX)
+  let rank = 1;
+  resultado = resultado.map((item, index, arr) => {
+    if (index > 0 && item.horas < arr[index - 1].horas) {
+      rank = index + 1;
+    }
+
+    return {
+      ...item,
+      rank
+    };
+  });
+
+  // 🔥 ACUMULADO (Tiempo_Acu_FR)
+  let acumulado = 0;
+  const totalHoras = resultado.reduce((sum, x) => sum + x.horas, 0);
+
+  resultado = resultado.map(item => {
+    acumulado += item.horas;
+
+    return {
+      ...item,
+      tiempo_acu: acumulado,
+      tiempo_acu_pct: totalHoras > 0 ? acumulado / totalHoras : 0
+    };
+  });
+
+  return resultado;
+}
+
+getTiposEstadosMantenimiento(): Record<string, string> {
+  return {
+    "206": "Inspección de equipo",
+    "301": "Mp inicial/final",
+    "302": "Mantenimiento programado",
+    "303": "Mantenimiento correctivo",
+  };
+}
+
+// =========================================
+//GRAFICO 9
+// =========================================
+procesarMetrosPorDisparoFR() {
+  const mapa = new Map<string, {
+    modelo_equipo: string,
+    seccion: string,
+    n_frentes: number,
+    metros_perforados: number,
+    m_disparo_fr: number
+  }>();
+
+  this.operacionesFiltradas.forEach(op => {
+    try {
+      const registrosArray = op.registros;
+
+      if (!Array.isArray(registrosArray) || registrosArray.length === 0) return;
+
+      const key = `${op.modelo_equipo || 'SIN_EQUIPO'}-${op.seccion || 'SIN_SECCION'}`;
+
+      const nFrentes = this.contarFrentesCompletos(registrosArray);
+      const metros = this.calcularMetrosPerforados(registrosArray);
+
+      if (mapa.has(key)) {
+        const existing = mapa.get(key)!;
+
+        existing.n_frentes += nFrentes;
+        existing.metros_perforados += metros;
+
+      } else {
+        mapa.set(key, {
+          modelo_equipo: op.modelo_equipo || 'SIN_EQUIPO',
+          seccion: op.seccion || 'SIN_SECCION',
+          n_frentes: nFrentes,
+          metros_perforados: metros,
+          m_disparo_fr: 0 // se calcula después
+        });
+      }
+
+    } catch (error) {}
+  });
+
+  // 🔥 cálculo FINAL estilo DAX
+  for (const item of mapa.values()) {
+    item.m_disparo_fr =
+      item.n_frentes > 0
+        ? item.metros_perforados / item.n_frentes
+        : 0;
+  }
+
+  return Array.from(mapa.values());
+}
+
+// =========================================
+// GRAFICO 10 
+// =========================================
+
+procesarMhrEquipo() {
+  const mapa = new Map<string, any>();
+
+  this.operacionesFiltradas.forEach(op => {
+
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    const key = op.modelo_equipo || 'SIN_EQUIPO';
+
+
+    const operativos = registrosArray.filter(r => r.estado === 'OPERATIVO');
+
+    const metros = this.calcularMetrosPerforados(operativos);
+
+    // 🔥 FIX AQUÍ
+    const perc = (op as any)?.horometros?.percusion;
+
+
+    const inicio = Number(perc?.inicio);
+    const final = Number(perc?.final);
+
+    let difPercusion = 0;
+
+    if (!isNaN(inicio) && !isNaN(final)) {
+      difPercusion = final - inicio;
+    }
+
+
+    if (!mapa.has(key)) {
+      mapa.set(key, {
+        modelo_equipo: key,
+        metros_perforados: 0,
+        dif_percusion: 0,
+        fr_mhr_hp: 0
+      });
+    }
+
+    const item = mapa.get(key)!;
+
+    item.metros_perforados += metros;
+    item.dif_percusion += difPercusion;
+  });
+
+  for (const item of mapa.values()) {
+
+    item.fr_mhr_hp =
+      item.dif_percusion > 0
+        ? item.metros_perforados / item.dif_percusion
+        : 0;
+  }
+
+  return Array.from(mapa.values());
+}
+
+// =========================================
+// 🔥 GRAFICO 11
+// =========================================
+
+procesarHorometrosJumbos() {
+  const mapa = new Map<string, any>();
+
+  this.operacionesFiltradas.forEach(op => {
+
+    const key = op.modelo_equipo || 'SIN_EQUIPO';
+
+    const horo = (op as any)?.horometros;
+
+    const diesel = horo?.diesel;
+    const electrico = horo?.electrico;
+    const percusion = horo?.percusion;
+
+    const difDiesel =
+      !isNaN(Number(diesel?.inicio)) && !isNaN(Number(diesel?.final))
+        ? Number(diesel.final) - Number(diesel.inicio)
+        : 0;
+
+    const difElectrico =
+      !isNaN(Number(electrico?.inicio)) && !isNaN(Number(electrico?.final))
+        ? Number(electrico.final) - Number(electrico.inicio)
+        : 0;
+
+    const difPercusion =
+      !isNaN(Number(percusion?.inicio)) && !isNaN(Number(percusion?.final))
+        ? Number(percusion.final) - Number(percusion.inicio)
+        : 0;
+
+    if (!mapa.has(key)) {
+      mapa.set(key, {
+        modelo_equipo: key,
+        diesel: 0,
+        electrico: 0,
+        percusion: 0
+      });
+    }
+
+    const item = mapa.get(key)!;
+
+    item.diesel += difDiesel;
+    item.electrico += difElectrico;
+    item.percusion += difPercusion;
+  });
+
+  const result = Array.from(mapa.values());
+
+  return result;
+}
+
+// =========================================
+// GRAFICO 12
+// =========================================
+
+procesarPromedioPrimeraPerfDiaFR() {
+
+  const mapa = new Map<string, Map<string, number>>();
+
+  this.operacionesFiltradas.forEach(op => {
+
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    const key = op.modelo_equipo || 'SIN_EQUIPO';
+    const fecha = op.fecha;
+
+    const operativos = registrosArray.filter(r => r.estado === 'OPERATIVO');
+
+    let primerasHorasDelDia: number[] = [];
+
+    operativos.forEach(r => {
+
+      const hora = r?.hora_inicio;
+      if (!hora) return;
+
+      const [h, m] = hora.split(':').map(Number);
+      const horaDecimal = h + (m / 60);
+
+      // 🔥 SOLO 07–19
+      if (horaDecimal < 7 || horaDecimal >= 19) return;
+
+      primerasHorasDelDia.push(horaDecimal);
+    });
+
+    if (primerasHorasDelDia.length === 0) return;
+
+    const primeraHora = Math.min(...primerasHorasDelDia);
+
+    if (!mapa.has(key)) {
+      mapa.set(key, new Map());
+    }
+
+    const mapaFechas = mapa.get(key)!;
+
+    // solo 1 valor por día
+    mapaFechas.set(fecha, primeraHora);
+  });
+
+  // =========================
+  // 🔥 PROMEDIO FINAL
+  // =========================
+  const result: any[] = [];
+
+  for (const [equipo, fechasMap] of mapa.entries()) {
+
+    let suma = 0;
+    let dias = 0;
+
+    fechasMap.forEach(hora => {
+      suma += hora;
+      dias++;
+    });
+
+    const promedio = dias > 0 ? suma / dias : 0;
+
+    //console.log(`\n🔥 ${equipo}`);
+    //console.log(`días:`, dias);
+    //console.log(`promedio primera perf:`, promedio);
+
+    result.push({
+      modelo_equipo: equipo,
+      promedio_primera_perf_dia_fr: promedio
+    });
+  }
+
+  return result;
+}
+
+// =========================================
+//Grafico 13
+// =========================================
+
+procesarPromedioPrimeraPerfDiaFRPorFecha() {
+
+  const mapa = new Map<string, Map<string, number>>();
+
+  this.operacionesFiltradas.forEach(op => {
+
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    const key = op.modelo_equipo || 'SIN_EQUIPO';
+    const fecha = op.fecha || 'SIN_FECHA';
+
+    const operativos = registrosArray.filter(r => r.estado === 'OPERATIVO');
+
+    let primerasHorasDelDia: number[] = [];
+
+    operativos.forEach(r => {
+
+      const hora = r?.hora_inicio;
+      if (!hora) return;
+
+      const [h, m] = hora.split(':').map(Number);
+      const horaDecimal = h + (m / 60);
+
+      // 🔥 SOLO 07–19
+      if (horaDecimal < 7 || horaDecimal >= 19) return;
+
+      primerasHorasDelDia.push(horaDecimal);
+    });
+
+    if (primerasHorasDelDia.length === 0) return;
+
+    const primeraHora = Math.min(...primerasHorasDelDia);
+
+    // =========================
+    // 🔥 MAPA POR EQUIPO
+    // =========================
+    if (!mapa.has(key)) {
+      mapa.set(key, new Map());
+    }
+
+    const mapaFechas = mapa.get(key)!;
+
+    // 🔥 1 valor por equipo por fecha
+    mapaFechas.set(fecha, primeraHora);
+  });
+
+  // =========================
+  // 🔥 FORMATO PARA GRÁFICO
+  // =========================
+  const result: any[] = [];
+
+  for (const [equipo, fechasMap] of mapa.entries()) {
+
+    fechasMap.forEach((hora, fecha) => {
+
+      result.push({
+        fecha,
+        modelo_equipo: equipo,
+        promedio_primera_perf_dia_fr: hora
+      });
+
+    });
+  }
+
+  // 🔥 ordenar por fecha (importante para eje X)
+  return result.sort((a, b) => a.fecha.localeCompare(b.fecha));
+}
+
+// =========================================
+// Grafico 14
+// =========================================
+
+procesarPromedioUltimaPerfDiaFR() {
+
+  const mapa = new Map<string, Map<string, number>>();
+
+  this.operacionesFiltradas.forEach(op => {
+
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    const key = op.modelo_equipo || 'SIN_EQUIPO';
+    const fecha = op.fecha || 'SIN_FECHA';
+
+    const operativos = registrosArray.filter(r => r.estado === 'OPERATIVO');
+
+    let horasValidas: number[] = [];
+
+    operativos.forEach(r => {
+
+      const hora = r?.hora_inicio;
+      if (!hora) return;
+
+      const [h, m] = hora.split(':').map(Number);
+      const horaDecimal = h + (m / 60);
+
+      // 🔥 solo 07–19
+      if (horaDecimal < 7 || horaDecimal >= 19) return;
+
+      horasValidas.push(horaDecimal);
+    });
+
+    if (horasValidas.length === 0) return;
+
+    // 🔥 AQUÍ CAMBIA LA LÓGICA
+    const ultimaHora = Math.max(...horasValidas);
+
+    if (!mapa.has(key)) {
+      mapa.set(key, new Map());
+    }
+
+    const mapaFechas = mapa.get(key)!;
+
+    // 1 valor por día
+    mapaFechas.set(fecha, ultimaHora);
+  });
+
+  // =========================
+  // 🔥 PROMEDIO FINAL
+  // =========================
+  const result: any[] = [];
+
+  for (const [equipo, fechasMap] of mapa.entries()) {
+
+    let suma = 0;
+    let dias = 0;
+
+    fechasMap.forEach(hora => {
+      suma += hora;
+      dias++;
+    });
+
+    const promedio = dias > 0 ? suma / dias : 0;
+
+    // console.log(`\n🔥 EQUIPO: ${equipo}`);
+    // console.log(`días:`, dias);
+    // console.log(`promedio última perf:`, promedio);
+
+    result.push({
+      modelo_equipo: equipo,
+      promedio_ultima_perf_dia_fr: promedio
+    });
+  }
+
+  return result;
+}
+
+// =========================================
+// Grafico 15
+// =========================================
+
+procesarPromedioUltimaPerfDiaFRPorFecha() {
+
+  const mapa = new Map<string, Map<string, number>>();
+
+  this.operacionesFiltradas.forEach(op => {
+
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    const key = op.modelo_equipo || 'SIN_EQUIPO';
+    const fecha = op.fecha || 'SIN_FECHA';
+
+    const operativos = registrosArray.filter(r => r.estado === 'OPERATIVO');
+
+    let horasValidas: number[] = [];
+
+    operativos.forEach(r => {
+
+      const hora = r?.hora_inicio;
+      if (!hora) return;
+
+      const [h, m] = hora.split(':').map(Number);
+      const horaDecimal = h + (m / 60);
+
+      // 🔥 SOLO 07–19
+      if (horaDecimal < 7 || horaDecimal >= 19) return;
+
+      horasValidas.push(horaDecimal);
+    });
+
+    if (horasValidas.length === 0) return;
+
+    // 🔥 CAMBIO CLAVE: última perforación
+    const ultimaHora = Math.max(...horasValidas);
+
+    if (!mapa.has(key)) {
+      mapa.set(key, new Map());
+    }
+
+    const mapaFechas = mapa.get(key)!;
+
+    // 1 valor por equipo por fecha
+    mapaFechas.set(fecha, ultimaHora);
+  });
+
+  // =========================
+  // 🔥 FORMATO PARA GRÁFICO
+  // =========================
+  const result: any[] = [];
+
+  for (const [equipo, fechasMap] of mapa.entries()) {
+
+    fechasMap.forEach((hora, fecha) => {
+
+      result.push({
+        fecha,
+        modelo_equipo: equipo,
+        promedio_ultima_perf_dia_fr: hora
+      });
+
+    });
+  }
+
+  return result.sort((a, b) => a.fecha.localeCompare(b.fecha));
+}
+
+//=========================================
+// 🔥 GRAFICO 16
+//=========================================
+
+procesarLaborFR() {
+
+  const mapa = new Map<string, Map<string, any>>();
+
+  this.operacionesFiltradas.forEach(op => {
+
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    const modelo = op.modelo_equipo || 'SIN_EQUIPO';
+    const fecha = op.fecha || 'SIN_FECHA';
+
+    const operativos = registrosArray.filter(r => r.estado === 'OPERATIVO');
+
+    let mejorRegistro: any = null;
+    let mejorHora = Infinity;
+
+    operativos.forEach(r => {
+
+      const hora = r?.hora_inicio;
+      if (!hora) return;
+
+      const [h, m] = hora.split(':').map(Number);
+      const horaDecimal = h + (m / 60);
+
+      // 🔥 buscamos la MÁS TEMPRANA
+      if (horaDecimal < mejorHora) {
+        mejorHora = horaDecimal;
+        mejorRegistro = r;
+      }
+    });
+
+    if (!mejorRegistro) return;
+
+    const operacion = mejorRegistro?.operacion || mejorRegistro;
+
+    const tipoLabor = operacion?.tipo_labor || '';
+    const labor = operacion?.labor || '';
+    const ala = operacion?.ala || '';
+
+    const labor_fr = `${tipoLabor}${labor}${ala}`;
+
+    // =========================
+    // MAPA por modelo + fecha
+    // =========================
+    const key = modelo;
+
+    if (!mapa.has(key)) {
+      mapa.set(key, new Map());
+    }
+
+    const mapaFechas = mapa.get(key)!;
+
+    // solo 1 registro por día (primera labor)
+    mapaFechas.set(fecha, {
+      modelo_equipo: modelo,
+      fecha,
+      hora_inicio: mejorRegistro.hora_inicio,
+      labor_fr
+    });
+  });
+
+  // =========================
+  // OUTPUT FINAL
+  // =========================
+  const result: any[] = [];
+
+  for (const [, fechasMap] of mapa.entries()) {
+    fechasMap.forEach(value => {
+      result.push(value);
+    });
+  }
+
+  return result.sort((a, b) => a.fecha.localeCompare(b.fecha));
+}
+
+// =========================================
+// Grafico 17
+// =========================================
+procesarPercusionConMetrosJumbos() {
+
+  const mapa = new Map<string, any>();
+
+  this.operacionesFiltradas.forEach(op => {
+
+    const key = op.modelo_equipo || 'SIN_EQUIPO';
+    const registrosArray = op.registros;
+
+    // =========================
+    // 🔥 METROS PERFORADOS
+    // =========================
+    const metros = Array.isArray(registrosArray)
+      ? this.calcularMetrosPerforados(registrosArray)
+      : 0;
+
+    // =========================
+    // 🔥 PERCUSIÓN
+    // =========================
+    const horo = (op as any)?.horometros;
+    const percusion = horo?.percusion;
+
+    const difPercusion =
+      !isNaN(Number(percusion?.inicio)) && !isNaN(Number(percusion?.final))
+        ? Number(percusion.final) - Number(percusion.inicio)
+        : 0;
+
+    // =========================
+    // 🔥 MAPA INIT
+    // =========================
+    if (!mapa.has(key)) {
+      mapa.set(key, {
+        modelo_equipo: key,
+
+        metros_perforados: 0,
+        percusion: 0,
+
+        // 🔥 acumuladores
+        sum_long_barras: 0,
+        count_long_barras: 0,
+
+        tal_alivio: 0,
+        tal_prod: 0,
+        tal_repaso: 0,
+        tal_rimados: 0,
+
+        // 🔥 resultados finales
+        long_barras: 0,
+        fr_mhr_hp: 0
+      });
+    }
+
+    const item = mapa.get(key)!;
+
+    item.metros_perforados += metros;
+    item.percusion += difPercusion;
+
+    // =========================
+    // 🔥 RECORRER REGISTROS
+    // =========================
+    if (Array.isArray(registrosArray)) {
+
+      registrosArray.forEach(r => {
+
+        const opData = r?.operacion || r;
+
+        const lb = Number(opData?.long_barras);
+
+        // ✅ SOLO valores válidos
+        if (!isNaN(lb) && lb > 0) {
+          item.sum_long_barras += lb;
+          item.count_long_barras += 1;
+        }
+
+        item.tal_alivio += Number(opData?.tal_alivio) || 0;
+        item.tal_prod += Number(opData?.tal_prod) || 0;
+        item.tal_repaso += Number(opData?.tal_repaso) || 0;
+        item.tal_rimados += Number(opData?.tal_rimados) || 0;
+      });
+    }
+  });
+
+  // =========================
+  // 🔥 CÁLCULOS FINALES
+  // =========================
+  for (const item of mapa.values()) {
+
+    // 🔥 PROMEDIO LONG_BARRAS
+    item.long_barras =
+      item.count_long_barras > 0
+        ? item.sum_long_barras / item.count_long_barras
+        : 0;
+
+    // 🔥 KPI FR
+    item.fr_mhr_hp =
+      item.percusion > 0
+        ? item.metros_perforados / item.percusion
+        : 0;
+
+    // 🔥 limpiar basura técnica
+    delete item.sum_long_barras;
+    delete item.count_long_barras;
+  }
+
+  return Array.from(mapa.values());
+}
+
+// =========================================
+// GRAFICO 18
+// =========================================
+
+procesarFrPorOperadorTurno() {
+
+  const mapa = new Map<string, any>();
+
+  this.operacionesFiltradas.forEach(op => {
+
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    const operador = op.operador || 'SIN_OPERADOR';
+    const turno = op.turno || 'SIN_TURNO';
+
+    const key = `${operador}-${turno}`;
+
+    // =========================
+    // 🔥 METROS PERFORADOS
+    // =========================
+    const metros = this.calcularMetrosPerforados(registrosArray);
+
+    // =========================
+    // 🔥 PERCUSIÓN
+    // =========================
+    const horo = (op as any)?.horometros;
+    const percusion = horo?.percusion;
+
+    const difPercusion =
+      !isNaN(Number(percusion?.inicio)) && !isNaN(Number(percusion?.final))
+        ? Number(percusion.final) - Number(percusion.inicio)
+        : 0;
+
+    // =========================
+    // 🔥 MAPA
+    // =========================
+    if (!mapa.has(key)) {
+      mapa.set(key, {
+        operador,
+        turno,
+        metros_perforados: 0,
+        dif_percusion: 0,
+        fr_mhr_hp: 0
+      });
+    }
+
+    const item = mapa.get(key)!;
+
+    item.metros_perforados += metros;
+    item.dif_percusion += difPercusion;
+  });
+
+  // =========================
+  // 🔥 FR FINAL (tipo DAX)
+  // =========================
+  for (const item of mapa.values()) {
+
+    item.fr_mhr_hp =
+      item.dif_percusion > 0
+        ? item.metros_perforados / item.dif_percusion
+        : 0;
+  }
+
+  return Array.from(mapa.values());
+}
+
+// =========================================
+// GRAFICO 19
+// =========================================
+
+procesarLaborFRDetallado() {
+
+  const mapa = new Map<string, any>();
+
+  this.operacionesFiltradas.forEach(op => {
+
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    const modelo = op.modelo_equipo || 'SIN_EQUIPO';
+    const operador = op.operador || 'SIN_OPERADOR';
+
+    registrosArray.forEach(r => {
+
+      const operacion = r?.operacion || {};
+
+      const tipo_labor = operacion?.tipo_labor || '';
+      const labor = operacion?.labor || '';
+      const ala = operacion?.ala || '';
+
+      const observaciones = operacion?.observaciones;
+
+      // ❌ filtrar observaciones vacías
+      if (!observaciones || !observaciones.trim()) return;
+
+      const labor_fr = `${tipo_labor}${labor}${ala}`.trim();
+
+      const key = `${modelo}-${operador}-${labor_fr}`;
+
+      if (!mapa.has(key)) {
+        mapa.set(key, {
+          modelo_equipo: modelo,
+          operador,
+          labor_fr,
+          observaciones,
+          count: 0
+        });
+      }
+
+      const item = mapa.get(key)!;
+
+      item.count += 1;
+    });
+  });
+
+  return Array.from(mapa.values());
+}
+
+// =========================================
+// grafico 20
+// =========================================
+procesarTipoPerforacion() {
+
+  const tiposValidos = new Set([
+    'DESQUINCHE',
+    'FRENTE COMPLETO',
+    'SELLADA',
+    'BREASTING'
+  ]);
+
+  const mapa = new Map<string, any>();
+
+  this.operacionesFiltradas.forEach(op => {
+
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    registrosArray.forEach(r => {
+
+      const operacion = r?.operacion || {};
+
+      const tipoPerforacion = (operacion?.tipo_perforacion || '')
+        .toString()
+        .trim()
+        .toUpperCase();
+
+      // 🔥 FILTRO DAX
+      if (!tiposValidos.has(tipoPerforacion)) return;
+
+      // 🔥 CLAVE (puedes agrupar como quieras)
+      const key = `${op.modelo_equipo}-${tipoPerforacion}`;
+
+      if (!mapa.has(key)) {
+        mapa.set(key, {
+          modelo_equipo: op.modelo_equipo || 'SIN_EQUIPO',
+          tipo_perforacion: tipoPerforacion,
+          n_disparos: 0
+        });
+      }
+
+      const item = mapa.get(key)!;
+
+      // 🔥 COUNTROWS equivalente
+      item.n_disparos += 1;
+    });
+  });
+
+  return Array.from(mapa.values());
+}
+
+//=========================================
+// GRAFICO 21
+//=========================================
+
+procesarDataPerforacionDetallada() {
+
+  const mapa = new Map<string, any>();
+
+  this.operacionesFiltradas.forEach(op => {
+
+    const key = op.modelo_equipo || 'SIN_EQUIPO';
+    const registrosArray = op.registros;
+
+    if (!Array.isArray(registrosArray)) return;
+
+    registrosArray.forEach(r => {
+
+      const operacion = r?.operacion || {};
+
+      // =========================
+      // 🔥 VALIDACIÓN REAL
+      // =========================
+      const tipo_perforacion = operacion?.tipo_perforacion;
+      if (!tipo_perforacion) return; // ❌ NO enviar basura
+
+      const labor_fr = `${operacion?.tipo_labor ?? ''}${operacion?.labor ?? ''}${operacion?.ala ?? ''}`.trim();
+      if (!labor_fr) return; // 🔥 también evitamos vacíos
+
+      // =========================
+      // 🔥 METROS
+      // =========================
+      const metros = this.calcularMetrosPerforados([r]);
+
+      // =========================
+      // 🔥 VALORES OPERACIONALES
+      // =========================
+      const long_barras = Number(operacion?.long_barras) || 0;
+      const tal_alivio = Number(operacion?.tal_alivio) || 0;
+      const tal_prod = Number(operacion?.tal_prod) || 0;
+      const tal_repaso = Number(operacion?.tal_repaso) || 0;
+      const tal_rimados = Number(operacion?.tal_rimados) || 0;
+
+      const mapKey = `${key}-${tipo_perforacion}-${labor_fr}`;
+
+      if (!mapa.has(mapKey)) {
+        mapa.set(mapKey, {
+          modelo_equipo: key,
+          tipo_perforacion,
+          labor_fr,
+
+          metros_perforados: 0,
+
+          sum_long_barras: 0,
+          count_long_barras: 0,
+
+          tal_alivio: 0,
+          tal_prod: 0,
+          tal_repaso: 0,
+          tal_rimados: 0,
+
+          long_barras: 0
+        });
+      }
+
+      const item = mapa.get(mapKey)!;
+
+      item.metros_perforados += metros;
+
+      if (long_barras > 0) {
+        item.sum_long_barras += long_barras;
+        item.count_long_barras++;
+      }
+
+      item.tal_alivio += tal_alivio;
+      item.tal_prod += tal_prod;
+      item.tal_repaso += tal_repaso;
+      item.tal_rimados += tal_rimados;
+
+    });
+  });
+
+  // =========================
+  // 🔥 PROMEDIO FINAL
+  // =========================
+  for (const item of mapa.values()) {
+    item.long_barras =
+      item.count_long_barras > 0
+        ? item.sum_long_barras / item.count_long_barras
+        : 0;
+  }
+
+  return Array.from(mapa.values());
+}
+
+// =========================================
+// GRAFICO 22
+// =========================================
+
+procesarHorasNumericas() {
+
+  const result: any[] = [];
+
+  this.operacionesFiltradas.forEach(op => {
+
+    const modelo = op.modelo_equipo || 'SIN_EQUIPO';
+    const fecha = op.fecha || 'SIN_FECHA';
+
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    registrosArray.forEach(r => {
+
+      const horaStr = r?.hora_inicio;
+      if (!horaStr) return;
+
+      // =========================
+      // 🔥 PARSE HORA
+      // =========================
+      const partes = horaStr.split(':').map(Number);
+
+      const h = partes[0] || 0;
+      const m = partes[1] || 0;
+      const s = partes[2] || 0;
+
+      // =========================
+      // 🔥 HORA DECIMAL (DAX)
+      // =========================
+      const hora_decimal = h + (m / 60) + (s / 3600);
+
+      result.push({
+        modelo_equipo: modelo,
+        fecha,
+        hora_inicio: horaStr,
+        hora_decimal
+      });
+
+    });
+  });
+
+  // 🔥 opcional: ordenar por fecha + hora
+  return result.sort((a, b) => {
+    if (a.fecha === b.fecha) {
+      return a.hora_decimal - b.hora_decimal;
+    }
+    return a.fecha.localeCompare(b.fecha);
+  });
+}
+
 }

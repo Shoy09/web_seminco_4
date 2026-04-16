@@ -1,11 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import * as echarts from 'echarts/core';
 import { BarChart } from 'echarts/charts';
 import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, ToolboxComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 
-echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, ToolboxComponent, CanvasRenderer]);
+echarts.use([
+  BarChart,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  ToolboxComponent,
+  CanvasRenderer
+]);
 
 @Component({
   selector: 'app-rendimiento-equipo',
@@ -15,127 +23,154 @@ echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendCo
   templateUrl: './rendimiento-equipo.component.html',
   styleUrl: './rendimiento-equipo.component.css'
 })
-export class RendimientoEquipoComponent {
-  chartOptions: any = {
-    title: {
-      text: 'DM y UTI por Equipo (%)',
-      left: 'center',
-      top: 10,
-      textStyle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333'
-      }
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'shadow'
-      },
-      formatter: function(params: any) {
-        return `${params[0].axisValue}<br/>${params[0].seriesName}: ${params[0].value}%<br/>${params[1].seriesName}: ${params[1].value}%`;
-      }
-    },
-    legend: {
-      data: ['DM', 'UTI'],
-      left: 'left',
-      top: 40,
-      itemWidth: 30,
-      itemHeight: 14,
-      textStyle: {
-        fontSize: 12,
-        fontWeight: 'bold'
-      }
-    },
-    grid: {
-      left: '8%',
-      right: '5%',
-      top: '18%',
-      bottom: '8%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'category',
-      data: ['J-23', 'VII'],
-      axisLabel: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: '#333'
-      },
-      axisLine: {
-        lineStyle: {
-          color: '#333',
-          width: 2
+export class RendimientoEquipoComponent implements OnChanges {
+
+  @Input() data: any[] = [];
+
+  chartOptions: any = this.getBaseOptions();
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['data']) {
+      //console.log('📊 DATA RENDIMIENTO:', this.data);
+      this.actualizarGrafico();
+    }
+  }
+
+  // 🔥 BASE DEL GRAFICO (ESTÁTICO)
+  getBaseOptions() {
+    return {
+      title: {
+        text: 'DM y UTI por Equipo (%)',
+        left: 'center',
+        top: 10,
+        textStyle: {
+          fontSize: 16,
+          fontWeight: 'bold',
+          color: '#333'
         }
       },
-      axisTick: {
-        show: true,
-        alignWithLabel: true
-      }
-    },
-    yAxis: {
-      type: 'value',
-      name: 'Porcentaje (%)',
-      nameLocation: 'middle',
-      nameGap: 45,
-      min: 0,
-      max: 100,
-      interval: 20,
-      axisLabel: {
-        fontSize: 12,
-        formatter: '{value}%'
-      },
-      splitLine: {
-        lineStyle: {
-          type: 'dashed',
-          color: '#ccc'
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: (params: any) => {
+          let result = `${params[0].axisValue}<br/>`;
+          params.forEach((p: any) => {
+            result += `${p.seriesName}: ${p.value}%<br/>`;
+          });
+          return result;
         }
       },
-      axisLine: {
-        show: false
-      }
-    },
-    series: [
-      {
-        name: 'DM',
-        type: 'bar',
-        data: [94.2, 85.0],  // J-23: 94.2%, VII: 85.0%
-        itemStyle: {
-          borderRadius: [5, 5, 0, 0],
-          color: '#3498db',
-          shadowColor: 'rgba(0, 0, 0, 0.2)',
-          shadowBlur: 5
-        },
-        label: {
-          show: true,
-          position: 'top',
-          formatter: '{c}%',
-          fontWeight: 'bold',
-          fontSize: 14,
-          color: '#3498db'
-        },
-        barWidth: '35%'
+      legend: {
+        data: ['DM', 'UTI'],
+        left: 'left',
+        top: 40,
+        textStyle: {
+          fontSize: 12,
+          fontWeight: 'bold'
+        }
       },
-      {
-        name: 'UTI',
-        type: 'bar',
-        data: [94.2, 85.0],  // Según la imagen, ambos tienen los mismos valores
-        itemStyle: {
-          borderRadius: [5, 5, 0, 0],
-          color: '#2ecc71',
-          shadowColor: 'rgba(0, 0, 0, 0.2)',
-          shadowBlur: 5
-        },
-        label: {
-          show: true,
-          position: 'top',
-          formatter: '{c}%',
+      grid: {
+        left: '8%',
+        right: '5%',
+        top: '18%',
+        bottom: '12%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: [],
+        axisLabel: {
+          interval: 0,
+          fontSize: 12,
+          lineHeight: 16,
           fontWeight: 'bold',
-          fontSize: 14,
-          color: '#2ecc71'
+          color: '#333'
         },
-        barWidth: '35%'
-      }
-    ]
-  };
+        axisTick: {
+          alignWithLabel: true
+        }
+      },
+      yAxis: {
+        type: 'value',
+        name: 'Porcentaje (%)',
+        nameLocation: 'middle',
+        nameGap: 45,
+        min: 0,
+        max: 100,
+        interval: 20,
+        axisLabel: {
+          formatter: '{value}%'
+        },
+        splitLine: {
+          lineStyle: {
+            type: 'dashed',
+            color: '#ccc'
+          }
+        }
+      },
+      series: []
+    };
+  }
+
+  // 🚀 TRANSFORMAR DATA → GRAFICO
+  actualizarGrafico(): void {
+    if (!this.data || this.data.length === 0) return;
+
+    const categorias = this.data.map(item =>
+      `${item.modelo_equipo}\n(${item.seccion || 'N/A'})`
+    );
+
+    const dmData = this.data.map(item =>
+      Number((item.DM_FR * 100).toFixed(2))
+    );
+
+    const utiData = this.data.map(item =>
+      Number((item.UTI_FR * 100).toFixed(2))
+    );
+
+    this.chartOptions = {
+      ...this.chartOptions,
+
+      xAxis: {
+        ...this.chartOptions.xAxis,
+        data: categorias
+      },
+
+      series: [
+        {
+          name: 'DM',
+          type: 'bar',
+          data: dmData,
+          barGap: '20%',
+          itemStyle: {
+            borderRadius: [5, 5, 0, 0],
+            color: '#3498db'
+          },
+          label: {
+            show: true,
+            position: 'top',
+            formatter: '{c}%',
+            fontWeight: 'bold'
+          },
+          barWidth: '35%'
+        },
+        {
+          name: 'UTI',
+          type: 'bar',
+          data: utiData,
+          itemStyle: {
+            borderRadius: [5, 5, 0, 0],
+            color: '#2ecc71'
+          },
+          label: {
+            show: true,
+            position: 'top',
+            formatter: '{c}%',
+            fontWeight: 'bold'
+          },
+          barWidth: '35%'
+        }
+      ]
+    };
+  }
 }

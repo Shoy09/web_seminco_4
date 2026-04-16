@@ -1,0 +1,48 @@
+<div class="table-container">
+  <h3 class="table-title">DETALLE DE DISPAROS</h3>
+  
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Equipo</th>
+          <th>Disparo</th>
+          <th>Labor</th>
+          <th>Tal Prod</th>
+          <th>Tal Rim</th>
+          <th>Tal Repaso</th>
+          <th>Tal Alivio</th>
+          <th>Pies</th>
+          <th>Metros Perforados</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of displayedData">
+          <td class="equipo-cell">{{ item.equipo }}</td>
+          <td class="disparo-cell">{{ item.disparo }}</td>
+          <td class="labor-cell">{{ item.labor }}</td>
+          <td class="numero-cell">{{ formatearNumero(item.tal_prod, 0) }}</td>
+          <td class="numero-cell">{{ formatearNumero(item.tal_rim, 0) }}</td>
+          <td class="numero-cell">{{ formatearNumero(item.tal_repaso, 0) }}</td>
+          <td class="numero-cell">{{ formatearNumero(item.tal_alivio, 0) }}</td>
+          <td class="numero-cell">{{ formatearNumero(item.pies, 2) }}</td>
+          <td class="numero-cell">{{ formatearNumero(item.metros_perforados, 2) }}</td>
+        </tr>
+        <tr *ngIf="displayedData.length === 0">
+          <td colspan="9" class="no-data">No hay datos disponibles</td>
+        </tr>
+      </tbody>
+      <tfoot *ngIf="displayedData.length > 0">
+        <tr class="total-row">
+          <td class="total-label" colspan="3"><strong>Total</strong></td>
+          <td class="total-num"><strong>{{ formatearNumero(totales.tal_prod, 0) }}</strong></td>
+          <td class="total-num"><strong>{{ formatearNumero(totales.tal_rim, 0) }}</strong></td>
+          <td class="total-num"><strong>{{ formatearNumero(totales.tal_repaso, 0) }}</strong></td>
+          <td class="total-num"><strong>{{ formatearNumero(totales.tal_alivio, 0) }}</strong></td>
+          <td class="total-num"><strong>{{ formatearNumero(totales.pies, 2) }}</strong></td>
+          <td class="total-num"><strong>{{ formatearNumero(totales.metros_perforados, 2) }}</strong></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

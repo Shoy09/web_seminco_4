@@ -18,7 +18,6 @@ echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendCo
 export class DisparosEquipoComponent implements OnChanges {
   
   @Input() data: any[] = [];
-  @Input() objetivoDisparos: number = 2;
 
   chartOptions: any = {};
 
@@ -29,194 +28,147 @@ export class DisparosEquipoComponent implements OnChanges {
   }
 
   actualizarGrafico(): void {
-    if (!this.data || this.data.length === 0) {
-      this.chartOptions = {};
-      return;
+  if (!this.data || this.data.length === 0) {
+    this.chartOptions = {};
+    return;
+  }
+
+  // Agrupar los datos por seccion_labor
+  const gruposPorSeccionLabor = new Map<string, any[]>();
+  
+  this.data.forEach(item => {
+    const seccionLabor = item.seccion_labor || 'SIN_SECCION';
+    if (!gruposPorSeccionLabor.has(seccionLabor)) {
+      gruposPorSeccionLabor.set(seccionLabor, []);
     }
+    gruposPorSeccionLabor.get(seccionLabor)!.push(item);
+  });
 
-    // Agrupar los datos por seccion_labor
-    const gruposPorSeccionLabor = new Map<string, any[]>();
-    
-    this.data.forEach(item => {
-      const seccionLabor = item.seccion_labor || 'SIN_SECCION';
-      if (!gruposPorSeccionLabor.has(seccionLabor)) {
-        gruposPorSeccionLabor.set(seccionLabor, []);
+  // Preparar datos para el gráfico con estructura jerárquica
+  const xAxisData: string[] = [];
+  const seriesData: number[] = [];
+  const tooltipMap: Map<number, any> = new Map();
+
+  let index = 0;
+  gruposPorSeccionLabor.forEach((items, seccionLabor) => {
+    items.forEach(item => {
+      // Mantener el formato original con dos líneas
+      const label = `${item.modelo_equipo}\n(${item.seccion || 'N/A'})`;
+      xAxisData.push(label);
+      seriesData.push(item.n_frentes);
+      tooltipMap.set(index, item);
+      index++;
+    });
+  });
+
+  const maxValor = Math.max(...seriesData);
+  const yAxisMax = Math.ceil(maxValor * 1.2);
+
+  this.chartOptions = {
+    title: {
+      text: 'DISPAROS POR EQUIPO',
+      left: 'center',
+      top: 10,
+      textStyle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333'
       }
-      gruposPorSeccionLabor.get(seccionLabor)!.push(item);
-    });
-
-    // Preparar datos para el gráfico con estructura jerárquica
-    const xAxisData: string[] = [];
-    const seriesData: number[] = [];
-    const tooltipMap: Map<number, any> = new Map();
-
-    let index = 0;
-    gruposPorSeccionLabor.forEach((items, seccionLabor) => {
-      // Para cada seccion_labor, agregar sus equipos
-      items.forEach(item => {
-        // Crear etiqueta con formato: modelo_equipo\n(seccion)
-        const label = `${item.modelo_equipo}\n(${item.seccion || 'N/A'})`;
-        xAxisData.push(label);
-        seriesData.push(item.n_frentes);
-        tooltipMap.set(index, item);
-        index++;
-      });
-    });
-
-    // Calcular el máximo para ajustar el eje Y
-    const maxValor = Math.max(...seriesData, this.objetivoDisparos);
-    const yAxisMax = Math.ceil(maxValor * 1.2);
-    
-    // Calcular la posición de la línea del objetivo
-    const objetivoPorcentaje = this.objetivoDisparos > 0 
-      ? (this.objetivoDisparos / yAxisMax) * 100 
-      : 0;
-
-    this.chartOptions = {
-      title: {
-        text: 'DISPAROS POR EQUIPO',
-        left: 'center',
-        top: 10,
-        textStyle: {
-          fontSize: 16,
-          fontWeight: 'bold',
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      },
+      formatter: (params: any) => {
+        const dataPoint = params[0];
+        const item = tooltipMap.get(dataPoint.dataIndex);
+        if (!item) return '';
+        
+        return `<strong>${item.modelo_equipo}</strong><br/>
+                Sección: ${item.seccion || 'N/A'}<br/>
+                Sección Labor: ${item.seccion_labor || 'N/A'}<br/>
+                <strong style="color: #3498db;">Disparos: ${dataPoint.value}</strong>`;
+      }
+    },
+    grid: {
+      left: '10%',
+      right: '5%',
+      top: '15%',
+      bottom: '15%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: xAxisData,
+      axisLabel: {
+        fontSize: 11,
+        fontWeight: 'bold',
+        rotate: 0,
+        interval: 0,
+        formatter: (value: string) => value,
+        rich: {
+          equipment: {
+            fontSize: 12,
+            fontWeight: 'bold',
+            color: '#333'
+          },
+          section: {
+            fontSize: 10,
+            color: '#666'
+          }
+        }
+      },
+      axisLine: {
+        lineStyle: {
           color: '#333'
         }
       },
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'shadow'
-        },
-        formatter: (params: any) => {
-          const dataPoint = params[0];
-          const item = tooltipMap.get(dataPoint.dataIndex);
-          if (!item) return '';
-          
-          return `<strong>${item.modelo_equipo}</strong><br/>
-                  Sección: ${item.seccion || 'N/A'}<br/>
-                  Sección Labor: ${item.seccion_labor || 'N/A'}<br/>
-                  <strong style="color: #3498db;">Disparos: ${dataPoint.value}</strong><br/>
-                  <span style="color: #e74c3c;">Objetivo: ${this.objetivoDisparos}</span>`;
+      axisTick: {
+        alignWithLabel: true
+      }
+    },
+    yAxis: {
+      type: 'value',
+      name: 'Cantidad de Disparos',
+      nameLocation: 'middle',
+      nameGap: 45,
+      min: 0,
+      max: yAxisMax,
+      interval: this.calcularIntervalo(yAxisMax),
+      axisLabel: {
+        fontSize: 12
+      },
+      splitLine: {
+        lineStyle: {
+          type: 'dashed'
         }
-      },
-      grid: {
-        left: '10%',
-        right: '5%',
-        top: '15%',
-        bottom: '15%',
-        containLabel: true
-      },
-      xAxis: {
-        type: 'category',
-        data: xAxisData,
-        axisLabel: {
-          fontSize: 11,
+      }
+    },
+    series: [
+      {
+        name: 'DISPAROS',
+        type: 'bar',
+        data: seriesData,
+        itemStyle: {
+          borderRadius: [5, 5, 0, 0],
+          color: '#3498db',
+          shadowColor: 'rgba(0, 0, 0, 0.2)',
+          shadowBlur: 5
+        },
+        label: {
+          show: true,
+          position: 'top',
           fontWeight: 'bold',
-          rotate: 0,
-          interval: 0,
-          formatter: (value: string) => value,
-          rich: {
-            equipment: {
-              fontSize: 12,
-              fontWeight: 'bold',
-              color: '#333'
-            },
-            section: {
-              fontSize: 10,
-              color: '#666'
-            }
-          }
+          fontSize: 14,
+          formatter: '{c}',
+          color: '#333'
         },
-        axisLine: {
-          lineStyle: {
-            color: '#333'
-          }
-        },
-        axisTick: {
-          alignWithLabel: true
-        }
-      },
-      yAxis: {
-        type: 'value',
-        name: 'Cantidad de Disparos',
-        nameLocation: 'middle',
-        nameGap: 45,
-        min: 0,
-        max: yAxisMax,
-        interval: this.calcularIntervalo(yAxisMax),
-        axisLabel: {
-          fontSize: 12
-        },
-        splitLine: {
-          lineStyle: {
-            type: 'dashed'
-          }
-        }
-      },
-      series: [
-        {
-          name: 'DISPAROS',
-          type: 'bar',
-          data: seriesData,
-          itemStyle: {
-            borderRadius: [5, 5, 0, 0],
-            color: (params: any) => {
-              // Color verde si cumple objetivo, azul si no
-              return params.value >= this.objetivoDisparos ? '#27ae60' : '#3498db';
-            },
-            shadowColor: 'rgba(0, 0, 0, 0.2)',
-            shadowBlur: 5
-          },
-          label: {
-            show: true,
-            position: 'top',
-            fontWeight: 'bold',
-            fontSize: 14,
-            formatter: '{c}',
-            color: '#333'
-          },
-          barWidth: '50%'
-        }
-      ],
-      // Agregar líneas separadoras entre grupos de seccion_labor
-      graphic: this.agregarSeparadores(gruposPorSeccionLabor, xAxisData.length)
-    };
-
-    // Agregar línea del objetivo si existe
-    if (this.objetivoDisparos > 0) {
-      this.chartOptions.graphic.push({
-        type: 'line',
-        shape: {
-          x1: 0,
-          y1: objetivoPorcentaje,
-          x2: 1,
-          y2: objetivoPorcentaje
-        },
-        style: {
-          stroke: '#e74c3c',
-          lineWidth: 2,
-          lineDash: [8, 8]
-        },
-        left: '8%',
-        right: '5%',
-        top: `${objetivoPorcentaje}%`,
-        bounding: 'raw',
-        z: 100
-      }, {
-        type: 'text',
-        style: {
-          text: `Objetivo: ${this.objetivoDisparos}`,
-          fill: '#e74c3c',
-          fontSize: 12,
-          fontWeight: 'bold'
-        },
-        left: 'right',
-        top: `${objetivoPorcentaje - 2}%`,
-        z: 100
-      });
-    }
-  }
+        barWidth: '50%'
+      }
+    ]
+  };
+}
 
   agregarSeparadores(grupos: Map<string, any[]>, totalItems: number): any[] {
     const separadores: any[] = [];

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import * as echarts from 'echarts/core';
 import { BarChart } from 'echarts/charts';
@@ -15,83 +15,178 @@ echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendCo
   templateUrl: './disparos-dia.component.html',
   styleUrl: './disparos-dia.component.css'
 })
-export class DisparosDiaComponent {
-  chartOptions: any = {
+export class DisparosDiaComponent implements OnChanges {
+  
+  @Input() data: any[] = [];
+
+  chartOptions: any = {};
+
+  ngOnChanges(changes: SimpleChanges): void {
+  if (changes['data']) {
+    //console.log('📊 DATA RECIBIDA:', this.data);
+  }
+
+  if (changes['data'] || changes['objetivoDisparos']) {
+    this.actualizarGrafico();
+  }
+}
+
+  actualizarGrafico(): void {
+  if (!this.data || this.data.length === 0) {
+    this.chartOptions = {};
+    return;
+  }
+
+  const xAxisData = this.data.map(item => this.formatearFecha(item.fecha));
+  const seriesData = this.data.map(item => item.n_frentes);
+
+  const maxValor = Math.max(...seriesData);
+  const yAxisMax = Math.ceil(maxValor * 1.2);
+
+  this.chartOptions = {
     title: {
       text: 'DISPAROS POR DÍA',
-      left: 'center',
-      top: 10,
-      textStyle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333'
-      }
+      left: 'center'
     },
     tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'shadow'
-      },
-      formatter: '{b}<br/>Disparos: {c}'
-    },
-    grid: {
-      left: '10%',
-      right: '5%',
-      top: '15%',
-      bottom: '10%',
-      containLabel: true
+      trigger: 'axis'
     },
     xAxis: {
       type: 'category',
-      data: ['11 Abril', '12 Abril', '13 Abril', '14 Abril', '15 Abril'],
-      axisLabel: {
-        fontSize: 12,
-        fontWeight: 'bold',
-        rotate: 30,  // Rotar etiquetas para mejor visibilidad
-      },
-      axisLine: {
-        lineStyle: {
-          color: '#333'
-        }
-      }
+      data: xAxisData
     },
     yAxis: {
       type: 'value',
-      name: 'Cantidad de Disparos',
-      nameLocation: 'middle',
-      nameGap: 40,
       min: 0,
-      max: 3,
-      interval: 1,
-      axisLabel: {
-        fontSize: 12
-      },
-      splitLine: {
-        lineStyle: {
-          type: 'dashed'
-        }
-      }
+      max: yAxisMax
     },
     series: [
       {
         name: 'DISPAROS',
         type: 'bar',
-        data: [1, 0, 2, 1, 0],
-        itemStyle: {
-          borderRadius: [5, 5, 0, 0],
-          color: '#2ecc71',
-          shadowColor: 'rgba(0, 0, 0, 0.2)',
-          shadowBlur: 5
-        },
-        label: {
-          show: true,
-          position: 'top',
-          fontWeight: 'bold',
-          fontSize: 14,
-          formatter: '{c}'
-        },
-        barWidth: '60%'
+        data: seriesData
       }
     ]
   };
+}
+
+  agregarSeparadores(grupos: Map<string, any[]>, totalItems: number): any[] {
+    const separadores: any[] = [];
+    let acumulado = 0;
+    let grupoIndex = 0;
+    
+    grupos.forEach((items, seccionLabor) => {
+      const itemsCount = items.length;
+      acumulado += itemsCount;
+      
+      // No agregar separador después del último grupo
+      if (grupoIndex < grupos.size - 1) {
+        // Calcular posición del separador (entre grupos)
+        const posicionX = (acumulado / totalItems) * 100;
+        
+        // Agregar línea vertical separadora
+        separadores.push({
+          type: 'line',
+          shape: {
+            x1: posicionX,
+            y1: 0,
+            x2: posicionX,
+            y2: 1
+          },
+          style: {
+            stroke: '#ccc',
+            lineWidth: 1,
+            lineDash: [4, 4]
+          },
+          left: '8%',
+          right: '5%',
+          top: '10%',
+          bottom: '10%',
+          bounding: 'raw',
+          z: 50
+        });
+        
+        // Agregar texto del grupo (seccion_labor) encima de las barras
+        const posicionTexto = acumulado - (itemsCount / 2);
+        const posicionXTexto = (posicionTexto / totalItems) * 100;
+        
+        separadores.push({
+          type: 'text',
+          style: {
+            text: seccionLabor,
+            fill: '#2c3e50',
+            fontSize: 12,
+            fontWeight: 'bold',
+            fontFamily: 'Arial'
+          },
+          left: `${posicionXTexto}%`,
+          top: 5,
+          styleHtml: true,
+          z: 100,
+          bounding: 'raw'
+        });
+      } else {
+        // Para el último grupo, solo agregar el texto
+        const posicionTexto = acumulado - (itemsCount / 2);
+        const posicionXTexto = (posicionTexto / totalItems) * 100;
+        
+        separadores.push({
+          type: 'text',
+          style: {
+            text: seccionLabor,
+            fill: '#2c3e50',
+            fontSize: 12,
+            fontWeight: 'bold',
+            fontFamily: 'Arial'
+          },
+          left: `${posicionXTexto}%`,
+          top: 5,
+          styleHtml: true,
+          z: 100,
+          bounding: 'raw'
+        });
+      }
+      
+      grupoIndex++;
+    });
+    
+    return separadores;
+  }
+
+  formatearFecha(fechaStr: string): string {
+  //console.log('📅 Fecha original:', fechaStr);
+
+  if (!fechaStr) {
+    //console.warn('⚠️ Fecha vacía o undefined');
+    return '';
+  }
+
+  // 🔥 FIX TIMEZONE
+  const [year, month, day] = fechaStr.split('-').map(Number);
+  const fecha = new Date(year, month - 1, day);
+
+  //console.log('🧪 Objeto Date CORREGIDO:', fecha);
+
+  const dia = fecha.getDate();
+
+  const meses = [
+    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+  ];
+
+  const mes = meses[fecha.getMonth()];
+
+  const resultado = `${dia} ${mes}`;
+  //console.log('✅ Fecha formateada:', resultado);
+
+  return resultado;
+}
+
+  calcularIntervalo(max: number): number {
+    if (max <= 5) return 1;
+    if (max <= 10) return 2;
+    if (max <= 20) return 5;
+    if (max <= 50) return 10;
+    return 20;
+  }
 }
