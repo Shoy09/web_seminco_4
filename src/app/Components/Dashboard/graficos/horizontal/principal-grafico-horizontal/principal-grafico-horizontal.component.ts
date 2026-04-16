@@ -34,6 +34,8 @@ import { RankingOperadorComponent } from "../Graficos components/Hoja 2/ranking-
 import { TotalHorometrosComponent } from "../Graficos components/Hoja 1/total-horometros/total-horometros.component";
 import { ScatterPlotComponent } from "../Graficos components/Hoja 2/scatter-plot/scatter-plot.component";
 import { ScatterTurnosComponent } from "../Graficos components/Hoja 2/scatter-turnos/scatter-turnos.component";
+import { ScatterTurnosNocheComponent } from "../Graficos components/Hoja 2/scatter-turnos-noche/scatter-turnos-noche.component";
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-principal-grafico-horizontal',
@@ -53,7 +55,9 @@ import { ScatterTurnosComponent } from "../Graficos components/Hoja 2/scatter-tu
     DetalleDisparosComponent,
     RankingOperadorComponent,
     TotalHorometrosComponent,
-    ScatterTurnosComponent
+    ScatterTurnosComponent,
+    ScatterTurnosNocheComponent,
+    CommonModule
 ],
   templateUrl: './principal-grafico-horizontal.component.html',
   styleUrl: './principal-grafico-horizontal.component.css'
@@ -95,6 +99,7 @@ dataHorasNumericas: any[] = [];
   fechaInicio: string = '';
   fechaFin: string = '';
 turnoSeleccionado: string = '';
+turnoAplicado: string = '';
   resumen = {
     conteoEquipos: 0,
     metrosPorDisparo: 0,
@@ -182,15 +187,16 @@ private getFechaHoy(): string {
   // =========================================
   // 🔥 FILTRO POR FECHA
   // =========================================
-  aplicarFiltro() {
+aplicarFiltro() {
+
+  this.turnoAplicado = this.turnoSeleccionado; // 🔥 CLAVE
+
   this.operacionesFiltradas = this.operacionesOriginal.filter(op => {
 
-    // 🔹 FECHA (opcional)
     if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
     if (this.fechaFin && op.fecha > this.fechaFin) return false;
 
-    // 🔹 TURNO (opcional)
-    if (this.turnoSeleccionado && op.turno !== this.turnoSeleccionado) return false;
+    if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
 
     return true;
   });
@@ -202,6 +208,7 @@ private getFechaHoy(): string {
   this.operacionesFiltradas = [...this.operacionesOriginal];
   this.fechaInicio = '';
   this.fechaFin = '';
+  this.turnoAplicado = '';
   this.turnoSeleccionado = '';
 
   this.procesarTodo();
@@ -562,9 +569,9 @@ private construirLaborFR(tipo_labor: any, labor: any, ala: any): string {
 
     this.resumen = {
       conteoEquipos: equiposSet.size,
-      metrosPorDisparo: Number(metrosPorDisparo.toFixed(2)),
+      metrosPorDisparo: Number(metrosPorDisparo.toFixed(0)),
       nFrentes,
-      totalMetros: Number(totalMetros.toFixed(2))
+      totalMetros: Number(totalMetros.toFixed(0))
     };
     
     //console.log('📊 RESUMEN FINAL:', this.resumen);
@@ -1906,6 +1913,10 @@ procesarHorasNumericas() {
 
     registrosArray.forEach(r => {
 
+      // 🔥 FILTRO POR CODIGO
+      const codigo = String(r?.codigo);
+      if (codigo !== '101' && codigo !== '111') return;
+
       const horaStr = r?.hora_inicio;
       if (!horaStr) return;
 
@@ -1919,7 +1930,7 @@ procesarHorasNumericas() {
       const s = partes[2] || 0;
 
       // =========================
-      // 🔥 HORA DECIMAL (DAX)
+      // 🔥 HORA DECIMAL
       // =========================
       const hora_decimal = h + (m / 60) + (s / 3600);
 
@@ -1927,13 +1938,13 @@ procesarHorasNumericas() {
         modelo_equipo: modelo,
         fecha,
         hora_inicio: horaStr,
-        hora_decimal
+        hora_decimal,
+        codigo // 🔥 opcional pero recomendado
       });
 
     });
   });
 
-  // 🔥 opcional: ordenar por fecha + hora
   return result.sort((a, b) => {
     if (a.fecha === b.fecha) {
       return a.hora_decimal - b.hora_decimal;
@@ -1941,5 +1952,4 @@ procesarHorasNumericas() {
     return a.fecha.localeCompare(b.fecha);
   });
 }
-
 }

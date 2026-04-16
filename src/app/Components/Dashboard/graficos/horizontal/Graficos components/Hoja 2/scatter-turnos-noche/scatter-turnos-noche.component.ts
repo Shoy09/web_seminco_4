@@ -26,14 +26,14 @@ echarts.use([
 ]);
 
 @Component({
-  selector: 'app-scatter-turnos',
+  selector: 'app-scatter-turnos-noche',
   standalone: true,
   imports: [NgxEchartsDirective],
   providers: [provideEchartsCore({ echarts })],
-  templateUrl: './scatter-turnos.component.html',
-  styleUrls: ['./scatter-turnos.component.scss']
+  templateUrl: './scatter-turnos-noche.component.html',
+  styleUrl: './scatter-turnos-noche.component.css'
 })
-export class ScatterTurnosComponent implements OnInit, OnChanges {
+export class ScatterTurnosNocheComponent implements OnInit, OnChanges {
 
   @Input() data: any[] = []; // 👈 DATA REAL DESDE EL PADRE
 
@@ -75,27 +75,33 @@ export class ScatterTurnosComponent implements OnInit, OnChanges {
   // 🔥 TRANSFORMACIÓN DATA REAL
   // =========================================
   private transformData(data: any[]): any[] {
-    const transformed = [];
+  const transformed = [];
 
-    for (const item of data) {
-      // Usar los campos exactos que llegan del padre
-      const equipo = item.modelo_equipo;
-      const hora = item.hora_decimal; // Viene como número: 7, 8, etc.
-      const fecha = item.fecha; // Viene como '2026-04-09'
+  for (const item of data) {
 
-      if (equipo && hora !== undefined && hora !== null && fecha) {
-        transformed.push({
-          equipo: equipo,
-          hora: hora,
-          fecha: this.formatearFecha(fecha),
-          codigo: item.codigo
-        });
+    const equipo = item.modelo_equipo;
+    let hora = item.hora_decimal;
+    const fecha = item.fecha;
+
+    if (equipo && hora !== undefined && hora !== null && fecha) {
+
+      // 🔥 NORMALIZAR TURNO NOCHE
+      // Si es menor a 7 AM, pertenece al día siguiente del turno noche
+      if (hora < 7) {
+        hora = hora + 24;
       }
-    }
 
-    return transformed;
+      transformed.push({
+        equipo,
+        hora,
+        fecha: this.formatearFecha(fecha),
+        codigo: item.codigo
+      });
+    }
   }
 
+  return transformed;
+}
   // =========================================
   // 🔥 FORMATO FECHA (YYYY-MM-DD → DD/MM/YYYY)
   // =========================================
@@ -119,7 +125,7 @@ export class ScatterTurnosComponent implements OnInit, OnChanges {
   private getEmptyChartOptions(): EChartsOption {
     return {
       title: {
-        text: 'Mapa de Calor de Inicios de Perforación Turno Dia',
+        text: 'Mapa de Calor de Inicios de Perforación Turno Noche',
         subtext: 'No hay datos disponibles',
         left: 'center',
         top: 'middle',
@@ -165,7 +171,7 @@ export class ScatterTurnosComponent implements OnInit, OnChanges {
 
     return {
       title: {
-        text: 'Mapa de Calor de Inicios de Perforación Turno Dia',
+        text: 'Mapa de Calor de Inicios de Perforación Turno Noche',
         left: 'center',
         top: 5,
         textStyle: {
@@ -179,7 +185,7 @@ export class ScatterTurnosComponent implements OnInit, OnChanges {
         formatter: (params: any) => {
           return `
             <b>${params.value[1]}</b><br/>
-            Hora: ${this.formatHora(params.value[0])}<br/>
+            Hora: ${this.formatHoraTurnoNoche(params.value[0])}<br/>
             Fecha: ${params.seriesName}<br/>
             Código: ${params.data.codigo}
           `;
@@ -203,11 +209,11 @@ export class ScatterTurnosComponent implements OnInit, OnChanges {
       xAxis: {
         type: 'value',
         name: 'Horas',
-        min: 7,
-        max: 19,
+        min: 19,
+        max: 31,
         interval: 1,
         axisLabel: {
-          formatter: (value: number) => this.formatHora(value),
+          formatter: (value: number) => this.formatHoraTurnoNoche(value),
           rotate: 0
         },
         splitLine: {
@@ -238,18 +244,17 @@ export class ScatterTurnosComponent implements OnInit, OnChanges {
   // =========================================
   // FORMATO HORA
   // =========================================
-  private formatHora(value: number): string {
-    if (isNaN(value)) return '--:--';
-    
-    const hora = Math.floor(value);
-    const minutosDecimal = value % 1;
-    const minutos = Math.round(minutosDecimal * 60);
-    
-    // Manejar casos donde los minutos son 60
-    if (minutos === 60) {
-      return `${hora + 1}:00`;
-    }
-    
-    return `${hora}:${minutos.toString().padStart(2, '0')}`;
+  private formatHoraTurnoNoche(value: number): string {
+  if (isNaN(value)) return '--:--';
+
+  // 🔥 volver a formato 24h real
+  if (value >= 24) {
+    value = value - 24;
   }
+
+  const hora = Math.floor(value);
+  const minutos = Math.round((value % 1) * 60);
+
+  return `${hora}:${minutos.toString().padStart(2, '0')}`;
+}
 }

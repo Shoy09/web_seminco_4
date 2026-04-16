@@ -36,22 +36,16 @@ export class HorasPrimeraPerforacionComponent implements OnChanges {
   }
 
   formatearHora(horaStr: string): string {
-    if (!horaStr) return '--:--:-- --';
-    
-    // Si ya viene en formato "09:30" o "13:25"
-    const [hora, minuto] = horaStr.split(':');
-    const horaNum = parseInt(hora);
-    const minutoNum = parseInt(minuto);
-    
-    // Convertir a formato 12 horas
-    let hora12 = horaNum % 12;
-    if (hora12 === 0) hora12 = 12;
-    const ampm = horaNum >= 12 ? 'p.m.' : 'a.m.';
-    
-    // Formatear con ceros a la izquierda
-    const horaStr12 = hora12.toString().padStart(2, '0');
-    const minutoStr = minutoNum.toString().padStart(2, '0');
-    
-    return `${horaStr12}:${minutoStr}:00 ${ampm}`;
-  }
+  if (!horaStr) return '--:--:--';
+
+  const [hora, minuto] = horaStr.split(':');
+
+  const horaNum = parseInt(hora, 10);
+  const minutoNum = parseInt(minuto, 10);
+
+  const hora24 = horaNum.toString().padStart(2, '0');
+  const minutoStr = minutoNum.toString().padStart(2, '0');
+
+  return `${hora24}:${minutoStr}:00`;
+}
 }

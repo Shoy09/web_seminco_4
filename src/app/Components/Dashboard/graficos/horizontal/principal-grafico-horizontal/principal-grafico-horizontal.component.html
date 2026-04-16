@@ -18,6 +18,7 @@
   </select>
 </div>
 
+
   <button class="btn-aplicar" (click)="aplicarFiltro()">
     Aplicar
   </button>
@@ -28,8 +29,8 @@
 </div>
 
 <div class="graficos-container">
-  <app-avance-fase [data]="dataAvanceFase"></app-avance-fase>
   <app-resumen class="full-width" [data]="resumen"></app-resumen>
+  
   <app-disparos-equipo [data]="dataDisparosEquipo"></app-disparos-equipo>
   <app-disparos-dia [data]="dataDisparosDia"></app-disparos-dia>
   <app-rendimiento-equipo [data]="dataIndicadoresEquipo" ></app-rendimiento-equipo>
@@ -42,16 +43,18 @@
   <app-mhr-equipo [data]="dataMhrEquipo"></app-mhr-equipo>
   <app-horometros-jumbos [data]="dataHorometrosJumbos"></app-horometros-jumbos>
   <app-total-horometros [data]="dataHorometrosJumbos"></app-total-horometros>
+  <app-horas-primera-perforacion [data]="dataProcesoLaborFR"></app-horas-primera-perforacion>
   <!-- <h1>SEGUNDA HOJA</h1> -->
   <!-- <app-horas-inicio-perforacion [data]="dataPromedioPrimeraPerfDiaFR"></app-horas-inicio-perforacion>
   <app-historial-inicio-perforacion [data]="dataPromedioPrimeraPerfDiaFRPorFecha"></app-historial-inicio-perforacion>
   <app-horas-fin-perforacion [data]="dataPromedioUltimaPerfDiaFR"></app-horas-fin-perforacion>
   <app-historial-ultimo-perforacion [data]="dataPromedioUltimaPerfDiaFRPorFecha"></app-historial-ultimo-perforacion>
    -->
+  <app-avance-fase [data]="dataAvanceFase"></app-avance-fase>
   <app-disparos-tipo-perforacion [data]="dataTipoPerforacion"></app-disparos-tipo-perforacion>
   
-  <app-horas-primera-perforacion [data]="dataProcesoLaborFR"></app-horas-primera-perforacion>
-  <app-detalle-perforacion [data]="dataPercusionConMetrosJumbos"></app-detalle-perforacion>
+  
+  <app-detalle-perforacion class="full-width" [data]="dataPercusionConMetrosJumbos"></app-detalle-perforacion>
   <app-detalle-disparos class="full-width" [data]="datadetalleDisparos"></app-detalle-disparos>
 
   <app-mejores-operadores [data]="dataFrPorOperadorTurno"></app-mejores-operadores>
@@ -68,5 +71,16 @@
 </app-gantt-diagram> -->
 
 
-<app-scatter-turnos class="full-width" [data]="dataHorasNumericas"></app-scatter-turnos>
+<app-scatter-turnos 
+  *ngIf="turnoAplicado === '' || turnoAplicado === 'DÍA'"
+  class="full-width"
+  [data]="dataHorasNumericas">
+</app-scatter-turnos>
+
+<app-scatter-turnos-noche 
+  *ngIf="turnoAplicado === '' || turnoAplicado === 'NOCHE'"
+  class="full-width"
+  [data]="dataHorasNumericas">
+</app-scatter-turnos-noche>
+
 </div>    

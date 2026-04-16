@@ -19,21 +19,21 @@ export class MenuComponent {
       title: 'Dashboard',
       icon: 'das.svg',
       subItems: [
-        // { title: 'Perforación Taladros Largos', path: 'taladro-largo-grafico' },
-        // { title: 'Servicio Lanzador', path: 'servicio-lanzador' },
-        // { title: 'Servicio Mixer', path: 'servicio-mixer' },
-        // { title: 'Acarreo', path: 'servicio-volquetes' },
-        // { title: "Sostenimiento", path:'sostenimiento'},
-        {title: "Jefe de mina", path: 'jefe-mina'},
-        { title: 'Reporte Indicadores', path: 'power-bi' },
-        { title: 'Explosivos', path: 'explosivos-graficos' },
-        { title: 'Gráfico Sostenimiento', path: 'grafico-sostenimiento' },
-         { title: 'Gráfico Horizontal', path: 'grafico-horizontal' },
+         { title: 'Perforacion Horizontal', path: 'grafico-horizontal' },
+        { title: 'Perforacion Sostenimiento', path: 'grafico-sostenimiento' },
+         { title: 'Explosivos', path: 'explosivos-graficos' },
+      ],
+    },
+    {
+      title: 'Validaciones',
+      icon: 'vota-si.svg',
+      subItems: [
+        {title: "Mina", path: 'jefe-mina'},
       ],
     },
     {
       title: 'Planes',
-      icon: 'das.svg',
+      icon: 'plan.svg',
       subItems: [
         { title: 'Plan de Avance', path: 'plan-avance' },
         { title: 'Plan de Metraje', path: 'plan-metraje' },
