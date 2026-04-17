@@ -61,14 +61,18 @@ export class RendimientoEquipoComponent implements OnChanges {
         }
       },
       legend: {
-        data: ['DM', 'UTI'],
-        left: 'left',
-        top: 40,
-        textStyle: {
-          fontSize: 12,
-          fontWeight: 'bold'
-        }
-      },
+  data: ['DM', 'UTI'],
+  bottom: 5,
+  left: 'center',
+  orient: 'horizontal',
+  itemWidth: 18,
+  itemHeight: 10,
+  textStyle: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#2c3e50'
+  }
+},
       grid: {
         left: '8%',
         right: '5%',
