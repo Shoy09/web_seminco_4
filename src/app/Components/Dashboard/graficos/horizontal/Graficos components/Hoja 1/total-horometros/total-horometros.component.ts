@@ -81,16 +81,17 @@ export class TotalHorometrosComponent implements OnChanges {
         }
       },
       legend: {
-        data: ['H. Diesel', 'H. Eléctrico', 'H. Percusión'],
-        left: 'center',
-        top: 45,
-        itemWidth: 30,
-        itemHeight: 14,
-        textStyle: {
-          fontSize: 12,
-          fontWeight: 'bold'
-        }
-      },
+  data: ['H. Diesel', 'H. Eléctrico', 'H. Percusión'],
+  bottom: 0,
+  left: 'center',
+  orient: 'horizontal',
+  itemWidth: 30,
+  itemHeight: 14,
+  textStyle: {
+    fontSize: 12,
+    fontWeight: 'bold'
+  }
+},
       grid: {
         left: '10%',
         right: '8%',

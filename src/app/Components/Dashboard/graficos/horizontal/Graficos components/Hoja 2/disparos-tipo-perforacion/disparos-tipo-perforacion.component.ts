@@ -99,14 +99,18 @@ export class DisparosTipoPerforacionComponent implements OnChanges {
         formatter: '{b}: {c} n_disparos ({d}%)'
       },
       legend: {
-        orient: 'vertical',
-        left: 'left',
-        data: data.map(d => d.name),
-        textStyle: {
-          fontSize: 12,
-          fontWeight: 'bold'
-        }
-      },
+  orient: 'horizontal',
+  bottom: 5,
+  left: 'center',
+  data: data.map(d => d.name),
+  itemWidth: 18,
+  itemHeight: 10,
+  textStyle: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#2c3e50'
+  }
+},
       series: [
         {
           name: 'Disparos',

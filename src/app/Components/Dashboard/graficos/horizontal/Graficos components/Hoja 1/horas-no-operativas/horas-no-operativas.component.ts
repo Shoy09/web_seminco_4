@@ -72,8 +72,9 @@ export class HorasNoOperativasComponent implements OnChanges {
       },
       legend: {
         data: ['Duración promedio', 'Porcentaje acumulado'],
-        left: 'left',
-        top: 40
+        bottom: 0,
+        left: 'center',
+        orient: 'horizontal',
       },
       grid: {
         left: '12%',
