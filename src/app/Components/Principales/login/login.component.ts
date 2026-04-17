@@ -60,7 +60,7 @@ localStorage.setItem('nombre_completo', nombreCompleto);
             this._toastr.success('Sesión iniciada con éxito', 'Bienvenido');
 
             // 4️⃣ Recién ahora navegamos
-            this.router.navigate(['/Dashboard']);
+            this.router.navigate(['/Dashboard/grafico-horizontal']);
           },
           error: (err) => {
             console.error('Error obteniendo perfil', err);
