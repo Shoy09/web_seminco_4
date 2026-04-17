@@ -36,21 +36,26 @@ export class FormularioOperacionComponent implements OnInit, OnChanges {
   ngOnInit() {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    // Cargar datos cuando llegan del padre
-    if (changes['estadoSeleccionado'] && this.estadoSeleccionado) {
-      this.formData.estado = this.estadoSeleccionado;
-    }
-    
-    if (changes['codigoSeleccionado'] && this.codigoSeleccionado) {
-      this.formData.codigo = this.codigoSeleccionado;
-      this.agregarSiNoExiste(this.codigos, this.codigoSeleccionado);
-    }
-    
-    if (changes['horaInicioSeleccionado'] && this.horaInicioSeleccionado) {
-      this.formData.horaInicio = this.horaInicioSeleccionado;
-      this.agregarSiNoExiste(this.horas, this.horaInicioSeleccionado);
-    }
+  console.log('📥 Inputs recibidos del padre:', {
+    estado: this.estadoSeleccionado,
+    codigo: this.codigoSeleccionado,
+    horaInicio: this.horaInicioSeleccionado
+  });
+
+  if (changes['estadoSeleccionado'] && this.estadoSeleccionado) {
+    this.formData.estado = this.estadoSeleccionado;
   }
+  
+  if (changes['codigoSeleccionado'] && this.codigoSeleccionado) {
+    this.formData.codigo = this.codigoSeleccionado;
+    this.agregarSiNoExiste(this.codigos, this.codigoSeleccionado);
+  }
+  
+  if (changes['horaInicioSeleccionado'] && this.horaInicioSeleccionado) {
+    this.formData.horaInicio = this.horaInicioSeleccionado;
+    this.agregarSiNoExiste(this.horas, this.horaInicioSeleccionado);
+  }
+}
 
   agregarSiNoExiste(lista: string[], valor: string) {
     if (!valor) return;

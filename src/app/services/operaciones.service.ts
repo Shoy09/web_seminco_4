@@ -58,6 +58,14 @@ getAll(
   );
 }
 
+getAllAprobados(
+  tipo: string
+): Observable<{ ok: boolean; data: OperacionBase[] }> {
+  return this.apiService.getDatos(
+    `${this.baseUrl}/aprobacion/${tipo}`
+  );
+}
+
   getActualizados(): Observable<boolean> {
     return this.actualizados.asObservable();
   }

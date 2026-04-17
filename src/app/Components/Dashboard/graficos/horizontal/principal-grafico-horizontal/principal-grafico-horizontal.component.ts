@@ -169,7 +169,7 @@ private getFechaHoy(): string {
   cargarOperaciones() {
   const tipo = 'tal_horizontal';
 
-  this.operacionesService.getAll(tipo).subscribe({
+  this.operacionesService.getAllAprobados(tipo).subscribe({
     next: (resp) => {
       this.operacionesOriginal = resp.data;
 
