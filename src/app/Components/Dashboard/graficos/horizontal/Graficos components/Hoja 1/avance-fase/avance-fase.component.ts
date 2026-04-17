@@ -76,9 +76,17 @@ export class AvanceFaseComponent implements OnChanges {
         formatter: '{b}: {c} m ({d}%)'
       },
       legend: {
-        orient: 'vertical',
-        left: 'left'
-      },
+  orient: 'horizontal',
+  bottom: 5,
+  left: 'center',
+  itemWidth: 18,
+  itemHeight: 10,
+  textStyle: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#2c3e50'
+  }
+},
       series: [
         {
           name: 'Metros',
