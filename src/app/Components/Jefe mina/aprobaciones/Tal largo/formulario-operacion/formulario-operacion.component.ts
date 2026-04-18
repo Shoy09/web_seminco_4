@@ -1,6 +1,13 @@
-// formulario-operacion.component.ts
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -8,54 +15,121 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './formulario-operacion.component.html',
-  styleUrl: './formulario-operacion.component.css'
+  styleUrl: './formulario-operacion.component.css',
 })
 export class FormularioOperacionComponent implements OnInit, OnChanges {
 
   @Input() visible = false;
-  @Input() estadoSeleccionado = '';
-  @Input() codigoSeleccionado = '';
-  @Input() horaInicioSeleccionado = '';
-  
-  // 🔥 OUTPUTS MODIFICADOS
+  @Input() data: any;
+  @Input() turno: string = '';
+
   @Output() cerrarForm = new EventEmitter<void>();
-  @Output() confirmar = new EventEmitter<any>(); // 🔥 Emitir datos, no solo void
+  @Output() confirmar = new EventEmitter<any>();
 
   public codigos: string[] = ['104', '105', '106'];
-  public horas: string[] = ['07:30'];
-  
-  // 🔥 Datos del formulario
+
+  // 🔥 TODAS las horas del turno
+  public horas: string[] = [];
+
   public formData = {
     estado: '',
     codigo: '',
-    horaInicio: ''
+    horaInicio: '',
+    horaFin: ''
   };
-
-  constructor() {}
 
   ngOnInit() {}
 
   ngOnChanges(changes: SimpleChanges): void {
-  console.log('📥 Inputs recibidos del padre:', {
-    estado: this.estadoSeleccionado,
-    codigo: this.codigoSeleccionado,
-    horaInicio: this.horaInicioSeleccionado
-  });
 
-  if (changes['estadoSeleccionado'] && this.estadoSeleccionado) {
-    this.formData.estado = this.estadoSeleccionado;
+    // 🔥 1. Generar horas según turno
+    if (changes['turno'] && this.turno) {
+      this.horas = this.generarHoras();
+    }
+
+    // 🔥 2. Cargar datos
+    if (changes['data'] && this.data) {
+      this.formData = {
+        estado: this.data.estado || '',
+        codigo: this.data.codigo || '',
+        horaInicio: this.data.horaInicio || '',
+        horaFin: this.data.horaFin || ''
+      };
+
+      console.log('🔥 Datos recibidos en formulario:', this.data);
+
+      this.agregarSiNoExiste(this.codigos, this.data.codigo);
+    }
   }
-  
-  if (changes['codigoSeleccionado'] && this.codigoSeleccionado) {
-    this.formData.codigo = this.codigoSeleccionado;
-    this.agregarSiNoExiste(this.codigos, this.codigoSeleccionado);
+
+  // 🔥 GENERAR HORAS CADA 5 MINUTOS
+  generarHoras(): string[] {
+    const horas: string[] = [];
+
+    const inicio = this.turno === 'NOCHE' ? 19 : 7;
+    const fin = this.turno === 'NOCHE' ? 7 : 19;
+
+    let current = new Date();
+    current.setHours(inicio, 0, 0, 0);
+
+    while (true) {
+      const h = current.getHours().toString().padStart(2, '0');
+      const m = current.getMinutes().toString().padStart(2, '0');
+
+      horas.push(`${h}:${m}`);
+
+      current.setMinutes(current.getMinutes() + 5);
+
+      const ch = current.getHours();
+      const cm = current.getMinutes();
+
+      if (this.turno === 'NOCHE') {
+        if (ch === fin && cm === 0) {
+          horas.push('07:00');
+          break;
+        }
+      } else {
+        if (ch === fin && cm === 0) {
+          horas.push('19:00');
+          break;
+        }
+      }
+    }
+
+    return horas;
   }
-  
-  if (changes['horaInicioSeleccionado'] && this.horaInicioSeleccionado) {
-    this.formData.horaInicio = this.horaInicioSeleccionado;
-    this.agregarSiNoExiste(this.horas, this.horaInicioSeleccionado);
+
+  // 🔥 FILTRAR HORAS FIN
+  getHorasFin(): string[] {
+    if (!this.formData.horaInicio) return this.horas;
+
+    return this.horas.filter(h =>
+      this.esHoraMayor(h, this.formData.horaInicio)
+    );
   }
-}
+
+  // 🔥 COMPARACIÓN INTELIGENTE (SOPORTA NOCHE)
+  esHoraMayor(fin: string, inicio: string): boolean {
+    const toMin = (h: string) => {
+      const [hh, mm] = h.split(':').map(Number);
+      return hh * 60 + mm;
+    };
+
+    let finMin = toMin(fin);
+    let iniMin = toMin(inicio);
+
+    if (this.turno === 'NOCHE') {
+      if (finMin < 720) finMin += 1440;
+      if (iniMin < 720) iniMin += 1440;
+    }
+
+    return finMin > iniMin;
+  }
+
+  // 🔥 RESET CUANDO CAMBIA INICIO
+  onHoraInicioChange() {
+    this.formData.horaFin = '';
+  }
 
   agregarSiNoExiste(lista: string[], valor: string) {
     if (!valor) return;
@@ -70,11 +144,6 @@ export class FormularioOperacionComponent implements OnInit, OnChanges {
   }
 
   confirmarOperacion() {
-    // 🔥 Emitir los datos actualizados
-    this.confirmar.emit({
-      estado: this.formData.estado,
-      codigo: this.formData.codigo,
-      horaInicio: this.formData.horaInicio
-    });
+    this.confirmar.emit({ ...this.formData });
   }
 }

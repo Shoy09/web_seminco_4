@@ -51,10 +51,9 @@
 <!-- 🔥 AQUÍ LLAMAS LOS MODALES -->
 <app-formulario-operacion
   [visible]="mostrarOperacion"
-  [estadoSeleccionado]="estadoSeleccionado"
-  [codigoSeleccionado]="codigoSeleccionado"
-  [horaInicioSeleccionado]="horaInicioSeleccionado"
-   (confirmar)="onConfirmarOperacion($event)"
+  [turno]="turno"
+  [data]="operacionFormSeleccionada"
+  (confirmar)="onConfirmarOperacion($event)"
   (cerrarForm)="mostrarOperacion = false">
 </app-formulario-operacion>
 

@@ -58,6 +58,7 @@ export class TablaComponent implements OnChanges {
 
   @Input() data: any[] = [];
   @Output() dataChange = new EventEmitter<any[]>();
+  @Input() turno: string = '';
 
   public datos: Registro[] = [];
   public mostrarOperacion = false;
@@ -67,6 +68,7 @@ export class TablaComponent implements OnChanges {
   public codigoSeleccionado = '';
   public operacionSeleccionada: Operacion | null = null;
   public registroEnEdicion: Registro | null = null;
+  public operacionFormSeleccionada: any = null;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data) {
@@ -121,12 +123,17 @@ export class TablaComponent implements OnChanges {
   }
 
   onEdit(item: Registro) {
-    this.registroEnEdicion = item;
-    this.estadoSeleccionado = item.estado;
-    this.codigoSeleccionado = item.codigo;
-    this.horaInicioSeleccionado = item.horaInicio;
-    this.mostrarOperacion = true;
-  }
+  this.registroEnEdicion = item;
+
+  this.operacionFormSeleccionada = {
+    estado: item.estado,
+    codigo: item.codigo,
+    horaInicio: item.horaInicio,
+    horaFin: item.horaFin
+  };
+
+  this.mostrarOperacion = true;
+}
 
   onExecute(item: Registro) {
     this.registroEnEdicion = item;
@@ -143,6 +150,7 @@ export class TablaComponent implements OnChanges {
       this.registroEnEdicion.estado = datosActualizados.estado;
       this.registroEnEdicion.codigo = datosActualizados.codigo;
       this.registroEnEdicion.horaInicio = datosActualizados.horaInicio;
+    this.registroEnEdicion.horaFin = datosActualizados.horaFin;
       this.registroEnEdicion.color = this.getColorEstado(datosActualizados.estado);
       this.emitirCambios();
     }
@@ -197,7 +205,7 @@ export class TablaComponent implements OnChanges {
       estado: registro.estado,
       codigo: registro.codigo,
       hora_inicio: registro.horaInicio,
-      hora_final: registro.horaFin === '--:--' ? null : registro.horaFin,
+      hora_final: registro.horaFin,
       operacion: registro.operacion  // ✅ Incluye todos los nuevos campos
     }));
     

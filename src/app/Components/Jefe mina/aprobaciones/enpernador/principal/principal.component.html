@@ -6,7 +6,7 @@
   </app-card-operaciones>
 
   <div class="tabla-container">
-    <app-tabla *ngIf="!loading" [data]="tablaData" (dataChange)="onTablaChange($event)"></app-tabla>
+    <app-tabla *ngIf="!loading" [turno]="cardData?.turno" [data]="tablaData" (dataChange)="onTablaChange($event)"></app-tabla>
   </div>
 
   <app-menuAcciones

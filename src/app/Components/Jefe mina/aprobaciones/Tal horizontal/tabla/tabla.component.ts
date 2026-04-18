@@ -43,6 +43,8 @@ export class TablaComponent implements OnChanges {
     @Input() data: any[] = [];
     @Output() dataChange = new EventEmitter<any[]>(); // 🔥 EMITIR CAMBIOS
   
+  @Input() turno: string = '';
+  
     public datos: Registro[] = [];
     public mostrarOperacion = false;
     public mostrarPerforacion = false;
@@ -52,7 +54,8 @@ export class TablaComponent implements OnChanges {
     public operacionSeleccionada: Operacion | null = null;
     
     public registroEnEdicion: Registro | null = null; // 🔥 Guardar qué registro editamos
-  
+    public operacionFormSeleccionada: any = null;
+
     ngOnChanges(changes: SimpleChanges): void {
       if (changes['data'] && this.data) {
         this.mapearDatos();
@@ -87,14 +90,18 @@ export class TablaComponent implements OnChanges {
       return '#6c757d';
     }
   
-    onEdit(item: Registro) {
-      console.log('Editando:', item);
-      this.registroEnEdicion = item; // 🔥 Guardar registro
-      this.estadoSeleccionado = item.estado;
-      this.codigoSeleccionado = item.codigo;
-      this.horaInicioSeleccionado = item.horaInicio;
-      this.mostrarOperacion = true;
-    }
+   onEdit(item: Registro) {
+  this.registroEnEdicion = item;
+
+  this.operacionFormSeleccionada = {
+    estado: item.estado,
+    codigo: item.codigo,
+    horaInicio: item.horaInicio,
+    horaFin: item.horaFin
+  };
+
+  this.mostrarOperacion = true;
+}
   
     onExecute(item: Registro) {
       console.log('Ejecutando:', item);
@@ -115,7 +122,7 @@ export class TablaComponent implements OnChanges {
         this.registroEnEdicion.estado = datosActualizados.estado;
         this.registroEnEdicion.codigo = datosActualizados.codigo;
         this.registroEnEdicion.horaInicio = datosActualizados.horaInicio;
-        
+        this.registroEnEdicion.horaFin = datosActualizados.horaFin;
         // Actualizar el color según el nuevo estado
         this.registroEnEdicion.color = this.getColorEstado(datosActualizados.estado);
         
@@ -172,7 +179,7 @@ export class TablaComponent implements OnChanges {
         estado: registro.estado,
         codigo: registro.codigo,
         hora_inicio: registro.horaInicio,
-        hora_final: registro.horaFin === '--:--' ? null : registro.horaFin,
+        hora_final: registro.horaFin,
         operacion: registro.operacion
       }));
       

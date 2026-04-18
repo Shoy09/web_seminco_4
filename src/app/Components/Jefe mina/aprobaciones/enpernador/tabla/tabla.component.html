@@ -51,9 +51,8 @@
 <!-- 🔥 AQUÍ LLAMAS LOS MODALES -->
 <app-formulario-operacion
   [visible]="mostrarOperacion"
-  [estadoSeleccionado]="estadoSeleccionado"
-  [codigoSeleccionado]="codigoSeleccionado"
-  [horaInicioSeleccionado]="horaInicioSeleccionado"
+  [turno]="turno"
+  [data]="operacionFormSeleccionada"
   (confirmar)="onConfirmarOperacion($event)"
   (cerrarForm)="mostrarOperacion = false">
 </app-formulario-operacion>
@@ -64,4 +63,4 @@
   [estado]="registroEnEdicion?.estado || ''"
   (guardar)="onGuardarPerforacion($event)"
   (cerrar)="mostrarPerforacion = false">
-</app-formulario-perforacion>
+</app-formulario-perforacion> 

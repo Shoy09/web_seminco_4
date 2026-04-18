@@ -7,8 +7,13 @@
 
 
   <div class="tabla-container">
-    <app-tabla *ngIf="!loading" [data]="tablaData"(dataChange)="onTablaChange($event)" ></app-tabla>
-  </div>
+  <app-tabla
+    *ngIf="!loading"
+    [data]="tablaData"
+    [turno]="cardData?.turno"
+    (dataChange)="onTablaChange($event)">
+  </app-tabla>
+</div>
 
   <app-menuAcciones
   [horometrosData]="horometrosData"
