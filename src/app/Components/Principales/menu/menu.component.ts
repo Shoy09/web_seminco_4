@@ -19,6 +19,7 @@ export class MenuComponent {
       title: 'Dashboard',
       icon: 'das.svg',
       subItems: [
+        { title: 'Perforacion Tal.Largo', path: 'grafico-tal-largo' },
          { title: 'Perforacion Horizontal', path: 'grafico-horizontal' },
         { title: 'Perforacion Sostenimiento', path: 'grafico-sostenimiento' },
          { title: 'Explosivos', path: 'explosivos-graficos' },

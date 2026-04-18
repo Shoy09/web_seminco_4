@@ -1,0 +1,27 @@
+<div class="table-container">
+  <h3 class="table-title">MEJORES OPERADORES TURNO DIA</h3>
+  
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Operador</th>
+          <th>Turno</th>
+          <th>M/Hr</th>
+          <th>Metros Perforados</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of displayedData; let i = index" [class.top-row]="i === 0">
+          <td class="operador-cell">{{ item.operador }}</td>
+          <td>{{ item.turno }}</td>
+          <td class="mhr-cell">{{ formatearNumero(item.m_hr, 2) }}</td>
+          <td class="metros-cell">{{ formatearNumero(item.metros_perforados, 2) }}</td>
+        </tr>
+        <tr *ngIf="displayedData.length === 0">
+          <td colspan="4" class="no-data">No hay datos disponibles</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

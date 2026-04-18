@@ -1,0 +1,50 @@
+<div class="table-container">
+  <h3 class="table-title">DETALLE</h3>
+  
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Equipo</th>
+          <th>Horas Percutadas</th>
+          <th>M/Hr</th>
+          <th>Tal Prod</th>
+          <th>Tal Rim</th>
+          <th>Tal Repaso</th>
+          <th>Tal Alivio</th>
+          <!-- <th>Pies</th> -->
+          <th>Metros Perforados</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of displayedData">
+          <td class="equipo-cell">{{ item.equipo }}</td>
+          <td>{{ formatearNumero(item.horas_percutadas, 2) }}</td>
+          <td>{{ formatearEntero(item.fr_mhr_hp) }}</td>
+          <td>{{ formatearNumero(item.tal_prod, 0) }}</td>
+          <td>{{ formatearNumero(item.tal_rimados, 0) }}</td>
+          <td>{{ formatearNumero(item.tal_repaso, 0) }}</td>
+          <td>{{ formatearNumero(item.tal_alivio, 0) }}</td>
+          <!-- <td>{{ formatearNumero(item.long_barras, 2) }}</td> -->
+          <td>{{ formatear1Decimal(item.metros_perforados) }}</td>
+         </tr>
+        <tr *ngIf="displayedData.length === 0">
+          <td colspan="9" class="no-data">No hay datos disponibles</td>
+         </tr>
+      </tbody>
+      <tfoot *ngIf="displayedData.length > 0">
+        <tr class="total-row">
+          <td class="total-label"><strong>Total</strong></td>
+          <td><strong>{{ formatearNumero(totales.horas_percutadas, 2) }}</strong></td>
+          <td>{{ formatearEntero(totales.fr_mhr_hp) }}</td>
+          <td><strong>{{ formatearNumero(totales.tal_prod, 0) }}</strong></td>
+          <td><strong>{{ formatearNumero(totales.tal_rimados, 0) }}</strong></td>
+          <td><strong>{{ formatearNumero(totales.tal_repaso, 0) }}</strong></td>
+          <td><strong>{{ formatearNumero(totales.tal_alivio, 0) }}</strong></td>
+          <!-- <td><strong>{{ formatearNumero(totales.long_barras, 2) }}</strong></td> -->
+<td>{{ formatear1Decimal(totales.metros_perforados) }}</td>
+         </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

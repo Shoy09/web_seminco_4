@@ -1,0 +1,93 @@
+<div class="filtro-fechas">
+  <div class="campo">
+    <label>Fecha inicio</label>
+    <input type="date" [(ngModel)]="fechaInicio">
+  </div>
+
+  <div class="campo">
+    <label>Fecha fin</label>
+    <input type="date" [(ngModel)]="fechaFin">
+  </div>
+
+  <div class="campo">
+  <label>Turno</label>
+  <select [(ngModel)]="turnoSeleccionado">
+    <option value="">Todos</option>
+    <option value="DÍA">Día</option>
+    <option value="NOCHE">Noche</option>
+  </select>
+</div>
+
+
+  <button class="btn-aplicar" (click)="aplicarFiltro()">
+    Aplicar
+  </button>
+
+  <button class="btn-aplicar" (click)="quitarFiltro()">
+    Quitar filtro
+  </button>
+</div>
+
+<div class="graficos-container">
+  <app-resumen class="full-width" [data]="resumen"></app-resumen>
+  
+  <app-disparos-equipo [data]="dataDisparosEquipo"></app-disparos-equipo>
+  <app-perforado-equipo  [data]="dataMetrosDisparoFR"></app-perforado-equipo>
+
+  <!-- <app-disparos-dia [data]="dataDisparosDia"></app-disparos-dia> -->
+
+  <app-rendimiento-equipo [data]="dataIndicadoresEquipo" ></app-rendimiento-equipo>
+  <app-demoras-operativas [data]="dataDemorasOperativas"></app-demoras-operativas>
+
+  <app-horas-no-operativas [data]="dataHorasNoOperativas"></app-horas-no-operativas>
+  <app-horas-de-mantenimiento [data]="dataHorasMantenimiento"></app-horas-de-mantenimiento>
+
+  <app-metros-perforados-disparo [data]="dataMetrosDisparoFR"></app-metros-perforados-disparo>
+  <app-mhr-equipo [data]="dataMhrEquipo"></app-mhr-equipo>
+
+  <app-horometros-jumbos [data]="dataHorometrosJumbos"></app-horometros-jumbos>
+  <app-total-horometros [data]="dataHorometrosJumbos"></app-total-horometros>
+
+  <!-- <h1>SEGUNDA HOJA</h1> -->
+  <!-- <app-horas-inicio-perforacion [data]="dataPromedioPrimeraPerfDiaFR"></app-horas-inicio-perforacion>
+  <app-historial-inicio-perforacion [data]="dataPromedioPrimeraPerfDiaFRPorFecha"></app-historial-inicio-perforacion>
+  <app-horas-fin-perforacion [data]="dataPromedioUltimaPerfDiaFR"></app-horas-fin-perforacion>
+  <app-historial-ultimo-perforacion [data]="dataPromedioUltimaPerfDiaFRPorFecha"></app-historial-ultimo-perforacion>
+   -->
+
+    <app-avance-fase [data]="dataAvanceFase"></app-avance-fase>
+    <app-horas-primera-perforacion [data]="dataProcesoLaborFR"></app-horas-primera-perforacion>
+  
+  
+  <!-- <app-disparos-tipo-perforacion [data]="dataTipoPerforacion"></app-disparos-tipo-perforacion> -->
+  
+  <app-detalle-perforacion class="full-width" [data]="dataPercusionConMetrosJumbos"></app-detalle-perforacion>
+  <app-detalle-disparos class="full-width" [data]="datadetalleDisparos"></app-detalle-disparos>
+
+  <app-mejores-operadores [data]="dataFrPorOperadorTurno"></app-mejores-operadores>
+  <app-ranking-operador [data]="dataFrPorOperadorTurno"></app-ranking-operador>
+  <app-observaciones class="full-width" [data]="dataLaborFRDetallado"></app-observaciones>
+
+  <!-- <app-gantt-diagram 
+  class="full-width"
+  [title]="'LINEA DE TIEMPO ACTIVIDADES'"
+  [data]="actividadesData"
+  [recursos]="['J-14', 'J-19', 'J-20']"
+  [minHora]="7"
+  [maxHora]="19">
+</app-gantt-diagram> -->
+
+
+<app-scatter-turnos 
+  *ngIf="turnoAplicado === '' || turnoAplicado === 'DÍA'"
+  class="full-width"
+  [data]="dataHorasNumericas">
+</app-scatter-turnos>
+
+<app-scatter-turnos-noche 
+  *ngIf="turnoAplicado === '' || turnoAplicado === 'NOCHE'"
+  class="full-width"
+  [data]="dataHorasNumericas">
+</app-scatter-turnos-noche>
+
+</div>    
