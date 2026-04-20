@@ -36,6 +36,7 @@ import { ScatterPlotComponent } from "../Graficos components/Hoja 2/scatter-plot
 import { ScatterTurnosComponent } from "../Graficos components/Hoja 2/scatter-turnos/scatter-turnos.component";
 import { ScatterTurnosNocheComponent } from "../Graficos components/Hoja 2/scatter-turnos-noche/scatter-turnos-noche.component";
 import { CommonModule } from '@angular/common';
+import { PromedioEstadosEchartsComponent } from "../Graficos components/Hoja 2/promedio-estados-echarts/promedio-estados-echarts.component";
 
 @Component({
   selector: 'app-principal-grafico-horizontal',
@@ -57,7 +58,8 @@ import { CommonModule } from '@angular/common';
     TotalHorometrosComponent,
     ScatterTurnosComponent,
     ScatterTurnosNocheComponent,
-    CommonModule
+    CommonModule,
+    PromedioEstadosEchartsComponent
 ],
   templateUrl: './principal-grafico-horizontal.component.html',
   styleUrl: './principal-grafico-horizontal.component.css'
@@ -107,6 +109,8 @@ turnoAplicado: string = '';
     totalMetros: 0
   };
 
+  datosGraficoEstados: any[] = [];
+
   actividadesData = [
   // J-14
   { recurso: 'J-14', actividad: 'DES', inicio: 12, fin: 16, label: '' },
@@ -124,6 +128,7 @@ turnoAplicado: string = '';
   { recurso: 'J-20', actividad: 'BREASTING', inicio: 13, fin: 17, label: '' },
   { recurso: 'J-20', actividad: 'FRENTE COMPLETO', inicio: 17, fin: 19, label: '' }
 ];
+dataPromedioEstados: any;
 
   constructor(
     private planMensualService: PlanMensualService,
@@ -279,6 +284,7 @@ console.log('DATA FILTRADA:', this.operacionesFiltradas);
      this.datadetalleDisparos = this.procesarDataPerforacionDetallada();
      this.dataHorasNumericas = this.procesarHorasNumericas();
     this.procesarResumen();
+    this.prepararDatosGraficoEstados();
 
     //console.log('🔥 DATA DISPAROS EQUIPO:', this.dataDisparosEquipo);
   }
@@ -1988,6 +1994,29 @@ procesarHorasNumericas() {
       return a.hora_decimal - b.hora_decimal;
     }
     return a.fecha.localeCompare(b.fecha);
+  });
+}
+
+//---------------------------------------------
+estadosBloqueados = ['FUERA DE PLAN'];
+
+prepararDatosGraficoEstados(): void {
+  this.datosGraficoEstados = this.operacionesFiltradas.flatMap(operacion => {
+
+    const registros = Array.isArray(operacion.registros)
+      ? operacion.registros
+      : [];
+
+    return registros
+      .map((estado: any) => ({
+        codigoOperacion: operacion.modelo_equipo || operacion.n_equipo || operacion.id,
+        turno: operacion.turno,
+        estado: (estado.estado || '').toUpperCase().trim(),
+        codigoEstado: estado.codigo,
+        hora_inicio: estado.hora_inicio,
+        hora_final: estado.hora_final
+      }))
+      .filter(e => !this.estadosBloqueados.includes(e.estado));
   });
 }
 }

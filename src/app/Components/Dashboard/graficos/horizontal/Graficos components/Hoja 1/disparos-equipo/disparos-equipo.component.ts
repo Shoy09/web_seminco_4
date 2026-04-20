@@ -70,12 +70,12 @@ actualizarGrafico(): void {
 
   // 🔹 Colores consistentes (opcional pero recomendado)
   const colores: any = {
-    'FRENTE COMPLETO': '#3498db',
-    'DESQUINCHE': '#e74c3c',
-    'BREASTING': '#2ecc71',
-    'CIRCADO': '#f1c40f',
-    'REFUGIO': '#9b59b6',
-    'SELLADA': '#34495e'
+    'FRENTE COMPLETO': '#85c1e9',
+    'DESQUINCHE': '#5dade2',
+    'BREASTING': '#3498db',
+    'CIRCADO': '#2e86c1',
+    'REFUGIO': '#2874a6',
+    'SELLADA': '#21618c'
   };
 
   // 🔹 Crear series apiladas (AQUÍ ESTÁ LA MAGIA)
