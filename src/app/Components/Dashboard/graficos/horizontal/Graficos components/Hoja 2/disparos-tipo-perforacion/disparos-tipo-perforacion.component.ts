@@ -23,7 +23,7 @@ export class DisparosTipoPerforacionComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      console.log('🔥 DISPAROS POR TIPO DE PERFORACIÓN RECIBIDO:', this.data);
+      //console.log('🔥 DISPAROS POR TIPO DE PERFORACIÓN RECIBIDO:', this.data);
 
       if (Array.isArray(this.data)) {
         // Usar setTimeout para evitar el error de main process
@@ -64,7 +64,7 @@ export class DisparosTipoPerforacionComponent implements OnChanges {
       value: agrupado[tipo]
     }));
 
-    console.log('🔥 DATA GRAFICO DISPAROS:', dataGrafico);
+    //console.log('🔥 DATA GRAFICO DISPAROS:', dataGrafico);
 
     this.chartOptions = this.getOpcionesGrafico(dataGrafico);
   }

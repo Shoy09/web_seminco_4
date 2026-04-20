@@ -24,7 +24,7 @@ export class AvanceFaseComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
 
   if (changes['data']) {
-    console.log('🔥 data cambió:', this.data);
+    //console.log('🔥 data cambió:', this.data);
 
     if (Array.isArray(this.data)) {
       this.generarGrafico();
@@ -55,14 +55,14 @@ export class AvanceFaseComponent implements OnChanges {
       value: Number(agrupado[fase].toFixed(2))
     }));
 
-    console.log('🔥 DATA GRAFICO PIE:', dataGrafico);
+    //console.log('🔥 DATA GRAFICO PIE:', dataGrafico);
 
     // =========================================
     // 🔥 OPCIONES DEL GRAFICO
     // =========================================
     this.chartOptions = {
       title: {
-        text: 'METROS PERFORADOS POR ÁREA',
+        text: 'METROS PERFORADOS POR FASE',
         left: 'center',
         top: 20,
         textStyle: {

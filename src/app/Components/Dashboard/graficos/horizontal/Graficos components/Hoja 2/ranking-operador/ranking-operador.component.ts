@@ -32,7 +32,7 @@ export class RankingOperadorComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      console.log('🏆 RANKING OPERADOR RECIBIDO:', this.data);
+      //console.log('🏆 RANKING OPERADOR RECIBIDO:', this.data);
       this.actualizarGrafico();
     }
   }

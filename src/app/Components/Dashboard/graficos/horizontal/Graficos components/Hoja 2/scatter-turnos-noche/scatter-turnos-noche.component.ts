@@ -45,7 +45,7 @@ export class ScatterTurnosNocheComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      console.log('📥 Data scatter recibida:', this.data);
+      //console.log('📥 Data scatter recibida:', this.data);
       this.renderChart();
     }
   }

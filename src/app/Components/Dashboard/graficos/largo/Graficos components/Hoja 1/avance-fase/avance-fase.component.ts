@@ -24,7 +24,7 @@ export class AvanceFaseComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
 
   if (changes['data']) {
-    console.log('🔥 data cambió:', this.data);
+    //console.log('🔥 data cambió:', this.data);
 
     if (Array.isArray(this.data)) {
       this.generarGrafico();

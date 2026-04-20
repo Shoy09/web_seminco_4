@@ -54,7 +54,17 @@ export class FormularioPerforacionComponent implements OnInit, OnChanges {
   public tiposLabor: string[] = ['RAMPA', 'GALERIA', 'CX', 'CHIMENEA', 'SUB-NIVEL'];
   public labores: string[] = [];
   public alas: string[] = ['NORTE', 'SUR', 'ESTE', 'OESTE'];
-  public tiposPerforacion: string[] = ['PRODUCCIÓN', 'DESARROLLO', 'SOSTENIMIENTO', 'FRENTE COMPLETO', 'BREASTING'];
+  public tiposPerforacion: string[] = [
+  'FRENTE COMPLETO',
+  'SELLADA',
+  'DESQUINCHE',
+  'REFUGIO',
+  'CIRCADO',
+  'BREASTING',
+  'SERVICIOS',
+  'CUNETA',
+  'RADIO DE GIRO'
+];
 
   constructor() {}
 

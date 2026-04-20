@@ -23,7 +23,7 @@ export class TotalHorometrosComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      console.log('🔥 TOTAL HORÓMETROS RECIBIDO:', this.data);
+      //console.log('🔥 TOTAL HORÓMETROS RECIBIDO:', this.data);
       this.updateChart();
     }
   }

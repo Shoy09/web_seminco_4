@@ -200,7 +200,7 @@ aplicarFiltro() {
 
     return true;
   });
-
+console.log('DATA FILTRADA:', this.operacionesFiltradas);
   this.procesarTodo();
 }
 
@@ -286,20 +286,61 @@ aplicarFiltro() {
   // =========================================
   // 🔥 CALCULO DE FRENTES COMPLETOS
   // =========================================
-  contarFrentesCompletos(registrosArray: any[]): number {
-    if (!Array.isArray(registrosArray)) return 0;
-    
-    let contador = 0;
-    for (const registro of registrosArray) {
-      if (registro.estado === 'OPERATIVO') {
-        const operacion = registro.operacion || registro;
-        if (operacion.tipo_perforacion === 'FRENTE COMPLETO') {
-          contador++;
-        }
-      }
+contarFrentesCompletos(registrosArray: any[]): number {
+  if (!Array.isArray(registrosArray)) return 0;
+
+  const tiposValidos = [
+    'FRENTE COMPLETO',
+    'BREASTING',
+    'DESQUINCHE',
+    'CIRCADO',
+    'REFUGIO',
+    'SELLADA'
+  ];
+
+  let contador = 0;
+
+  for (const registro of registrosArray) {
+    if (registro.estado !== 'OPERATIVO') continue;
+
+    const operacion = registro.operacion || registro;
+    const tipo = (operacion?.tipo_perforacion || '').trim().toUpperCase();
+
+    if (tiposValidos.includes(tipo)) {
+      contador++;
     }
-    return contador;
   }
+
+  return contador;
+}
+
+contarFrentesPorTipo(registrosArray: any[]): Record<string, number> {
+  if (!Array.isArray(registrosArray)) return {};
+
+  const tiposValidos = [
+    'FRENTE COMPLETO',
+    'BREASTING',
+    'DESQUINCHE',
+    'CIRCADO',
+    'REFUGIO',
+    'SELLADA'
+  ];
+
+  const conteo: Record<string, number> = {};
+
+  for (const registro of registrosArray) {
+    if (registro.estado !== 'OPERATIVO') continue;
+
+    const operacion = registro.operacion || registro;
+    const tipo = (operacion?.tipo_perforacion || '').trim().toUpperCase();
+
+    if (tiposValidos.includes(tipo)) {
+      conteo[tipo] = (conteo[tipo] || 0) + 1;
+    }
+  }
+
+  return conteo;
+}
 
   // =========================================
   // 🔥 OBTENER SECCION DEL PLAN
@@ -316,54 +357,59 @@ aplicarFiltro() {
   // 🔥 DATA PARA GRAFICO DISPAROS EQUIPO
   // =========================================
   procesarDisparosEquipo() {
-    const mapaDisparos = new Map<string, {
-      modelo_equipo: string,
-      seccion_labor: string,  // 👈 Cambiado de 'seccion' a 'seccion_labor'
-      seccion: string, 
-      n_frentes: number
-    }>();
+  const mapaDisparos = new Map<string, {
+    modelo_equipo: string,
+    seccion_labor: string,
+    seccion: string,
+    n_frentes: number,
+    tipos: Record<string, number> // 🔥 nuevo
+  }>();
 
-    this.operacionesFiltradas.forEach(op => {
-      try {
-        const registrosArray = op.registros;
-        
-        if (Array.isArray(registrosArray) && registrosArray.length > 0) {
-          // Obtener área del primer registro
-          const primerRegistro = registrosArray[0];
-          const area = primerRegistro?.operacion?.area || primerRegistro?.area || '';
-          
-          // Obtener sección del plan
-          const seccionLabor = this.obtenerSeccionDelPlan(area);  // 👈 Cambiado nombre variable
-          
-          // Contar frentes completos
-          const nFrentes = this.contarFrentesCompletos(registrosArray);
-          
-          // Usar modelo_equipo como clave única
-          const key = op.modelo_equipo || 'SIN_EQUIPO';
-          
-          
-          if (mapaDisparos.has(key)) {
-            // Acumular frentes si ya existe
-            const existing = mapaDisparos.get(key)!;
-            existing.n_frentes += nFrentes;
-          } else {
-            // Crear nueva entrada
-            mapaDisparos.set(key, {
-              modelo_equipo: op.modelo_equipo || 'SIN_EQUIPO',
-              seccion: op.seccion || 'SIN_SECCION',  // 👈 Cambiado a 'seccion'
-              seccion_labor: seccionLabor,  // 👈 Cambiado a 'seccion_labor'
-              n_frentes: nFrentes
-            });
+  this.operacionesFiltradas.forEach(op => {
+    try {
+      const registrosArray = op.registros;
+      
+      if (Array.isArray(registrosArray) && registrosArray.length > 0) {
+
+        const primerRegistro = registrosArray[0];
+        const area = primerRegistro?.operacion?.area || primerRegistro?.area || '';
+        const seccionLabor = this.obtenerSeccionDelPlan(area);
+
+        // 🔥 nuevo: obtener conteo por tipo
+        const conteoTipos = this.contarFrentesPorTipo(registrosArray);
+
+        // 🔥 total (por si aún lo necesitas)
+        const totalFrentes = Object.values(conteoTipos)
+          .reduce((a, b) => a + b, 0);
+
+        const key = op.modelo_equipo || 'SIN_EQUIPO';
+
+        if (mapaDisparos.has(key)) {
+          const existing = mapaDisparos.get(key)!;
+
+          // 🔥 acumular total
+          existing.n_frentes += totalFrentes;
+
+          // 🔥 acumular por tipo
+          for (const tipo in conteoTipos) {
+            existing.tipos[tipo] = (existing.tipos[tipo] || 0) + conteoTipos[tipo];
           }
-        }
-        
-      } catch (error) {
-        //console.error('Error procesando operación para disparos equipo:', op.id, error);
-      }
-    });
 
-    // Convertir el mapa a un array
-    return Array.from(mapaDisparos.values());
+        } else {
+          mapaDisparos.set(key, {
+            modelo_equipo: op.modelo_equipo || 'SIN_EQUIPO',
+            seccion: op.seccion || 'SIN_SECCION',
+            seccion_labor: seccionLabor,
+            n_frentes: totalFrentes,
+            tipos: { ...conteoTipos } // 🔥 inicializar
+          });
+        }
+      }
+      
+    } catch (error) {}
+  });
+
+  return Array.from(mapaDisparos.values());
 }
 
  // =========================================
@@ -533,49 +579,40 @@ private construirLaborFR(tipo_labor: any, labor: any, ala: any): string {
   // SEGUNDO GRAFICO - RESUMEN
   // =========================================
   procesarResumen() {
-    let totalMetros = 0;
-    let nFrentes = 0;
-    const equiposSet = new Set<string>();
+  let totalMetros = 0;
+  let totalFrentes = 0;
+  const equiposSet = new Set<string>();
 
-    this.operacionesFiltradas.forEach(op => {
-      if (op.modelo_equipo) {
-        equiposSet.add(op.modelo_equipo);
-      }
+  this.operacionesFiltradas.forEach((op, index) => {
+    if (op.modelo_equipo) {
+      equiposSet.add(op.modelo_equipo);
+    }
 
-      try {
-        const registrosArray = op.registros;
-        
-        if (Array.isArray(registrosArray)) {
-          const metros = this.calcularMetrosPerforados(registrosArray);
-          totalMetros += metros;
-          
-          for (const registro of registrosArray) {
-            if (registro.estado === 'OPERATIVO') {
-              const operacion = registro.operacion || registro;
-              if (operacion.tipo_perforacion === 'FRENTE COMPLETO') {
-                nFrentes++;
-                break;
-              }
-            }
-          }
-        }
-        
-      } catch (error) {
-        //console.error('Error procesando operación:', op.id, error);
-      }
-    });
+    const registrosArray = op.registros;
 
-    const metrosPorDisparo = nFrentes > 0 ? totalMetros / nFrentes : 0;
+    if (!Array.isArray(registrosArray)) {
+      console.warn(`⚠️ Operación ${index} sin registros`);
+      return;
+    }
 
-    this.resumen = {
-      conteoEquipos: equiposSet.size,
-      metrosPorDisparo: Number(metrosPorDisparo.toFixed(0)),
-      nFrentes,
-      totalMetros: Number(totalMetros.toFixed(0))
-    };
-    
-    //console.log('📊 RESUMEN FINAL:', this.resumen);
-  }
+    // 🔹 Metros
+    const metros = this.calcularMetrosPerforados(registrosArray);
+    totalMetros += metros;
+
+    // 🔹 Frentes por operación
+    const frentes = this.contarFrentesCompletos(registrosArray);
+    totalFrentes += frentes;
+  });
+
+  const metrosPorDisparo = totalFrentes > 0 ? totalMetros / totalFrentes : 0;
+
+  this.resumen = {
+    conteoEquipos: equiposSet.size,
+    metrosPorDisparo: Number(metrosPorDisparo.toFixed(0)),
+    nFrentes: totalFrentes,
+    totalMetros: Number(totalMetros.toFixed(0))
+  };
+}
 
   //=========================================
   // 🔥 GRAFICO 5
@@ -1826,8 +1863,9 @@ procesarDataPerforacionDetallada() {
       const tipo_perforacion = operacion?.tipo_perforacion;
       if (!tipo_perforacion) return; // ❌ NO enviar basura
 
-      const labor_fr = `${operacion?.tipo_labor ?? ''}${operacion?.labor ?? ''}${operacion?.ala ?? ''}`.trim();
-      if (!labor_fr) return; // 🔥 también evitamos vacíos
+      console.log(`\n🔥 Procesando registro para equipo ${key}:`);
+
+      const labor_fr = `${operacion?.tipo_labor ?? ''}${operacion?.labor ?? ''}${operacion?.ala ?? ''}`.trim(); // 🔥 también evitamos vacíos
 
       // =========================
       // 🔥 METROS

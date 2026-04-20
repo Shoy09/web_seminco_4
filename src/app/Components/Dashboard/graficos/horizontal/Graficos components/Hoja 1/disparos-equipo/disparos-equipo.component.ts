@@ -23,17 +23,18 @@ export class DisparosEquipoComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] || changes['objetivoDisparos']) {
+      //console.log('📊 DATA RECIBIDA:', this.data);
       this.actualizarGrafico();
     }
   }
 
-  actualizarGrafico(): void {
+actualizarGrafico(): void {
   if (!this.data || this.data.length === 0) {
     this.chartOptions = {};
     return;
   }
 
-  // Agrupar los datos por seccion_labor
+  // 🔹 Agrupar por seccion_labor (NO SE TOCA)
   const gruposPorSeccionLabor = new Map<string, any[]>();
   
   this.data.forEach(item => {
@@ -44,24 +45,66 @@ export class DisparosEquipoComponent implements OnChanges {
     gruposPorSeccionLabor.get(seccionLabor)!.push(item);
   });
 
-  // Preparar datos para el gráfico con estructura jerárquica
+  // 🔹 Detectar TODOS los tipos dinámicamente
+  const tiposSet = new Set<string>();
+  this.data.forEach(item => {
+    if (item.tipos) {
+      Object.keys(item.tipos).forEach(t => tiposSet.add(t));
+    }
+  });
+  const tiposArray = Array.from(tiposSet);
+
+  // 🔹 Preparar eje X (NO SE TOCA DISEÑO)
   const xAxisData: string[] = [];
-  const seriesData: number[] = [];
   const tooltipMap: Map<number, any> = new Map();
 
   let index = 0;
-  gruposPorSeccionLabor.forEach((items, seccionLabor) => {
+  gruposPorSeccionLabor.forEach((items) => {
     items.forEach(item => {
-      // Mantener el formato original con dos líneas
       const label = `${item.modelo_equipo}\n(${item.seccion || 'N/A'})`;
       xAxisData.push(label);
-      seriesData.push(item.n_frentes);
       tooltipMap.set(index, item);
       index++;
     });
   });
 
-  const maxValor = Math.max(...seriesData);
+  // 🔹 Colores consistentes (opcional pero recomendado)
+  const colores: any = {
+    'FRENTE COMPLETO': '#3498db',
+    'DESQUINCHE': '#e74c3c',
+    'BREASTING': '#2ecc71',
+    'CIRCADO': '#f1c40f',
+    'REFUGIO': '#9b59b6',
+    'SELLADA': '#34495e'
+  };
+
+  // 🔹 Crear series apiladas (AQUÍ ESTÁ LA MAGIA)
+  const series = tiposArray.map((tipo, tipoIndex) => ({
+    name: tipo,
+    type: 'bar',
+    stack: 'total',
+    barWidth: '50%',
+    data: this.data.map(item => item.tipos?.[tipo] || 0),
+    itemStyle: {
+      color: colores[tipo] || '#95a5a6',
+      borderRadius: tipoIndex === tiposArray.length - 1
+        ? [5, 5, 0, 0] // 🔥 solo la parte superior redondeada
+        : [0, 0, 0, 0],
+      shadowColor: 'rgba(0, 0, 0, 0.2)',
+      shadowBlur: 5
+    },
+    label: {
+      show: true,
+      position: 'inside',
+      fontWeight: 'bold',
+      fontSize: 11,
+      formatter: (params: any) => params.value > 0 ? params.value : ''
+    }
+  }));
+
+  // 🔹 Calcular máximo (igual que antes pero con total)
+  const totales = this.data.map(item => item.n_frentes);
+  const maxValor = Math.max(...totales);
   const yAxisMax = Math.ceil(maxValor * 1.2);
 
   this.chartOptions = {
@@ -77,25 +120,34 @@ export class DisparosEquipoComponent implements OnChanges {
     },
     tooltip: {
       trigger: 'axis',
-      axisPointer: {
-        type: 'shadow'
-      },
+      axisPointer: { type: 'shadow' },
       formatter: (params: any) => {
-        const dataPoint = params[0];
-        const item = tooltipMap.get(dataPoint.dataIndex);
+        const item = tooltipMap.get(params[0].dataIndex);
         if (!item) return '';
-        
+
+        let detalle = '';
+        params.forEach((p: any) => {
+          if (p.value > 0) {
+            detalle += `${p.marker} ${p.seriesName}: ${p.value}<br/>`;
+          }
+        });
+
         return `<strong>${item.modelo_equipo}</strong><br/>
                 Sección: ${item.seccion || 'N/A'}<br/>
-                Sección Labor: ${item.seccion_labor || 'N/A'}<br/>
-                <strong style="color: #3498db;">Disparos: ${dataPoint.value}</strong>`;
+                Sección Labor: ${item.seccion_labor || 'N/A'}<br/><br/>
+                ${detalle}
+                <strong>Total: ${item.n_frentes}</strong>`;
       }
+    },
+    legend: {
+      bottom: 0,
+      left: 'center'
     },
     grid: {
       left: '10%',
       right: '5%',
       top: '15%',
-      bottom: '15%',
+      bottom: '20%', // 🔥 un poco más de espacio para la leyenda
       containLabel: true
     },
     xAxis: {
@@ -104,25 +156,10 @@ export class DisparosEquipoComponent implements OnChanges {
       axisLabel: {
         fontSize: 11,
         fontWeight: 'bold',
-        rotate: 0,
-        interval: 0,
-        formatter: (value: string) => value,
-        rich: {
-          equipment: {
-            fontSize: 12,
-            fontWeight: 'bold',
-            color: '#333'
-          },
-          section: {
-            fontSize: 10,
-            color: '#666'
-          }
-        }
+        interval: 0
       },
       axisLine: {
-        lineStyle: {
-          color: '#333'
-        }
+        lineStyle: { color: '#333' }
       },
       axisTick: {
         alignWithLabel: true
@@ -136,40 +173,14 @@ export class DisparosEquipoComponent implements OnChanges {
       min: 0,
       max: yAxisMax,
       interval: this.calcularIntervalo(yAxisMax),
-      axisLabel: {
-        fontSize: 12
-      },
+      axisLabel: { fontSize: 12 },
       splitLine: {
-        lineStyle: {
-          type: 'dashed'
-        }
+        lineStyle: { type: 'dashed' }
       }
     },
-    series: [
-      {
-        name: 'DISPAROS',
-        type: 'bar',
-        data: seriesData,
-        itemStyle: {
-          borderRadius: [5, 5, 0, 0],
-          color: '#3498db',
-          shadowColor: 'rgba(0, 0, 0, 0.2)',
-          shadowBlur: 5
-        },
-        label: {
-          show: true,
-          position: 'top',
-          fontWeight: 'bold',
-          fontSize: 14,
-          formatter: '{c}',
-          color: '#333'
-        },
-        barWidth: '50%'
-      }
-    ]
+    series
   };
 }
-
   agregarSeparadores(grupos: Map<string, any[]>, totalItems: number): any[] {
     const separadores: any[] = [];
     let acumulado = 0;
