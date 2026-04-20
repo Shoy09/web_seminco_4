@@ -37,6 +37,8 @@ import { ScatterTurnosComponent } from "../Graficos components/Hoja 2/scatter-tu
 import { ScatterTurnosNocheComponent } from "../Graficos components/Hoja 2/scatter-turnos-noche/scatter-turnos-noche.component";
 import { CommonModule } from '@angular/common';
 import { PromedioEstadosEchartsComponent } from "../Graficos components/Hoja 2/promedio-estados-echarts/promedio-estados-echarts.component";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-principal-grafico-horizontal',
@@ -1852,60 +1854,83 @@ procesarDataPerforacionDetallada() {
 
   const mapa = new Map<string, any>();
 
+  let totalRegistros = 0;
+  let descartadosSinTipo = 0;
+  let aceptados = 0;
+
+  // console.log('🚀 INICIO procesamiento perforación');
+
   this.operacionesFiltradas.forEach(op => {
 
     const key = op.modelo_equipo || 'SIN_EQUIPO';
     const registrosArray = op.registros;
 
-    if (!Array.isArray(registrosArray)) return;
+    if (!Array.isArray(registrosArray)) {
+      console.log(`⚠️ ${key} descartado: registros no es array`);
+      return;
+    }
 
-    registrosArray.forEach(r => {
+    // console.log(`\n📦 Equipo: ${key} | registros: ${registrosArray.length}`);
+
+    registrosArray.forEach((r, idx) => {
+
+      totalRegistros++;
+
+      console.log('➡️ Registro ENTRANTE:', r);
 
       const operacion = r?.operacion || {};
 
-      // =========================
-      // 🔥 VALIDACIÓN REAL
-      // =========================
       const tipo_perforacion = operacion?.tipo_perforacion;
-      if (!tipo_perforacion) return; // ❌ NO enviar basura
-
-      console.log(`\n🔥 Procesando registro para equipo ${key}:`);
-
-      const labor_fr = `${operacion?.tipo_labor ?? ''}${operacion?.labor ?? ''}${operacion?.ala ?? ''}`.trim(); // 🔥 también evitamos vacíos
 
       // =========================
-      // 🔥 METROS
+      // 🔥 FILTRO CRÍTICO
       // =========================
+      if (!tipo_perforacion) {
+        descartadosSinTipo++;
+        console.log('❌ DESCARTADO (sin tipo_perforacion):', r);
+        return;
+      }
+
+      aceptados++;
+
+      const labor_fr =
+        `${operacion?.tipo_labor ?? ''}${operacion?.labor ?? ''}${operacion?.ala ?? ''}`.trim();
+
       const metros = this.calcularMetrosPerforados([r]);
 
-      // =========================
-      // 🔥 VALORES OPERACIONALES
-      // =========================
       const long_barras = Number(operacion?.long_barras) || 0;
       const tal_alivio = Number(operacion?.tal_alivio) || 0;
       const tal_prod = Number(operacion?.tal_prod) || 0;
       const tal_repaso = Number(operacion?.tal_repaso) || 0;
       const tal_rimados = Number(operacion?.tal_rimados) || 0;
 
-      const mapKey = `${key}-${tipo_perforacion}-${labor_fr}`;
+      // 🔥 SOLUCIÓN: Usar ID único por registro
+      // Opción 1: Usar el número de registro + timestamp + índice
+      const mapKey = `${key}-${tipo_perforacion}-${labor_fr}-${r.numero}-${Date.now()}-${idx}`;
+      
+      // Opción 2: Usar un contador interno (más limpio)
+      // const mapKey = `${key}-${tipo_perforacion}-${labor_fr}-${aceptados}`;
+      
+      // Opción 3: Si cada registro tiene un ID único
+      // const mapKey = r.id || `${key}-${tipo_perforacion}-${labor_fr}-${Date.now()}-${Math.random()}`;
 
       if (!mapa.has(mapKey)) {
         mapa.set(mapKey, {
           modelo_equipo: key,
           tipo_perforacion,
           labor_fr,
-
           metros_perforados: 0,
-
           sum_long_barras: 0,
           count_long_barras: 0,
-
           tal_alivio: 0,
           tal_prod: 0,
           tal_repaso: 0,
           tal_rimados: 0,
-
-          long_barras: 0
+          long_barras: 0,
+          // Opcional: guardar datos originales para trazabilidad
+          numero_registro: r.numero,
+          hora_inicio: r.hora_inicio,
+          hora_final: r.hora_final
         });
       }
 
@@ -1923,6 +1948,13 @@ procesarDataPerforacionDetallada() {
       item.tal_repaso += tal_repaso;
       item.tal_rimados += tal_rimados;
 
+      console.log('✅ ACEPTADO:', {
+        key,
+        tipo_perforacion,
+        labor_fr,
+        metros,
+        mapKey  // Para depuración
+      });
     });
   });
 
@@ -1936,9 +1968,23 @@ procesarDataPerforacionDetallada() {
         : 0;
   }
 
-  return Array.from(mapa.values());
-}
+  const resultado = Array.from(mapa.values());
 
+  // =========================
+  // 🔥 RESUMEN FINAL
+  // =========================
+  // console.log('\n========================');
+  // console.log('📊 RESUMEN FINAL');
+  // console.log('========================');
+  // console.log('Total registros:', totalRegistros);
+  // console.log('Aceptados:', aceptados);
+  // console.log('Descartados sin tipo_perforacion:', descartadosSinTipo);
+  // console.log('Registros individuales (sin agrupar):', resultado.length);
+  // console.log('✅ Coincidencia:', aceptados === resultado.length ? '✓ PERFECTO' : '✗ INCONSISTENCIA');
+  // console.log('Resultado:', resultado);
+
+  return resultado;
+}
 // =========================================
 // GRAFICO 22
 // =========================================
@@ -2019,4 +2065,45 @@ prepararDatosGraficoEstados(): void {
       .filter(e => !this.estadosBloqueados.includes(e.estado));
   });
 }
+
+//GENERAR PDF
+async generarPDF() {
+  const elemento = document.querySelector('.graficos-container') as HTMLElement;
+
+  if (!elemento) return;
+
+  const canvas = await html2canvas(elemento, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: '#ffffff'
+  });
+
+  const imgData = canvas.toDataURL('image/png');
+
+  const pdf = new jsPDF('p', 'mm', 'a4');
+
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = pdf.internal.pageSize.getHeight();
+
+  // altura total de la imagen en PDF
+  const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  // primera página
+  pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+  heightLeft -= pdfHeight;
+
+  // páginas siguientes
+  while (heightLeft > 0) {
+    position -= pdfHeight;
+    pdf.addPage();
+    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+    heightLeft -= pdfHeight;
+  }
+
+  pdf.save('grafico_horizontal.pdf');
+}
+
 }

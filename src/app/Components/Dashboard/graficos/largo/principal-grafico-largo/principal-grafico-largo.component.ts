@@ -28,6 +28,8 @@ import { ScatterTurnosNocheComponent } from "../Graficos components/Hoja 2/scatt
 import { RendimientoEquipoComponent } from "../Graficos components/Hoja 1/rendimiento-equipo/rendimiento-equipo.component";
 import { PlanProduccionService } from '../../../../../services/plan-produccion.service';
 import { PlanProduccion } from '../../../../../models/plan_produccion.model';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-principal-grafico-largo',
@@ -185,6 +187,45 @@ aplicarFiltro() {
   this.turnoSeleccionado = '';
 
   this.procesarTodo();
+}
+
+async generarPDF() {
+  const elemento = document.querySelector('.graficos-container') as HTMLElement;
+
+  if (!elemento) return;
+
+  const canvas = await html2canvas(elemento, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: '#ffffff'
+  });
+
+  const imgData = canvas.toDataURL('image/png');
+
+  const pdf = new jsPDF('p', 'mm', 'a4');
+
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = pdf.internal.pageSize.getHeight();
+
+  // altura total de la imagen en PDF
+  const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  // primera página
+  pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+  heightLeft -= pdfHeight;
+
+  // páginas siguientes
+  while (heightLeft > 0) {
+    position -= pdfHeight;
+    pdf.addPage();
+    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+    heightLeft -= pdfHeight;
+  }
+
+  pdf.save('grafico_tl.largo.pdf');
 }
 
   // =========================================

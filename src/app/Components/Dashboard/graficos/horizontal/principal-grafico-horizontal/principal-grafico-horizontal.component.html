@@ -26,6 +26,10 @@
   <button class="btn-aplicar" (click)="quitarFiltro()">
     Quitar filtro
   </button>
+
+  <button class="btn-aplicar" (click)="generarPDF()">
+  Exportar PDF
+</button>
 </div>
 
 <div class="graficos-container">
@@ -44,12 +48,7 @@
   <app-horometros-jumbos [data]="dataHorometrosJumbos"></app-horometros-jumbos>
   <app-total-horometros [data]="dataHorometrosJumbos"></app-total-horometros>
   <app-horas-primera-perforacion [data]="dataProcesoLaborFR"></app-horas-primera-perforacion>
-  <!-- <h1>SEGUNDA HOJA</h1> -->
-  <!-- <app-horas-inicio-perforacion [data]="dataPromedioPrimeraPerfDiaFR"></app-horas-inicio-perforacion>
-  <app-historial-inicio-perforacion [data]="dataPromedioPrimeraPerfDiaFRPorFecha"></app-historial-inicio-perforacion>
-  <app-horas-fin-perforacion [data]="dataPromedioUltimaPerfDiaFR"></app-horas-fin-perforacion>
-  <app-historial-ultimo-perforacion [data]="dataPromedioUltimaPerfDiaFRPorFecha"></app-historial-ultimo-perforacion>
-   -->
+
   <app-avance-fase [data]="dataAvanceFase"></app-avance-fase>
   <app-disparos-tipo-perforacion [data]="dataTipoPerforacion"></app-disparos-tipo-perforacion>
   
@@ -61,16 +60,6 @@
   <app-mejores-operadores [data]="dataFrPorOperadorTurno"></app-mejores-operadores>
   <app-ranking-operador [data]="dataFrPorOperadorTurno"></app-ranking-operador>
   <app-observaciones class="full-width" [data]="dataLaborFRDetallado"></app-observaciones>
-
-  <!-- <app-gantt-diagram 
-  class="full-width"
-  [title]="'LINEA DE TIEMPO ACTIVIDADES'"
-  [data]="actividadesData"
-  [recursos]="['J-14', 'J-19', 'J-20']"
-  [minHora]="7"
-  [maxHora]="19">
-</app-gantt-diagram> -->
-
 
 <app-scatter-turnos 
   *ngIf="turnoAplicado === '' || turnoAplicado === 'DÍA'"
