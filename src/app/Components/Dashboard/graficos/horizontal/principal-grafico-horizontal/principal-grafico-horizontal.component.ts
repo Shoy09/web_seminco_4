@@ -131,7 +131,7 @@ turnoAplicado: string = '';
   { recurso: 'J-20', actividad: 'FRENTE COMPLETO', inicio: 17, fin: 19, label: '' }
 ];
 dataPromedioEstados: any;
-
+cargandoPDF = false;
   constructor(
     private planMensualService: PlanMensualService,
     private fechasPlanMensualService: FechasPlanMensualService,
@@ -2068,42 +2068,64 @@ prepararDatosGraficoEstados(): void {
 
 //GENERAR PDF
 async generarPDF() {
-  const elemento = document.querySelector('.graficos-container') as HTMLElement;
+  this.cargandoPDF = true;
 
-  if (!elemento) return;
+  try {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
 
-  const canvas = await html2canvas(elemento, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: '#ffffff'
-  });
+    const todasLasPaginas = document.querySelectorAll('[data-page]');
+    const elementosPorPagina = new Map<number, Element[]>();
 
-  const imgData = canvas.toDataURL('image/png');
+    todasLasPaginas.forEach(el => {
+      const page = parseInt(el.getAttribute('data-page') || '1');
+      if (!elementosPorPagina.has(page)) {
+        elementosPorPagina.set(page, []);
+      }
+      elementosPorPagina.get(page)!.push(el);
+    });
 
-  const pdf = new jsPDF('p', 'mm', 'a4');
+    for (const [pageNum, elementos] of Array.from(elementosPorPagina.entries())) {
+      if (pageNum > 1) pdf.addPage();
 
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = pdf.internal.pageSize.getHeight();
+      todasLasPaginas.forEach(el => {
+        (el as HTMLElement).style.display = 'none';
+      });
 
-  // altura total de la imagen en PDF
-  const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      elementos.forEach(el => {
+        (el as HTMLElement).style.display = 'block';
+      });
 
-  let heightLeft = imgHeight;
-  let position = 0;
+      await this.delay(300);
 
-  // primera página
-  pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-  heightLeft -= pdfHeight;
+      const container = document.querySelector('.graficos-container') as HTMLElement;
 
-  // páginas siguientes
-  while (heightLeft > 0) {
-    position -= pdfHeight;
-    pdf.addPage();
-    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-    heightLeft -= pdfHeight;
+      if (container) {
+        const canvas = await html2canvas(container, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff'
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight);
+      }
+    }
+
+    todasLasPaginas.forEach(el => {
+      (el as HTMLElement).style.display = '';
+    });
+
+    pdf.save('grafico_completo_tal_horizontal.pdf');
+
+  } finally {
+    this.cargandoPDF = false;
   }
-
-  pdf.save('grafico_horizontal.pdf');
+}
+private delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 }

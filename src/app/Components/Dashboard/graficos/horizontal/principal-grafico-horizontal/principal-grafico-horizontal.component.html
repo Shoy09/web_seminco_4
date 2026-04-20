@@ -33,46 +33,57 @@
 </div>
 
 <div class="graficos-container">
-  <app-resumen class="full-width" [data]="resumen"></app-resumen>
+  <!-- Hoja 1 pdf -->
+  <app-resumen class="full-width" [data]="resumen" data-page="1"></app-resumen>
+
+  <app-disparos-equipo [data]="dataDisparosEquipo" data-page="1"></app-disparos-equipo>
+  <app-disparos-dia [data]="dataDisparosDia" data-page="1"></app-disparos-dia>
+
+  <app-rendimiento-equipo [data]="dataIndicadoresEquipo" data-page="1"></app-rendimiento-equipo>
+  <app-demoras-operativas [data]="dataDemorasOperativas" data-page="1"></app-demoras-operativas>
+ <!-- Hoja 2 pdf -->
+  <app-horas-no-operativas [data]="dataHorasNoOperativas" data-page="2"></app-horas-no-operativas>
+  <app-horas-de-mantenimiento [data]="dataHorasMantenimiento" data-page="2"></app-horas-de-mantenimiento>
+
+  <app-metros-perforados-disparo [data]="dataMetrosDisparoFR" data-page="2"></app-metros-perforados-disparo>
+  <app-perforado-equipo  [data]="dataMetrosDisparoFR" data-page="2"></app-perforado-equipo>
+
+  <app-mhr-equipo [data]="dataMhrEquipo" data-page="2"></app-mhr-equipo>
+  <app-horometros-jumbos [data]="dataHorometrosJumbos" data-page="2"></app-horometros-jumbos>
+   <!-- Hoja 3 pdf -->
+  <app-total-horometros [data]="dataHorometrosJumbos" data-page="3"></app-total-horometros>
+  <app-horas-primera-perforacion [data]="dataProcesoLaborFR" data-page="3"></app-horas-primera-perforacion>
+
+  <app-avance-fase [data]="dataAvanceFase" data-page="3"></app-avance-fase>
+  <app-disparos-tipo-perforacion [data]="dataTipoPerforacion" data-page="3"></app-disparos-tipo-perforacion>
   
-  <app-disparos-equipo [data]="dataDisparosEquipo"></app-disparos-equipo>
-  <app-disparos-dia [data]="dataDisparosDia"></app-disparos-dia>
-  <app-rendimiento-equipo [data]="dataIndicadoresEquipo" ></app-rendimiento-equipo>
-  <app-demoras-operativas [data]="dataDemorasOperativas"></app-demoras-operativas>
-  <app-horas-no-operativas [data]="dataHorasNoOperativas"></app-horas-no-operativas>
-  <app-horas-de-mantenimiento [data]="dataHorasMantenimiento"></app-horas-de-mantenimiento>
+  <app-promedio-estados-echarts class="full-width" [data]="datosGraficoEstados" data-page="3"></app-promedio-estados-echarts>
+  <!-- Hoja 4 pdf -->
+  <app-detalle-perforacion class="full-width" [data]="dataPercusionConMetrosJumbos" data-page="4"></app-detalle-perforacion>
+  <app-detalle-disparos class="full-width" [data]="datadetalleDisparos" data-page="4"></app-detalle-disparos>
+ <!-- Hoja 5 pdf -->
+  <app-mejores-operadores [data]="dataFrPorOperadorTurno" data-page="5"></app-mejores-operadores>
+  <app-ranking-operador [data]="dataFrPorOperadorTurno" data-page="5"></app-ranking-operador>
 
-  <app-metros-perforados-disparo [data]="dataMetrosDisparoFR"></app-metros-perforados-disparo>
-  <app-perforado-equipo  [data]="dataMetrosDisparoFR"></app-perforado-equipo>
-  <app-mhr-equipo [data]="dataMhrEquipo"></app-mhr-equipo>
-  <app-horometros-jumbos [data]="dataHorometrosJumbos"></app-horometros-jumbos>
-  <app-total-horometros [data]="dataHorometrosJumbos"></app-total-horometros>
-  <app-horas-primera-perforacion [data]="dataProcesoLaborFR"></app-horas-primera-perforacion>
-
-  <app-avance-fase [data]="dataAvanceFase"></app-avance-fase>
-  <app-disparos-tipo-perforacion [data]="dataTipoPerforacion"></app-disparos-tipo-perforacion>
-  
-  <app-promedio-estados-echarts class="full-width" [data]="datosGraficoEstados" ></app-promedio-estados-echarts>
-  
-  <app-detalle-perforacion class="full-width" [data]="dataPercusionConMetrosJumbos"></app-detalle-perforacion>
-  <app-detalle-disparos class="full-width" [data]="datadetalleDisparos"></app-detalle-disparos>
-
-  <app-mejores-operadores [data]="dataFrPorOperadorTurno"></app-mejores-operadores>
-  <app-ranking-operador [data]="dataFrPorOperadorTurno"></app-ranking-operador>
-  <app-observaciones class="full-width" [data]="dataLaborFRDetallado"></app-observaciones>
-
+  <app-observaciones class="full-width" [data]="dataLaborFRDetallado" data-page="5"></app-observaciones>
+ <!-- Hoja 6 pdf -->
 <app-scatter-turnos 
   *ngIf="turnoAplicado === '' || turnoAplicado === 'DÍA'"
   class="full-width"
-  [data]="dataHorasNumericas">
+  [data]="dataHorasNumericas" data-page="6">
 </app-scatter-turnos>
 
 <app-scatter-turnos-noche 
   *ngIf="turnoAplicado === '' || turnoAplicado === 'NOCHE'"
   class="full-width"
-  [data]="dataHorasNumericas">
+  [data]="dataHorasNumericas" data-page="6">
 </app-scatter-turnos-noche>
 
 
 
 </div>     
+
+<div class="overlay" *ngIf="cargandoPDF">
+  <div class="spinner"></div>
+  <p>Generando PDF...</p>
+</div>
