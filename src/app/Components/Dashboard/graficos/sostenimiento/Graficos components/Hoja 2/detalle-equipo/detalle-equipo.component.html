@@ -1,0 +1,47 @@
+<div class="table-container">
+  <h3 class="table-title">DETALLE DE EQUIPO</h3>
+  
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Equipo</th>
+          <th>Horas percutadas</th>
+          <th>N° Pernos</th>
+          <th>Log Pernos</th>
+          <th>N° Labores Sostenidas</th>
+          <th>N° Pernos/Labor</th>
+          <th>M/HR</th>
+          <th>Metros Perforados</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of displayedData">
+          <td class="equipo-cell">{{ item.equipo }}</td>
+          <td>{{ formatear1Decimal(item.diferencia_percusion) }}</td>
+          <td>{{ formatearEntero(item.n_pernos) }}</td>
+          <td>{{ formatearEntero(item.log_pernos) }}</td>
+          <td>{{ formatearEntero(item.n_labores_sostenidas) }}</td>
+          <td>{{ formatear1Decimal(item.n_pernos_por_labor) }}</td>
+          <td>{{ formatear1Decimal(item.sos_m_hr_hp) }}</td>
+          <td>{{ formatear1Decimal(item.metros_perforados) }}</td>
+        </tr>
+        <tr *ngIf="displayedData.length === 0">
+          <td colspan="8" class="no-data">No hay datos disponibles</td>
+        </tr>
+      </tbody>
+      <tfoot *ngIf="displayedData.length > 0">
+        <tr class="total-row">
+          <td class="total-label"><strong>Total/Promedio</strong></td>
+          <td><strong>{{ formatear1Decimal(totales.diferencia_percusion) }}</strong></td>
+          <td><strong>{{ formatearEntero(totales.n_pernos) }}</strong></td>
+          <td><strong>{{ formatearEntero(totales.log_pernos) }}</strong></td>
+          <td><strong>{{ formatearEntero(totales.n_labores_sostenidas) }}</strong></td>
+          <td><strong>{{ formatear1Decimal(totales.n_pernos_por_labor) }}</strong></td>
+          <td><strong>{{ formatear1Decimal(totales.sos_m_hr_hp) }}</strong></td>
+          <td><strong>{{ formatear1Decimal(totales.metros_perforados) }}</strong></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

@@ -34,6 +34,7 @@ import { ExplosivosComponent } from './Components/Crear datos/explosivos/explosi
 import { ExplosivosGraficosComponent } from './Components/Dashboard/Explosivos/explosivos-graficos/explosivos-graficos.component';
 import { DashboardPruebaComponent } from './Components/Dashboard/sostenimiento/dashboard-prueba/dashboard-prueba.component';
 import { PrincipalGraficoLargoComponent } from './Components/Dashboard/graficos/largo/principal-grafico-largo/principal-grafico-largo.component';
+import { PrincipalGraficoSostenimientoComponent } from './Components/Dashboard/graficos/sostenimiento/principal-grafico-sostenimiento/principal-grafico-sostenimiento.component';
 
 
 
@@ -85,8 +86,8 @@ export const routes: Routes = [
 { path: 'power-bi', component: PowerBiPublicComponent },
 { path: 'grafico-horizontal', component: PrincipalGraficoHorizontalComponent },
 { path: 'grafico-tal-largo', component: PrincipalGraficoLargoComponent },
+{path: 'grafico-sostenimiento', component: PrincipalGraficoSostenimientoComponent},
 
-{ path: 'grafico-sostenimiento', component: DashboardPruebaComponent },
 
 { path: 'explosivos', component: ExplosivosComponent },
 { path: 'explosivos-graficos', component: ExplosivosGraficosComponent },

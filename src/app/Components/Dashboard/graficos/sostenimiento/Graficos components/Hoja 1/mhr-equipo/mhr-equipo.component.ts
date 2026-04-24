@@ -49,14 +49,14 @@ export class MhrEquipoComponent implements OnChanges {
 
     // Preparar datos para el gráfico
     const xAxisData = this.data.map(item => 
-      `${item.modelo_equipo || 'N/A'}`
+      `${item.modeloEquipo || 'N/A'}\n(${item.seccion || 'N/A'})`
     );
     
-    const seriesData = this.data.map(item => Number(item.fr_mhr_hp) || 0);
+    const seriesData = this.data.map(item => Number(item.MH) || 0);
     
     // Calcular max redondeado hacia arriba (múltiplo de 20 para ejes limpios)
     const maxMH = Math.max(...seriesData);
-    const maxY = Math.ceil(maxMH / 20) * 20;
+    const maxY = Math.ceil(maxMH / 20) * 20; // Ej: 114 → 120, 36 → 40
 
     // Asignar colores azules a cada barra
     const coloresBarras = seriesData.map((_, index) => 
@@ -81,9 +81,10 @@ export class MhrEquipoComponent implements OnChanges {
         },
         formatter: (params: any) => {
           const item = this.data[params[0].dataIndex];
-          return `<strong>${item.modelo_equipo}</strong><br/>
-                  Metros perforados: ${item.metros_perforados?.toFixed(2) || 0} m<br/>
-                  Dif. Percusión: ${item.dif_percusion?.toFixed(2) || 0}<br/>
+          return `<strong>${item.modeloEquipo}</strong><br/>
+                  Sección: ${item.seccion}<br/>
+                  Metros perforados: ${item.metros?.toFixed(2) || 0} m<br/>
+                  Horas percusión: ${item.horasPercusion?.toFixed(2) || 0}<br/>
                   <strong style="color: ${this.paletaAzules[params[0].dataIndex % this.paletaAzules.length]};">Rendimiento: ${params[0].value.toFixed(2)} m/hr</strong>`;
         }
       },
@@ -101,7 +102,8 @@ export class MhrEquipoComponent implements OnChanges {
           fontSize: 11,
           fontWeight: 'bold',
           interval: 0,
-          rotate: 0
+          rotate: 0,
+          lineHeight: 18
         },
         axisLine: {
           lineStyle: {

@@ -8,14 +8,14 @@ import { CanvasRenderer } from 'echarts/renderers';
 echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, CanvasRenderer]);
 
 @Component({
-  selector: 'app-mhr-equipo',
+  selector: 'app-metros-equipo',
   standalone: true,
   imports: [NgxEchartsDirective],
   providers: [provideEchartsCore({ echarts })],
-  templateUrl: './mhr-equipo.component.html',
-  styleUrl: './mhr-equipo.component.css'
+  templateUrl: './metros-equipo.component.html',
+  styleUrl: './metros-equipo.component.css'
 })
-export class MhrEquipoComponent implements OnChanges {
+export class MetrosEquipoComponent implements OnChanges {
 
   @Input() data: any[] = [];
 
@@ -49,14 +49,14 @@ export class MhrEquipoComponent implements OnChanges {
 
     // Preparar datos para el gráfico
     const xAxisData = this.data.map(item => 
-      `${item.modelo_equipo || 'N/A'}`
+      `${item.modeloEquipo || 'N/A'}`
     );
     
-    const seriesData = this.data.map(item => Number(item.fr_mhr_hp) || 0);
+    const seriesData = this.data.map(item => Number(item.metros) || 0);
     
     // Calcular max redondeado hacia arriba (múltiplo de 20 para ejes limpios)
-    const maxMH = Math.max(...seriesData);
-    const maxY = Math.ceil(maxMH / 20) * 20;
+    const maxMetros = Math.max(...seriesData);
+    const maxY = Math.ceil(maxMetros / 20) * 20;
 
     // Asignar colores azules a cada barra
     const coloresBarras = seriesData.map((_, index) => 
@@ -65,7 +65,7 @@ export class MhrEquipoComponent implements OnChanges {
 
     this.chartOptions = {
       title: {
-        text: 'M/HR POR EQUIPO',
+        text: 'METROS PERFORADOS POR EQUIPO',
         left: 'center',
         top: 10,
         textStyle: {
@@ -81,14 +81,12 @@ export class MhrEquipoComponent implements OnChanges {
         },
         formatter: (params: any) => {
           const item = this.data[params[0].dataIndex];
-          return `<strong>${item.modelo_equipo}</strong><br/>
-                  Metros perforados: ${item.metros_perforados?.toFixed(2) || 0} m<br/>
-                  Dif. Percusión: ${item.dif_percusion?.toFixed(2) || 0}<br/>
-                  <strong style="color: ${this.paletaAzules[params[0].dataIndex % this.paletaAzules.length]};">Rendimiento: ${params[0].value.toFixed(2)} m/hr</strong>`;
+          return `<strong>${item.modeloEquipo}</strong><br/>
+                  Metros perforados: <strong style="color: ${this.paletaAzules[params[0].dataIndex % this.paletaAzules.length]};">${params[0].value.toFixed(2)} m</strong>`;
         }
       },
       grid: {
-        left: '12%',     // Más espacio a la izquierda para el eje Y
+        left: '12%',
         right: '8%',
         top: '15%',
         bottom: '10%',
@@ -114,15 +112,15 @@ export class MhrEquipoComponent implements OnChanges {
       },
       yAxis: {
         type: 'value',
-        name: 'Metros/Hora',
+        name: 'Metros',
         nameLocation: 'middle',
         nameGap: 50,
         min: 0,
         max: maxY,
-        interval: maxY / 4, // 5 intervalos limpios (0, 30, 60, 90, 120)
+        interval: maxY / 4,
         axisLabel: {
           fontSize: 10,
-          formatter: '{value} m/hr'
+          formatter: '{value} m'
         },
         splitLine: {
           show: true,
@@ -133,15 +131,15 @@ export class MhrEquipoComponent implements OnChanges {
           }
         },
         axisLine: {
-          show: false  // Oculta la línea del eje Y para menos ruido
+          show: false
         },
         axisTick: {
-          show: false  // Oculta las marquitas del eje Y
+          show: false
         }
       },
       series: [
         {
-          name: 'M/HR',
+          name: 'Metros',
           type: 'bar',
           data: seriesData.map((value, index) => ({
             value: value,
@@ -157,11 +155,11 @@ export class MhrEquipoComponent implements OnChanges {
           label: {
             show: true,
             position: 'top',
-            formatter: (params: any) => `${Math.round(params.value)}`,
+            formatter: (params: any) => `${Math.round(params.value)} m`,
             fontWeight: 'bold',
             fontSize: 11,
             color: '#333',
-            offset: [0, 5]  // Separar la etiqueta de la barra
+            offset: [0, 5]
           },
           barWidth: '50%',
           barCategoryGap: '30%'
