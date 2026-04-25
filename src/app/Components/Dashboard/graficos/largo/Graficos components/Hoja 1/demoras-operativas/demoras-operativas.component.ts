@@ -37,7 +37,6 @@ export class DemorasOperativasComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      //console.log('📊 DEMORAS OPERATIVAS RECIBIDAS:', this.data);
       this.actualizarGrafico();
     }
   }
@@ -45,17 +44,21 @@ export class DemorasOperativasComponent implements OnChanges {
   actualizarGrafico(): void {
     if (!this.data || !this.data.length) return;
 
-    // 🔹 Categorías (Tipo Estado)
+    // Categorías (Tipo Estado)
     const actividades = this.data.map((item) => item.tipo_estado);
 
-    // 🔹 Duración promedio (FR_Duración_Estado_Prom)
+    // Duración promedio (FR_Duración_Estado_Prom)
     const horas = this.data.map((item) => Number(item.promedio.toFixed(1)));
 
-    // 🔹 % acumulado
+    // % acumulado
     const porcentajes = this.data.map((item) => item.tiempo_acu_pct * 100);
 
+    // 🔹 Calcular maxHoras con EXACTAMENTE 20% de margen (sin ceil ni redondeos extras)
+    const maxHorasOriginal = Math.max(...horas, 1);
+    const margenSuperior = 0.20; // 20% exacto
+    let maxHoras = maxHorasOriginal * (1 + margenSuperior);
+    
     // 🔹 Escalar línea al eje Y
-    const maxHoras = Math.max(...horas, 1);
     const porcentajesEscalados = porcentajes.map((p) => (p / 100) * maxHoras);
 
     this.chartOptions = {
@@ -94,7 +97,7 @@ export class DemorasOperativasComponent implements OnChanges {
       grid: {
         left: '12%',
         right: '8%',
-        top: '18%',
+        top: '15%',  // Reducido para que no haya tanto espacio arriba
         bottom: '10%',
         containLabel: true,
       },
@@ -102,40 +105,41 @@ export class DemorasOperativasComponent implements OnChanges {
         type: 'category',
         data: actividades,
         axisLabel: {
-          rotate: 0, // 👈 importante: sin rotación si quieres vertical
+          rotate: 0,
           interval: 0,
           fontSize: 10,
           formatter: (value: string) => {
             const words = value.split(' ');
-
-            // máximo 3 líneas
             const lines = [];
             for (let i = 0; i < Math.min(words.length, 4); i++) {
               lines.push(words[i]);
             }
-
             let result = lines.join('\n');
-
-            // si hay más palabras -> puntos suspensivos
             if (words.length > 3) {
               result += '\n...';
             }
-
             return result;
           },
         },
       },
       yAxis: {
         type: 'value',
-        name: 'Duración (horas)', // 👈 AÑADIR ESTO BIEN CONFIGURADO
+        name: 'Duración (horas)',
         nameLocation: 'middle',
         nameGap: 45,
-
         min: 0,
         max: maxHoras,
-
         axisLabel: {
           formatter: '{value} h',
+        },
+        // 🔹 QUITAR boundaryGap para que no añada espacio extra
+        splitLine: {
+          show: true,
+          lineStyle: {
+            type: 'dashed',
+            width: 1,
+            color: '#e0e0e0',
+          },
         },
       },
       series: [
@@ -151,7 +155,10 @@ export class DemorasOperativasComponent implements OnChanges {
             show: true,
             position: 'top',
             formatter: '{c} h',
+            offset: [0, 3], // Reducido el offset
           },
+          barCategoryGap: '30%',
+          barGap: '30%',
         },
         {
           name: 'Porcentaje acumulado',
@@ -165,13 +172,20 @@ export class DemorasOperativasComponent implements OnChanges {
           },
           itemStyle: {
             color: '#e74c3c',
+            borderColor: '#ffffff',
+            borderWidth: 2,
           },
           label: {
             show: true,
             position: 'top',
+            offset: [0, -5], // Reducido el offset negativo
             formatter: (params: any) =>
               `${porcentajes[params.dataIndex].toFixed(1)}%`,
+            fontWeight: 'bold',
+            fontSize: 11,
           },
+          zlevel: 1,
+          z: 10,
         },
       ],
     };

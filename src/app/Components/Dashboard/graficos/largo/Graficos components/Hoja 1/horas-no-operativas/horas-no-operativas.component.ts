@@ -5,6 +5,16 @@ import { BarChart, LineChart } from 'echarts/charts';
 import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, ToolboxComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 
+echarts.use([
+  BarChart,
+  LineChart,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  ToolboxComponent,
+  CanvasRenderer,
+]);
 
 @Component({
   selector: 'app-horas-no-operativas',
@@ -22,7 +32,6 @@ export class HorasNoOperativasComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      //console.log('📊 DEMORAS OPERATIVAS RECIBIDAS:', this.data);
       this.actualizarGrafico();
     }
   }
@@ -30,17 +39,21 @@ export class HorasNoOperativasComponent implements OnChanges {
   actualizarGrafico(): void {
     if (!this.data || !this.data.length) return;
 
-    // 🔹 Categorías (Tipo Estado)
+    // Categorías (Tipo Estado)
     const actividades = this.data.map(item => item.tipo_estado);
 
-    // 🔹 Duración promedio (FR_Duración_Estado_Prom)
+    // Duración promedio (FR_Duración_Estado_Prom)
     const horas = this.data.map(item => Number(item.promedio.toFixed(1)));
 
-    // 🔹 % acumulado
+    // % acumulado
     const porcentajes = this.data.map(item => item.tiempo_acu_pct * 100);
 
-    // 🔹 Escalar línea al eje Y
-    const maxHoras = Math.max(...horas, 1);
+    // Calcular maxHoras con EXACTAMENTE 20% de margen (sin ceil ni redondeos extras)
+    const maxHorasOriginal = Math.max(...horas, 1);
+    const margenSuperior = 0.20; // 20% exacto
+    let maxHoras = maxHorasOriginal * (1 + margenSuperior);
+
+    // Escalar línea al eje Y
     const porcentajesEscalados = porcentajes.map(p => (p / 100) * maxHoras);
 
     this.chartOptions = {
@@ -79,50 +92,50 @@ export class HorasNoOperativasComponent implements OnChanges {
       grid: {
         left: '12%',
         right: '8%',
-        top: '18%',
+        top: '15%',  // Reducido de 18% a 15%
         bottom: '10%',
         containLabel: true
       },
       xAxis: {
-  type: 'category',
-  data: actividades,
-  axisLabel: {
-    rotate: 0, // 👈 importante: sin rotación si quieres vertical
-    interval: 0,
-    fontSize: 10,
-    formatter: (value: string) => {
-      const words = value.split(' ');
-
-      // máximo 3 líneas
-      const lines = [];
-      for (let i = 0; i < Math.min(words.length, 4); i++) {
-        lines.push(words[i]);
-      }
-
-      let result = lines.join('\n');
-
-      // si hay más palabras -> puntos suspensivos
-      if (words.length > 3) {
-        result += '\n...';
-      }
-
-      return result;
-    }
-  }
-},
+        type: 'category',
+        data: actividades,
+        axisLabel: {
+          rotate: 0,
+          interval: 0,
+          fontSize: 10,
+          formatter: (value: string) => {
+            const words = value.split(' ');
+            const lines = [];
+            for (let i = 0; i < Math.min(words.length, 4); i++) {
+              lines.push(words[i]);
+            }
+            let result = lines.join('\n');
+            if (words.length > 3) {
+              result += '\n...';
+            }
+            return result;
+          }
+        }
+      },
       yAxis: {
-  type: 'value',
-  name: 'Duración (horas)',   // 👈 AÑADIR ESTO BIEN CONFIGURADO
-  nameLocation: 'middle',
-  nameGap: 45,
-
-  min: 0,
-  max: maxHoras,
-
-  axisLabel: {
-    formatter: '{value} h'
-  }
-},
+        type: 'value',
+        name: 'Duración (horas)',
+        nameLocation: 'middle',
+        nameGap: 45,
+        min: 0,
+        max: maxHoras,
+        axisLabel: {
+          formatter: '{value} h'
+        },
+        splitLine: {
+          show: true,
+          lineStyle: {
+            type: 'dashed',
+            width: 1,
+            color: '#e0e0e0',
+          },
+        },
+      },
       series: [
         {
           name: 'Duración promedio',
@@ -135,8 +148,11 @@ export class HorasNoOperativasComponent implements OnChanges {
           label: {
             show: true,
             position: 'top',
-            formatter: '{c} h'
-          }
+            formatter: '{c} h',
+            offset: [0, 3]  // Separar etiqueta de la barra
+          },
+          barCategoryGap: '30%',
+          barGap: '30%',
         },
         {
           name: 'Porcentaje acumulado',
@@ -149,13 +165,20 @@ export class HorasNoOperativasComponent implements OnChanges {
             width: 3
           },
           itemStyle: {
-            color: '#e74c3c'
+            color: '#e74c3c',
+            borderColor: '#ffffff',
+            borderWidth: 2,
           },
           label: {
             show: true,
             position: 'top',
-            formatter: (params: any) => `${porcentajes[params.dataIndex].toFixed(1)}%`
-          }
+            offset: [0, -5],  // Separar etiqueta de la línea
+            formatter: (params: any) => `${porcentajes[params.dataIndex].toFixed(1)}%`,
+            fontWeight: 'bold',
+            fontSize: 11,
+          },
+          zlevel: 1,  // Asegurar que la línea esté por encima de las barras
+          z: 10,
         }
       ]
     };
