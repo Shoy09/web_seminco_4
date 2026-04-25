@@ -424,7 +424,8 @@ contarFrentesPorTipo(registrosArray: any[]): Record<string, number> {
   // 🔥 DISPARO POR DIA
   // =========================================
 
-  procesarDisparosDia() {
+procesarDisparosDia() {
+
   const mapa = new Map<string, number>();
 
   this.operacionesFiltradas.forEach(op => {
@@ -433,31 +434,43 @@ contarFrentesPorTipo(registrosArray: any[]): Record<string, number> {
 
       if (Array.isArray(registrosArray) && registrosArray.length > 0) {
 
-        // 🔥 Fecha directa de la operación
         const fecha = op.fecha || 'SIN_FECHA';
+        const turno = op.turno || 'SIN_TURNO';
 
-        // 🔥 Contar frentes completos (igual que antes)
+        // 🔥 KEY SEGURA (NO ROMPE FECHA)
+        const key = `${fecha}|${turno}`;
+
         const nFrentes = this.contarFrentesCompletos(registrosArray);
 
-        if (mapa.has(fecha)) {
-          mapa.set(fecha, mapa.get(fecha)! + nFrentes);
+        if (mapa.has(key)) {
+          mapa.set(key, mapa.get(key)! + nFrentes);
         } else {
-          mapa.set(fecha, nFrentes);
+          mapa.set(key, nFrentes);
         }
       }
 
     } catch (error) {
-      //console.error('Error procesando operación para disparos día:', op.id, error);
+      // console.error(...)
     }
   });
 
-  // 🔥 Convertir a array
-  return Array.from(mapa.entries()).map(([fecha, n_frentes]) => ({
-    fecha,
-    n_frentes
-  }))
-  // 🔥 OPCIONAL: ordenar por fecha
-  .sort((a, b) => a.fecha.localeCompare(b.fecha));
+  // 🔥 OUTPUT FINAL
+  return Array.from(mapa.entries())
+    .map(([key, n_frentes]) => {
+
+      const [fecha, turno] = key.split('|');
+
+      return {
+        fecha,
+        turno,
+        n_frentes
+      };
+    })
+    .sort((a, b) => {
+      // orden seguro por fecha + turno
+      const diff = a.fecha.localeCompare(b.fecha);
+      return diff !== 0 ? diff : a.turno.localeCompare(b.turno);
+    });
 }
 
   // =========================================
@@ -1866,7 +1879,7 @@ procesarDataPerforacionDetallada() {
     const registrosArray = op.registros;
 
     if (!Array.isArray(registrosArray)) {
-      console.log(`⚠️ ${key} descartado: registros no es array`);
+      // console.log(`⚠️ ${key} descartado: registros no es array`);
       return;
     }
 
@@ -1876,7 +1889,7 @@ procesarDataPerforacionDetallada() {
 
       totalRegistros++;
 
-      console.log('➡️ Registro ENTRANTE:', r);
+      //console.log('➡️ Registro ENTRANTE:', r);
 
       const operacion = r?.operacion || {};
 
@@ -1887,7 +1900,7 @@ procesarDataPerforacionDetallada() {
       // =========================
       if (!tipo_perforacion) {
         descartadosSinTipo++;
-        console.log('❌ DESCARTADO (sin tipo_perforacion):', r);
+        // console.log('❌ DESCARTADO (sin tipo_perforacion):', r);
         return;
       }
 
@@ -1948,13 +1961,13 @@ procesarDataPerforacionDetallada() {
       item.tal_repaso += tal_repaso;
       item.tal_rimados += tal_rimados;
 
-      console.log('✅ ACEPTADO:', {
-        key,
-        tipo_perforacion,
-        labor_fr,
-        metros,
-        mapKey  // Para depuración
-      });
+      // console.log('✅ ACEPTADO:', {
+      //   key,
+      //   tipo_perforacion,
+      //   labor_fr,
+      //   metros,
+      //   mapKey  // Para depuración
+      // });
     });
   });
 

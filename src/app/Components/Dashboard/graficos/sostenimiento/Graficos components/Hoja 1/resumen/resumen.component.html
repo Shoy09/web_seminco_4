@@ -12,7 +12,7 @@
         </svg>
       </div>
       <div class="card-label">EQUIPOS</div>
-      <div class="card-value">{{ resumenData.conteoEquipos }}</div>
+      <div class="card-value">{{ resumenData.conteoEquipos | number }}</div>
     </div>
 
     <!-- Tarjeta 2: METROS -->
@@ -25,7 +25,7 @@
         </svg>
       </div>
       <div class="card-label">Total Metros</div>
-      <div class="card-value">{{ resumenData.totalMetros }}</div>
+      <div class="card-value">{{ resumenData.totalMetros | number }}</div>
     </div>
 
     <!-- Tarjeta 3: LABORES SOSTENIDAS -->
@@ -39,7 +39,7 @@
         </svg>
       </div>
       <div class="card-label">Labores Sostenidas</div>
-      <div class="card-value">{{ resumenData.totalLaboresSostenidas }}</div>
+      <div class="card-value">{{ resumenData.totalLaboresSostenidas | number }}</div>
     </div>
 
     <!-- Tarjeta 4: PERNOS POR DÍA -->
@@ -51,7 +51,7 @@
         </svg>
       </div>
       <div class="card-label">Pernos / Día</div>
-      <div class="card-value">{{ resumenData.nPernoDia }}</div>
+      <div class="card-value">{{ resumenData.nPernoDia | number }}</div>
     </div>
 
   </div>

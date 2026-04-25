@@ -73,7 +73,14 @@ export class AvanceFaseComponent implements OnChanges {
       },
       tooltip: {
         trigger: 'item',
-        formatter: '{b}: {c} m ({d}%)'
+        formatter: (params: any) => {
+  const valor = Number(params.value || 0).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  return `${params.name}: ${valor} m (${params.percent}%)`;
+}
       },
       legend: {
   orient: 'horizontal',
@@ -95,7 +102,13 @@ export class AvanceFaseComponent implements OnChanges {
           data: dataGrafico,
           label: {
             show: true,
-            formatter: '{b}\n{c} m',
+            formatter: (params: any) => {
+  const valor = Number(params.value || 0).toLocaleString('en-US', {
+    maximumFractionDigits: 1
+  });
+
+  return `${params.name}\n${valor} m`;
+},
             fontSize: 12
           },
           emphasis: {

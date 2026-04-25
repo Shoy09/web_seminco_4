@@ -23,7 +23,7 @@ export class DisparosEquipoComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] || changes['objetivoDisparos']) {
-      //console.log('📊 DATA RECIBIDA:', this.data);
+      console.log('📊 DATA RECIBIDASSSSSSSSSSSSSSS:', this.data);
       this.actualizarGrafico();
     }
   }

@@ -57,9 +57,16 @@ export class PerforadoEquipoComponent implements OnChanges {
           type: 'shadow'
         },
         formatter: (params: any) => {
-          const item = this.data[params[0].dataIndex];
-          return `${item.modelo_equipo} (${item.seccion})<br/>Metros/Disparo: ${params[0].value.toFixed(2)} m`;
-        }
+  const item = this.data[params[0].dataIndex];
+
+  const valor = Number(params[0].value || 0).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  return `${item.modelo_equipo} (${item.seccion})<br/>
+          Metros/Disparo: ${valor} m`;
+}
       },
       grid: {
         left: '12%',      // Aumentado para dar más espacio a las etiquetas del eje Y
@@ -96,9 +103,11 @@ export class PerforadoEquipoComponent implements OnChanges {
         nameGap: 45,
         min: 0,
         axisLabel: {
-          fontSize: 11,
-          formatter: '{value} m'
-        },
+  fontSize: 11,
+  formatter: (value: number) => {
+    return value.toLocaleString('en-US') + ' m';
+  }
+},
         splitLine: {
           lineStyle: {
             type: 'dashed',
@@ -118,13 +127,17 @@ export class PerforadoEquipoComponent implements OnChanges {
             shadowBlur: 5
           },
           label: {
-            show: true,
-            position: 'top',
-            formatter: (params: any) => `${Math.round(params.value)} m`,
-            fontWeight: 'bold',
-            fontSize: 12,
-            color: '#2980b9'
-          },
+  show: true,
+  position: 'top',
+  formatter: (params: any) => {
+    return Number(params.value || 0).toLocaleString('en-US', {
+      maximumFractionDigits: 0
+    }) + ' m';
+  },
+  fontWeight: 'bold',
+  fontSize: 12,
+  color: '#2980b9'
+},
           barWidth: '40%',      // Reducido de 50% a 40% para barras más delgadas
           barCategoryGap: '30%' // Espacio entre categorías
         }

@@ -7,15 +7,16 @@ import { CanvasRenderer } from 'echarts/renderers';
 
 echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, CanvasRenderer]);
 
+
 @Component({
-  selector: 'app-disparos-dia',
+  selector: 'app-pernos-dia',
   standalone: true,
   imports: [NgxEchartsDirective],
   providers: [provideEchartsCore({ echarts })],
-  templateUrl: './disparos-dia.component.html',
-  styleUrl: './disparos-dia.component.css'
+  templateUrl: './pernos-dia.component.html',
+  styleUrl: './pernos-dia.component.css'
 })
-export class DisparosDiaComponent implements OnChanges {
+export class PernosDiaComponent implements OnChanges {
   
   @Input() data: any[] = [];
 
@@ -29,7 +30,7 @@ export class DisparosDiaComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      console.log('📊 DATA RECIBIDA:', this.data);
+      console.log('📊 DATA RECIBIDA DIA:', this.data);
       this.actualizarGrafico();
     }
   }
@@ -65,7 +66,7 @@ export class DisparosDiaComponent implements OnChanges {
       barWidth: '50%',
       data: fechas.map(fecha => {
         const item = this.data.find(d => d.fecha === fecha && d.turno === turno);
-        return item ? item.n_frentes || 0 : 0;
+        return item ? item.total_pernos || 0 : 0;
       }),
       itemStyle: {
         color: this.coloresTurnos[turno] || '#95a5a6',
@@ -80,7 +81,12 @@ export class DisparosDiaComponent implements OnChanges {
         position: 'inside',
         fontWeight: 'bold',
         fontSize: 11,
-        formatter: (params: any) => params.value > 0 ? params.value : ''
+        formatter: (params: any) => {
+          const value = params.value;
+          if (value === 0) return '';
+          // Formatear números grandes con separador de miles
+          return value >= 1000 ? this.formatearNumeroGrande(value) : value.toString();
+        }
       }
     }));
 
@@ -88,7 +94,7 @@ export class DisparosDiaComponent implements OnChanges {
     const totalesPorFecha = fechas.map(fecha => {
       return this.data
         .filter(d => d.fecha === fecha)
-        .reduce((sum, d) => sum + (d.n_frentes || 0), 0);
+        .reduce((sum, d) => sum + (d.total_pernos || 0), 0);
     });
     
     const maxValor = Math.max(...totalesPorFecha, 1);
@@ -118,14 +124,16 @@ export class DisparosDiaComponent implements OnChanges {
               fecha = p.axisValue;
             }
             if (p.value > 0) {
-              detalle += `${p.marker} ${p.seriesName}: ${p.value}<br/>`;
+              const valorFormateado = p.value >= 1000 ? this.formatearNumeroGrande(p.value) : p.value;
+              detalle += `${p.marker} ${p.seriesName}: ${valorFormateado}<br/>`;
               total += p.value;
             }
           });
           
+          const totalFormateado = total >= 1000 ? this.formatearNumeroGrande(total) : total;
           return `<strong>${fecha}</strong><br/><br/>
                   ${detalle}
-                  <strong>Total: ${total}</strong>`;
+                  <strong>Total: ${totalFormateado}</strong>`;
         }
       },
       legend: {
@@ -142,7 +150,7 @@ export class DisparosDiaComponent implements OnChanges {
         }
       },
       grid: {
-        left: '10%',
+        left: '12%',
         right: '5%',
         top: '15%',
         bottom: '12%',
@@ -168,13 +176,23 @@ export class DisparosDiaComponent implements OnChanges {
         type: 'value',
         name: 'Cantidad de Disparos',
         nameLocation: 'middle',
-        nameGap: 45,
+        nameGap: 50,
+        nameTextStyle: {
+          fontSize: 12,
+          fontWeight: 'bold'
+        },
         min: 0,
         max: yAxisMax,
         interval: this.calcularIntervalo(yAxisMax),
         axisLabel: {
           fontSize: 11,
-          formatter: '{value}'
+          fontWeight: 'bold',
+          formatter: (value: number) => {
+            // Formatear números del eje Y
+            if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
+            if (value >= 1000) return (value / 1000).toFixed(0) + 'K';
+            return value.toString();
+          }
         },
         splitLine: {
           show: true,
@@ -214,6 +232,19 @@ export class DisparosDiaComponent implements OnChanges {
     if (max <= 10) return 2;
     if (max <= 20) return 5;
     if (max <= 50) return 10;
-    return 20;
+    if (max <= 100) return 20;
+    if (max <= 500) return 50;
+    if (max <= 1000) return 100;
+    if (max <= 5000) return 500;
+    if (max <= 10000) return 1000;
+    if (max <= 50000) return 5000;
+    if (max <= 100000) return 10000;
+    return 20000;
+  }
+
+  formatearNumeroGrande(valor: number): string {
+    if (valor >= 1000000) return (valor / 1000000).toFixed(1) + 'M';
+    if (valor >= 1000) return (valor / 1000).toFixed(0) + 'K';
+    return valor.toString();
   }
 }

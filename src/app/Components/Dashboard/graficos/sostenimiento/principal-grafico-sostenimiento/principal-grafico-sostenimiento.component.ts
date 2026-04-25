@@ -30,10 +30,11 @@ import { DetalleSostenimientoComponent } from "../Graficos components/Hoja 2/det
 import { MejoresOperadoresComponent } from '../Graficos components/Hoja 2/mejores-operadores/mejores-operadores.component';
 import { RankingOperadorComponent } from '../Graficos components/Hoja 2/ranking-operador/ranking-operador.component';
 import { ObservacionesComponent } from '../Graficos components/Hoja 2/observaciones/observaciones.component';
+import { PernosDiaComponent } from "../Graficos components/Hoja 1/pernos-dia/pernos-dia.component";
 
 @Component({
   selector: 'app-principal-grafico-sostenimiento',
-  imports: [CommonModule, FormsModule, ResumenComponent, PernosEquipoComponent, PernosLaborComponent, RendimientoEquipoComponent, DemorasOperativasComponent, DemorasInoperativasComponent, HorasMantenimientoComponent, PernosInstaladosTipoComponent, MhrEquipoComponent, MetrosEquipoComponent, HorometroEmpernadorComponent, TotalHorometrosComponent, ScatterTurnosComponent, ScatterTurnosNocheComponent, PernosMinadoTipoComponent, HorasPrimeraPerforacionComponent, DetalleEquipoComponent, DetalleSostenimientoComponent, MejoresOperadoresComponent, RankingOperadorComponent, ObservacionesComponent],
+  imports: [CommonModule, FormsModule, ResumenComponent, PernosEquipoComponent, PernosLaborComponent, RendimientoEquipoComponent, DemorasOperativasComponent, DemorasInoperativasComponent, HorasMantenimientoComponent, PernosInstaladosTipoComponent, MhrEquipoComponent, MetrosEquipoComponent, HorometroEmpernadorComponent, TotalHorometrosComponent, ScatterTurnosComponent, ScatterTurnosNocheComponent, PernosMinadoTipoComponent, HorasPrimeraPerforacionComponent, DetalleEquipoComponent, DetalleSostenimientoComponent, MejoresOperadoresComponent, RankingOperadorComponent, ObservacionesComponent, PernosDiaComponent],
   templateUrl: './principal-grafico-sostenimiento.component.html',
   styleUrl: './principal-grafico-sostenimiento.component.css'
 })
@@ -53,6 +54,7 @@ turnoSeleccionado: string = '';
 turnoAplicado: string = '';
 cargandoPDF = false;
 DataPernosPorEquipo: any[] = [];
+dataPernoDia: any[] = [];
 DataPernosPorLabor: any[] = [];
 DataDMyUTI: any[] = [];
 DataEstadosSOS: any[] = [];
@@ -158,6 +160,7 @@ dataLaborFRDetallado: any[] = [];
 
     this.procesarResumen();
      this.DataPernosPorEquipo = this.PernosPorEquipo();
+     this.dataPernoDia = this.procesarPernosPorDia();
      this.DataPernosPorLabor = this.PernosPorLabor();
      this.DataDMyUTI = this.ProcesarDMyUTI();
      this.DataEstadosSOS = this.procesarDemorasOperativas();
@@ -333,13 +336,11 @@ procesarResumen() {
   const fechasSet = new Set<string>();
   const equiposSet = new Set<string>();
 
-  const equiposValidos = ['BOLTER-3', 'BOLTER-5', 'BOLTER-7'];
 
   this.operacionesFiltradas.forEach(op => {
 
     const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
 
-    if (!equiposValidos.includes(modeloEquipo)) return;
 
     equiposSet.add(modeloEquipo);
 
@@ -462,7 +463,7 @@ PernosPorEquipo() {
 
   const resultadoMap = new Map<string, any>();
 
-  const equiposValidos = ['BOLTER-3', 'BOLTER-5', 'BOLTER-7'];
+  //const equiposValidos = ['BOLTER-3', 'BOLTER-5', 'BOLTER-7'];
 
   // 🔥 crear mapa del plan UNA sola vez
   const mapaPlanes = this.crearMapaPlanes();
@@ -472,7 +473,7 @@ PernosPorEquipo() {
     const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
     const seccion = op.seccion || 'SIN_SECCION';
 
-    if (!equiposValidos.includes(modeloEquipo)) return;
+    //if (!equiposValidos.includes(modeloEquipo)) return;
 
     const registrosArray = op.registros;
     if (!Array.isArray(registrosArray)) return;
@@ -516,19 +517,81 @@ PernosPorEquipo() {
   return resultado;
 }
 
+//Grafico 2-2
+
+procesarPernosPorDia() {
+
+  const mapa = new Map<string, number>();
+
+  this.operacionesFiltradas.forEach(op => {
+    try {
+
+      const registrosArray = op.registros;
+      if (!Array.isArray(registrosArray) || registrosArray.length === 0) return;
+
+      const fecha = op.fecha || 'SIN_FECHA';
+      const turno = op.turno || 'SIN_TURNO';
+
+      const key = `${fecha}|${turno}`;
+
+      let totalPernosDia = 0;
+
+      for (const registro of registrosArray) {
+
+        if (registro.estado !== 'OPERATIVO') continue;
+
+        const opReg = registro.operacion || registro;
+
+        const nPernos = Number(opReg.n_pernos_instalados) || 0;
+
+        if (nPernos <= 0) continue;
+
+        totalPernosDia += nPernos;
+      }
+
+      // 🔥 acumular igual que disparos
+      if (mapa.has(key)) {
+        mapa.set(key, mapa.get(key)! + totalPernosDia);
+      } else {
+        mapa.set(key, totalPernosDia);
+      }
+
+    } catch (error) {
+      // opcional log
+    }
+  });
+
+  // 🔥 salida final igual que disparos
+  return Array.from(mapa.entries())
+    .map(([key, totalPernos]) => {
+
+      const [fecha, turno] = key.split('|');
+
+      return {
+        fecha,
+        turno,
+        total_pernos: totalPernos
+      };
+    })
+    .sort((a, b) => {
+      const diff = a.fecha.localeCompare(b.fecha);
+      return diff !== 0 ? diff : a.turno.localeCompare(b.turno);
+    });
+}
+
 //Grafico 3
 PernosPorLabor() {
 
   const resultadoMap = new Map<string, any>();
 
-  const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
+  //const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
 
   const mapaPlanes = this.crearMapaPlanes();
 
   this.operacionesFiltradas.forEach(op => {
 
     const modeloEquipo = `${op.equipo}-${op.n_equipo}`; // 🔥 agregar esto
-    if (!equiposValidos.includes(modeloEquipo)) return; // 🔥 filtro
+    //if (!equiposValidos.includes(modeloEquipo)) return; // 🔥 filtro
 
     const seccion = op.seccion || 'SIN_SECCION';
 
@@ -577,7 +640,7 @@ PernosPorLabor() {
 //GRAFICO 4 
 ProcesarDMyUTI() {
 
-  const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
+  //const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
 
   const mapa = new Map<string, any>();
 
@@ -586,7 +649,7 @@ ProcesarDMyUTI() {
     const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
     const seccion = op.seccion || 'SIN_SECCION';
 
-    if (!equiposValidos.includes(modeloEquipo)) return;
+    //if (!equiposValidos.includes(modeloEquipo)) return;
 
     const registros = op.registros;
     if (!Array.isArray(registros)) return;
@@ -1030,14 +1093,14 @@ procesarHorasMantenimiento() {
 // Grafico 8
 ProcesarPernosInstalados() {
 
-  const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
+  //const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
 
   const mapa = new Map<string, any>();
 
   this.operacionesFiltradas.forEach(op => {
 
     const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
-    if (!equiposValidos.includes(modeloEquipo)) return;
+    //if (!equiposValidos.includes(modeloEquipo)) return;
 
     const registros = op.registros;
     if (!Array.isArray(registros)) return;
@@ -1078,7 +1141,7 @@ ProcesarPernosInstalados() {
 
 ProcesarMHrEquipo() {
 
-  const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
+  //const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
 
   const mapa = new Map<string, any>();
 
@@ -1088,7 +1151,7 @@ ProcesarMHrEquipo() {
     const seccion = op.seccion || 'SIN_SECCION';
 
     // 🔥 filtro igual que los demás
-    if (!equiposValidos.includes(modeloEquipo)) return;
+    //if (!equiposValidos.includes(modeloEquipo)) return;
 
     const registros = op.registros;
     if (!Array.isArray(registros)) return;
@@ -1144,7 +1207,7 @@ ProcesarMHrEquipo() {
 //Grafico 10
 ProcesarMetrosPerforadosEquipo() {
 
-  const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
+  //const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
 
   const mapa = new Map<string, number>();
 
@@ -1153,7 +1216,7 @@ ProcesarMetrosPerforadosEquipo() {
     const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
 
     // 🔥 filtro
-    if (!equiposValidos.includes(modeloEquipo)) return;
+    //if (!equiposValidos.includes(modeloEquipo)) return;
 
     const registros = op.registros;
     if (!Array.isArray(registros)) return;
@@ -1182,7 +1245,7 @@ ProcesarMetrosPerforadosEquipo() {
 //Grafico 11
 ProcesarHorometrosEquipo() {
 
-  const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
+  //const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
 
   const mapa = new Map<string, any>();
 
@@ -1191,7 +1254,7 @@ ProcesarHorometrosEquipo() {
     const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
 
     // 🔥 filtro
-    if (!equiposValidos.includes(modeloEquipo)) return;
+    //if (!equiposValidos.includes(modeloEquipo)) return;
 
     const horometros = op.horometros as any;
 
@@ -1250,7 +1313,7 @@ percusion: Number(item.percusion.toFixed(2))
 
 ProcesarHorometrosGlobal() {
 
-  const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
+  //const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
 
   // 🔥 acumulador único (sin Map)
   const acumulado = {
@@ -1264,7 +1327,7 @@ ProcesarHorometrosGlobal() {
     const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
 
     // 🔥 mismo filtro que siempre
-    if (!equiposValidos.includes(modeloEquipo)) return;
+    //if (!equiposValidos.includes(modeloEquipo)) return;
 
     const horometros = op.horometros as any;
 
@@ -1312,7 +1375,7 @@ ProcesarHorometrosGlobal() {
 // Grafico 13
 procesarHorasNumericas() {
 
-  const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
+  //const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
 
   // 🔥 usa lista (más limpio y escalable)
   const codigosValidos = ['101', '102', '111', '112', '120', '201'];
@@ -1333,10 +1396,10 @@ procesarHorasNumericas() {
     // });
 
     // 🔥 FILTRO DE EQUIPO
-    if (!equiposValidos.includes(modeloEquipo)) {
-      // console.log('⛔ FUERA POR EQUIPO:', modeloEquipo);
-      return;
-    }
+    // if (!equiposValidos.includes(modeloEquipo)) {
+    //   // console.log('⛔ FUERA POR EQUIPO:', modeloEquipo);
+    //   return;
+    // }
 
     const registrosArray = op.registros;
     if (!Array.isArray(registrosArray)) {
@@ -1406,7 +1469,7 @@ procesarHorasNumericas() {
 
 ProcesarPernosPorMinadoTipo() {
 
-  const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
+  //const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
 
   const mapa = new Map<string, any>();
 
@@ -1418,7 +1481,7 @@ ProcesarPernosPorMinadoTipo() {
     const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
 
     // 🔥 filtro de equipo
-    if (!equiposValidos.includes(modeloEquipo)) return;
+    //if (!equiposValidos.includes(modeloEquipo)) return;
 
     const registros = op.registros;
     if (!Array.isArray(registros)) return;
@@ -1470,7 +1533,7 @@ procesarLaborFR() {
   const mapa = new Map<string, Map<string, any>>();
 
   // 👉 (OPCIONAL) si aún quieres filtrar algunos equipos
-  const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
+  //const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
 
   this.operacionesFiltradas.forEach(op => {
 
@@ -1483,7 +1546,7 @@ procesarLaborFR() {
       : 'SIN_EQUIPO';
 
     // 👉 (OPCIONAL) activar filtro
-    if (equiposValidos.length && !equiposValidos.includes(modelo)) return;
+    //if (equiposValidos.length && !equiposValidos.includes(modelo)) return;
 
     const fecha = op.fecha || 'SIN_FECHA';
 
@@ -1557,7 +1620,7 @@ procesarIndicadores() {
 
   const mapa = new Map<string, any>();
 
-  const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
+  //const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
 
   this.operacionesFiltradas.forEach(op => {
 
@@ -1566,7 +1629,7 @@ procesarIndicadores() {
       : 'SIN_EQUIPO';
 
     // 🔥 FILTRO DE EQUIPOS
-    if (!equiposValidos.includes(modelo)) return;
+    //if (!equiposValidos.includes(modelo)) return;
 
     const registros = op.registros;
     if (!Array.isArray(registros)) return;
@@ -1669,7 +1732,7 @@ procesarIndicadores() {
 
 procesarIndicadoresPorLabor() {
 
-  const mapa = new Map<string, any>();
+  const resultado: any[] = [];
   const mapaPlanes = this.crearMapaPlanes();
 
   this.operacionesFiltradas.forEach(op => {
@@ -1681,6 +1744,7 @@ procesarIndicadoresPorLabor() {
     const registros = op.registros;
     if (!Array.isArray(registros)) return;
 
+    // 🔥 PERCUSIÓN TOTAL
     const horometros = (typeof op.horometros === 'object' && op.horometros !== null)
       ? op.horometros as {
           percusion?: { inicio?: number; final?: number }
@@ -1692,7 +1756,9 @@ procesarIndicadoresPorLabor() {
 
     const diferenciaPercusion = Number((percusionFinal - percusionInicio).toFixed(2));
 
-    const metrosPerforadosTotal = this.calcularMetrosPerforados(registros);
+    // 🔥 repartir percusión
+    const totalRegistros = registros.length || 1;
+    const percusionPorRegistro = diferenciaPercusion / totalRegistros;
 
     registros.forEach(r => {
 
@@ -1702,111 +1768,59 @@ procesarIndicadoresPorLabor() {
         ? r.operacion
         : {};
 
-      // 🔥 LABOR_SOS
+      // 🔥 LABOR
       const tipoLabor = opData.tipo_labor || '';
       const labor = opData.labor || '';
       const ala = opData.ala || '';
 
-      const laborSOS = `${tipoLabor}${labor}${ala}`;
+      const laborRaw = `${tipoLabor}${labor}${ala}`.trim();
+      const laborSOS = laborRaw || 'SIN_LABOR';
 
-      // 🔥 SECCION_LABOR (MATCH PLAN)
+      // 🔥 SECCIÓN
       const seccionLabor = this.obtenerSeccionLabor(opData, mapaPlanes);
-
-      const key = `${modelo}|${laborSOS}|${seccionLabor}`;
-
-      if (!mapa.has(key)) {
-        mapa.set(key, {
-          modelo_equipo: modelo,
-          labor_sos: laborSOS,
-          seccion_labor: seccionLabor,
-
-          n_pernos: 0,
-          log_pernos: 0,
-          log_pernos_count: 0,
-
-          mt52_malla: 0,
-
-          tipo_pernos: '',
-
-          metros_perforados: 0,
-          diferencia_percusion: 0,
-
-          registros: 0,
-
-          cantidad_registros: 0 // 🔥 NUEVO CAMPO
-        });
-      }
-
-      const data = mapa.get(key);
-
-      // 🔥 contador de repeticiones
-      data.cantidad_registros += 1;
-
-      data.registros += 1;
 
       // 🔥 PERNOS
       const pernos = Number(opData.n_pernos_instalados) || 0;
-      data.n_pernos += pernos;
 
-      // 🔥 LOG PERNOS (PROMEDIO)
+      // 🔥 LONGITUD
       const logPernos = Number(opData.log_pernos) || 0;
 
-      if (logPernos > 0) {
-        data.log_pernos += logPernos;
-        data.log_pernos_count += 1;
-      }
-
-      // 🔥 MT52 MALLA
+      // 🔥 MT52
       const mt52 = Number(opData.mt52_malla) || 0;
-      data.mt52_malla += mt52;
 
       // 🔥 TIPO PERNOS
       const tipoPernos = opData.tipo_pernos || '';
-      if (tipoPernos) {
-        data.tipo_pernos = tipoPernos;
-      }
 
-      // 🔥 METROS PERFORADOS
-      data.metros_perforados += metrosPerforadosTotal;
+      // 🔥 METROS
+      const metros = this.calcularMetrosPerforados([r]);
 
-      // 🔥 PERCUSIÓN
-      data.diferencia_percusion += diferenciaPercusion;
+      // 🔥 KPI
+      const sos_m_hr_hp =
+        percusionPorRegistro > 0
+          ? metros / percusionPorRegistro
+          : 0;
+
+      resultado.push({
+        modelo_equipo: modelo,
+        labor_sos: laborSOS,
+        seccion_labor: seccionLabor,
+
+        n_pernos: pernos,
+        log_pernos: Number(logPernos.toFixed(2)),
+        mt52_malla: mt52,
+        tipo_pernos: tipoPernos,
+
+        metros_perforados: metros,
+        diferencia_percusion: Number(percusionPorRegistro.toFixed(2)),
+
+        sos_m_hr_hp: Number(sos_m_hr_hp.toFixed(2))
+      });
 
     });
 
   });
 
-  // =========================
-  // 🔥 RESULTADO FINAL
-  // =========================
-  const resultado: any[] = [];
-
-  mapa.forEach((d) => {
-
-    const n_pernos_por_labor =
-      d.registros > 0
-        ? d.n_pernos / d.registros
-        : 0;
-
-    const log_pernos_promedio =
-      d.log_pernos_count > 0
-        ? d.log_pernos / d.log_pernos_count
-        : 0;
-
-    const sos_m_hr_hp =
-      d.diferencia_percusion > 0
-        ? d.metros_perforados / d.diferencia_percusion
-        : 0;
-
-    resultado.push({
-      ...d,
-      log_pernos: Number(log_pernos_promedio.toFixed(2)),
-      n_pernos_por_labor: Number(n_pernos_por_labor.toFixed(2)),
-      sos_m_hr_hp: Number(sos_m_hr_hp.toFixed(2))
-    });
-  });
-
-  console.log('🚀 INDICADORES POR LABOR:', resultado);
+  console.log('🚀 DETALLE POR REGISTRO:', resultado);
 
   return resultado;
 }

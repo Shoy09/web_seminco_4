@@ -11,7 +11,7 @@
         </svg>
       </div>
       <div class="card-label">EQUIPOS FRONTONEROS</div>
-      <div class="card-value">{{ resumenData.equiposFrontoneros }}</div>
+      <div class="card-value">{{ resumenData.equiposFrontoneros | number }}</div>
     </div>
 
     <div class="card">
@@ -23,7 +23,7 @@
         </svg>
       </div>
       <div class="card-label">Total Perforado</div>
-      <div class="card-value">{{ resumenData.totalPerforado }}</div>
+      <div class="card-value">{{ resumenData.totalPerforado | number }}</div>
     </div>
 
     <div class="card">
@@ -36,7 +36,7 @@
         </svg>
       </div>
       <div class="card-label">Metros Perforados / Labor</div>
-      <div class="card-value">{{ resumenData.metrosPerforadosDisparo }}</div>
+      <div class="card-value">{{ resumenData.metrosPerforadosDisparo | number }}</div>
     </div>
 
     <!-- Tarjeta 3: TOTAL DE DISPAROS / DÍA -->
@@ -48,7 +48,7 @@
         </svg>
       </div>
       <div class="card-label">Labores perforadas</div>
-      <div class="card-value">{{ resumenData.totalDisparosDia }}</div>
+      <div class="card-value">{{ resumenData.totalDisparosDia | number }}</div>
     </div>
 
     

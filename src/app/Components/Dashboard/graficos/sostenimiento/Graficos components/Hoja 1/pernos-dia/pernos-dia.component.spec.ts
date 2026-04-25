@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ObservacionesComponent } from './observaciones.component';
+import { PernosDiaComponent } from './pernos-dia.component';
 
-describe('ObservacionesComponent', () => {
-  let component: ObservacionesComponent;
-  let fixture: ComponentFixture<ObservacionesComponent>;
+describe('PernosDiaComponent', () => {
+  let component: PernosDiaComponent;
+  let fixture: ComponentFixture<PernosDiaComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ObservacionesComponent]
+      imports: [PernosDiaComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ObservacionesComponent);
+    fixture = TestBed.createComponent(PernosDiaComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -17,34 +17,77 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of displayedData">
-          <td class="equipo-cell">{{ item.equipo }}</td>
-          <td>{{ formatearNumero(item.horas_percutadas, 2) }}</td>
-          <td>{{ formatearNumero(item.tal_prod, 0) }}</td>
-          <td>{{ formatearNumero(item.tal_rimados, 0) }}</td>
-          <td>{{ formatearNumero(item.tal_repaso, 0) }}</td>
-          <td>{{ formatearNumero(item.tal_alivio, 0) }}</td>
-          <td>{{ formatearNumero(item.long_barras, 2) }}</td>
-          <td>{{ formatearEntero(item.fr_mhr_hp) }}</td>
-          <td>{{ formatear1Decimal(item.metros_perforados) }}</td>
-         </tr>
-        <tr *ngIf="displayedData.length === 0">
-          <td colspan="9" class="no-data">No hay datos disponibles</td>
-         </tr>
-      </tbody>
+  <tr *ngFor="let item of paginatedData">
+    <td class="equipo-cell">{{ item.equipo }}</td>
+    <td>{{ item.horas_percutadas | number:'1.0-2' }}</td>
+    <td>{{ item.tal_prod | number:'1.0-0' }}</td>
+    <td>{{ item.tal_rimados | number:'1.0-0' }}</td>
+    <td>{{ item.tal_repaso | number:'1.0-0' }}</td>
+    <td>{{ item.tal_alivio | number:'1.0-0' }}</td>
+    <td>{{ item.long_barras | number:'1.0-2' }}</td>
+    <td>{{ item.fr_mhr_hp | number:'1.0-0' }}</td>
+    <td>{{ item.metros_perforados | number:'1.0-1' }}</td>
+  </tr>
+</tbody>
       <tfoot *ngIf="displayedData.length > 0">
         <tr class="total-row">
           <td class="total-label"><strong>Total</strong></td>
-          <td><strong>{{ formatearNumero(totales.horas_percutadas, 2) }}</strong></td>
-          <td><strong>{{ formatearNumero(totales.tal_prod, 0) }}</strong></td>
-          <td><strong>{{ formatearNumero(totales.tal_rimados, 0) }}</strong></td>
-          <td><strong>{{ formatearNumero(totales.tal_repaso, 0) }}</strong></td>
-          <td><strong>{{ formatearNumero(totales.tal_alivio, 0) }}</strong></td>
-          <td><strong>{{ formatearNumero(totales.long_barras, 2) }}</strong></td>
-          <td>{{ formatearEntero(totales.fr_mhr_hp) }}</td>
-<td>{{ formatear1Decimal(totales.metros_perforados) }}</td>
-         </tr>
+          <td><strong>{{ totales.horas_percutadas | number:'1.0-2' }}</strong></td>
+
+<td><strong>{{ totales.tal_prod | number:'1.0-0' }}</strong></td>
+<td><strong>{{ totales.tal_rimados | number:'1.0-0' }}</strong></td>
+<td><strong>{{ totales.tal_repaso | number:'1.0-0' }}</strong></td>
+<td><strong>{{ totales.tal_alivio | number:'1.0-0' }}</strong></td>
+
+<td><strong>{{ totales.long_barras | number:'1.0-2' }}</strong></td>
+
+<td><strong>{{ totales.fr_mhr_hp | number:'1.0-0' }}</strong></td>
+
+<td><strong>{{ totales.metros_perforados | number:'1.0-1' }}</strong></td>
+        </tr>
       </tfoot>
     </table>
+  </div>
+
+  <!-- Controles de paginación -->
+  <div class="pagination-controls" *ngIf="displayedData.length > 0">
+    <div class="rows-info">
+      Mostrando {{ startIndex + 1 }} - {{ endIndex }} de {{ displayedData.length }} registros
+    </div>
+    <div class="pagination-buttons">
+      <button 
+        class="pagination-btn" 
+        (click)="previousPage()" 
+        [disabled]="currentPage === 1">
+        ‹ Anterior
+      </button>
+      
+      <div class="page-numbers">
+        <button 
+          *ngFor="let page of pageNumbers" 
+          class="page-btn" 
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      </div>
+      
+      <button 
+        class="pagination-btn" 
+        (click)="nextPage()" 
+        [disabled]="currentPage === totalPages">
+        Siguiente ›
+      </button>
+    </div>
+    
+    <div class="rows-per-page">
+      <label>Filas por página:</label>
+      <select (change)="onRowsPerPageChange($event)" class="rows-select">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+      </select>
+    </div>
   </div>
 </div>

@@ -1,9 +1,10 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 @Component({
   selector: 'app-resumen',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './resumen.component.html',
   styleUrl: './resumen.component.css'
 })

@@ -176,6 +176,7 @@ aplicarFiltro() {
 
     return true;
   });
+  console.log('🔥 OPERACIONES FILTRADAS:', this.operacionesFiltradas);
 
   this.procesarTodo();
 }
@@ -606,7 +607,7 @@ procesarResumen() {
     totalMetros: Number(totalMetros.toFixed(0))
   };
 
-  console.log('📊 RESUMEN FINAL:', this.resumen);
+  //console.log('📊 RESUMEN FINAL:', this.resumen);
 }
 
   //=========================================
@@ -1858,8 +1859,10 @@ procesarDataPerforacionDetallada() {
       const tipo_perforacion = operacion?.tipo_perforacion;
       if (!tipo_perforacion) return; // ❌ NO enviar basura
 
-      const labor_fr = `${operacion?.tipo_labor ?? ''}${operacion?.labor ?? ''}${operacion?.ala ?? ''}`.trim();
-      if (!labor_fr) return; // 🔥 también evitamos vacíos
+      const labor_fr_raw = `${operacion?.tipo_labor ?? ''}${operacion?.labor ?? ''}${operacion?.ala ?? ''}`.trim();
+
+// 🔥 ahora SIEMPRE habrá valor
+const labor_fr = labor_fr_raw || 'SIN LABOR';
 
       // =========================
       // 🔥 METROS
