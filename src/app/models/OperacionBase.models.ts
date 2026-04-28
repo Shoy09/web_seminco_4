@@ -23,7 +23,6 @@ export interface OperacionBase {
   modelo_equipo?: string;
   tipo_equipo?: string;
   capacidad?: string;
-  check_list_telemando?: any;
 
   horometros?: string;
   condiciones_equipo?: string;

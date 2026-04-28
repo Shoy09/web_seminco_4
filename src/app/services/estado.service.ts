@@ -15,6 +15,10 @@ export class EstadoService {
     return this.apiService.getDatos(this.baseUrl);
   }
 
+  getEstadosByProceso(proceso: string): Observable<Estado[]> {
+  return this.apiService.getDatos(`${this.baseUrl}/proceso/${proceso}`);
+}
+
   getEstadoById(id: number): Observable<Estado> {
     return this.apiService.getDatos(`${this.baseUrl}/${id}`);
   }

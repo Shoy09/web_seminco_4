@@ -34,8 +34,8 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
 
   chartOptions: any = {};
 
-  // Almacenar códigos con sus horas por estado
-  private codigosPorEstado: Map<string, Map<string, number>> = new Map();
+  // Almacenar tipos_estado con sus horas por estado
+  private tiposPorEstado: Map<string, Map<string, { horas: number, categoria: string | null }>> = new Map();
 
   coloresPorEstado: any = {
     'OPERATIVO': '#4CAF50',
@@ -60,10 +60,10 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
       return;
     }
 
-    // Reiniciar el mapa de códigos por estado
-    this.codigosPorEstado.clear();
+    // Reiniciar el mapa de tipos por estado
+    this.tiposPorEstado.clear();
 
-    // ⏱ Calcular duración y agrupar por estado y código
+    // ⏱ Calcular duración y agrupar por estado y tipo_estado
     const datosConDuracion = this.data.map(item => {
       const inicio = this.parseHora(item.hora_inicio).getTime();
       const fin = this.parseHora(item.hora_final).getTime();
@@ -74,24 +74,30 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
       return { ...item, duracion };
     });
 
-    // 📊 Agrupar por estado y por códigoEstado
+    // 📊 Agrupar por estado y por tipo_estado
     const sumas: any = {};
     const codigosOperacion = new Set<string>();
 
     datosConDuracion.forEach(d => {
       const estado = (d.estado || '').toUpperCase().trim();
-      const codigoEstado = d.codigoEstado || 'N/A';
+      const tipoEstado = d.tipo_estado || 'SIN TIPO';
+      const categoria = d.categoria || null;
       
       codigosOperacion.add(d.codigoOperacion);
       sumas[estado] = (sumas[estado] || 0) + d.duracion;
       
-      // Guardar código estado y acumular sus horas
-      if (!this.codigosPorEstado.has(estado)) {
-        this.codigosPorEstado.set(estado, new Map());
+      // Guardar tipo_estado y acumular sus horas
+      if (!this.tiposPorEstado.has(estado)) {
+        this.tiposPorEstado.set(estado, new Map());
       }
-      const codigosMap = this.codigosPorEstado.get(estado)!;
-      const horasActuales = codigosMap.get(codigoEstado) || 0;
-      codigosMap.set(codigoEstado, horasActuales + d.duracion);
+      const tiposMap = this.tiposPorEstado.get(estado)!;
+      const dataActual = tiposMap.get(tipoEstado) || { horas: 0, categoria: categoria };
+      dataActual.horas += d.duracion;
+      // Actualizar categoría si no existe o si encontramos una mejor
+      if (!dataActual.categoria && categoria) {
+        dataActual.categoria = categoria;
+      }
+      tiposMap.set(tipoEstado, dataActual);
     });
 
     const totalCodigos = codigosOperacion.size;
@@ -133,17 +139,12 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
         backgroundColor: 'rgba(0, 0, 0, 0)',
         borderWidth: 0,
         padding: 0,
-        // 🔥 CRUCIAL: permitir que el mouse entre al tooltip
         enterable: true,
-        // 🔥 Aumentar el tiempo de ocultamiento
         hideDelay: 300,
-        // 🔥 Usar posición fija para mejor control
         position: function(point: any, params: any, dom: any, rect: any, size: any) {
-          // Posicionar a la derecha del cursor
           const x = point[0] + 20;
           const y = point[1] - 50;
           
-          // Ajustar si se sale de la pantalla
           const tooltipWidth = dom ? dom.clientWidth : 320;
           const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
           
@@ -159,48 +160,54 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
           const horasPromedio = params.value;
           const porcentaje = params.percent.toFixed(1);
           
-          // Obtener los códigos con sus horas para este estado
-          const codigosMap = self.codigosPorEstado.get(estado);
+          // Obtener los tipos_estado con sus horas para este estado
+          const tiposMap = self.tiposPorEstado.get(estado);
           
-          let codigosHtml = '';
-          if (codigosMap && codigosMap.size > 0) {
-            // Convertir a array y ordenar por código
-            const codigosArray = Array.from(codigosMap.entries())
-              .map(([codigo, horas]) => ({ codigo, horas: horas.toFixed(2) }))
-              .sort((a, b) => a.codigo.localeCompare(b.codigo));
+          let tiposHtml = '';
+          if (tiposMap && tiposMap.size > 0) {
+            // Convertir a array y ordenar por horas (descendente)
+            const tiposArray = Array.from(tiposMap.entries())
+              .map(([tipo, { horas, categoria }]) => ({ 
+                tipo, 
+                horas: horas.toFixed(2),
+                categoria 
+              }))
+              .sort((a, b) => parseFloat(b.horas) - parseFloat(a.horas));
             
-            // 🔥 Mejor diseño: tabla más compacta con mejor scroll
-            const itemsHtml = codigosArray.map(item => `
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f0f0f0;">
-                <span style="display: inline-block; background: ${color}20; color: ${color}; padding: 3px 10px; border-radius: 14px; font-size: 11px; font-weight: 600; min-width: 50px; text-align: center;">
-                  ${item.codigo}
-                </span>
-                <span style="font-size: 12px; font-weight: 600; color: #333;">
+            // 🔥 Mostrar tipo_estado con su categoría
+            const itemsHtml = tiposArray.map(item => `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+                <div style="flex: 1;">
+                  <span style="display: inline-block; background: ${color}20; color: ${color}; padding: 4px 10px; border-radius: 14px; font-size: 11px; font-weight: 600; margin-bottom: 4px;">
+                    ${item.tipo}
+                  </span>
+                </div>
+                <span style="font-size: 12px; font-weight: 600; color: #333; margin-left: 12px;">
                   ${item.horas} hrs
                 </span>
               </div>
             `).join('');
             
             // 🔥 Limitar altura pero con mejor scroll
-            const scrollHeight = codigosArray.length > 8 ? '200px' : 'auto';
+            const scrollHeight = tiposArray.length > 6 ? '200px' : 'auto';
             
-            codigosHtml = `
+            tiposHtml = `
               <div style="margin-top: 12px;">
                 <div style="font-size: 11px; font-weight: 600; color: #666; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 4px; border-bottom: 2px solid ${color};">
-                  📋 DESGLOSE POR CÓDIGO
+                  📋 DESGLOSE POR TIPO DE ESTADO
                 </div>
                 <div style="max-height: ${scrollHeight}; overflow-y: auto; padding-right: 6px;">
                   ${itemsHtml}
                 </div>
                 <div style="margin-top: 8px; text-align: center; font-size: 10px; color: #999; padding-top: 4px; border-top: 1px solid #f0f0f0;">
-                  Total códigos: ${codigosArray.length}
+                  Total tipos: ${tiposArray.length}
                 </div>
               </div>
             `;
           }
           
           return `
-            <div style="background: white; border-radius: 12px; box-shadow: 0 6px 16px rgba(0,0,0,0.15); padding: 0; overflow: hidden; min-width: 280px; max-width: 320px;">
+            <div style="background: white; border-radius: 12px; box-shadow: 0 6px 16px rgba(0,0,0,0.15); padding: 0; overflow: hidden; min-width: 280px; max-width: 350px;">
               <!-- Header con color del estado -->
               <div style="background: ${color}; padding: 12px 16px;">
                 <div style="color: white; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">
@@ -210,7 +217,7 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
               
               <!-- Cuerpo del tooltip -->
               <div style="padding: 16px;">
-                <!-- Métricas principales en grid de 2 columnas -->
+                <!-- Métricas principales -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px;">
                   <div>
                     <div style="font-size: 11px; color: #666;">⏱️ Horas promedio</div>
@@ -221,7 +228,7 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
                     <div style="font-size: 18px; font-weight: bold; color: #333;">${porcentaje}%</div>
                   </div>
                 </div>
-                ${codigosHtml}
+                ${tiposHtml}
               </div>
             </div>
           `;

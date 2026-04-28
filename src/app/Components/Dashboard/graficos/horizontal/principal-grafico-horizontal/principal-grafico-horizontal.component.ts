@@ -39,6 +39,8 @@ import { CommonModule } from '@angular/common';
 import { PromedioEstadosEchartsComponent } from "../Graficos components/Hoja 2/promedio-estados-echarts/promedio-estados-echarts.component";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { EstadoService } from '../../../../../services/estado.service';
+import { SchedulerComponent } from "../Graficos components/scheduler/scheduler.component";
 
 @Component({
   selector: 'app-principal-grafico-horizontal',
@@ -61,7 +63,8 @@ import html2canvas from 'html2canvas';
     ScatterTurnosComponent,
     ScatterTurnosNocheComponent,
     CommonModule,
-    PromedioEstadosEchartsComponent
+    PromedioEstadosEchartsComponent,
+    // SchedulerComponent
 ],
   templateUrl: './principal-grafico-horizontal.component.html',
   styleUrl: './principal-grafico-horizontal.component.css'
@@ -113,6 +116,8 @@ turnoAplicado: string = '';
 
   datosGraficoEstados: any[] = [];
 
+  ganttData: any[] = [];
+
   actividadesData = [
   // J-14
   { recurso: 'J-14', actividad: 'DES', inicio: 12, fin: 16, label: '' },
@@ -132,10 +137,14 @@ turnoAplicado: string = '';
 ];
 dataPromedioEstados: any;
 cargandoPDF = false;
+
+estadosProceso: any[] = [];
+
   constructor(
     private planMensualService: PlanMensualService,
     private fechasPlanMensualService: FechasPlanMensualService,
-    private operacionesService: OperacionesService
+    private operacionesService: OperacionesService,
+    private estadoService: EstadoService
   ) {}
 
   ngOnInit(): void {
@@ -146,9 +155,25 @@ cargandoPDF = false;
   this.fechaInicio = hoy;
   this.fechaFin = hoy;
   this.turnoSeleccionado = this.getTurnoActual();
-
-    this.cargarOperaciones();
+  this.cargarOperaciones();
+ this.obtenerEstadosPorProceso('PERFORACIÓN HORIZONTAL');
   }
+
+obtenerEstadosPorProceso(proceso: string) {
+  this.estadoService.getEstadosByProceso(proceso)
+    .subscribe({
+      next: (data) => {
+        this.estadosProceso = data;
+       //console.log('Estados por proceso:', data);
+
+        // 🔥 CLAVE
+        this.construirMapaEstados();
+      },
+      error: (err) => {
+        console.error('Error al traer estados por proceso', err);
+      }
+    });
+}
 
   private getTurnoActual(): string {
   const hora = new Date().getHours();
@@ -180,7 +205,7 @@ private getFechaHoy(): string {
     next: (resp) => {
       this.operacionesOriginal = resp.data;
 
-      console.log('🔥 DATA OPERACIONES:', this.operacionesOriginal);
+     //console.log('🔥 DATA OPERACIONES:', this.operacionesOriginal);
 
       // 🔥 SOLO ESTO
       this.aplicarFiltro();
@@ -247,7 +272,7 @@ console.log('DATA FILTRADA:', this.operacionesFiltradas);
     this.planMensualService.getPlanMensualByYearAndMonth(anio, mes).subscribe({
       next: (planes) => {
         this.planesMensuales = planes;
-        console.log('🔥 PLANES MENSUALES:', this.planesMensuales);
+       //console.log('🔥 PLANES MENSUALES:', this.planesMensuales);
 
         this.procesarTodo();
       },
@@ -287,6 +312,7 @@ console.log('DATA FILTRADA:', this.operacionesFiltradas);
      this.dataHorasNumericas = this.procesarHorasNumericas();
     this.procesarResumen();
     this.prepararDatosGraficoEstados();
+    this.construirGanttDataNuevo();
 
     //console.log('🔥 DATA DISPAROS EQUIPO:', this.dataDisparosEquipo);
   }
@@ -1415,9 +1441,9 @@ procesarPromedioUltimaPerfDiaFR() {
 
     const promedio = dias > 0 ? suma / dias : 0;
 
-    // console.log(`\n🔥 EQUIPO: ${equipo}`);
-    // console.log(`días:`, dias);
-    // console.log(`promedio última perf:`, promedio);
+    ////console.log(`\n🔥 EQUIPO: ${equipo}`);
+    ////console.log(`días:`, dias);
+    ////console.log(`promedio última perf:`, promedio);
 
     result.push({
       modelo_equipo: equipo,
@@ -1871,7 +1897,7 @@ procesarDataPerforacionDetallada() {
   let descartadosSinTipo = 0;
   let aceptados = 0;
 
-  // console.log('🚀 INICIO procesamiento perforación');
+  ////console.log('🚀 INICIO procesamiento perforación');
 
   this.operacionesFiltradas.forEach(op => {
 
@@ -1879,11 +1905,11 @@ procesarDataPerforacionDetallada() {
     const registrosArray = op.registros;
 
     if (!Array.isArray(registrosArray)) {
-      // console.log(`⚠️ ${key} descartado: registros no es array`);
+      ////console.log(`⚠️ ${key} descartado: registros no es array`);
       return;
     }
 
-    // console.log(`\n📦 Equipo: ${key} | registros: ${registrosArray.length}`);
+    ////console.log(`\n📦 Equipo: ${key} | registros: ${registrosArray.length}`);
 
     registrosArray.forEach((r, idx) => {
 
@@ -1900,7 +1926,7 @@ procesarDataPerforacionDetallada() {
       // =========================
       if (!tipo_perforacion) {
         descartadosSinTipo++;
-        // console.log('❌ DESCARTADO (sin tipo_perforacion):', r);
+        ////console.log('❌ DESCARTADO (sin tipo_perforacion):', r);
         return;
       }
 
@@ -1961,7 +1987,7 @@ procesarDataPerforacionDetallada() {
       item.tal_repaso += tal_repaso;
       item.tal_rimados += tal_rimados;
 
-      // console.log('✅ ACEPTADO:', {
+      ////console.log('✅ ACEPTADO:', {
       //   key,
       //   tipo_perforacion,
       //   labor_fr,
@@ -1986,15 +2012,15 @@ procesarDataPerforacionDetallada() {
   // =========================
   // 🔥 RESUMEN FINAL
   // =========================
-  // console.log('\n========================');
-  // console.log('📊 RESUMEN FINAL');
-  // console.log('========================');
-  // console.log('Total registros:', totalRegistros);
-  // console.log('Aceptados:', aceptados);
-  // console.log('Descartados sin tipo_perforacion:', descartadosSinTipo);
-  // console.log('Registros individuales (sin agrupar):', resultado.length);
-  // console.log('✅ Coincidencia:', aceptados === resultado.length ? '✓ PERFECTO' : '✗ INCONSISTENCIA');
-  // console.log('Resultado:', resultado);
+  ////console.log('\n========================');
+  ////console.log('📊 RESUMEN FINAL');
+  ////console.log('========================');
+  ////console.log('Total registros:', totalRegistros);
+  ////console.log('Aceptados:', aceptados);
+  ////console.log('Descartados sin tipo_perforacion:', descartadosSinTipo);
+  ////console.log('Registros individuales (sin agrupar):', resultado.length);
+  ////console.log('✅ Coincidencia:', aceptados === resultado.length ? '✓ PERFECTO' : '✗ INCONSISTENCIA');
+  ////console.log('Resultado:', resultado);
 
   return resultado;
 }
@@ -2059,7 +2085,25 @@ procesarHorasNumericas() {
 //---------------------------------------------
 estadosBloqueados = ['FUERA DE PLAN'];
 
+mapaEstados: Map<string, any> = new Map();
+
+construirMapaEstados() {
+  this.mapaEstados.clear();
+
+  this.estadosProceso.forEach(e => {
+    const codigo = String(e.codigo || '').trim();
+    this.mapaEstados.set(codigo, e);
+  });
+
+ //console.log('🧩 Mapa de estados construido:', this.mapaEstados.size);
+}
+
 prepararDatosGraficoEstados(): void {
+
+  if (!this.mapaEstados.size) {
+    console.warn('⚠️ mapaEstados vacío, asegúrate de ejecutar construirMapaEstados() antes');
+  }
+
   this.datosGraficoEstados = this.operacionesFiltradas.flatMap(operacion => {
 
     const registros = Array.isArray(operacion.registros)
@@ -2067,16 +2111,53 @@ prepararDatosGraficoEstados(): void {
       : [];
 
     return registros
-      .map((estado: any) => ({
-        codigoOperacion: operacion.modelo_equipo || operacion.n_equipo || operacion.id,
-        turno: operacion.turno,
-        estado: (estado.estado || '').toUpperCase().trim(),
-        codigoEstado: estado.codigo,
-        hora_inicio: estado.hora_inicio,
-        hora_final: estado.hora_final
-      }))
+      .map((estado: any) => {
+
+        const codigo = String(estado.codigo || '').trim();
+        const estadoOperacion = (estado.estado || '').toUpperCase().trim();
+
+        const estadoMatch = this.mapaEstados.get(codigo);
+
+        // 🔥 Debug clave (solo cuando falla)
+        if (!estadoMatch) {
+          console.warn('❌ Sin match:', {
+            codigo,
+            estadoOperacion,
+            registro: estado
+          });
+        }
+
+        return {
+          codigoOperacion: operacion.modelo_equipo || operacion.n_equipo || operacion.id,
+          turno: operacion.turno,
+
+          // 🔹 base
+          estado: estadoOperacion,
+          codigoEstado: codigo,
+
+          // 🔥 enriquecido desde catálogo
+          tipo_estado: estadoMatch?.tipo_estado || null,
+          categoria: estadoMatch?.categoria || null,
+          estado_principal_match: estadoMatch?.estado_principal || null,
+
+          hora_inicio: estado.hora_inicio,
+          hora_final: estado.hora_final
+        };
+      })
       .filter(e => !this.estadosBloqueados.includes(e.estado));
   });
+
+  // 🔥 LOGS FINALES (clave para validar)
+ //console.log('📊 Total registros:', this.datosGraficoEstados.length);
+
+  const sinMatch = this.datosGraficoEstados.filter(x => !x.tipo_estado);
+ //console.log('⚠️ Registros sin tipo_estado:', sinMatch.length);
+
+  if (sinMatch.length) {
+    console.table(sinMatch.slice(0, 10)); // solo muestra 10 para no saturar
+  }
+
+  console.table(this.datosGraficoEstados.slice(0, 20)); // preview general
 }
 
 //GENERAR PDF
@@ -2139,6 +2220,84 @@ async generarPDF() {
 }
 private delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+//GANTT
+private construirGanttDataNuevo(): void {
+
+  const fechaMap: Record<string, any> = {};
+
+  this.operacionesFiltradas.forEach(op => {
+
+    const fecha = op.fecha || 'SIN_FECHA';
+    const equipoCodigo = `${op.equipo} - ${op.n_equipo}`;
+
+    if (!fechaMap[fecha]) {
+      fechaMap[fecha] = {};
+    }
+
+    if (!fechaMap[fecha][equipoCodigo]) {
+      fechaMap[fecha][equipoCodigo] = {};
+    }
+
+    const registros = Array.isArray(op.registros)
+      ? op.registros
+      : [];
+
+    registros.forEach((reg: any) => {
+
+      // =========================
+      // 🔥 LIMPIEZA BASE
+      // =========================
+      const estado = (reg.estado || 'SIN ESTADO').toUpperCase().trim();
+      const codigo = String(reg.codigo || '').trim();
+
+      if (!reg.hora_inicio || !reg.hora_final) return;
+
+      // =========================
+      // 🔥 DEFINICIÓN DE LABOR
+      // =========================
+      const labor = estado; // luego puedes cambiar esto
+
+      if (!fechaMap[fecha][equipoCodigo][labor]) {
+        fechaMap[fecha][equipoCodigo][labor] = [];
+      }
+
+      fechaMap[fecha][equipoCodigo][labor].push({
+        start: reg.hora_inicio,
+        end: reg.hora_final,
+        estado,
+        description: codigo
+      });
+
+    });
+
+  });
+
+  // =========================
+  // 🔁 NORMALIZACIÓN FINAL
+  // =========================
+  this.ganttData = Object.entries(fechaMap).map(
+    ([fecha, equipos]: any) => ({
+      fecha,
+      groups: Object.entries(equipos).map(
+        ([equipoCodigo, labores]: any) => ({
+          equipoCodigo,
+          rows: Object.entries(labores).map(
+            ([labor, tasks]: any) => ({
+              labor,
+              // 🔥 ORDENAR tareas por hora
+              tasks: tasks.sort((a: any, b: any) =>
+                a.start.localeCompare(b.start)
+              )
+            })
+          )
+        })
+      )
+    })
+  );
+
+ console.log('📊 GANTT DATA NUEVO:', this.ganttData);
 }
 
 }

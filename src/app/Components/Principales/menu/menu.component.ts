@@ -22,6 +22,7 @@ export class MenuComponent {
         { title: 'Perforacion Tal.Largo', path: 'grafico-tal-largo' },
          { title: 'Perforacion Horizontal', path: 'grafico-horizontal' },
         { title: 'Perforacion Sostenimiento', path: 'grafico-sostenimiento' },
+        {title: 'Scoops', path: 'grafico-scoops'},
          { title: 'Explosivos', path: 'explosivos-graficos' },
       ],
     },

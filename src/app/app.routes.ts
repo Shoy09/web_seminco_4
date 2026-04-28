@@ -35,6 +35,8 @@ import { ExplosivosGraficosComponent } from './Components/Dashboard/Explosivos/e
 import { DashboardPruebaComponent } from './Components/Dashboard/sostenimiento/dashboard-prueba/dashboard-prueba.component';
 import { PrincipalGraficoLargoComponent } from './Components/Dashboard/graficos/largo/principal-grafico-largo/principal-grafico-largo.component';
 import { PrincipalGraficoSostenimientoComponent } from './Components/Dashboard/graficos/sostenimiento/principal-grafico-sostenimiento/principal-grafico-sostenimiento.component';
+import { PrincipalGraficoScoopsComponent } from './Components/Dashboard/graficos/scoops/principal-grafico-scoops/principal-grafico-scoops.component';
+import { SchedulerComponent } from './Components/Dashboard/graficos/horizontal/Graficos components/scheduler/scheduler.component';
 
 
 
@@ -87,6 +89,7 @@ export const routes: Routes = [
 { path: 'grafico-horizontal', component: PrincipalGraficoHorizontalComponent },
 { path: 'grafico-tal-largo', component: PrincipalGraficoLargoComponent },
 {path: 'grafico-sostenimiento', component: PrincipalGraficoSostenimientoComponent},
+{path: 'grafico-scoops', component: PrincipalGraficoScoopsComponent},
 
 
 { path: 'explosivos', component: ExplosivosComponent },
