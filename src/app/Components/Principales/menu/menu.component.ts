@@ -24,6 +24,7 @@ export class MenuComponent {
         { title: 'Perforacion Sostenimiento', path: 'grafico-sostenimiento' },
         {title: 'SCOOPTRAM', path: 'grafico-scoops'},
          { title: 'Explosivos', path: 'explosivos-graficos' },
+        { title: 'Linea de tiempo', path: 'linea-de-tiempo' },
       ],
     },
     {
