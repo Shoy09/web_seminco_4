@@ -31,9 +31,14 @@
   Exportar PDF
 </button>
 
+<button class="btn-aplicar" (click)="toggleVista()">
+  {{ vistaPrincipal ? 'Ver gráficos secundarios' : 'Gráficos principales' }}
+</button>
+
+
 </div>
 
-<div class="graficos-container">
+<div class="graficos-container" *ngIf="vistaPrincipal">
   <!-- Hoja 1 pdf -->
   <app-resumen class="full-width" [data]="resumenSC" data-page="1"></app-resumen>
 
@@ -82,6 +87,11 @@
   [data]="dataHorasNumericas" data-page="6">
 </app-scatter-turnos-noche>
 
+</div>
+
+<div class="graficos-container" *ngIf="!vistaPrincipal">
+
+<app-scheduler class="full-width" [data]="ganttData" data-page="6"></app-scheduler>
 </div>
  
 <div class="overlay" *ngIf="cargandoPDF">

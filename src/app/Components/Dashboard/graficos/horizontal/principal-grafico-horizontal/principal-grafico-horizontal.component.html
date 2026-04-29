@@ -30,10 +30,16 @@
   <button class="btn-aplicar" (click)="generarPDF()">
   Exportar PDF
 </button>
+
+<button class="btn-aplicar" (click)="toggleVista()">
+  {{ vistaPrincipal ? 'Ver gráficos secundarios' : 'Gráficos principales' }}
+</button>
+
 </div>
 
-<div class="graficos-container">
-  <!-- Hoja 1 pdf -->
+<div class="graficos-container" *ngIf="vistaPrincipal">
+
+<!-- Hoja 1 pdf -->
   <app-resumen class="full-width" [data]="resumen" data-page="1"></app-resumen>
 
   <app-disparos-equipo class="full-width" [data]="dataDisparosEquipo" data-page="1"></app-disparos-equipo>
@@ -79,12 +85,14 @@
   [data]="dataHorasNumericas" data-page="6">
 </app-scatter-turnos-noche>
 
+</div>
 
-<!-- <app-scheduler class="full-width" [data]="ganttData" data-page="6"></app-scheduler> -->
+<div class="graficos-container" *ngIf="!vistaPrincipal">
 
+<app-scheduler class="full-width" [data]="ganttData" data-page="6"></app-scheduler>
+</div>
 
-
-</div>     
+ 
 
 <div class="overlay" *ngIf="cargandoPDF">
   <div class="spinner"></div>

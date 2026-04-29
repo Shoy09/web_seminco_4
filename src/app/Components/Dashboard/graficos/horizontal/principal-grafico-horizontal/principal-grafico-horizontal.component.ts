@@ -40,7 +40,7 @@ import { PromedioEstadosEchartsComponent } from "../Graficos components/Hoja 2/p
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { EstadoService } from '../../../../../services/estado.service';
-import { SchedulerComponent } from "../Graficos components/scheduler/scheduler.component";
+import { SchedulerComponent } from '../../Linea de tiempo/scheduler/scheduler.component';
 
 @Component({
   selector: 'app-principal-grafico-horizontal',
@@ -64,7 +64,7 @@ import { SchedulerComponent } from "../Graficos components/scheduler/scheduler.c
     ScatterTurnosNocheComponent,
     CommonModule,
     PromedioEstadosEchartsComponent,
-    // SchedulerComponent
+    SchedulerComponent
 ],
   templateUrl: './principal-grafico-horizontal.component.html',
   styleUrl: './principal-grafico-horizontal.component.css'
@@ -137,7 +137,7 @@ turnoAplicado: string = '';
 ];
 dataPromedioEstados: any;
 cargandoPDF = false;
-
+vistaPrincipal: boolean = true;
 estadosProceso: any[] = [];
 
   constructor(
@@ -158,6 +158,10 @@ estadosProceso: any[] = [];
   this.cargarOperaciones();
  this.obtenerEstadosPorProceso('PERFORACIÓN HORIZONTAL');
   }
+
+  toggleVista() {
+  this.vistaPrincipal = !this.vistaPrincipal;
+}
 
 obtenerEstadosPorProceso(proceso: string) {
   this.estadoService.getEstadosByProceso(proceso)
@@ -2230,14 +2234,22 @@ private construirGanttDataNuevo(): void {
   this.operacionesFiltradas.forEach(op => {
 
     const fecha = op.fecha || 'SIN_FECHA';
+    const turno = op.turno || 'SIN_TURNO';
     const equipoCodigo = `${op.equipo} - ${op.n_equipo}`;
 
-    if (!fechaMap[fecha]) {
-      fechaMap[fecha] = {};
+    // 🔥 clave combinada
+    const key = `${fecha}|${turno}`;
+
+    if (!fechaMap[key]) {
+      fechaMap[key] = {
+        fecha,
+        turno,
+        equipos: {}
+      };
     }
 
-    if (!fechaMap[fecha][equipoCodigo]) {
-      fechaMap[fecha][equipoCodigo] = {};
+    if (!fechaMap[key].equipos[equipoCodigo]) {
+      fechaMap[key].equipos[equipoCodigo] = {};
     }
 
     const registros = Array.isArray(op.registros)
@@ -2246,58 +2258,66 @@ private construirGanttDataNuevo(): void {
 
     registros.forEach((reg: any) => {
 
-      // =========================
-      // 🔥 LIMPIEZA BASE
-      // =========================
       const estado = (reg.estado || 'SIN ESTADO').toUpperCase().trim();
       const codigo = String(reg.codigo || '').trim();
 
       if (!reg.hora_inicio || !reg.hora_final) return;
 
-      // =========================
-      // 🔥 DEFINICIÓN DE LABOR
-      // =========================
-      const labor = estado; // luego puedes cambiar esto
+      // 🔥 MATCH CONTRA MAPA (igual que tu otro proceso)
+      const estadoMatch = this.mapaEstados.get(codigo);
 
-      if (!fechaMap[fecha][equipoCodigo][labor]) {
-        fechaMap[fecha][equipoCodigo][labor] = [];
+      // 🔥 puedes mantener estado o usar categoría (te dejo listo)
+      const labor = estadoMatch?.estado_principal || estado;
+
+      if (!fechaMap[key].equipos[equipoCodigo][labor]) {
+        fechaMap[key].equipos[equipoCodigo][labor] = [];
       }
 
-      fechaMap[fecha][equipoCodigo][labor].push({
+      fechaMap[key].equipos[equipoCodigo][labor].push({
         start: reg.hora_inicio,
         end: reg.hora_final,
+
         estado,
-        description: codigo
+        description: codigo,
+
+        // 🔥 CAMPOS ENRIQUECIDOS
+        tipo_estado: estadoMatch?.tipo_estado || null,
+        categoria: estadoMatch?.categoria || null,
+        estado_principal: estadoMatch?.estado_principal || null
       });
+
+      // 🔍 debug opcional
+      // if (!estadoMatch) {
+      //   console.warn('❌ SIN MATCH GANTT:', codigo, reg);
+      // }
 
     });
 
   });
 
-  // =========================
   // 🔁 NORMALIZACIÓN FINAL
-  // =========================
-  this.ganttData = Object.entries(fechaMap).map(
-    ([fecha, equipos]: any) => ({
-      fecha,
-      groups: Object.entries(equipos).map(
-        ([equipoCodigo, labores]: any) => ({
-          equipoCodigo,
-          rows: Object.entries(labores).map(
-            ([labor, tasks]: any) => ({
-              labor,
-              // 🔥 ORDENAR tareas por hora
-              tasks: tasks.sort((a: any, b: any) =>
-                a.start.localeCompare(b.start)
-              )
-            })
-          )
-        })
-      )
-    })
-  );
+  this.ganttData = Object.values(fechaMap).map((item: any) => ({
 
- console.log('📊 GANTT DATA NUEVO:', this.ganttData);
+    fecha: item.fecha,
+    turno: item.turno,
+
+    groups: Object.entries(item.equipos).map(
+      ([equipoCodigo, labores]: any) => ({
+        equipoCodigo,
+        rows: Object.entries(labores).map(
+          ([labor, tasks]: any) => ({
+            labor,
+            tasks: tasks.sort((a: any, b: any) =>
+              a.start.localeCompare(b.start)
+            )
+          })
+        )
+      })
+    )
+
+  }));
+
+  console.log('📊 GANTT DATA NUEVO:', this.ganttData);
 }
 
 }
