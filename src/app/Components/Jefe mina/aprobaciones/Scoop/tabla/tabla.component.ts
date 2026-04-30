@@ -40,6 +40,8 @@ export class TablaComponent implements OnChanges {
   @Input() data: any[] = [];
   @Output() dataChange = new EventEmitter<any[]>(); // 🔥 EMITIR CAMBIOS
 
+  @Input() turno: string = '';
+
   public datos: Registro[] = [];
   public mostrarOperacion = false;
   public mostrarPerforacion = false;
@@ -47,7 +49,7 @@ export class TablaComponent implements OnChanges {
   public horaInicioSeleccionado = '';
   public codigoSeleccionado = '';
   public operacionSeleccionada: Operacion | null = null;
-  
+  public operacionFormSeleccionada: any = null;
   public registroEnEdicion: Registro | null = null; // 🔥 Guardar qué registro editamos
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -88,13 +90,17 @@ export class TablaComponent implements OnChanges {
   }
 
   onEdit(item: Registro) {
-    console.log('Editando:', item);
-    this.registroEnEdicion = item; // 🔥 Guardar registro
-    this.estadoSeleccionado = item.estado;
-    this.codigoSeleccionado = item.codigo;
-    this.horaInicioSeleccionado = item.horaInicio;
-    this.mostrarOperacion = true;
-  }
+  this.registroEnEdicion = item;
+
+  this.operacionFormSeleccionada = {
+    estado: item.estado,
+    codigo: item.codigo,
+    horaInicio: item.horaInicio,
+    horaFin: item.horaFin
+  };
+
+  this.mostrarOperacion = true;
+}
 
   onExecute(item: Registro) {
     console.log('Ejecutando:', item);
@@ -115,7 +121,7 @@ export class TablaComponent implements OnChanges {
       this.registroEnEdicion.estado = datosActualizados.estado;
       this.registroEnEdicion.codigo = datosActualizados.codigo;
       this.registroEnEdicion.horaInicio = datosActualizados.horaInicio;
-      
+      this.registroEnEdicion.horaFin = datosActualizados.horaFin;
       // Actualizar el color según el nuevo estado
       this.registroEnEdicion.color = this.getColorEstado(datosActualizados.estado);
       
@@ -158,18 +164,18 @@ onGuardarPerforacion(datosPerforacion: any) {
 
   // 🔥 Emitir el array completo actualizado
   emitirCambios() {
-    // Reconstruir el array en el formato original
-    const dataActualizada = this.datos.map(registro => ({
-      numero: registro.nro,
-      estado: registro.estado,
-      codigo: registro.codigo,
-      hora_inicio: registro.horaInicio,
-      hora_final: registro.horaFin === '--:--' ? null : registro.horaFin,
-      operacion: registro.operacion
-    }));
-    
-    this.dataChange.emit(dataActualizada);
-  }
+      // Reconstruir el array en el formato original
+      const dataActualizada = this.datos.map(registro => ({
+        numero: registro.nro,
+        estado: registro.estado,
+        codigo: registro.codigo,
+        hora_inicio: registro.horaInicio,
+        hora_final: registro.horaFin,
+        operacion: registro.operacion
+      }));
+      
+      this.dataChange.emit(dataActualizada);
+    }
 
   cerrarFormOperacion() {
     this.mostrarOperacion = false;
