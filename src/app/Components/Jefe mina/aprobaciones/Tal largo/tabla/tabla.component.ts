@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { FormularioOperacionComponent } from "../formulario-operacion/formulario-operacion.component";
 import { FormularioPerforacionComponent } from "../formulario-perforacion/formulario-perforacion.component";
+import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 // tabla.component.ts
 interface Operacion {
@@ -69,6 +71,8 @@ export class TablaComponent implements OnChanges {
   public operacionSeleccionada: Operacion | null = null;
   public registroEnEdicion: Registro | null = null;
   public operacionFormSeleccionada: any = null;
+
+  constructor(private dialog: MatDialog) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data) {
@@ -142,9 +146,20 @@ export class TablaComponent implements OnChanges {
   }
 
   onDelete(item: Registro) {
-    console.log('Borrando:', item);
+  
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      disableClose: true
+    });
+  
+    dialogRef.afterClosed().subscribe(confirmado => {
+      if (!confirmado) return;
+  
+      this.datos = this.datos.filter(r => r !== item);
+      this.emitirCambios();
+    });
   }
-
+  
   onConfirmarOperacion(datosActualizados: any) {
     if (this.registroEnEdicion) {
       this.registroEnEdicion.estado = datosActualizados.estado;

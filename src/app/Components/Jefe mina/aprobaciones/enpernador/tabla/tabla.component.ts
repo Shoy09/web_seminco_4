@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { FormularioOperacionComponent } from "../formulario-operacion/formulario-operacion.component";
 import { FormularioPerforacionComponent } from "../formulario-perforacion/formulario-perforacion.component";
+import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 interface Operacion {
   nivel: string;
@@ -54,6 +56,8 @@ export class TablaComponent implements OnChanges {
   public operacionFormSeleccionada: any = null;
   
   public registroEnEdicion: Registro | null = null; // 🔥 Guardar qué registro editamos
+
+   constructor(private dialog: MatDialog) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data) {
@@ -117,8 +121,18 @@ export class TablaComponent implements OnChanges {
   }
 
   onDelete(item: Registro) {
-    console.log('Borrando:', item);
-    // Si implementas borrado, también debes emitir cambios
+  
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      disableClose: true
+    });
+  
+    dialogRef.afterClosed().subscribe(confirmado => {
+      if (!confirmado) return;
+  
+      this.datos = this.datos.filter(r => r !== item);
+      this.emitirCambios();
+    });
   }
 
   // 🔥 Manejar cambios desde formulario-operacion
