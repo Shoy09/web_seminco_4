@@ -100,7 +100,7 @@ export class MejoresOperadoresGraficoComponent implements OnChanges {
 
     this.chartOptions = {
       title: {
-        text: 'MEJORES OPERADORES - Tonelaje vs Tn/Hr',
+        text: 'MEJORES OPERADORES',
         left: 'center',
         top: 10,
         textStyle: {

@@ -67,7 +67,22 @@
 
    <!-- Hoja 2 pdf -->
 
-   <app-scatter-turnos 
+
+
+<app-pernos-minado-tipo [data]="dataPernosMinadoTipo" data-page="2"></app-pernos-minado-tipo>
+
+<app-horas-primera-perforacion [data]="dataProcesoLaborFR" data-page="3"></app-horas-primera-perforacion>
+
+<app-detalle-equipo class="full-width" [data]="dataIndicadores" data-page="4"></app-detalle-equipo>
+
+<app-detalle-sostenimiento class="full-width" [data]="dataIndicadoresLabor" data-page="5"></app-detalle-sostenimiento>
+
+<app-mejores-operadores class="full-width" [data]="dataFrPorOperadorTurno" data-page="5"></app-mejores-operadores>
+<app-ranking-operador [data]="dataFrPorOperadorTurno" data-page="5"></app-ranking-operador>
+
+  <app-observaciones class="full-width" [data]="dataLaborFRDetallado" data-page="5"></app-observaciones>
+
+     <app-scatter-turnos 
   *ngIf="turnoAplicado === '' || turnoAplicado === 'DÍA'"
   class="full-width"
   [data]="dataHorasNumericas" data-page="6">
@@ -78,19 +93,6 @@
   class="full-width"
   [data]="dataHorasNumericas" data-page="6">
 </app-scatter-turnos-noche>
-
-<app-pernos-minado-tipo [data]="dataPernosMinadoTipo" data-page="2"></app-pernos-minado-tipo>
-
-<app-horas-primera-perforacion [data]="dataProcesoLaborFR" data-page="3"></app-horas-primera-perforacion>
-
-<app-detalle-equipo class="full-width" [data]="dataIndicadores" data-page="4"></app-detalle-equipo>
-
-<app-detalle-sostenimiento class="full-width" [data]="dataIndicadoresLabor" data-page="5"></app-detalle-sostenimiento>
-
-<app-mejores-operadores [data]="dataFrPorOperadorTurno" data-page="5"></app-mejores-operadores>
-  <app-ranking-operador [data]="dataFrPorOperadorTurno" data-page="5"></app-ranking-operador>
-
-  <app-observaciones class="full-width" [data]="dataLaborFRDetallado" data-page="5"></app-observaciones>
  
 </div>
 
