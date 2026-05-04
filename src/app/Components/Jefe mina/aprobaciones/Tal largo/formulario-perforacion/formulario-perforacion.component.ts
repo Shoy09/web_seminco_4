@@ -168,12 +168,13 @@ export class FormularioPerforacionComponent implements OnInit, OnChanges {
 
   validarFormulario(): boolean {
     // Validar campos obligatorios
-    return !!(
-      this.datosPerforacion.ubicacion.nivel &&
-      this.datosPerforacion.ubicacion.tipoLabor &&
-      this.datosPerforacion.ubicacion.labor &&
-      this.datosPerforacion.tipoPerforacion.nombre
-    );
+    // return !!(
+    //   this.datosPerforacion.ubicacion.nivel &&
+    //   this.datosPerforacion.ubicacion.tipoLabor &&
+    //   this.datosPerforacion.ubicacion.labor &&
+    //   this.datosPerforacion.tipoPerforacion.nombre
+    // );
+    return true;
   }
 
   private getInitDatosPerforacion(): DatosPerforacion {
