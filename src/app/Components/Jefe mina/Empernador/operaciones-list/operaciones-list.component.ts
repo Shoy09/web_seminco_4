@@ -4,10 +4,11 @@ import { OperacionesService } from '../../../../services/operaciones.service';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../services/auth-service.service';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-operaciones-list',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './operaciones-list.component.html',
   styleUrl: './operaciones-list.component.css'
 })
@@ -16,8 +17,16 @@ export class OperacionesListEmpernadorComponent implements OnInit {
   tipo: string = 'empernador';
   jefe_guardia: string = '';
 
-  operaciones: OperacionBase[] = [];
+  operacionesOriginal: OperacionBase[] = [];
+  operacionesFiltradas: OperacionBase[] = [];
   loading = false;
+
+  // Variables para el filtro de fechas
+  fechaInicio: string = '';
+  fechaFin: string = '';
+  turnoSeleccionado: string = '';
+  turnoAplicado: string = '';
+  
 
   constructor(
     private operacionesService: OperacionesService,
@@ -34,8 +43,38 @@ export class OperacionesListEmpernadorComponent implements OnInit {
     }
 
     this.jefe_guardia = nombre;
+    
+    // 🔥 SETEO AUTOMÁTICO
+    const hoy = this.getFechaHoy();
+    this.fechaInicio = hoy;
+    this.fechaFin = hoy;
+    this.turnoSeleccionado = this.getTurnoActual();
+
     this.cargarDatos();
   }
+
+  // 🔥 OBTENER TURNO ACTUAL BASADO EN LA HORA
+  private getTurnoActual(): string {
+    const hora = new Date().getHours();
+
+    // Día: 07:00 - 18:59
+    if (hora >= 7 && hora < 19) {
+      return 'DÍA';
+    }
+
+    // Noche: 19:00 - 06:59
+    return 'NOCHE';
+  }
+
+  // 🔥 OBTENER FECHA ACTUAL EN FORMATO YYYY-MM-DD
+  private getFechaHoy(): string {
+    const hoy = new Date();
+    const year = hoy.getFullYear();
+    const month = String(hoy.getMonth() + 1).padStart(2, '0');
+    const day = String(hoy.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
 
   //por tipo
   cargarDatos() {
@@ -45,8 +84,10 @@ export class OperacionesListEmpernadorComponent implements OnInit {
     .getAll(this.tipo) // 🔥 cambio aquí
     .subscribe({
       next: (resp: any) => {
-        this.operaciones = resp.data;
+        this.operacionesOriginal = resp.data;
         this.loading = false;
+
+        this.aplicarFiltro();
       },
       error: (err) => {
         console.error(err);
@@ -54,6 +95,39 @@ export class OperacionesListEmpernadorComponent implements OnInit {
       }
     });
 }
+
+// =========================================
+  // 🔥 FILTRO POR FECHA Y TURNO
+  // =========================================
+  aplicarFiltro() {
+    this.turnoAplicado = this.turnoSeleccionado;
+
+    this.operacionesFiltradas = this.operacionesOriginal.filter((op) => {
+      // Filtro por fecha inicio
+      if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
+      
+      // Filtro por fecha fin
+      if (this.fechaFin && op.fecha > this.fechaFin) return false;
+
+      // Filtro por turno
+      if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
+
+      return true;
+    });
+    
+    console.log('🔥 OPERACIONES FILTRADAS:', this.operacionesFiltradas);
+  }
+
+  // 🔥 QUITAR TODOS LOS FILTROS
+  quitarFiltro() {
+    this.operacionesFiltradas = [...this.operacionesOriginal];
+    this.fechaInicio = '';
+    this.fechaFin = '';
+    this.turnoAplicado = '';
+    this.turnoSeleccionado = '';
+
+    console.log('🔥 FILTROS ELIMINADOS, mostrando todas las operaciones');
+  }
 //Jefe guardia y tipo
   // cargarDatos() {
   //   this.loading = true;

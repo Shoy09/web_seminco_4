@@ -35,12 +35,12 @@ export class EquiposMenuComponent {
       icono: 'fas fa-wrench',
       color: '#e74c3c'
     },
-    // { 
-    //   nombre: 'SCISSOR', 
-    //   ruta: '/Dashboard/jefe-mina/scissor',
-    //   icono: 'fas fa-cut',
-    //   color: '#f39c12'
-    // },
+    { 
+      nombre: 'SCISSOR', 
+      ruta: '/Dashboard/jefe-mina/scissor',
+      icono: 'fas fa-cut',
+      color: '#f39c12'
+    },
     // { 
     //   nombre: 'SCALAMIN', 
     //   ruta: '/Dashboard/jefe-mina/scalamin',

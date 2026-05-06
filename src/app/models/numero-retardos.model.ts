@@ -1,6 +1,6 @@
 export interface NumeroRetardos {
   id?: number;
-  mes: string;
-  anio: number;
-  cantidad: number;
+  longitud: number;
+  tipo: string;
+  codigo: string;
 }

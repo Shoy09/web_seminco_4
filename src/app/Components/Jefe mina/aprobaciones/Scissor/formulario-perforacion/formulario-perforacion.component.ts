@@ -1,10 +1,29 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-interface DatosOperacion {
-  origen: { nivel: string; tipoLabor: string; labor: string; ala: string; };
-  destino: { nivel: string; tipoLabor: string; labor: string; ala: string; };
+// 🔥 NUEVA INTERFAZ CON ORIGEN/DESTINO
+interface DatosPerforacion {
+  origen: {
+    nivel: string;
+    tipoLabor: string;
+    labor: string;
+    ala: string;
+  };
+  destino: {
+    nivel: string;
+    tipoLabor: string;
+    labor: string;
+    ala: string;
+  };
   observaciones: string;
 }
 
@@ -13,70 +32,75 @@ interface DatosOperacion {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './formulario-perforacion.component.html',
-  styleUrl: './formulario-perforacion.component.css'
+  styleUrl: './formulario-perforacion.component.css',
 })
 export class FormularioPerforacionComponent implements OnInit, OnChanges {
-
   @Input() visible = false;
   @Input() operacion: any;
+  @Input() estado: string = '';
   @Output() cerrar = new EventEmitter<void>();
+  @Output() guardar = new EventEmitter<any>();
 
   public formularioInvalido = false;
-  public datosOperacion: DatosOperacion = this.getInitDatosOperacion();
+  public datosPerforacion: DatosPerforacion = this.getInitDatosPerforacion();
 
-  // 🔥 LISTAS DINÁMICAS
-  public niveles: string[] = ['100', '200', '450'];
-  public tiposLabor: string[] = ['RAMPA', 'GALERIA', 'SN'];
-  public labores: string[] = ['RAMPA 1', 'GALERIA A', '382E'];
-  public alas: string[] = ['NORTE', 'SUR', ''];
+  // Datos para selects
+  public niveles: string[] = ['100', '200', '300', '400'];
+  public tiposLabor: string[] = ['RAMPA', 'GALERIA', 'CHIMENEA', 'SUB-NIVEL'];
+  public labores: string[] = [];
+  public alas: string[] = ['NORTE', 'SUR', 'ESTE', 'OESTE'];
 
   constructor() {}
+
   ngOnInit() {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['operacion'] && this.operacion) {
-      const op = this.operacion;
-
-      console.log('📥 Datos recibidos en operacion:', op);
-
-      // 🔥 ORIGEN
-      this.datosOperacion.origen.nivel = op.origen_nivel || '';
-      this.datosOperacion.origen.tipoLabor = op.origen_tipo_labor || '';
-      this.datosOperacion.origen.labor = op.origen_labor || '';
-      this.datosOperacion.origen.ala = op.origen_ala || '';
-
-      // 🔥 DESTINO
-      this.datosOperacion.destino.nivel = op.destino_nivel || '';
-      this.datosOperacion.destino.tipoLabor = op.destino_tipo_labor || '';
-      this.datosOperacion.destino.labor = op.destino_labor || '';
-      this.datosOperacion.destino.ala = op.destino_ala || '';
-
-      // 🔥 OBSERVACIONES
-      this.datosOperacion.observaciones = op.observaciones || '';
-
-      // 🔥 LISTAS DINÁMICAS - ORIGEN
-      this.agregarSiNoExiste(this.niveles, op.origen_nivel);
-      this.agregarSiNoExiste(this.tiposLabor, op.origen_tipo_labor);
-      this.agregarSiNoExiste(this.labores, op.origen_labor);
-      this.agregarSiNoExiste(this.alas, op.origen_ala);
-
-      // 🔥 LISTAS DINÁMICAS - DESTINO
-      this.agregarSiNoExiste(this.niveles, op.destino_nivel);
-      this.agregarSiNoExiste(this.tiposLabor, op.destino_tipo_labor);
-      this.agregarSiNoExiste(this.labores, op.destino_labor);
-      this.agregarSiNoExiste(this.alas, op.destino_ala);
+      this.cargarDatosOperacion(this.operacion);
     }
   }
 
-  // 🔥 FUNCIÓN REUTILIZABLE PARA LISTAS
+  public get mostrarCamposCompletos(): boolean {
+    return this.estado === 'OPERATIVO';
+  }
+
+  // 🔥 CARGA DATOS DESDE OPERACIÓN (con nueva estructura origen/destino)
+  cargarDatosOperacion(op: any) {
+    console.log('📥 Cargando operación:', op);
+
+    // Origen
+    this.datosPerforacion.origen.nivel = op.origen_nivel || '';
+    this.datosPerforacion.origen.tipoLabor = op.origen_tipo_labor || '';
+    this.datosPerforacion.origen.labor = op.origen_labor || '';
+    this.datosPerforacion.origen.ala = op.origen_ala || '';
+
+    // Destino
+    this.datosPerforacion.destino.nivel = op.destino_nivel || '';
+    this.datosPerforacion.destino.tipoLabor = op.destino_tipo_labor || '';
+    this.datosPerforacion.destino.labor = op.destino_labor || '';
+    this.datosPerforacion.destino.ala = op.destino_ala || '';
+
+    // Observaciones
+    this.datosPerforacion.observaciones = op.observaciones || '';
+
+    // Agregar a listas dinámicas (origen)
+    this.agregarSiNoExiste(this.niveles, op.origen_nivel);
+    this.agregarSiNoExiste(this.tiposLabor, op.origen_tipo_labor);
+    this.agregarSiNoExiste(this.labores, op.origen_labor);
+    this.agregarSiNoExiste(this.alas, op.origen_ala);
+
+    // Agregar a listas dinámicas (destino)
+    this.agregarSiNoExiste(this.niveles, op.destino_nivel);
+    this.agregarSiNoExiste(this.tiposLabor, op.destino_tipo_labor);
+    this.agregarSiNoExiste(this.labores, op.destino_labor);
+    this.agregarSiNoExiste(this.alas, op.destino_ala);
+  }
+
   agregarSiNoExiste(lista: string[], valor: string) {
     if (!valor) return;
-
     const limpio = valor.trim();
-
     if (limpio && !lista.includes(limpio)) {
       lista.push(limpio);
-      console.log(`✅ Agregado a lista: ${limpio}`);
     }
   }
 
@@ -84,14 +108,14 @@ export class FormularioPerforacionComponent implements OnInit, OnChanges {
     this.cerrar.emit();
   }
 
+  // 🔥 EMITIR CON NUEVA ESTRUCTURA (origen/destino)
   guardarPerforacion() {
     if (this.validarFormulario()) {
-      console.log('💾 Datos guardados:', this.datosOperacion);
-      
-      // Aquí puedes emitir los datos al componente padre si es necesario
-      // this.guardar.emit(this.datosOperacion);
-      
-      this.cerrar.emit();
+      console.log(
+        '📤 Emitiendo datos perforación (origen/destino):',
+        this.datosPerforacion,
+      );
+      this.guardar.emit(this.datosPerforacion);
       this.formularioInvalido = false;
     } else {
       this.formularioInvalido = true;
@@ -99,23 +123,21 @@ export class FormularioPerforacionComponent implements OnInit, OnChanges {
     }
   }
 
-  validarFormulario(): boolean {
-    // Validar que al menos origen o destino tengan datos obligatorios
-    const origen = this.datosOperacion.origen;
-    const destino = this.datosOperacion.destino;
-    
-    // Al menos uno de los dos debe tener nivel y labor
-    const origenValido = !!(origen.nivel && origen.labor);
-    const destinoValido = !!(destino.nivel && destino.labor);
-    
-    return origenValido || destinoValido;
+    validarFormulario(): boolean {
+    // Validar campos obligatorios
+    // return !!(
+    //   this.datosPerforacion.ubicacion.nivel &&
+    //   this.datosPerforacion.ubicacion.tipoLabor &&
+    //   this.datosPerforacion.ubicacion.labor &&
+    //   this.datosPerforacion.tipoPerforacion.nombre
+    // );
+    return true;
   }
-
-  private getInitDatosOperacion(): DatosOperacion {
+  private getInitDatosPerforacion(): DatosPerforacion {
     return {
       origen: { nivel: '', tipoLabor: '', labor: '', ala: '' },
       destino: { nivel: '', tipoLabor: '', labor: '', ala: '' },
-      observaciones: ''
+      observaciones: '',
     };
   }
 }

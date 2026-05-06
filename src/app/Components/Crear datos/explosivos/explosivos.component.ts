@@ -38,6 +38,11 @@ export class ExplosivosComponent implements OnInit {
     { nombre: 'Reporte C', year: '2024', mes: 'Enero' },
   ];
 
+tipos: string[] = [];
+longitudes: number[] = [];
+
+private retardosOriginales: any[] = [];
+
   constructor(
     private explosivoService: ExplosivoService,
     private accesorioService: AccesorioService,
@@ -49,6 +54,29 @@ export class ExplosivosComponent implements OnInit {
   ngOnInit() {
     this.generarAños();
   }
+
+  actualizarLongitudes() {
+
+  const tipoSeleccionado = this.nuevoDato.tipo;
+
+  if (!tipoSeleccionado) return;
+
+  const filtrados = this.retardosOriginales.filter(
+    (x: any) => x.tipo === tipoSeleccionado
+  );
+
+  this.longitudes = [
+    ...new Set(filtrados.map((x: any) => x.dato))
+  ];
+
+  const campoLongitud = this.modalContenido.campos.find(
+    (c: any) => c.nombre === 'longitud'
+  );
+
+  if (campoLongitud) {
+    campoLongitud.opciones = this.longitudes;
+  }
+}
 
   generarAños() {
     const yearActual = new Date().getFullYear();
@@ -116,22 +144,30 @@ export class ExplosivosComponent implements OnInit {
       ],
     },
     {
-      nombre: 'Numeros retardos',
-      icon: 'mas.svg',
-      tipo: 'Numeros retardos',
-      datos: [],
-      campos: [
-        { nombre: 'mes', label: 'Mes', tipo: 'select', opciones: this.meses },
-        { nombre: 'anio', label: 'Año', tipo: 'select', opciones: this.years },
-        {
-          nombre: 'cantidad',
-          label: 'Cantidad',
-          tipo: 'number',
-          step: 1,
-          min: 0,
-        },
-      ],
+  nombre: 'Numeros retardos',
+  icon: 'mas.svg',
+  tipo: 'Numeros retardos',
+  datos: [],
+  campos: [
+    {
+      nombre: 'tipo',
+      label: 'Tipo',
+      tipo: 'select',
+      opciones: this.tipos // 👈 debes definir esto
     },
+    {
+      nombre: 'longitud',
+      label: 'Longitud',
+      tipo: 'select',
+      opciones: this.longitudes // 👈 debes definir esto
+    },
+    {
+      nombre: 'codigo',
+      label: 'Código',
+      tipo: 'text'
+    }
+  ],
+}
     // {
     //   nombre: 'Destinatarios de Despacho',
     //   icon: 'mas.svg',
@@ -170,13 +206,46 @@ export class ExplosivosComponent implements OnInit {
         error: (err) => console.error('Error al cargar accesorios:', err),
       });
     } else if (button.tipo === 'Numeros retardos') {
-      this.numeroRetardosService.getAll().subscribe({
-        next: (data) => {
-          this.modalContenido.datos = data;
-        },
-        error: (err) => console.error('Error al cargar retardos:', err),
-      });
-    }
+
+  // TABLA INFERIOR
+  this.numeroRetardosService.getAll().subscribe({
+    next: (data) => {
+      this.modalContenido.datos = data;
+    },
+    error: (err) => console.error('Error al cargar retardos:', err),
+  });
+
+  // SELECTS DINÁMICOS
+  this.ExplosivosUniService.getExplosivos().subscribe({
+    next: (data) => {
+
+      this.retardosOriginales = data;
+
+      // TIPOS ÚNICOS
+      this.tipos = [...new Set(data.map((x: any) => x.tipo))];
+
+      // ACTUALIZAR OPCIONES DEL SELECT TIPO
+      const campoTipo = this.modalContenido.campos.find(
+        (c: any) => c.nombre === 'tipo'
+      );
+
+      if (campoTipo) {
+        campoTipo.opciones = this.tipos;
+      }
+
+      // INICIALMENTE VACÍO
+      const campoLongitud = this.modalContenido.campos.find(
+        (c: any) => c.nombre === 'longitud'
+      );
+
+      if (campoLongitud) {
+        campoLongitud.opciones = [];
+      }
+
+    },
+    error: (err) => console.error('Error al cargar tipos:', err),
+  });
+}
     // else if (button.tipo === 'Destinatarios de Despacho') {
     //   this.DestinatarioCorreoService.getDestinatarios().subscribe({
     //     next: (data) => {

@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { OperacionBase } from '../../../../../models/OperacionBase.models';
+import { EquipoService } from '../../../../../services/equipo.service';
+import { UsuarioService } from '../../../../../services/usuario.service';
+import { Usuario } from '../../../../../models/Usuario';
 
 @Component({
   selector: 'app-card-operaciones',
@@ -11,60 +13,149 @@ import { OperacionBase } from '../../../../../models/OperacionBase.models';
   templateUrl: './card-operaciones.component.html',
   styleUrls: ['./card-operaciones.component.css']
 })
-export class CardOperacionesComponent implements OnChanges {
+export class CardOperacionesComponent implements OnChanges, OnInit {
 
-  // 🔥 RECIBE LA DATA REAL
   @Input() data!: any;
+  @Output() dataChange = new EventEmitter<any>();
+
+  isDirty = false;
+
+  private readonly PROCESO = 'SCISSOR';
 
   formValues: Record<string, any> = {
-  fecha: '',
-  turno: '',
-  equipo: '',
-  codigo: '',
-  operador: '',
-  jefeGuardia: '',
-};
+    fecha: '',
+    turno: '',
+    equipo: '',
+    codigo: '',
+    operador: '',
+    jefeGuardia: '',
+  };
 
   campos = [
-  { key: 'turno',       options: ['DÍA', 'NOCHE'] },
-  { key: 'equipo',      options: ['ZTTT', 'XRRR'] },
-  { key: 'codigo',      options: ['T12', 'T15'] },
-  { key: 'jefeGuardia', options: ['6666 6666', '7777 7777'] },
-];
+    { key: 'turno', options: ['DÍA', 'NOCHE'] },
+    { key: 'equipo', options: [] },
+    { key: 'codigo', options: [] },
+   { key: 'jefeGuardia', options: [] }, 
+  ];
 
+  constructor(
+    private equipoService: EquipoService,
+    private usuarioService: UsuarioService
+  ) {}
+
+  // 🔥 INIT
+  ngOnInit(): void {
+    this.cargarEquipos();
+    this.cargarJefesGuardia();
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
-  if (changes['data'] && this.data) {
-    this.cargarDatos();
-    //console.log('🔥 DATA MAPEADA:', this.data);
+    if (changes['data']?.currentValue) {
+      if (this.isDirty) return;
+      this.cargarDatos();
+    }
   }
+
+// 🔹 ===============================
+// 🔹 JEFES DE GUARDIA
+// 🔹 ===============================
+cargarJefesGuardia() {
+  this.usuarioService.obtenerJefesGuardia()
+    .subscribe({
+      next: (usuarios: Usuario[]) => {
+        // Combinar apellidos y nombres
+        const nombresCompletos = usuarios.map(u => {
+          return `${u.nombres} ${u.apellidos}`;
+        });
+        
+        this.mergeOpciones('jefeGuardia', nombresCompletos);
+        
+        // 🔥 asegurar valor actual si existe en data
+        this.ensureCurrentValues();
+      },
+      error: err => console.error('Error jefes de guardia:', err)
+    });
 }
 
-cargarDatos() {
 
-  this.agregarOpcionSiNoExiste('equipo', this.data.equipo);
-  this.agregarOpcionSiNoExiste('codigo', this.data.codigo);
+  // 🔥 ===============================
+  // 🔹 EQUIPOS
+  // 🔥 ===============================
+  cargarEquipos() {
+    this.equipoService.getEquiposByProceso(this.PROCESO)
+      .subscribe({
+        next: (equipos: any[]) => {
 
+          const nombres = equipos.map(e => e.nombre);
+          const codigos = equipos.map(e => e.codigo);
 
-  this.formValues = {
-  fecha: this.data.fecha,
-  turno: this.data.turno,
-  equipo: this.data.equipo,
-  codigo: this.data.codigo,
-  operador: this.data.operador,
-  jefeGuardia: this.data.jefeGuardia,
-};
-}
+          this.mergeOpciones('equipo', nombres);
+          this.mergeOpciones('codigo', codigos);
 
-agregarOpcionSiNoExiste(key: string, valor: string) {
-  const campo = this.campos.find(c => c.key === key);
-
-  if (!campo) return;
-
-  if (valor && !campo.options.includes(valor)) {
-    campo.options = [valor, ...campo.options];
+          // 🔥 asegurar valores actuales si ya hay data
+          this.ensureCurrentValues();
+        },
+        error: err => console.error('Error equipos:', err)
+      });
   }
-}
+
+  // 🔥 ===============================
+  // 🔹 HELPERS PRO
+  // 🔥 ===============================
+
+  // 👉 mezcla opciones sin perder las anteriores
+  mergeOpciones(key: string, nuevas: string[]) {
+    const campo = this.campos.find(c => c.key === key);
+    if (!campo) return;
+
+    const actuales = campo.options || [];
+    campo.options = [...new Set([...actuales, ...nuevas])];
+  }
+
+  // 👉 asegura que lo que viene en data SIEMPRE exista en options
+  ensureCurrentValues() {
+    if (!this.data) return;
+
+    this.agregarOpcionSiNoExiste('equipo', this.data.equipo);
+    this.agregarOpcionSiNoExiste('codigo', this.data.codigo);
+    this.agregarOpcionSiNoExiste('jefeGuardia', this.data.jefeGuardia); 
+  }
+
+  onChange() {
+    this.isDirty = true;
+
+    console.log('🟡 CARD - formValues actualizado:', this.formValues);
+
+    this.dataChange.emit({
+      ...this.formValues
+    });
+  }
+
+  cargarDatos() {
+
+    // 🔥 primero asegura opciones
+    this.ensureCurrentValues();
+
+    this.formValues = {
+      fecha: this.data.fecha,
+      turno: this.data.turno,
+      equipo: this.data.equipo,
+      codigo: this.data.codigo,
+      operador: this.data.operador,
+      jefeGuardia: this.data.jefeGuardia,
+    };
+  }
+
+  agregarOpcionSiNoExiste(key: string, valor: string) {
+    if (!valor) return;
+
+    const campo = this.campos.find(c => c.key === key);
+    if (!campo) return;
+
+    if (!campo.options.includes(valor)) {
+      campo.options = [valor, ...campo.options];
+    }
+  }
 
   getCampo(key: string) {
     return this.campos.find(c => c.key === key) || { key, options: [] };

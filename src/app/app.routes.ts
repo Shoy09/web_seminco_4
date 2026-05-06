@@ -25,8 +25,6 @@ import { OperacionesListAnfochaComponent } from './Components/Jefe mina/ANFOCHAN
 import { PrincipalTalLargoComponent } from './Components/Jefe mina/aprobaciones/Tal largo/principal/principal.component';
 import { PrincipalTalHorizontalComponent } from './Components/Jefe mina/aprobaciones/Tal horizontal/principal/principal.component';
 import { PrincipalScoopsComponent } from './Components/Jefe mina/aprobaciones/Scoop/principal/principal.component';
-import { PrincipalScissorComponent } from './Components/Jefe mina/aprobaciones/Scissor/principal/principal.component';
-import { PrincipalRompebancosComponent } from './Components/Jefe mina/aprobaciones/Rompebancos/principal/principal.component';
 import { PowerBiPublicComponent } from './Components/Dashboard/Pu-PowerBi/power-bi-public/power-bi-public.component';
 import { PrincipalSostenimientoComponent } from './Components/Jefe mina/aprobaciones/enpernador/principal/principal.component';
 import { PrincipalGraficoHorizontalComponent } from './Components/Dashboard/graficos/horizontal/principal-grafico-horizontal/principal-grafico-horizontal.component';
@@ -37,6 +35,7 @@ import { PrincipalGraficoLargoComponent } from './Components/Dashboard/graficos/
 import { PrincipalGraficoSostenimientoComponent } from './Components/Dashboard/graficos/sostenimiento/principal-grafico-sostenimiento/principal-grafico-sostenimiento.component';
 import { PrincipalGraficoScoopsComponent } from './Components/Dashboard/graficos/scoops/principal-grafico-scoops/principal-grafico-scoops.component';
 import { LineaPrincipalComponent } from './Components/Dashboard/graficos/Linea de tiempo/linea.principal/linea.principal.component';
+import { PrincipalScissorComponent } from './Components/Jefe mina/aprobaciones/scissor/principal/principal.component';
 
 
 
@@ -79,7 +78,7 @@ export const routes: Routes = [
       {path:'jefe-mina/scissor/operacion/:id', component:PrincipalScissorComponent},
 
       { path: 'jefe-mina/rompebancos', component: OperacionesListRompebancosComponent },
-      {path:'jefe-mina/rompebancos/operacion/:id', component:PrincipalRompebancosComponent},
+      // {path:'jefe-mina/rompebancos/operacion/:id', component:PrincipalRompebancosComponent},
 
       
       { path: 'jefe-mina/scalamin', component: OperacionesListScalaminComponent },

@@ -41,11 +41,15 @@ export class OperacionesLisScissorComponent implements OnInit {
     this.loading = true;
 
     this.operacionesService
-      .getPorJefe(this.tipo, this.jefe_guardia)
+      .getAll(this.tipo)
       .subscribe({
         next: (resp: any) => {
           this.operaciones = resp.data;
           this.loading = false;
+          
+          console.log('🔥 DATA OPERACIONES:', this.operaciones);
+          
+          
         },
         error: (err) => {
           console.error(err);

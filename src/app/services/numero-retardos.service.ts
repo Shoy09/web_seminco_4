@@ -17,13 +17,6 @@ export class NumeroRetardosService {
     return this.apiService.getDatos(`${this.baseUrl}/`);
   }
 
-  getLast(): Observable<NumeroRetardos> {
-    return this.apiService.getDatos(`${this.baseUrl}/ultimo`);
-  }
-
-  getByAnio(anio: number): Observable<NumeroRetardos[]> {
-    return this.apiService.getDatos(`${this.baseUrl}/anio/${anio}`);
-  }
 
   create(data: NumeroRetardos): Observable<NumeroRetardos> {
     return this.apiService.postDatos(`${this.baseUrl}/`, data).pipe(

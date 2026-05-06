@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 interface AccionItem {
@@ -22,7 +22,8 @@ export class MenuAccionesComponent implements OnInit, OnChanges {
   @Input() condicionesData: any;
   @Input() checkListData: any[] = [];
   @Input() llantasData: any;
-
+@Output() actualizarClick = new EventEmitter<void>();
+@Output() dataChange = new EventEmitter<any>();
   // 🔥 Arrays usados en los modales
   public filasHorometro: any[] = [];
   public condicionesEquipo: any[] = [];
@@ -78,10 +79,17 @@ export class MenuAccionesComponent implements OnInit, OnChanges {
 
   // 🔥 Inicializa Horómetros
   inicializarHorometros(data: any) {
-    this.filasHorometro = [
-      { nombre: 'Diesel', inicial: data.diesel.inicio, final: data.diesel.final, op: data.diesel.op, inop: data.diesel.inop },
-    ];
-  }
+  const map = (item: any) => ({
+    inicial: Number(item?.inicio ?? 0),
+    final: Number(item?.final ?? 0),
+    op: item?.op === true || item?.op === 1,
+    inop: item?.inop === true || item?.inop === 1,
+  });
+
+  this.filasHorometro = [
+    { nombre: 'Diesel', ...map(data?.diesel) },
+  ];
+}
 
   // 🔥 Inicializa Condiciones de equipo
   inicializarCondiciones(data: any) {
@@ -99,7 +107,7 @@ export class MenuAccionesComponent implements OnInit, OnChanges {
   this.itemsChecklist = data.map(item => ({
     categoria: item.categoria || 'General',
     descripcion: item.descripcion || 'Item',
-    decision: item.decision === 1,      // convertimos 1/0 a true/false
+    decision: Number(item.decision) === 1,    // convertimos 1/0 a true/false
     observacion: item.observacion || ''
   }));
 }
@@ -129,6 +137,9 @@ inicializarLlantas(data: any) {
       case 'presion':
         this.mostrarModalInspeccion = true;
         break;
+      case 'actualizar':
+        this.actualizarClick.emit(); // 🔥 AVISA AL PADRE
+        break;
     }
   }
 
@@ -143,24 +154,59 @@ inicializarLlantas(data: any) {
 
   // 🔥 Guardar acciones
   guardarHorometros() {
-    console.log('Horómetros:', this.filasHorometro);
-    this.cerrarModales();
-  }
+  const map = (item: any) => ({
+    inicio: Number(item.inicial ?? 0),
+    final: Number(item.final ?? 0),
+    op: item.op ? 1 : 0,
+    inop: item.inop ? 1 : 0,
+  });
+
+  const data = {
+    diesel: map(this.filasHorometro[0]),
+  };
+
+  this.dataChange.emit({ tipo: 'horometros', data });
+
+  this.cerrarModales();
+}
 
   guardarCondiciones() {
-    console.log('Condiciones:', this.condicionesEquipo);
-    this.cerrarModales();
-  }
+  console.log('Condiciones:', this.condicionesData);
+
+  this.dataChange.emit({
+    tipo: 'condiciones',
+    data: this.condicionesData
+  });
+
+  this.cerrarModales();
+}
 
   guardarChecklist() {
-    console.log('Checklist:', this.itemsChecklist);
-    this.cerrarModales();
-  }
+  console.log('Checklist:', this.itemsChecklist);
+
+  this.dataChange.emit({
+    tipo: 'checklist',
+    data: this.itemsChecklist
+  });
+
+  this.cerrarModales();
+}
 
   guardarInspeccion() {
-    console.log('Inspección visual guardada');
-    this.cerrarModales();
-  }
+  console.log('Llantas:', this.llantasInspeccion);
+
+  const data = this.llantasInspeccion.reduce((acc: any, item: any) => {
+    acc[item.id] = item.estado;
+    return acc;
+  }, {});
+
+  this.dataChange.emit({
+    tipo: 'llantas',
+    data
+  });
+
+  this.cerrarModales();
+}
 
   // 🔥 Toggle para horometro op/inop
   toggleStatus(fila: any, tipo: string) {

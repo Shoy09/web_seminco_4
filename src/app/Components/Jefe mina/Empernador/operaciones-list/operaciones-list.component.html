@@ -1,3 +1,35 @@
+
+<div class="filtro-fechas">
+  <div class="campo">
+    <label>Fecha inicio</label>
+    <input type="date" [(ngModel)]="fechaInicio">
+  </div>
+
+  <div class="campo">
+    <label>Fecha fin</label>
+    <input type="date" [(ngModel)]="fechaFin">
+  </div>
+
+  <div class="campo">
+  <label>Turno</label>
+  <select [(ngModel)]="turnoSeleccionado">
+    <option value="">Todos</option>
+    <option value="DÍA">Día</option>
+    <option value="NOCHE">Noche</option>
+  </select>
+</div>
+
+
+  <button class="btn-aplicar" (click)="aplicarFiltro()">
+    Aplicar
+  </button>
+
+  <button class="btn-aplicar" (click)="quitarFiltro()">
+    Quitar filtro
+  </button>
+
+
+</div>
 <div class="container">
   <div class="header-section">
     <div class="title-section">
@@ -20,7 +52,7 @@
   </div>
 
   <!-- ❌ sin datos -->
-  <div *ngIf="!loading && operaciones.length === 0" class="empty-state">
+  <div *ngIf="!loading && operacionesFiltradas.length === 0" class="empty-state">
     <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M9 12H15M9 16H15M17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3H12.5858C12.851 3 13.1054 3.10536 13.2929 3.29289L18.7071 8.70711C18.8946 8.89464 19 9.149 19 9.41421V19C19 20.1046 18.1046 21 17 21Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>
@@ -29,8 +61,8 @@
   </div>
 
   <!-- ✅ cards -->
-  <div class="cards-grid" *ngIf="!loading && operaciones.length > 0">
-    <div class="card" *ngFor="let op of operaciones" (click)="irDetalle(op)">
+  <div class="cards-grid" *ngIf="!loading && operacionesFiltradas.length > 0">
+    <div class="card" *ngFor="let op of operacionesFiltradas" (click)="irDetalle(op)">
       
       <!-- Header con ID y estado -->
       <div class="card-header">
