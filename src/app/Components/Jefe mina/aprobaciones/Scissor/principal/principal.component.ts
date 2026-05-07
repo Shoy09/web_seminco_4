@@ -22,7 +22,7 @@ import { DialogEstadoComponent } from '../../dialog-estado/dialog-estado.compone
   templateUrl: './principal.component.html',
   styleUrls: ['./principal.component.css'],
 })
-export class PrincipalScissorComponent implements OnInit {
+export class PrincipalScissorComponents implements OnInit {
   tipo: string = 'scissor';
   operacion!: OperacionBase;
   operacionOriginal!: OperacionBase;

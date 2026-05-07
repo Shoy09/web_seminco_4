@@ -35,7 +35,7 @@ import { PrincipalGraficoLargoComponent } from './Components/Dashboard/graficos/
 import { PrincipalGraficoSostenimientoComponent } from './Components/Dashboard/graficos/sostenimiento/principal-grafico-sostenimiento/principal-grafico-sostenimiento.component';
 import { PrincipalGraficoScoopsComponent } from './Components/Dashboard/graficos/scoops/principal-grafico-scoops/principal-grafico-scoops.component';
 import { LineaPrincipalComponent } from './Components/Dashboard/graficos/Linea de tiempo/linea.principal/linea.principal.component';
-import { PrincipalScissorComponent } from './Components/Jefe mina/aprobaciones/scissor/principal/principal.component';
+import { PrincipalScissorComponents } from './Components/Jefe mina/aprobaciones/scissor/principal/principal.component';
 
 
 
@@ -75,7 +75,7 @@ export const routes: Routes = [
       { path: 'jefe-mina/dumper', component: OperacionesListDumperComponent },
 
       { path: 'jefe-mina/scissor', component: OperacionesLisScissorComponent },
-      {path:'jefe-mina/scissor/operacion/:id', component:PrincipalScissorComponent},
+      {path:'jefe-mina/scissor/operacion/:id', component:PrincipalScissorComponents},
 
       { path: 'jefe-mina/rompebancos', component: OperacionesListRompebancosComponent },
       // {path:'jefe-mina/rompebancos/operacion/:id', component:PrincipalRompebancosComponent},
