@@ -30,7 +30,7 @@
 
   <!-- ✅ cards -->
   <div class="cards-grid" *ngIf="!loading && operaciones.length > 0">
-    <div class="card" *ngFor="let op of operaciones">
+    <div class="card" *ngFor="let op of operaciones" (click)="irDetalle(op)">
       
       <!-- Header con ID y estado -->
       <div class="card-header">

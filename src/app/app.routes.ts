@@ -36,6 +36,8 @@ import { PrincipalGraficoSostenimientoComponent } from './Components/Dashboard/g
 import { PrincipalGraficoScoopsComponent } from './Components/Dashboard/graficos/scoops/principal-grafico-scoops/principal-grafico-scoops.component';
 import { LineaPrincipalComponent } from './Components/Dashboard/graficos/Linea de tiempo/linea.principal/linea.principal.component';
 import { PrincipalScissorComponents } from './Components/Jefe mina/aprobaciones/scissor_temp/principal/principal.component';
+import { PrincipalScalaminComponents } from './Components/Jefe mina/aprobaciones/scalamin/principal/principal.component';
+import { PrincipalAnfochargerComponents } from './Components/Jefe mina/aprobaciones/anfocharger/principal/principal.component';
 
 
 
@@ -82,18 +84,21 @@ export const routes: Routes = [
 
       
       { path: 'jefe-mina/scalamin', component: OperacionesListScalaminComponent },
+      { path: 'jefe-mina/scalamin/operacion/:id', component: PrincipalScalaminComponents },
+
       { path: 'jefe-mina/anfochanger', component: OperacionesListAnfochaComponent },
+      { path: 'jefe-mina/anfochanger/operacion/:id', component: PrincipalAnfochargerComponents },
       
-{ path: 'power-bi', component: PowerBiPublicComponent },
-{ path: 'grafico-horizontal', component: PrincipalGraficoHorizontalComponent },
-{ path: 'grafico-tal-largo', component: PrincipalGraficoLargoComponent },
-{path: 'grafico-sostenimiento', component: PrincipalGraficoSostenimientoComponent},
-{path: 'grafico-scoops', component: PrincipalGraficoScoopsComponent},
+      { path: 'power-bi', component: PowerBiPublicComponent },
+      { path: 'grafico-horizontal', component: PrincipalGraficoHorizontalComponent },
+      { path: 'grafico-tal-largo', component: PrincipalGraficoLargoComponent },
+      {path: 'grafico-sostenimiento', component: PrincipalGraficoSostenimientoComponent},
+      {path: 'grafico-scoops', component: PrincipalGraficoScoopsComponent},
 
 
-{ path: 'explosivos', component: ExplosivosComponent },
-{ path: 'explosivos-graficos', component: ExplosivosGraficosComponent },
-{ path: 'linea-de-tiempo', component: LineaPrincipalComponent },
+      { path: 'explosivos', component: ExplosivosComponent },
+      { path: 'explosivos-graficos', component: ExplosivosGraficosComponent },
+      { path: 'linea-de-tiempo', component: LineaPrincipalComponent },
     ]
   },
 
