@@ -2169,7 +2169,115 @@ async generarPDF() {
   this.cargandoPDF = true;
 
   try {
-    const pdf = new jsPDF('p', 'mm', 'a4');
+    // Guardar referencia al estilo original del contenedor
+    const container = document.querySelector('.graficos-container') as HTMLElement;
+    const originalGridTemplate = container.style.gridTemplateColumns;
+    const originalGap = container.style.gap;
+    const originalPadding = container.style.padding;
+    
+    // Estilos para el PDF (4 columnas)
+    const style = document.createElement('style');
+    style.textContent = `
+      @media print {
+        /* Cambiar a 4 columnas para el PDF */
+        .graficos-container {
+          display: grid !important;
+          grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+          gap: 8px !important;
+          padding: 8px !important;
+        }
+        
+        /* Reducir márgenes internos de los componentes */
+        .graficos-container > * {
+          margin: 0 !important;
+          padding: 4px !important;
+          min-height: auto !important;
+        }
+        
+        /* Full-width ocupa todas las columnas */
+        .full-width:not([data-pdf-span]) {
+          grid-column: 1 / -1 !important;
+        }
+        
+        /* Elementos que deben ocupar 2 columnas en PDF */
+        [data-pdf-span="2"] {
+          grid-column: span 2 !important;
+        }
+        
+        [data-pdf-span="3"] {
+          grid-column: span 3 !important;
+        }
+        
+        /* Reducir tamaños de fuente */
+        .graficos-container * {
+          font-size: 8px !important;
+        }
+        
+        /* Títulos más compactos */
+        .graficos-container h1, 
+        .graficos-container h2, 
+        .graficos-container h3 {
+          font-size: 10px !important;
+          margin: 2px 0 !important;
+        }
+        
+        /* Ajustar tablas */
+        table, .table-container {
+          font-size: 7px !important;
+        }
+        
+        td, th {
+          padding: 1px !important;
+        }
+        
+        /* Ajustar gráficos */
+        canvas, .chart-container {
+          max-height: 180px !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Guardar referencias a los atributos originales
+    const elementosFullWidth = container.querySelectorAll('.full-width');
+    const atributosOriginales = new Map();
+    
+    elementosFullWidth.forEach((el: Element) => {
+      const htmlEl = el as HTMLElement;
+      if (htmlEl.hasAttribute('data-pdf-span')) {
+        atributosOriginales.set(htmlEl, htmlEl.getAttribute('data-pdf-span'));
+      }
+      if (htmlEl.hasAttribute('data-pdf-span')) {
+        const spanValue = htmlEl.getAttribute('data-pdf-span');
+        if (spanValue === '2') {
+          htmlEl.style.gridColumn = 'span 2';
+        }
+      }
+    });
+    
+    // Aplicar cambios temporales
+    container.style.gridTemplateColumns = 'repeat(4, minmax(0, 1fr))';
+    container.style.gap = '8px';
+    container.style.padding = '8px';
+    
+    elementosFullWidth.forEach((el: Element) => {
+      const htmlEl = el as HTMLElement;
+      if (htmlEl.hasAttribute('data-pdf-span')) {
+        const spanValue = htmlEl.getAttribute('data-pdf-span');
+        if (spanValue === '2') {
+          htmlEl.style.gridColumn = 'span 2';
+        } else if (spanValue === '3') {
+          htmlEl.style.gridColumn = 'span 3';
+        }
+      } else {
+        htmlEl.style.gridColumn = '1 / -1';
+      }
+    });
+    
+    container.offsetHeight;
+    
+    // jsPDF sin opción compress problemática
+    const pdf = new jsPDF('l', 'mm', 'a4');
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
 
@@ -2195,33 +2303,91 @@ async generarPDF() {
         (el as HTMLElement).style.display = 'block';
       });
 
-      await this.delay(300);
+      await this.delay(200);
 
-      const container = document.querySelector('.graficos-container') as HTMLElement;
+      const canvas = await html2canvas(container, {
+        scale: 1.2, // Reducido de 2.5 a 1.2 para mejor rendimiento
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        allowTaint: false,
+        imageTimeout: 0,
+        removeContainer: true,
+        onclone: (clonedDoc, element) => {
+          const clonedContainer = clonedDoc.querySelector('.graficos-container');
+          if (clonedContainer) {
+            (clonedContainer as HTMLElement).style.display = 'grid';
+            (clonedContainer as HTMLElement).style.gridTemplateColumns = 'repeat(4, minmax(0, 1fr))';
+            (clonedContainer as HTMLElement).style.gap = '8px';
+            (clonedContainer as HTMLElement).style.padding = '8px';
+            
+            const children = clonedContainer.children;
+            for (let i = 0; i < children.length; i++) {
+              const child = children[i] as HTMLElement;
+              
+              if (child.hasAttribute('data-pdf-span')) {
+                const spanValue = child.getAttribute('data-pdf-span');
+                if (spanValue === '2') {
+                  child.style.gridColumn = 'span 2';
+                  child.style.margin = '0';
+                  child.style.padding = '4px';
+                } else if (spanValue === '3') {
+                  child.style.gridColumn = 'span 3';
+                  child.style.margin = '0';
+                  child.style.padding = '4px';
+                }
+              } else if (child.classList.contains('full-width')) {
+                child.style.gridColumn = '1 / -1';
+              } else {
+                child.style.margin = '0';
+                child.style.padding = '4px';
+              }
+            }
+          }
+        }
+      });
 
-      if (container) {
-        const canvas = await html2canvas(container, {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: '#ffffff'
-        });
-
-        const imgData = canvas.toDataURL('image/png');
-        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight);
+      // Usar JPEG con compresión
+      const imgData = canvas.toDataURL('image/jpeg', 0.6); // Calidad 60% para menor peso
+      
+      let imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      if (imgHeight > pdfHeight) {
+        imgHeight = pdfHeight * 0.95;
       }
+      
+      const yPosition = (pdfHeight - imgHeight) / 2;
+      
+      // Añadir imagen al PDF en formato JPEG
+      pdf.addImage(imgData, 'JPEG', 0, yPosition, pdfWidth, imgHeight);
     }
 
+    // Restaurar todo
+    container.style.gridTemplateColumns = originalGridTemplate;
+    container.style.gap = originalGap;
+    container.style.padding = originalPadding;
+    
+    elementosFullWidth.forEach((el: Element) => {
+      const htmlEl = el as HTMLElement;
+      htmlEl.style.gridColumn = '';
+    });
+    
     todasLasPaginas.forEach(el => {
       (el as HTMLElement).style.display = '';
     });
+    
+    document.head.removeChild(style);
 
-    pdf.save('grafico_completo_tal_horizontal.pdf');
+    // Guardar el PDF (jsPDF ya comprime internamente)
+    pdf.save('dashboard_horizontal.pdf');
 
+  } catch (error) {
+    console.error('Error generando PDF:', error);
   } finally {
     this.cargandoPDF = false;
   }
 }
+
 private delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }

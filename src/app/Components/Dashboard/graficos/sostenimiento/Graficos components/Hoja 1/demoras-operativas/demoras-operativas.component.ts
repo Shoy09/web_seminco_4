@@ -54,9 +54,12 @@ export class DemorasOperativasComponent implements OnChanges {
     const porcentajes = this.data.map((item) => item.tiempo_acu_pct * 100);
 
     // Calcular maxHoras con EXACTAMENTE 20% de margen (sin ceil ni redondeos extras)
-    const maxHorasOriginal = Math.max(...horas, 1);
-    const margenSuperior = 0.20; // 20% exacto
-    let maxHoras = maxHorasOriginal * (1 + margenSuperior);
+const maxHorasOriginal = Math.max(...horas, 1);
+const margenSuperior = 0.20;
+let maxHoras = maxHorasOriginal * (1 + margenSuperior);
+
+// ✅ LIMITAR maxHoras A 1 DECIMAL
+maxHoras = Math.ceil(maxHoras * 10) / 10;
 
     // Escalar línea al eje Y
     const porcentajesEscalados = porcentajes.map((p) => (p / 100) * maxHoras);
@@ -130,7 +133,7 @@ export class DemorasOperativasComponent implements OnChanges {
         min: 0,
         max: maxHoras,
         axisLabel: {
-          formatter: '{value} h',
+          formatter: (value: number) => `${value.toFixed(1)} h`,
         },
         splitLine: {
           show: true,
