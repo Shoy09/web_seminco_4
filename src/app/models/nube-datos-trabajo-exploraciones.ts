@@ -1,8 +1,19 @@
+// Nueva interfaz para los retardos
+export interface Retardo {
+  numero: number;
+  codigo: string;
+  cantidad: number;
+}
+
+// Nueva interfaz para detalles_explosivos (ahora con la nueva estructura)
 export interface NubeDetalleDespachoExplosivos {
   id: number;
-  numero: number;
-  ms_cant1: string;
-  lp_cant1: string;
+  id_despacho: number;
+  tipo: string;        // "Milisegundo" o "Medio Segundo"
+  longitud: number;    // ej: 18, 4.2
+  retardos: string;    // JSON string que parsearemos a Retardo[]
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface NubeDespachoDetalle {
@@ -13,18 +24,21 @@ export interface NubeDespachoDetalle {
 
 export interface NubeDespacho {
   id: number;
-  mili_segundo: number;
-  medio_segundo: number;
-  observaciones?: string;  // Nuevo campo
+  observaciones?: string;
   detalles: NubeDespachoDetalle[];
-  detalles_explosivos: NubeDetalleDespachoExplosivos[];
+  detalles_explosivos: NubeDetalleDespachoExplosivos[];  // Actualizado
+  // NOTA: Ya no usamos mili_segundo, medio_segundo
 }
 
+// Nueva interfaz para devoluciones explosivos
 export interface NubeDetalleDevolucionesExplosivos {
   id: number;
-  numero: number;
-  ms_cant1: string;
-  lp_cant1: string;
+  id_devolucion: number;
+  tipo: string;        // "Milisegundo" o "Medio Segundo"
+  longitud: number;    // ej: 18, 4.2
+  retardos: string;    // JSON string que parsearemos a Retardo[]
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface NubeDevolucionDetalle {
@@ -35,11 +49,10 @@ export interface NubeDevolucionDetalle {
 
 export interface NubeDevoluciones {
   id: number;
-  mili_segundo: number;
-  medio_segundo: number;
-  observaciones?: string;  // Nuevo campo
+  observaciones?: string;
   detalles: NubeDevolucionDetalle[];
-  detalles_explosivos: NubeDetalleDevolucionesExplosivos[];
+  detalles_explosivos: NubeDetalleDevolucionesExplosivos[];  // Actualizado
+  // NOTA: Ya no usamos mili_segundo, medio_segundo
 }
 
 export interface NubeDatosTrabajoExploraciones {
@@ -51,16 +64,16 @@ export interface NubeDatosTrabajoExploraciones {
   zona: string;
   tipo_labor: string;
   labor: string;
-  ala?: string;           // Nuevo campo
+  ala?: string;
   veta: string;
   nivel: string;
   tipo_perforacion: string;
   estado: string;
   cerrado: number;
-  envio?: number;         // Nuevo campo
-  semanaDefault?: string;  // Nuevo campo
-  semanaSelect?: string;  // Nuevo campo
-  empresa?: string;       // Nuevo campo
+  envio?: number;
+  semanaDefault?: string;
+  semanaSelect?: string;
+  empresa?: string;
   seccion: string;
   despachos: NubeDespacho[];
   devoluciones: NubeDevoluciones[];

@@ -2174,7 +2174,7 @@ async generarPDF() {
     const originalGridTemplate = container.style.gridTemplateColumns;
     const originalGap = container.style.gap;
     const originalPadding = container.style.padding;
-    
+
     // Estilos para el PDF (4 columnas)
     const style = document.createElement('style');
     style.textContent = `
@@ -2186,84 +2186,93 @@ async generarPDF() {
           gap: 8px !important;
           padding: 8px !important;
         }
-        
+
         /* Reducir márgenes internos de los componentes */
         .graficos-container > * {
           margin: 0 !important;
           padding: 4px !important;
           min-height: auto !important;
         }
-        
+
         /* Full-width ocupa todas las columnas */
         .full-width:not([data-pdf-span]) {
           grid-column: 1 / -1 !important;
         }
-        
+
         /* Elementos que deben ocupar 2 columnas en PDF */
         [data-pdf-span="2"] {
           grid-column: span 2 !important;
         }
-        
+
         [data-pdf-span="3"] {
           grid-column: span 3 !important;
         }
-        
+
         /* Reducir tamaños de fuente */
         .graficos-container * {
           font-size: 8px !important;
         }
-        
+
         /* Títulos más compactos */
-        .graficos-container h1, 
-        .graficos-container h2, 
+        .graficos-container h1,
+        .graficos-container h2,
         .graficos-container h3 {
           font-size: 10px !important;
           margin: 2px 0 !important;
         }
-        
+
         /* Ajustar tablas */
         table, .table-container {
           font-size: 7px !important;
         }
-        
+
         td, th {
           padding: 1px !important;
         }
-        
+
         /* Ajustar gráficos */
         canvas, .chart-container {
           max-height: 180px !important;
         }
       }
     `;
+
     document.head.appendChild(style);
-    
+
     // Guardar referencias a los atributos originales
     const elementosFullWidth = container.querySelectorAll('.full-width');
     const atributosOriginales = new Map();
-    
+
     elementosFullWidth.forEach((el: Element) => {
       const htmlEl = el as HTMLElement;
+
       if (htmlEl.hasAttribute('data-pdf-span')) {
-        atributosOriginales.set(htmlEl, htmlEl.getAttribute('data-pdf-span'));
+        atributosOriginales.set(
+          htmlEl,
+          htmlEl.getAttribute('data-pdf-span')
+        );
       }
+
       if (htmlEl.hasAttribute('data-pdf-span')) {
         const spanValue = htmlEl.getAttribute('data-pdf-span');
+
         if (spanValue === '2') {
           htmlEl.style.gridColumn = 'span 2';
         }
       }
     });
-    
+
     // Aplicar cambios temporales
     container.style.gridTemplateColumns = 'repeat(4, minmax(0, 1fr))';
     container.style.gap = '8px';
     container.style.padding = '8px';
-    
+
     elementosFullWidth.forEach((el: Element) => {
       const htmlEl = el as HTMLElement;
+
       if (htmlEl.hasAttribute('data-pdf-span')) {
         const spanValue = htmlEl.getAttribute('data-pdf-span');
+
         if (spanValue === '2') {
           htmlEl.style.gridColumn = 'span 2';
         } else if (spanValue === '3') {
@@ -2273,28 +2282,58 @@ async generarPDF() {
         htmlEl.style.gridColumn = '1 / -1';
       }
     });
-    
+
     container.offsetHeight;
-    
-    // jsPDF sin opción compress problemática
+
+    // Crear PDF
     const pdf = new jsPDF('l', 'mm', 'a4');
+
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    // =========================
+    // FONDOS
+    // =========================
+    const fondoPrimeraPagina = 'horizontal_principal.jpg';
+    const fondoPaginas = 'horizontal_general.jpg';
 
     const todasLasPaginas = document.querySelectorAll('[data-page]');
     const elementosPorPagina = new Map<number, Element[]>();
 
     todasLasPaginas.forEach(el => {
       const page = parseInt(el.getAttribute('data-page') || '1');
+
       if (!elementosPorPagina.has(page)) {
         elementosPorPagina.set(page, []);
       }
+
       elementosPorPagina.get(page)!.push(el);
     });
 
     for (const [pageNum, elementos] of Array.from(elementosPorPagina.entries())) {
-      if (pageNum > 1) pdf.addPage();
 
+      if (pageNum > 1) {
+        pdf.addPage();
+      }
+
+      // =========================
+      // AGREGAR FONDO
+      // =========================
+      const fondoActual =
+        pageNum === 1
+          ? fondoPrimeraPagina
+          : fondoPaginas;
+
+      pdf.addImage(
+        fondoActual,
+        'PNG',
+        0,
+        0,
+        pdfWidth,
+        pdfHeight
+      );
+
+      // Mostrar solo elementos de la página actual
       todasLasPaginas.forEach(el => {
         (el as HTMLElement).style.display = 'none';
       });
@@ -2306,39 +2345,61 @@ async generarPDF() {
       await this.delay(200);
 
       const canvas = await html2canvas(container, {
-        scale: 1.2, // Reducido de 2.5 a 1.2 para mejor rendimiento
+        scale: 2,
         useCORS: true,
-        backgroundColor: '#ffffff',
+        backgroundColor: 'transparent',// transparente para que se vea el fondo
         logging: false,
         allowTaint: false,
         imageTimeout: 0,
         removeContainer: true,
+
         onclone: (clonedDoc, element) => {
           const clonedContainer = clonedDoc.querySelector('.graficos-container');
+
           if (clonedContainer) {
+
             (clonedContainer as HTMLElement).style.display = 'grid';
-            (clonedContainer as HTMLElement).style.gridTemplateColumns = 'repeat(4, minmax(0, 1fr))';
+
+            (clonedContainer as HTMLElement).style.gridTemplateColumns =
+              'repeat(4, minmax(0, 1fr))';
+
             (clonedContainer as HTMLElement).style.gap = '8px';
+
             (clonedContainer as HTMLElement).style.padding = '8px';
-            
+
+            // IMPORTANTE:
+            // Fondo transparente para que se vea la imagen del PDF
+            (clonedContainer as HTMLElement).style.background = 'transparent';
+
             const children = clonedContainer.children;
+
             for (let i = 0; i < children.length; i++) {
+
               const child = children[i] as HTMLElement;
-              
+
               if (child.hasAttribute('data-pdf-span')) {
+
                 const spanValue = child.getAttribute('data-pdf-span');
+
                 if (spanValue === '2') {
+
                   child.style.gridColumn = 'span 2';
                   child.style.margin = '0';
                   child.style.padding = '4px';
+
                 } else if (spanValue === '3') {
+
                   child.style.gridColumn = 'span 3';
                   child.style.margin = '0';
                   child.style.padding = '4px';
                 }
+
               } else if (child.classList.contains('full-width')) {
+
                 child.style.gridColumn = '1 / -1';
+
               } else {
+
                 child.style.margin = '0';
                 child.style.padding = '4px';
               }
@@ -2347,43 +2408,65 @@ async generarPDF() {
         }
       });
 
-      // Usar JPEG con compresión
-      const imgData = canvas.toDataURL('image/jpeg', 0.6); // Calidad 60% para menor peso
-      
-      let imgHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      if (imgHeight > pdfHeight) {
-        imgHeight = pdfHeight * 0.95;
+      // Imagen comprimida
+      const imgData = canvas.toDataURL('image/png');
+
+      // Márgenes para que se vea el fondo
+      const margenX = 8;
+      const margenY = 10;
+
+      const contenidoWidth = pdfWidth - (margenX * 2);
+
+      let contenidoHeight =
+        (canvas.height * contenidoWidth) / canvas.width;
+
+      // Limitar altura
+      if (contenidoHeight > (pdfHeight - (margenY * 2))) {
+        contenidoHeight = pdfHeight - (margenY * 2);
       }
-      
-      const yPosition = (pdfHeight - imgHeight) / 2;
-      
-      // Añadir imagen al PDF en formato JPEG
-      pdf.addImage(imgData, 'JPEG', 0, yPosition, pdfWidth, imgHeight);
+
+      // Centrar verticalmente
+      const yPosition =
+        (pdfHeight - contenidoHeight) / 2;
+
+      // =========================
+      // CONTENIDO ENCIMA DEL FONDO
+      // =========================
+      pdf.addImage(
+  imgData,
+  'PNG',
+  margenX,
+  yPosition,
+  contenidoWidth,
+  contenidoHeight
+);
     }
 
     // Restaurar todo
     container.style.gridTemplateColumns = originalGridTemplate;
     container.style.gap = originalGap;
     container.style.padding = originalPadding;
-    
+
     elementosFullWidth.forEach((el: Element) => {
       const htmlEl = el as HTMLElement;
       htmlEl.style.gridColumn = '';
     });
-    
+
     todasLasPaginas.forEach(el => {
       (el as HTMLElement).style.display = '';
     });
-    
+
     document.head.removeChild(style);
 
-    // Guardar el PDF (jsPDF ya comprime internamente)
+    // Descargar PDF
     pdf.save('dashboard_horizontal.pdf');
 
   } catch (error) {
+
     console.error('Error generando PDF:', error);
+
   } finally {
+
     this.cargandoPDF = false;
   }
 }
