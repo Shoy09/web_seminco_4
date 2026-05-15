@@ -40,6 +40,9 @@ export class ExplosivosComponent implements OnInit {
 
 tipos: string[] = [];
 longitudes: number[] = [];
+editando: boolean = false;
+indiceEditando: number = -1;
+datoOriginal: any = null;
 
 private retardosOriginales: any[] = [];
 
@@ -96,6 +99,7 @@ private retardosOriginales: any[] = [];
       tipo: 'explosivo',
       datos: [],
       campos: [
+        { nombre: 'codigo', label: 'Código', tipo: 'text' },
         { nombre: 'tipo_explosivo', label: 'Tipo de Explosivo', tipo: 'text' },
         {
           nombre: 'cantidad_por_caja',
@@ -118,6 +122,7 @@ private retardosOriginales: any[] = [];
       tipo: 'accesorio',
       datos: [],
       campos: [
+        { nombre: 'codigo', label: 'Código', tipo: 'text' },
         { nombre: 'tipo_accesorio', label: 'Tipo de Accesorio', tipo: 'text' },
         { nombre: 'costo', label: 'Costo', tipo: 'number' },
         {
@@ -360,6 +365,83 @@ private retardosOriginales: any[] = [];
     //   });
     // }
   }
+
+  editarDato(dato: any, index: number) {
+  this.editando = true;
+  this.indiceEditando = index;
+  this.datoOriginal = { ...dato };
+
+  // Clonamos para editar sin afectar tabla
+  this.nuevoDato = { ...dato };
+}
+
+cancelarEdicion() {
+  this.editando = false;
+  this.indiceEditando = -1;
+  this.nuevoDato = {};
+  this.datoOriginal = null;
+}
+
+actualizarDatos() {
+
+  if (Object.values(this.nuevoDato).some((val) => val !== '')) {
+
+    const datosActualizados = { ...this.nuevoDato };
+    const id = this.modalContenido.datos[this.indiceEditando].id;
+
+    if (this.modalContenido.tipo === 'explosivo') {
+
+      this.explosivoService.updateExplosivo(id, datosActualizados).subscribe({
+        next: (data) => {
+
+          this.modalContenido.datos[this.indiceEditando] = data;
+
+          this.cancelarEdicion();
+        },
+        error: (err) => console.error('Error al actualizar explosivo:', err),
+      });
+
+    } else if (this.modalContenido.tipo === 'accesorio') {
+
+      this.accesorioService.updateAccesorio(id, datosActualizados).subscribe({
+        next: (data) => {
+
+          this.modalContenido.datos[this.indiceEditando] = data;
+
+          this.cancelarEdicion();
+        },
+        error: (err) => console.error('Error al actualizar accesorio:', err),
+      });
+
+    } else if (this.modalContenido.tipo === 'Retardos') {
+
+      this.ExplosivosUniService.updateExplosivo(id, datosActualizados).subscribe({
+        next: (data) => {
+
+          this.modalContenido.datos[this.indiceEditando] = data;
+
+          this.cancelarEdicion();
+        },
+        error: (err) => console.error('Error al actualizar retardos:', err),
+      });
+
+    } else if (this.modalContenido.tipo === 'Numeros retardos') {
+
+      this.numeroRetardosService.update(id, datosActualizados).subscribe({
+        next: (data) => {
+
+          this.modalContenido.datos[this.indiceEditando] = data;
+
+          this.cancelarEdicion();
+        },
+        error: (err) => console.error('Error al actualizar número retardos:', err),
+      });
+
+    }
+
+  }
+
+}
 
   descargar(item: any): void {}
 }

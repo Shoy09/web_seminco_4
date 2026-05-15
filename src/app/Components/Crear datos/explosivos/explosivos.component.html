@@ -22,56 +22,170 @@
     </div>
   </div>
 
-  <div class="modal-overlay" *ngIf="modalAbierto">
-    <div class="modal">
-      <button class="close-icon" (click)="cerrarModal()">✖</button>
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="modalAbierto">
+  <div class="modal">
+    <button class="close-icon" (click)="cerrarModal()">✖</button>
 
-      <!-- Nuevo contenedor para dar espacio interno -->
-      <div class="modal-content">
-        <div class="subtitu">
-          <h2>{{ modalContenido?.nombre }}</h2>
-          <p>Creación del tipo de {{ modalContenido?.nombre }}</p>
+    <div class="modal-content">
+
+      <!-- TITULO -->
+      <div class="subtitu">
+        <h2>{{ modalContenido?.nombre }}</h2>
+
+        <p>
+          {{ editando ? 'Editando ' : 'Creación del tipo de ' }}
+          {{ modalContenido?.nombre }}
+        </p>
+      </div>
+
+      <!-- FORMULARIO -->
+      <form
+        (submit)="editando ? actualizarDatos() : guardarDatos()"
+        class="forme"
+      >
+
+        <div
+          class="form-group"
+          *ngFor="let campo of modalContenido?.campos"
+        >
+
+          <label>{{ campo.label }}</label>
+
+          <div class="input-container">
+
+            <!-- SELECT -->
+            <ng-container *ngIf="campo.tipo === 'select'; else inputField">
+
+              <select
+                [(ngModel)]="nuevoDato[campo.nombre]"
+                [name]="campo.nombre"
+                required
+                class="form-input"
+                (ngModelChange)="campo.nombre === 'tipo' && actualizarLongitudes()"
+              >
+
+                <option
+                  *ngFor="let opcion of campo.opciones"
+                  [value]="opcion"
+                >
+                  {{ opcion }}
+                </option>
+
+              </select>
+
+            </ng-container>
+
+            <!-- INPUT -->
+            <ng-template #inputField>
+
+              <input
+                [type]="campo.tipo"
+                [(ngModel)]="nuevoDato[campo.nombre]"
+                [name]="campo.nombre"
+                required
+                class="form-input"
+              >
+
+            </ng-template>
+
+          </div>
+
         </div>
 
-        <!-- Formulario dentro del modal -->
-        <form (submit)="guardarDatos()" class="forme">
-          <div class="form-group" *ngFor="let campo of modalContenido?.campos">
-            <label>{{ campo.label }}</label>
-            <div class="input-container">
-              <input *ngIf="campo.tipo !== 'select'" [type]="campo.tipo" [(ngModel)]="nuevoDato[campo.nombre]" [name]="campo.nombre" required class="form-input">
+        <!-- BOTONES -->
+        <div class="button-group">
 
-              <select *ngIf="campo.tipo === 'select'" [(ngModel)]="nuevoDato[campo.nombre]" (ngModelChange)="campo.nombre === 'tipo' && actualizarLongitudes()" [name]="campo.nombre" required class="form-input">
-                <option *ngFor="let opcion of campo.opciones" [value]="opcion">{{ opcion }}</option>
-              </select>
-            </div>
-          </div>
-          <div class="button-group">
-            <button type="submit" class="btn-submit">Guardar</button>
-          </div>
-        </form>
+          <!-- MODO CREAR -->
+          <ng-container *ngIf="!editando; else botonesEditar">
 
-        <!-- Tabla dentro del modal -->
-        <div class="tabla-scroll">
-          <table>
-            <thead>
+            <button type="submit" class="btn-submit">
+              Guardar
+            </button>
+
+          </ng-container>
+
+          <!-- MODO EDITAR -->
+          <ng-template #botonesEditar>
+
+            <button type="submit" class="btn-submit">
+              Actualizar
+            </button>
+
+            <button
+              type="button"
+              class="btn-submit"
+              (click)="cancelarEdicion()"
+            >
+              Cancelar
+            </button>
+
+          </ng-template>
+
+        </div>
+
+      </form>
+
+      <!-- TABLA -->
+      <div class="tabla-scroll">
+
+        <table>
+
+          <thead>
+
             <tr>
               <th>#</th>
-              <th *ngFor="let campo of modalContenido?.campos">{{ campo.label }}</th>
+
+              <th *ngFor="let campo of modalContenido?.campos">
+                {{ campo.label }}
+              </th>
+
               <th>Opciones</th>
             </tr>
-            </thead>
-            <tbody>
+
+          </thead>
+
+          <tbody>
+
             <tr *ngFor="let dato of modalContenido?.datos; let i = index">
+
               <td>{{ i + 1 }}</td>
-              <td *ngFor="let campo of modalContenido?.campos">{{ dato[campo.nombre] }}</td>
-              <td><img src="dele.svg" alt="Eliminar" class="action-icon" (click)="eliminar(dato)"></td>
+
+              <td *ngFor="let campo of modalContenido?.campos">
+                {{ dato[campo.nombre] }}
+              </td>
+
+              <td>
+
+                <!-- EDITAR -->
+                <img
+                  src="boton-editar.png"
+                  alt="Editar"
+                  class="action-icon"
+                  (click)="editarDato(dato, i)"
+                >
+
+                <!-- ELIMINAR -->
+                <img
+                  src="dele.svg"
+                  alt="Eliminar"
+                  class="action-icon"
+                  (click)="eliminar(dato)"
+                >
+
+              </td>
+
             </tr>
-            </tbody>
-          </table>
-        </div>
+
+          </tbody>
+
+        </table>
+
       </div>
+
     </div>
   </div>
+</div>
 
 
   <!-- Formulario de carga de documento -->
