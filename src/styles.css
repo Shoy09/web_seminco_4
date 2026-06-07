@@ -1,5 +1,6 @@
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
-
+@import "tailwindcss";
+@import "primeicons/primeicons.css";
 
 html, body {
   height: 100%;
