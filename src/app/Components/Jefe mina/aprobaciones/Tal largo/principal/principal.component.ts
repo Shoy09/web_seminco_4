@@ -160,6 +160,7 @@ export class PrincipalTalLargoComponent implements OnInit {
       // 🔥 payload final
       const payload: any = {
         ...nuevaRaw,
+        registros: JSON.stringify(nuevaRaw.registros),
         [campoObservacion]: JSON.stringify(original),
         revisado: revisionActual + 1,
 

@@ -3,7 +3,6 @@ import { OperacionBase } from '../../../../models/OperacionBase.models';
 import { OperacionesService } from '../../../../services/operaciones.service';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../services/auth-service.service';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-operaciones-list',
@@ -21,8 +20,7 @@ export class OperacionesListScalaminComponent implements OnInit {
 
   constructor(
     private operacionesService: OperacionesService,
-    private authService: AuthService,
-    private router: Router
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -41,15 +39,11 @@ export class OperacionesListScalaminComponent implements OnInit {
     this.loading = true;
 
     this.operacionesService
-      .getAll(this.tipo)
+      .getPorJefe(this.tipo, this.jefe_guardia)
       .subscribe({
         next: (resp: any) => {
           this.operaciones = resp.data;
           this.loading = false;
-          
-          console.log('🔥 DATA OPERACIONES:', this.operaciones);
-          
-          
         },
         error: (err) => {
           console.error(err);
@@ -122,11 +116,4 @@ export class OperacionesListScalaminComponent implements OnInit {
     if (turnoLower.includes('noche') || turnoLower.includes('night')) return 'night';
     return '';
   }
-
-  irDetalle(op: OperacionBase) {
-  this.router.navigate([
-    '/Dashboard/jefe-mina/scalamin/operacion',
-    op.id
-  ]);
-}
 }

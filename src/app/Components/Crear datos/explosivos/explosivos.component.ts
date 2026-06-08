@@ -5,10 +5,27 @@ import { ExplosivoService } from '../../../services/explosivo.service';
 import { AccesorioService } from '../../../services/accesorio.service';
 import { ExplosivosUniService } from '../../../services/explosivos-uni.service';
 import { NumeroRetardosService } from '../../../services/numero-retardos.service';
-
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { FileUploadModule } from 'primeng/fileupload';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { TableModule } from 'primeng/table';
+import { RippleModule } from 'primeng/ripple';
+import { ToastService } from '../../../services/toast.service';
 @Component({
   selector: 'app-explosivos',
-  imports: [FormsModule, CommonModule],
+  imports: [
+    FormsModule,
+    CommonModule,
+    ButtonModule,
+    DialogModule,
+    FileUploadModule,
+    InputTextModule,
+    SelectModule,
+    TableModule,
+    RippleModule,
+  ],
   templateUrl: './explosivos.component.html',
   styleUrl: './explosivos.component.css',
 })
@@ -38,48 +55,18 @@ export class ExplosivosComponent implements OnInit {
     { nombre: 'Reporte C', year: '2024', mes: 'Enero' },
   ];
 
-tipos: string[] = [];
-longitudes: number[] = [];
-editando: boolean = false;
-indiceEditando: number = -1;
-datoOriginal: any = null;
-
-private retardosOriginales: any[] = [];
-
   constructor(
     private explosivoService: ExplosivoService,
     private accesorioService: AccesorioService,
     private ExplosivosUniService: ExplosivosUniService,
     private numeroRetardosService: NumeroRetardosService,
+    private toastService: ToastService,
     // private DestinatarioCorreoService: DestinatarioCorreoService
   ) {} // Inyecta el servicio
 
   ngOnInit() {
     this.generarAños();
   }
-
-  actualizarLongitudes() {
-
-  const tipoSeleccionado = this.nuevoDato.tipo;
-
-  if (!tipoSeleccionado) return;
-
-  const filtrados = this.retardosOriginales.filter(
-    (x: any) => x.tipo === tipoSeleccionado
-  );
-
-  this.longitudes = [
-    ...new Set(filtrados.map((x: any) => x.dato))
-  ];
-
-  const campoLongitud = this.modalContenido.campos.find(
-    (c: any) => c.nombre === 'longitud'
-  );
-
-  if (campoLongitud) {
-    campoLongitud.opciones = this.longitudes;
-  }
-}
 
   generarAños() {
     const yearActual = new Date().getFullYear();
@@ -99,7 +86,6 @@ private retardosOriginales: any[] = [];
       tipo: 'explosivo',
       datos: [],
       campos: [
-        { nombre: 'codigo', label: 'Código', tipo: 'text' },
         { nombre: 'tipo_explosivo', label: 'Tipo de Explosivo', tipo: 'text' },
         {
           nombre: 'cantidad_por_caja',
@@ -122,7 +108,6 @@ private retardosOriginales: any[] = [];
       tipo: 'accesorio',
       datos: [],
       campos: [
-        { nombre: 'codigo', label: 'Código', tipo: 'text' },
         { nombre: 'tipo_accesorio', label: 'Tipo de Accesorio', tipo: 'text' },
         { nombre: 'costo', label: 'Costo', tipo: 'number' },
         {
@@ -149,30 +134,22 @@ private retardosOriginales: any[] = [];
       ],
     },
     {
-  nombre: 'Numeros retardos',
-  icon: 'mas.svg',
-  tipo: 'Numeros retardos',
-  datos: [],
-  campos: [
-    {
-      nombre: 'tipo',
-      label: 'Tipo',
-      tipo: 'select',
-      opciones: this.tipos // 👈 debes definir esto
+      nombre: 'Numeros retardos',
+      icon: 'mas.svg',
+      tipo: 'Numeros retardos',
+      datos: [],
+      campos: [
+        { nombre: 'mes', label: 'Mes', tipo: 'select', opciones: this.meses },
+        { nombre: 'anio', label: 'Año', tipo: 'select', opciones: this.years },
+        {
+          nombre: 'cantidad',
+          label: 'Cantidad',
+          tipo: 'number',
+          step: 1,
+          min: 0,
+        },
+      ],
     },
-    {
-      nombre: 'longitud',
-      label: 'Longitud',
-      tipo: 'select',
-      opciones: this.longitudes // 👈 debes definir esto
-    },
-    {
-      nombre: 'codigo',
-      label: 'Código',
-      tipo: 'text'
-    }
-  ],
-}
     // {
     //   nombre: 'Destinatarios de Despacho',
     //   icon: 'mas.svg',
@@ -211,46 +188,13 @@ private retardosOriginales: any[] = [];
         error: (err) => console.error('Error al cargar accesorios:', err),
       });
     } else if (button.tipo === 'Numeros retardos') {
-
-  // TABLA INFERIOR
-  this.numeroRetardosService.getAll().subscribe({
-    next: (data) => {
-      this.modalContenido.datos = data;
-    },
-    error: (err) => console.error('Error al cargar retardos:', err),
-  });
-
-  // SELECTS DINÁMICOS
-  this.ExplosivosUniService.getExplosivos().subscribe({
-    next: (data) => {
-
-      this.retardosOriginales = data;
-
-      // TIPOS ÚNICOS
-      this.tipos = [...new Set(data.map((x: any) => x.tipo))];
-
-      // ACTUALIZAR OPCIONES DEL SELECT TIPO
-      const campoTipo = this.modalContenido.campos.find(
-        (c: any) => c.nombre === 'tipo'
-      );
-
-      if (campoTipo) {
-        campoTipo.opciones = this.tipos;
-      }
-
-      // INICIALMENTE VACÍO
-      const campoLongitud = this.modalContenido.campos.find(
-        (c: any) => c.nombre === 'longitud'
-      );
-
-      if (campoLongitud) {
-        campoLongitud.opciones = [];
-      }
-
-    },
-    error: (err) => console.error('Error al cargar tipos:', err),
-  });
-}
+      this.numeroRetardosService.getAll().subscribe({
+        next: (data) => {
+          this.modalContenido.datos = data;
+        },
+        error: (err) => console.error('Error al cargar retardos:', err),
+      });
+    }
     // else if (button.tipo === 'Destinatarios de Despacho') {
     //   this.DestinatarioCorreoService.getDestinatarios().subscribe({
     //     next: (data) => {
@@ -266,6 +210,20 @@ private retardosOriginales: any[] = [];
     this.modalAbierto = false;
     this.modalContenido = null;
   }
+
+  procesarDocumentoCarga(event: any): void {
+  const archivo: File | undefined = event.files?.[0];
+
+  if (!archivo) {
+    this.toastService.warn(
+      'Archivo no seleccionado',
+      'Debe seleccionar un documento para continuar.'
+    );
+    return;
+  }
+
+  console.log('Documento seleccionado:', archivo);
+}
 
   guardarDatos() {
     if (Object.values(this.nuevoDato).some((val) => val !== '')) {
@@ -365,83 +323,6 @@ private retardosOriginales: any[] = [];
     //   });
     // }
   }
-
-  editarDato(dato: any, index: number) {
-  this.editando = true;
-  this.indiceEditando = index;
-  this.datoOriginal = { ...dato };
-
-  // Clonamos para editar sin afectar tabla
-  this.nuevoDato = { ...dato };
-}
-
-cancelarEdicion() {
-  this.editando = false;
-  this.indiceEditando = -1;
-  this.nuevoDato = {};
-  this.datoOriginal = null;
-}
-
-actualizarDatos() {
-
-  if (Object.values(this.nuevoDato).some((val) => val !== '')) {
-
-    const datosActualizados = { ...this.nuevoDato };
-    const id = this.modalContenido.datos[this.indiceEditando].id;
-
-    if (this.modalContenido.tipo === 'explosivo') {
-
-      this.explosivoService.updateExplosivo(id, datosActualizados).subscribe({
-        next: (data) => {
-
-          this.modalContenido.datos[this.indiceEditando] = data;
-
-          this.cancelarEdicion();
-        },
-        error: (err) => console.error('Error al actualizar explosivo:', err),
-      });
-
-    } else if (this.modalContenido.tipo === 'accesorio') {
-
-      this.accesorioService.updateAccesorio(id, datosActualizados).subscribe({
-        next: (data) => {
-
-          this.modalContenido.datos[this.indiceEditando] = data;
-
-          this.cancelarEdicion();
-        },
-        error: (err) => console.error('Error al actualizar accesorio:', err),
-      });
-
-    } else if (this.modalContenido.tipo === 'Retardos') {
-
-      this.ExplosivosUniService.updateExplosivo(id, datosActualizados).subscribe({
-        next: (data) => {
-
-          this.modalContenido.datos[this.indiceEditando] = data;
-
-          this.cancelarEdicion();
-        },
-        error: (err) => console.error('Error al actualizar retardos:', err),
-      });
-
-    } else if (this.modalContenido.tipo === 'Numeros retardos') {
-
-      this.numeroRetardosService.update(id, datosActualizados).subscribe({
-        next: (data) => {
-
-          this.modalContenido.datos[this.indiceEditando] = data;
-
-          this.cancelarEdicion();
-        },
-        error: (err) => console.error('Error al actualizar número retardos:', err),
-      });
-
-    }
-
-  }
-
-}
 
   descargar(item: any): void {}
 }

@@ -164,7 +164,7 @@ export class PrincipalTalHorizontalComponent implements OnInit {
       // 🔥 PAYLOAD DINÁMICO (SE AGREGA APROBACION)
       const payload: any = {
         ...nuevaRaw,
-
+        registros: JSON.stringify(nuevaRaw.registros),
         [campoObservacion]: JSON.stringify(original),
 
         revisado: revisionActual + 1,
@@ -254,7 +254,6 @@ export class PrincipalTalHorizontalComponent implements OnInit {
         ...item,
         decision: item.decision ? 1 : 0, // 🔥 conversión clave
       })),
-
       control_llantas: {
         numero1: this.llantasData.numero1,
         numero2: this.llantasData.numero2,

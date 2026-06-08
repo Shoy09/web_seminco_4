@@ -34,9 +34,6 @@ import { PrincipalGraficoLargoComponent } from './Components/Dashboard/graficos/
 import { PrincipalGraficoSostenimientoComponent } from './Components/Dashboard/graficos/sostenimiento/principal-grafico-sostenimiento/principal-grafico-sostenimiento.component';
 import { PrincipalGraficoScoopsComponent } from './Components/Dashboard/graficos/scoops/principal-grafico-scoops/principal-grafico-scoops.component';
 import { LineaPrincipalComponent } from './Components/Dashboard/graficos/Linea de tiempo/linea.principal/linea.principal.component';
-import { PrincipalScissorComponents } from './Components/Jefe mina/aprobaciones/scissor_temp/principal/principal.component';
-import { PrincipalScalaminComponents } from './Components/Jefe mina/aprobaciones/scalamin/principal/principal.component';
-import { PrincipalAnfochargerComponents } from './Components/Jefe mina/aprobaciones/anfocharger/principal/principal.component';
 import { LayoutComponent } from './Components/Principales/layout/layout.component';
 import { MonitoreoScoopsComponent } from './features/monitoreo-mina/pages/monitoreo-scoops/monitoreo-scoops.component';
 import { MonitoreoPerfHorizontalComponent } from './features/monitoreo-mina/pages/monitoreo-perf-horizontal/monitoreo-perf-horizontal.component';

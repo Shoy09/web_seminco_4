@@ -22,8 +22,8 @@ import { DialogEstadoComponent } from '../../dialog-estado/dialog-estado.compone
   templateUrl: './principal.component.html',
   styleUrls: ['./principal.component.css'],
 })
-export class PrincipalScalaminComponents implements OnInit {
-  tipo: string = 'scalamin';
+export class PrincipalScissorComponent implements OnInit {
+  tipo: string = 'scissor';
   operacion!: OperacionBase;
   operacionOriginal!: OperacionBase;
   loading = false;
