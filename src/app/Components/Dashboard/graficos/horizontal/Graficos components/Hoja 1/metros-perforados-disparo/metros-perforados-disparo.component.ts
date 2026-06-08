@@ -1,11 +1,32 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
+
 import * as echarts from 'echarts/core';
 import { BarChart } from 'echarts/charts';
-import { TitleComponent, TooltipComponent, GridComponent, LegendComponent } from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
 
-echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, CanvasRenderer]);
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  DataZoomComponent,
+} from 'echarts/components';
+
+import { CanvasRenderer } from 'echarts/renderers';
+import {
+  calcularZoomInicial,
+  CHART_THEME,
+} from '../../../../../../../shared/chart-theme';
+
+echarts.use([
+  BarChart,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  DataZoomComponent,
+  CanvasRenderer,
+]);
 
 @Component({
   selector: 'app-metros-perforados-disparo',
@@ -13,122 +34,156 @@ echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendCo
   imports: [NgxEchartsDirective],
   providers: [provideEchartsCore({ echarts })],
   templateUrl: './metros-perforados-disparo.component.html',
-  styleUrl: './metros-perforados-disparo.component.css'
 })
 export class MetrosPerforadosDisparoComponent implements OnChanges {
-
   @Input() data: any[] = [];
-
   chartOptions: any = {};
+  private chartInstance: any;
+
+  onChartInit(ec: any): void {
+    this.chartInstance = ec;
+  }
+
+  getChartImage(): string | null {
+    if (!this.chartInstance) return null;
+
+    return this.chartInstance.getDataURL({
+      type: 'jpeg',
+      pixelRatio: 1.2,
+      backgroundColor: '#FFFFFF',
+      excludeComponents: ['toolbox', 'dataZoom'],
+    });
+  }
+
+  getChartTitle(): string {
+    return 'METROS PERFORADOS/DISPARO';
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      //console.log('📦 Data recibida en metros-perforados-disparo:', this.data);
       this.updateChart();
     }
   }
 
   updateChart(): void {
-    if (!this.data || this.data.length === 0) {
+    if (!Array.isArray(this.data) || this.data.length === 0) {
+      this.chartOptions = {};
       return;
     }
 
-    // Preparar datos para el gráfico
-    const xAxisData = this.data.map(item => 
-      `${item.modelo_equipo || 'N/A'}\n(${item.seccion || 'N/A'})`
+    const xAxisData = this.data.map(
+      (item) => `${item.modelo_equipo || 'N/A'} (${item.seccion || 'N/A'})`,
     );
-    
-    const seriesData = this.data.map(item => item.m_disparo_fr || 0);
+
+    const seriesData = this.data.map((item) => Number(item.m_disparo_fr || 0));
+
+    const zoomEnd = calcularZoomInicial(xAxisData.length, 'categorias');
 
     this.chartOptions = {
+      color: [CHART_THEME.colors.primary],
+
       title: {
+        ...CHART_THEME.title,
         text: 'METROS PERFORADOS/DISPARO',
-        left: 'center',
-        top: 10,
         textStyle: {
+          ...CHART_THEME.title.textStyle,
           fontSize: 14,
-          fontWeight: 'bold',
-          color: '#333'
-        }
-      },
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'shadow'
         },
+      },
+
+      tooltip: {
+        ...CHART_THEME.tooltip,
         formatter: (params: any) => {
-          const item = this.data[params[0].dataIndex];
-          return `${item.modelo_equipo} (${item.seccion})<br/>Metros/Disparo: ${params[0].value.toFixed(2)} m`;
-        }
+          const param = params[0];
+          const item = this.data[param.dataIndex];
+
+          return `
+            <strong>${item.modelo_equipo || 'N/A'} (${item.seccion || 'N/A'})</strong><br/><br/>
+            ${param.marker} Metros/Disparo:
+            <strong>${Number(param.value || 0).toFixed(2)} m</strong>
+          `;
+        },
       },
+
+      legend: {
+        ...CHART_THEME.legend,
+        show: false,
+      },
+
       grid: {
-        left: '12%',      // Aumentado para dar más espacio a las etiquetas del eje Y
-        right: '5%',
-        top: '18%',       // Reducido para dar más espacio a las barras
-        bottom: '18%',    // Aumentado IMPORTANTE: más espacio para etiquetas del eje X de 2 líneas
-        containLabel: false // Cambiado a false para control manual
+        ...CHART_THEME.grid,
+        bottom: 60,
       },
+
+      dataZoom: [
+        {
+          ...CHART_THEME.dataZoom.inside,
+          start: 0,
+          end: zoomEnd,
+        },
+        {
+          ...CHART_THEME.dataZoom.slider,
+          start: 0,
+          end: zoomEnd,
+        },
+      ],
       xAxis: {
-        type: 'category',
+        ...CHART_THEME.xAxisCategory,
         data: xAxisData,
         axisLabel: {
+          ...CHART_THEME.xAxisCategory.axisLabel,
           fontSize: 11,
           fontWeight: 'bold',
-          rotate: 0,
+          rotate: xAxisData.length > 8 ? 25 : 0,
           interval: 0,
+          margin: 10,
+          lineHeight: 18,
           formatter: (value: string) => value,
-          margin: 10,     // Margen entre etiqueta y eje
-          lineHeight: 20  // Altura de línea para texto de 2 líneas
-        },
-        axisLine: {
-          lineStyle: {
-            color: '#333'
-          }
         },
         axisTick: {
-          alignWithLabel: true  // Alinear ticks con las etiquetas
-        }
+          alignWithLabel: true,
+        },
       },
+
       yAxis: {
-        type: 'value',
+        ...CHART_THEME.yAxisValue,
         name: 'Metros',
         nameLocation: 'middle',
         nameGap: 45,
         min: 0,
         axisLabel: {
-          fontSize: 11,
-          formatter: '{value} m'
+          ...CHART_THEME.yAxisValue.axisLabel,
+          formatter: '{value} m',
         },
-        splitLine: {
-          lineStyle: {
-            type: 'dashed',
-            color: '#ccc'
-          }
-        }
       },
+
       series: [
         {
           name: 'Metros/Disparo',
           type: 'bar',
           data: seriesData,
+
+          barWidth: CHART_THEME.bar.barWidth,
+          barCategoryGap: '30%',
+
           itemStyle: {
-            borderRadius: [5, 5, 0, 0],
-            color: '#3498db',
-            shadowColor: 'rgba(0, 0, 0, 0.2)',
-            shadowBlur: 5
+            ...CHART_THEME.bar.itemStyle,
+            color: CHART_THEME.colors.primary,
+            borderRadius: [6, 6, 0, 0],
           },
+
           label: {
+            ...CHART_THEME.bar.label,
             show: true,
             position: 'top',
-            formatter: (params: any) => `${Math.round(params.value)} m`,
+            color: CHART_THEME.colors.secondary,
+            formatter: (params: any) =>
+              `${Math.round(Number(params.value || 0))} m`,
             fontWeight: 'bold',
             fontSize: 12,
-            color: '#2980b9'
           },
-          barWidth: '40%',      // Reducido de 50% a 40% para barras más delgadas
-          barCategoryGap: '30%' // Espacio entre categorías
-        }
-      ]
+        },
+      ],
     };
   }
 }

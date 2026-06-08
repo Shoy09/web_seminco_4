@@ -1,3 +1,8 @@
-<div class="ranking-container">
-  <div echarts [options]="chartOptions" class="ranking-chart"></div>
+<div class="h-105 w-full min-w-0">
+  <div
+    echarts
+    [options]="chartOptions"
+    (chartInit)="onChartInit($event)"
+    class="h-full w-full">
+  </div>
 </div>

@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CardOperacionesComponent } from '../card-operaciones/card-operaciones.component';
-import { BotonsComponent } from "../botons/botons.component";
-import { TablaComponent } from "../tabla/tabla.component";
-import { MenuAccionesComponent } from "../menuAcciones/menuAcciones.component";
+import { BotonsComponent } from '../botons/botons.component';
+import { TablaComponent } from '../tabla/tabla.component';
+import { MenuAccionesComponent } from '../menuAcciones/menuAcciones.component';
 import { OperacionesService } from '../../../../../services/operaciones.service';
 import { OperacionBase } from '../../../../../models/OperacionBase.models';
 import { CommonModule } from '@angular/common';
@@ -20,10 +20,9 @@ import { MatDialog } from '@angular/material/dialog';
     CommonModule,
   ],
   templateUrl: './principal.component.html',
-  styleUrls: ['./principal.component.css']
+  styleUrls: ['./principal.component.css'],
 })
 export class PrincipalScoopsComponent implements OnInit {
-
   tipo: string = 'carguio';
   operacion!: OperacionBase;
   operacionOriginal!: OperacionBase;
@@ -41,7 +40,7 @@ export class PrincipalScoopsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private operacionesService: OperacionesService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -94,106 +93,109 @@ export class PrincipalScoopsComponent implements OnInit {
 
     this.loading = true;
 
-    this.operacionesService.getById(this.tipo, +id)
-      .subscribe({
-        next: (resp) => {
-          this.operacion = resp.data;
+    this.operacionesService.getById(this.tipo, +id).subscribe({
+      next: (resp) => {
+        this.operacion = resp.data;
 
-          // 🔥 CLON PROFUNDO (IMPORTANTE)
-          this.operacionOriginal = structuredClone(resp.data);
+        // 🔥 CLON PROFUNDO (IMPORTANTE)
+        this.operacionOriginal = structuredClone(resp.data);
 
-          console.log('operacion editable', this.operacion);
-          console.log('operacion original', this.operacionOriginal);
+        console.log('operacion editable', this.operacion);
+        console.log('operacion original', this.operacionOriginal);
 
-          this.mapearDatos();
-          this.loading = false;
-        },
-        error: (err) => {
-          console.error(err);
-          this.loading = false;
-        }
-      });
+        this.mapearDatos();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.loading = false;
+      },
+    });
   }
 
-  
-validarCambios() {
-  const nuevaRaw = this.reconstruirOperacion();
-  const original = this.operacionOriginal;
-  const nueva = this.parsearNueva(nuevaRaw);
+  validarCambios() {
+    const nuevaRaw = this.reconstruirOperacion();
+    const original = this.operacionOriginal;
+    const nueva = this.parsearNueva(nuevaRaw);
 
-  const hayCambios = JSON.stringify(nueva) !== JSON.stringify(original);
+    const hayCambios = JSON.stringify(nueva) !== JSON.stringify(original);
 
-  if (!hayCambios) {
-    console.log('⚪ No hay cambios, no se envía nada');
-    return;
-  }
-
-  const revisionActual = this.operacion.revisado ?? 0;
-
-  if (revisionActual >= 3) {
-    alert('🚫 Esta operación ya alcanzó el máximo de revisiones');
-    return;
-  }
-
-  // 🔥 ABRIR DIALOG (sin bloquear cierre)
-  const dialogRef = this.dialog.open(DialogEstadoComponent, {
-    width: '350px'
-  });
-
-  dialogRef.afterClosed().subscribe((estadoSeleccionado: number | null) => {
-
-    // 🔥 VALIDACIÓN ROBUSTA (clave)
-    if (estadoSeleccionado !== 1 && estadoSeleccionado !== 2) {
-      console.log('❌ Cancelado o cerrado fuera');
+    if (!hayCambios) {
+      console.log('⚪ No hay cambios, no se envía nada');
       return;
     }
 
-    let campoObservacion = '';
+    const revisionActual = this.operacion.revisado ?? 0;
 
-    switch (revisionActual) {
-      case 0: campoObservacion = 'observaciones_jefe'; break;
-      case 1: campoObservacion = 'observaciones_jefe2'; break;
-      case 2: campoObservacion = 'observaciones_jefe3'; break;
+    if (revisionActual >= 3) {
+      alert('🚫 Esta operación ya alcanzó el máximo de revisiones');
+      return;
     }
 
-    const payload: any = {
-      ...nuevaRaw,
+    // 🔥 ABRIR DIALOG (sin bloquear cierre)
+    const dialogRef = this.dialog.open(DialogEstadoComponent, {
+      width: '350px',
+    });
 
-      tipo_equipo: JSON.stringify(
-        this.normalizarTipoEquipo(this.cardData.tiposEquipo)
-      ),
+    dialogRef.afterClosed().subscribe((estadoSeleccionado: number | null) => {
+      // 🔥 VALIDACIÓN ROBUSTA (clave)
+      if (estadoSeleccionado !== 1 && estadoSeleccionado !== 2) {
+        console.log('❌ Cancelado o cerrado fuera');
+        return;
+      }
 
-      [campoObservacion]: JSON.stringify(original),
+      let campoObservacion = '';
 
-      revisado: revisionActual + 1,
+      switch (revisionActual) {
+        case 0:
+          campoObservacion = 'observaciones_jefe';
+          break;
+        case 1:
+          campoObservacion = 'observaciones_jefe2';
+          break;
+        case 2:
+          campoObservacion = 'observaciones_jefe3';
+          break;
+      }
 
-      // 👇 APROBACIÓN
-      aprobacion: estadoSeleccionado
-    };
+      const payload: any = {
+        ...nuevaRaw,
 
-    console.log('📦 PAYLOAD FINAL:', payload);
+        tipo_equipo: JSON.stringify(
+          this.normalizarTipoEquipo(this.cardData.tiposEquipo),
+        ),
 
-    this.loading = true;
+        [campoObservacion]: JSON.stringify(original),
 
-    this.operacionesService.actualizar(this.tipo, this.operacion.id!, payload)
-      .subscribe({
-        next: (resp) => {
-          console.log('🟢 RESPUESTA BACKEND:', resp);
+        revisado: revisionActual + 1,
 
-          this.loading = false;
-          this.obtenerOperacion();
+        // 👇 APROBACIÓN
+        aprobacion: estadoSeleccionado,
+      };
 
-          alert(`✅ Actualizado (Revisión ${revisionActual + 1})`);
-        },
-        error: (err) => {
-          console.error('🔴 ERROR AL ACTUALIZAR:', err);
-          this.loading = false;
-          alert('❌ Error al actualizar');
-        }
-      });
+      console.log('📦 PAYLOAD FINAL:', payload);
 
-  });
-}
+      this.loading = true;
+
+      this.operacionesService
+        .actualizar(this.tipo, this.operacion.id!, payload)
+        .subscribe({
+          next: (resp) => {
+            console.log('🟢 RESPUESTA BACKEND:', resp);
+
+            this.loading = false;
+            this.obtenerOperacion();
+
+            alert(`✅ Actualizado (Revisión ${revisionActual + 1})`);
+          },
+          error: (err) => {
+            console.error('🔴 ERROR AL ACTUALIZAR:', err);
+            this.loading = false;
+            alert('❌ Error al actualizar');
+          },
+        });
+    });
+  }
 
   parsearNueva(nueva: any) {
     return {
@@ -203,7 +205,7 @@ validarCambios() {
       condiciones_equipo: this.safeParse(nueva.condiciones_equipo),
       check_list: this.safeParse(nueva.check_list),
       control_llantas: this.safeParse(nueva.control_llantas),
-      programa_trabajo: this.safeParse(nueva.programa_trabajo)
+      programa_trabajo: this.safeParse(nueva.programa_trabajo),
     };
   }
 
@@ -219,11 +221,11 @@ validarCambios() {
     return valor;
   }
   normalizarTipoEquipo(tipo: any) {
-  return {
-    Diesel: !!tipo?.diesel,
-    Electrico: !!tipo?.electrico
-  };
-}
+    return {
+      Diesel: !!tipo?.diesel,
+      Electrico: !!tipo?.electrico,
+    };
+  }
 
   reconstruirOperacion(): OperacionBase {
     return {
@@ -239,10 +241,10 @@ validarCambios() {
       n_equipo: this.cardData.codigo,
       seccion: this.cardData.seccion,
       tipo_equipo: JSON.stringify(
-  this.normalizarTipoEquipo(this.cardData.tiposEquipo)
-),
+        this.normalizarTipoEquipo(this.cardData.tiposEquipo),
+      ),
 
-      registros: JSON.stringify(this.tablaData),
+      registros: this.tablaData,
 
       horometros: JSON.stringify(this.formatearHorometros(this.horometrosData)),
 
@@ -258,24 +260,23 @@ validarCambios() {
         noOp: this.condicionesData.noOperativo,
       }),
 
-      check_list: JSON.stringify(
-        this.checkListData.map(item => ({
-          ...item,
-          decision: item.decision ? 1 : 0 // 🔥 conversión clave
-        }))
-      ),
-
-      control_llantas: JSON.stringify({
+      check_list: this.checkListData.map((item) => ({
+        ...item,
+        decision: item.decision ? 1 : 0, // 🔥 conversión clave
+      })),
+      control_llantas: {
         numero1: this.llantasData.numero1,
         numero2: this.llantasData.numero2,
         numero3: this.llantasData.numero3,
         numero4: this.llantasData.numero4,
-      }),
+      },
 
       programa_trabajo: JSON.stringify({
-  n_cucharas_programado: this.programaTrabajoData?.n_cucharas_programado ?? 0,
-  n_cucharas_realizado: this.programaTrabajoData?.n_cucharas_realizado ?? 0
-}),
+        n_cucharas_programado:
+          this.programaTrabajoData?.n_cucharas_programado ?? 0,
+        n_cucharas_realizado:
+          this.programaTrabajoData?.n_cucharas_realizado ?? 0,
+      }),
     };
   }
 
@@ -306,8 +307,6 @@ validarCambios() {
     this.llantasData = this.mapearParaLlantas(this.operacion);
     this.programaTrabajoData = this.mapearParaProgramaTrabajo(this.operacion);
   }
-
-  
 
   // 🔥 MAPEO SOLO PARA CARD
   mapearParaCard(op: OperacionBase) {
@@ -343,7 +342,7 @@ validarCambios() {
 
     // 🔥 aquí puedes transformar cada fila si quieres
     return registros.map((item: any) => ({
-      ...item
+      ...item,
     }));
   }
 
@@ -367,7 +366,7 @@ validarCambios() {
     if (!h || typeof h !== 'object') return null;
 
     return {
-      horometro: h.horometro || null
+      horometro: h.horometro || null,
     };
   }
 
@@ -385,7 +384,7 @@ validarCambios() {
       horaLlenado: c.horaLlenado || '',
       lugar: c.lugar || '',
       operativo: !!c.op,
-      noOperativo: !!c.noOp
+      noOperativo: !!c.noOp,
     };
   }
 
@@ -395,7 +394,7 @@ validarCambios() {
     if (!Array.isArray(lista)) return [];
 
     return lista.map((item: any) => ({
-      ...item
+      ...item,
     }));
   }
 
@@ -408,18 +407,18 @@ validarCambios() {
       numero1: !!l.numero1,
       numero2: !!l.numero2,
       numero3: !!l.numero3,
-      numero4: !!l.numero4
+      numero4: !!l.numero4,
     };
   }
 
   mapearParaProgramaTrabajo(op: OperacionBase) {
-  const p = this.parseSeguro(op.programa_trabajo);
+    const p = this.parseSeguro(op.programa_trabajo);
 
-  if (!p || typeof p !== 'object') return null;
+    if (!p || typeof p !== 'object') return null;
 
-  return {
-    n_cucharas_programado: p.n_cucharas_programado ?? 0,
-    n_cucharas_realizado: p.n_cucharas_realizado ?? 0
-  };
-}
+    return {
+      n_cucharas_programado: p.n_cucharas_programado ?? 0,
+      n_cucharas_realizado: p.n_cucharas_realizado ?? 0,
+    };
+  }
 }

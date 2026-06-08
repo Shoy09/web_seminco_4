@@ -1,74 +1,152 @@
-<div class="filtro-fechas">
-  <div class="campo">
-    <label>Fecha inicio</label>
-    <input type="date" [(ngModel)]="fechaInicio">
+<div class="space-y-5">
+
+  <!-- FILTROS -->
+  <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+
+      <!-- FECHA INICIO -->
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">
+          Fecha inicio
+        </label>
+
+        <input
+          pInputText
+          type="date"
+          [(ngModel)]="fechaInicio"
+          class="w-full"
+        />
+      </div>
+
+      <!-- FECHA FIN -->
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">
+          Fecha fin
+        </label>
+
+        <input
+          pInputText
+          type="date"
+          [(ngModel)]="fechaFin"
+          class="w-full"
+        />
+      </div>
+
+      <!-- TURNO -->
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">
+          Turno
+        </label>
+
+        <p-select
+          [options]="turnos"
+          [(ngModel)]="turnoSeleccionado"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Todos"
+          styleClass="w-full"
+          appendTo="body">
+        </p-select>
+      </div>
+
+      <!-- APLICAR -->
+      <div class="flex items-end">
+        <button
+          pButton
+          type="button"
+          label="Aplicar"
+          icon="pi pi-filter"
+          class="w-full !bg-secondary !border-secondary !text-white hover:!bg-secondary/90"
+          (click)="aplicarFiltro()">
+        </button>
+      </div>
+
+      <!-- QUITAR FILTRO -->
+      <div class="flex items-end">
+        <button
+          pButton
+          type="button"
+          label="Quitar filtro"
+          icon="pi pi-filter-slash"
+          severity="secondary"
+          outlined="true"
+          class="w-full"
+          (click)="quitarFiltro()">
+        </button>
+      </div>
+
+    </div>
+
   </div>
 
-  <div class="campo">
-    <label>Fecha fin</label>
-    <input type="date" [(ngModel)]="fechaFin">
+  <!-- GRÁFICOS -->
+  <div class="grid grid-cols-1 gap-5">
+
+    <!-- PERFORACIÓN HORIZONTAL -->
+    <div class="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+      <div class="mb-4 border-b border-border pb-3">
+        <h2 class="text-lg font-extrabold text-secondary">
+          Perforación Horizontal
+        </h2>
+      </div>
+
+      <div class="w-full">
+        <app-scheduler
+          class="block w-full"
+          [data]="ganttHorizontal">
+        </app-scheduler>
+      </div>
+    </div>
+
+    <!-- PERFORACIÓN TALADRO LARGO -->
+    <div class="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+      <div class="mb-4 border-b border-border pb-3">
+        <h2 class="text-lg font-extrabold text-secondary">
+          Perforación Taladro Largo
+        </h2>
+      </div>
+
+      <div class="w-full">
+        <app-scheduler
+          class="block w-full"
+          [data]="ganttLargo">
+        </app-scheduler>
+      </div>
+    </div>
+
+    <!-- EMPERNADOR -->
+    <div class="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+      <div class="mb-4 border-b border-border pb-3">
+        <h2 class="text-lg font-extrabold text-secondary">
+          Empernador
+        </h2>
+      </div>
+
+      <div class="w-full">
+        <app-scheduler
+          class="block w-full"
+          [data]="ganttEmpernador">
+        </app-scheduler>
+      </div>
+    </div>
+
+    <!-- SCOOPTRAM -->
+    <div class="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+      <div class="mb-4 border-b border-border pb-3">
+        <h2 class="text-lg font-extrabold text-secondary">
+          Scooptram
+        </h2>
+      </div>
+
+      <div class="w-full">
+        <app-scheduler
+          class="block w-full"
+          [data]="ganttScoops">
+        </app-scheduler>
+      </div>
+    </div>
+
   </div>
 
-  <div class="campo">
-  <label>Turno</label>
-  <select [(ngModel)]="turnoSeleccionado">
-    <option value="">Todos</option>
-    <option value="DÍA">Día</option>
-    <option value="NOCHE">Noche</option>
-  </select>
 </div>
-
-
-  <button class="btn-aplicar" (click)="aplicarFiltro()">
-    Aplicar
-  </button>
-
-  <button class="btn-aplicar" (click)="quitarFiltro()">
-    Quitar filtro
-  </button>
-
-  <!-- <button class="btn-aplicar" (click)="generarPDF()">
-  Exportar PDF
-</button> -->
-
-</div>
-
-<div class="graficos-container">
-
-  <!-- 🔹 HORIZONTAL -->
-  <div class="grafico-card">
-    <h2 class="titulo-grafico">Perforación Horizontal</h2>
-    <app-scheduler 
-      class="full-width" 
-      [data]="ganttHorizontal">
-    </app-scheduler>
-  </div>
-
-  <!-- 🔹 TALADRO LARGO -->
-  <div class="grafico-card">
-    <h2 class="titulo-grafico">Perforación Taladro Largo</h2>
-    <app-scheduler 
-      class="full-width" 
-      [data]="ganttLargo">
-    </app-scheduler>
-  </div>
-
-  <div class="grafico-card">
-    <h2 class="titulo-grafico">Empernador</h2>
-    <app-scheduler 
-      class="full-width" 
-      [data]="ganttEmpernador">
-    </app-scheduler>
-  </div>
-
-  <div class="grafico-card">
-    <h2 class="titulo-grafico">Scooptram</h2>
-    <app-scheduler 
-      class="full-width" 
-      [data]="ganttScoops">
-    </app-scheduler>
-  </div>
-</div>
-
- 
-

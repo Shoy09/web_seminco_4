@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FechasPlanMensualService } from '../../../../../services/fechas-plan-mensual.service';
 import { OperacionesService } from '../../../../../services/operaciones.service';
-import { OperacionBase } from '../../../../../models/OperacionBase.models';
+import { OperacionBase, OperacionBaseTLargos } from '../../../../../models/OperacionBase.models';
 import { PlanMensual } from '../../../../../models/plan-mensual.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -32,6 +32,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { SchedulerComponent } from '../../Linea de tiempo/scheduler/scheduler.component';
 import { EstadoService } from '../../../../../services/estado.service';
+import { OperacionTLargos } from '../../../../../models/OperacionTLargos';
 
 @Component({
   selector: 'app-principal-grafico-largo',
@@ -68,8 +69,8 @@ export class PrincipalGraficoLargoComponent implements OnInit {
   mes!: string;
 
   // DATA ORIGINAL (sin filtrar)
-  operacionesOriginal: OperacionBase[] = [];
-  operacionesFiltradas: OperacionBase[] = [];
+  operacionesOriginal: OperacionBaseTLargos[] = [];
+  operacionesFiltradas: OperacionBaseTLargos[] = [];
   planesMensuales: PlanProduccion[] = [];
 
   // 🔥 DATA FINAL PARA LOS GRAFICOS
@@ -92,7 +93,6 @@ export class PrincipalGraficoLargoComponent implements OnInit {
   dataFrPorOperadorTurno: any[] = [];
   dataLaborFRDetallado: any[] = [];
   dataTipoPerforacion: any[] = [];
-  datadetalleDisparos: any[] = [];
   dataHorasNumericas: any[] = [];
 
   // Variables para el filtro de fechas
@@ -250,7 +250,8 @@ mapaEstados: Map<string, any> = new Map();
   cargarOperaciones() {
     const tipo = 'tal_largo';
 
-    this.operacionesService.getAllAprobados(tipo).subscribe({
+    this.operacionesService.getAllAprobados<OperacionTLargos>(tipo).subscribe({
+
       next: (resp) => {
         this.operacionesOriginal = resp.data;
 
@@ -423,7 +424,7 @@ mapaEstados: Map<string, any> = new Map();
     this.dataFrPorOperadorTurno = this.procesarFrPorOperadorTurno();
     this.dataLaborFRDetallado = this.procesarLaborFRDetallado();
     this.dataTipoPerforacion = this.procesarTipoPerforacion();
-    this.datadetalleDisparos = this.procesarDataPerforacionDetallada();
+    //this.datadetalleDisparos = this.procesarDataPerforacionDetallada();
     this.dataHorasNumericas = this.procesarHorasNumericas();
     this.procesarResumen();
     this.construirGanttDataNuevo();
@@ -477,12 +478,6 @@ mapaEstados: Map<string, any> = new Map();
         const registrosArray = op.registros;
 
         if (Array.isArray(registrosArray) && registrosArray.length > 0) {
-          // Obtener área del primer registro
-          const primerRegistro = registrosArray[0];
-          const area =
-            primerRegistro?.operacion?.area || primerRegistro?.area || '';
-
-          // Obtener sección del plan
 
           // Contar frentes completos
           const nFrentes = this.contarFrentesCompletos(registrosArray);
@@ -622,9 +617,9 @@ mapaEstados: Map<string, any> = new Map();
         const operacion = r?.operacion || {};
 
         const labor_fr = this.construirLaborFR(
-          operacion?.tipo_labor,
+          "",
           operacion?.labor,
-          operacion?.ala,
+          "",
         );
 
         // 🔥 JOIN con plan
@@ -673,21 +668,25 @@ mapaEstados: Map<string, any> = new Map();
             const operacion = registro.operacion || registro;
 
             // 🔹 SUMA DE METROS (nuevo modelo)
-            const prod = Number(operacion.metros_perforados_produccion) || 0;
+            /* const prod = Number(operacion.metros_perforados_produccion) || 0;
             const rim = Number(operacion.metros_perforados_rimados) || 0;
             const rep = Number(operacion.metros_perforados_repaso) || 0;
-            const ali = Number(operacion.metros_perforados_alivio) || 0;
+            const ali = Number(operacion.metros_perforados_alivio) || 0; */
+            const prod = 1;
+            const rim = 1;
+            const rep = 1;
+            const ali = 1;
 
             const metrosRegistro = prod + rim + rep + ali;
             totalMetros += metrosRegistro;
 
             // 🔹 CONTADOR DE DISPAROS TL
-            if (
+            /* if (
               operacion.tipo_perforacion === 'PRODUCCIÓN' ||
               operacion.tipo_perforacion === 'SLOT'
             ) {
               nDisparosTL++;
-            }
+            } */
           }
         }
       } catch (error) {
@@ -851,7 +850,7 @@ mapaEstados: Map<string, any> = new Map();
 
         const duracion = this.calcularDuracionHoras(
           r.hora_inicio,
-          r.hora_final,
+          r.hora_final!,
         );
 
         if (!duracion || duracion <= 0) return;
@@ -949,7 +948,7 @@ mapaEstados: Map<string, any> = new Map();
 
         const duracion = this.calcularDuracionHoras(
           r.hora_inicio,
-          r.hora_final,
+          r.hora_final!,
         );
 
         if (!duracion || duracion <= 0) return;
@@ -1047,7 +1046,7 @@ mapaEstados: Map<string, any> = new Map();
 
         const duracion = this.calcularDuracionHoras(
           r.hora_inicio,
-          r.hora_final,
+          r.hora_final!,
         );
 
         if (!duracion || duracion <= 0) return;
@@ -1697,18 +1696,18 @@ mapaEstados: Map<string, any> = new Map();
         registrosArray.forEach((r) => {
           const opData = r?.operacion || r;
 
-          const lb = Number(opData?.long_barras);
-
+          //const lb = Number(opData?.long_barras);
+          const lb = 1;
           // ✅ SOLO valores válidos
           if (!isNaN(lb) && lb > 0) {
             item.sum_long_barras += lb;
             item.count_long_barras += 1;
           }
 
-          item.tal_alivio += Number(opData?.metros_perforados_alivio) || 0;
+          /* item.tal_alivio += Number(opData?.metros_perforados_alivio) || 0;
           item.tal_prod += Number(opData?.metros_perforados_produccion) || 0;
           item.tal_repaso += Number(opData?.metros_perforados_repaso) || 0;
-          item.tal_rimados += Number(opData?.metros_perforados_rimados) || 0;
+          item.tal_rimados += Number(opData?.metros_perforados_rimados) || 0; */
         });
       }
     });
@@ -1816,16 +1815,17 @@ mapaEstados: Map<string, any> = new Map();
       registrosArray.forEach((r) => {
         const operacion = r?.operacion || {};
 
-        const tipo_labor = operacion?.tipo_labor || '';
+        //const tipo_labor = operacion?.tipo_labor || '';
         const labor = operacion?.labor || '';
-        const ala = operacion?.ala || '';
+        //const ala = operacion?.ala || '';
 
         const observaciones = operacion?.observaciones;
 
         // ❌ filtrar observaciones vacías
         if (!observaciones || !observaciones.trim()) return;
 
-        const labor_fr = `${tipo_labor}${labor}${ala}`.trim();
+        //const labor_fr = `${tipo_labor}${labor}${ala}`.trim();
+        const labor_fr = `${labor}`.trim();
 
         const key = `${modelo}-${operador}-${labor_fr}`;
 
@@ -1868,10 +1868,12 @@ mapaEstados: Map<string, any> = new Map();
       registrosArray.forEach((r) => {
         const operacion = r?.operacion || {};
 
-        const tipoPerforacion = (operacion?.tipo_perforacion || '')
+        /* const tipoPerforacion = (operacion?.tipo_perforacion || '')
           .toString()
           .trim()
-          .toUpperCase();
+          .toUpperCase(); */
+
+        const tipoPerforacion ='';
 
         // 🔥 FILTRO DAX
         if (!tiposValidos.has(tipoPerforacion)) return;
@@ -1897,98 +1899,8 @@ mapaEstados: Map<string, any> = new Map();
     return Array.from(mapa.values());
   }
 
-  //=========================================
-  // GRAFICO 21
-  //=========================================
-
-  procesarDataPerforacionDetallada() {
-    const mapa = new Map<string, any>();
-
-    this.operacionesFiltradas.forEach((op) => {
-      const key = op.modelo_equipo || 'SIN_EQUIPO';
-      const registrosArray = op.registros;
-
-      if (!Array.isArray(registrosArray)) return;
-
-      registrosArray.forEach((r) => {
-        const operacion = r?.operacion || {};
-
-        // =========================
-        // 🔥 VALIDACIÓN REAL
-        // =========================
-        const tipo_perforacion = operacion?.tipo_perforacion;
-        if (!tipo_perforacion) return; // ❌ NO enviar basura
-
-        const labor_fr_raw =
-          `${operacion?.tipo_labor ?? ''}${operacion?.labor ?? ''}${operacion?.ala ?? ''}`.trim();
-
-        // 🔥 ahora SIEMPRE habrá valor
-        const labor_fr = labor_fr_raw || 'SIN LABOR';
-
-        // =========================
-        // 🔥 METROS
-        // =========================
-        const metros = this.calcularMetrosPerforados([r]);
-
-        // =========================
-        // 🔥 VALORES OPERACIONALES
-        // =========================
-        const long_barras = Number(operacion?.long_barras) || 0;
-        const tal_alivio = Number(operacion?.metros_perforados_alivio) || 0;
-        const tal_prod = Number(operacion?.metros_perforados_produccion) || 0;
-        const tal_repaso = Number(operacion?.metros_perforados_repaso) || 0;
-        const tal_rimados = Number(operacion?.metros_perforados_rimados) || 0;
-
-        const mapKey = `${key}-${tipo_perforacion}-${labor_fr}`;
-
-        if (!mapa.has(mapKey)) {
-          mapa.set(mapKey, {
-            modelo_equipo: key,
-            tipo_perforacion,
-            labor_fr,
-
-            metros_perforados: 0,
-
-            sum_long_barras: 0,
-            count_long_barras: 0,
-
-            tal_alivio: 0,
-            tal_prod: 0,
-            tal_repaso: 0,
-            tal_rimados: 0,
-
-            long_barras: 0,
-          });
-        }
-
-        const item = mapa.get(mapKey)!;
-
-        item.metros_perforados += metros;
-
-        if (long_barras > 0) {
-          item.sum_long_barras += long_barras;
-          item.count_long_barras++;
-        }
-
-        item.tal_alivio += tal_alivio;
-        item.tal_prod += tal_prod;
-        item.tal_repaso += tal_repaso;
-        item.tal_rimados += tal_rimados;
-      });
-    });
-
-    // =========================
-    // 🔥 PROMEDIO FINAL
-    // =========================
-    for (const item of mapa.values()) {
-      item.long_barras =
-        item.count_long_barras > 0
-          ? item.sum_long_barras / item.count_long_barras
-          : 0;
-    }
-
-    return Array.from(mapa.values());
-  }
+  
+  
 
   // =========================================
   // GRAFICO 22

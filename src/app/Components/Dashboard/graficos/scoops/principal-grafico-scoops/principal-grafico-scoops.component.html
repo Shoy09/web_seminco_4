@@ -40,7 +40,7 @@
 
 <div class="graficos-container" *ngIf="vistaPrincipal">
   <!-- Hoja 1 pdf -->
-  <app-resumen class="full-width" [data]="resumenSC" data-page="1"></app-resumen>
+  <!-- <app-resumen class="full-width" [data]="resumenSC" data-page="1"></app-resumen>
 
   <app-cucharas-labor [data]="DataCucharadasLabor" data-page="1"></app-cucharas-labor>
 
@@ -64,12 +64,12 @@
 
   <app-horas-primer-viaje class="full-width"  [data]="dataViajesSC" data-page="1"></app-horas-primer-viaje>
 
-  <app-resumen-equipos class="full-width" [data]="dataDetalleEquipo" data-page="1"></app-resumen-equipos>
+  <app-resumen-equipos class="full-width" [data]="dataDetalleEquipo" data-page="1"></app-resumen-equipos> -->
 
 
 
 
-  <app-mejores-operadores class="full-width"  [data]="dataMejoresOperadores" data-page="1"></app-mejores-operadores>
+  <!-- <app-mejores-operadores class="full-width"  [data]="dataMejoresOperadores" data-page="1"></app-mejores-operadores>
 
   <app-mejores-operadores-grafico [data]="dataMejoresOperadores" data-page="1"></app-mejores-operadores-grafico>
 
@@ -85,13 +85,13 @@
   *ngIf="turnoAplicado === '' || turnoAplicado === 'NOCHE'"
   class="full-width"
   [data]="dataHorasNumericas" data-page="6">
-</app-scatter-turnos-noche>
+</app-scatter-turnos-noche> -->
 
 </div>
 
 <div class="graficos-container" *ngIf="!vistaPrincipal">
 
-<app-scheduler class="full-width" [data]="ganttData" data-page="6"></app-scheduler>
+<!-- <app-scheduler class="full-width" [data]="ganttData" data-page="6"></app-scheduler> -->
 </div>
  
 <div class="overlay" *ngIf="cargandoPDF">

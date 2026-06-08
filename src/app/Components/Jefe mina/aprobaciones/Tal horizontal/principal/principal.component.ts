@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CardOperacionesComponent } from '../card-operaciones/card-operaciones.component';
-import { BotonsComponent } from "../botons/botons.component";
-import { TablaComponent } from "../tabla/tabla.component";
-import { MenuAccionesComponent } from "../menuAcciones/menuAcciones.component";
+import { BotonsComponent } from '../botons/botons.component';
+import { TablaComponent } from '../tabla/tabla.component';
+import { MenuAccionesComponent } from '../menuAcciones/menuAcciones.component';
 import { OperacionesService } from '../../../../../services/operaciones.service';
 import { OperacionBase } from '../../../../../models/OperacionBase.models';
 import { CommonModule } from '@angular/common';
@@ -18,12 +18,11 @@ import { MatDialog } from '@angular/material/dialog';
     TablaComponent,
     MenuAccionesComponent,
     CommonModule,
-],
+  ],
   templateUrl: './principal.component.html',
-  styleUrls: ['./principal.component.css']
+  styleUrls: ['./principal.component.css'],
 })
 export class PrincipalTalHorizontalComponent implements OnInit {
-
   tipo: string = 'tal_horizontal';
   operacion!: OperacionBase;
   operacionOriginal!: OperacionBase;
@@ -40,48 +39,48 @@ export class PrincipalTalHorizontalComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private operacionesService: OperacionesService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
     this.obtenerOperacion();
   }
-  
+
   onCardChange(data: any) {
-  console.log('🟢 PADRE RECIBE CARD:', data);
+    console.log('🟢 PADRE RECIBE CARD:', data);
 
-  this.cardData = data;
-}
-
-onMenuChange(event: any) {
-  console.log('🟢 PADRE RECIBE MENU:', event);
-
-  switch (event.tipo) {
-    case 'horometros':
-      this.horometrosData = event.data;
-      break;
-
-    case 'condiciones':
-      this.condicionesData = event.data;
-      break;
-
-    case 'checklist':
-      this.checkListData = event.data;
-      break;
-
-    case 'llantas':
-      this.llantasData = event.data;
-      break;
+    this.cardData = data;
   }
-}
 
-onTablaChange(data: any[]) {
-  console.log('🟢 TABLA ACTUALIZADA:', data);
-  this.tablaData = data;
-  
-  // Opcional: Marcar que hay cambios pendientes
-  // this.hayCambios = true;
-}
+  onMenuChange(event: any) {
+    console.log('🟢 PADRE RECIBE MENU:', event);
+
+    switch (event.tipo) {
+      case 'horometros':
+        this.horometrosData = event.data;
+        break;
+
+      case 'condiciones':
+        this.condicionesData = event.data;
+        break;
+
+      case 'checklist':
+        this.checkListData = event.data;
+        break;
+
+      case 'llantas':
+        this.llantasData = event.data;
+        break;
+    }
+  }
+
+  onTablaChange(data: any[]) {
+    console.log('🟢 TABLA ACTUALIZADA:', data);
+    this.tablaData = data;
+
+    // Opcional: Marcar que hay cambios pendientes
+    // this.hayCambios = true;
+  }
 
   obtenerOperacion() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -113,177 +112,174 @@ onTablaChange(data: any[]) {
     });
   }
 
-validarCambios() {
-  const nuevaRaw = this.reconstruirOperacion();
-  const original = this.operacionOriginal;
+  validarCambios() {
+    const nuevaRaw = this.reconstruirOperacion();
+    const original = this.operacionOriginal;
 
-  const nueva = this.parsearNueva(nuevaRaw);
+    const nueva = this.parsearNueva(nuevaRaw);
 
-  const hayCambios = JSON.stringify(nueva) !== JSON.stringify(original);
+    const hayCambios = JSON.stringify(nueva) !== JSON.stringify(original);
 
-  console.log('🟣 NUEVA (ANTES DE ENVIAR):', nueva);
+    console.log('🟣 NUEVA (ANTES DE ENVIAR):', nueva);
 
-  if (!hayCambios) {
-    console.log('⚪ No hay cambios, no se envía nada');
-    return;
-  }
-
-  // 🔥 VALIDACIÓN DE LÍMITE
-  const revisionActual = this.operacion.revisado ?? 0;
-
-  if (revisionActual >= 3) {
-    alert('🚫 Esta operación ya alcanzó el máximo de revisiones');
-    return;
-  }
-
-  // 🔥 ABRIR DIALOG (NUEVO)
-  const dialogRef = this.dialog.open(DialogEstadoComponent, {
-    width: '350px'
-  });
-
-  dialogRef.afterClosed().subscribe((estadoSeleccionado: number | null) => {
-
-    if (estadoSeleccionado == null) {
-      console.log('❌ Cancelado');
+    if (!hayCambios) {
+      console.log('⚪ No hay cambios, no se envía nada');
       return;
     }
 
-    // 🔥 DEFINIR CAMPO DINÁMICO
-    let campoObservacion = '';
+    // 🔥 VALIDACIÓN DE LÍMITE
+    const revisionActual = this.operacion.revisado ?? 0;
 
-    switch (revisionActual) {
-      case 0:
-        campoObservacion = 'observaciones_jefe';
-        break;
-      case 1:
-        campoObservacion = 'observaciones_jefe2';
-        break;
-      case 2:
-        campoObservacion = 'observaciones_jefe3';
-        break;
+    if (revisionActual >= 3) {
+      alert('🚫 Esta operación ya alcanzó el máximo de revisiones');
+      return;
     }
 
-    // 🔥 PAYLOAD DINÁMICO (SE AGREGA APROBACION)
-    const payload: any = {
-      ...nuevaRaw,
+    // 🔥 ABRIR DIALOG (NUEVO)
+    const dialogRef = this.dialog.open(DialogEstadoComponent, {
+      width: '350px',
+    });
 
-      [campoObservacion]: JSON.stringify(original),
+    dialogRef.afterClosed().subscribe((estadoSeleccionado: number | null) => {
+      if (estadoSeleccionado == null) {
+        console.log('❌ Cancelado');
+        return;
+      }
 
-      revisado: revisionActual + 1,
+      // 🔥 DEFINIR CAMPO DINÁMICO
+      let campoObservacion = '';
 
-      // 👇 NUEVO CAMPO
-      aprobacion: estadoSeleccionado
-    };
+      switch (revisionActual) {
+        case 0:
+          campoObservacion = 'observaciones_jefe';
+          break;
+        case 1:
+          campoObservacion = 'observaciones_jefe2';
+          break;
+        case 2:
+          campoObservacion = 'observaciones_jefe3';
+          break;
+      }
 
-    console.log('📦 PAYLOAD FINAL:', payload);
+      // 🔥 PAYLOAD DINÁMICO (SE AGREGA APROBACION)
+      const payload: any = {
+        ...nuevaRaw,
 
-    this.loading = true;
+        [campoObservacion]: JSON.stringify(original),
 
-    this.operacionesService.actualizar(this.tipo, this.operacion.id!, payload)
-      .subscribe({
-        next: (resp) => {
-          console.log('🟢 RESPUESTA BACKEND:', resp);
+        revisado: revisionActual + 1,
 
-          this.obtenerOperacion();
+        // 👇 NUEVO CAMPO
+        aprobacion: estadoSeleccionado,
+      };
 
-          alert(`✅ Actualizado (Revisión ${revisionActual + 1})`);
-        },
-        error: (err) => {
-          console.error('🔴 ERROR AL ACTUALIZAR:', err);
-          this.loading = false;
-          alert('❌ Error al actualizar');
-        }
-      });
+      console.log('📦 PAYLOAD FINAL:', payload);
 
-  });
-}
+      this.loading = true;
 
- parsearNueva(nueva: any) {
-  return {
-    ...nueva,
-    registros: this.safeParse(nueva.registros),
-    horometros: this.safeParse(nueva.horometros),
-    condiciones_equipo: this.safeParse(nueva.condiciones_equipo),
-    check_list: this.safeParse(nueva.check_list),
-    control_llantas: this.safeParse(nueva.control_llantas),
-  };
-}
+      this.operacionesService
+        .actualizar(this.tipo, this.operacion.id!, payload)
+        .subscribe({
+          next: (resp) => {
+            console.log('🟢 RESPUESTA BACKEND:', resp);
 
-// 🔥 Parse seguro (evita que explote si ya es objeto)
- safeParse(valor: any) {
-  if (typeof valor === 'string') {
-    try {
-      return JSON.parse(valor);
-    } catch {
-      return valor;
-    }
+            this.obtenerOperacion();
+
+            alert(`✅ Actualizado (Revisión ${revisionActual + 1})`);
+          },
+          error: (err) => {
+            console.error('🔴 ERROR AL ACTUALIZAR:', err);
+            this.loading = false;
+            alert('❌ Error al actualizar');
+          },
+        });
+    });
   }
-  return valor;
-}
+
+  parsearNueva(nueva: any) {
+    return {
+      ...nueva,
+      registros: this.safeParse(nueva.registros),
+      horometros: this.safeParse(nueva.horometros),
+      condiciones_equipo: this.safeParse(nueva.condiciones_equipo),
+      check_list: this.safeParse(nueva.check_list),
+      control_llantas: this.safeParse(nueva.control_llantas),
+    };
+  }
+
+  // 🔥 Parse seguro (evita que explote si ya es objeto)
+  safeParse(valor: any) {
+    if (typeof valor === 'string') {
+      try {
+        return JSON.parse(valor);
+      } catch {
+        return valor;
+      }
+    }
+    return valor;
+  }
 
   reconstruirOperacion(): OperacionBase {
-  return {
-    ...this.operacionOriginal, // base original
+    return {
+      ...this.operacionOriginal, // base original
 
-    // 🔥 sobreescribes con lo nuevo
-    fecha: this.cardData.fecha,
-    turno: this.cardData.turno,
-    operador: this.cardData.operador,
-    jefe_guardia: this.cardData.jefeGuardia,
-    equipo: this.cardData.equipo,
-    n_equipo: this.cardData.codigo,
-    seccion: this.cardData.seccion,
-    tipo_equipo: this.cardData.tipo_equipo,
-    modelo_equipo: this.cardData.modelo_equipo,
+      // 🔥 sobreescribes con lo nuevo
+      fecha: this.cardData.fecha,
+      turno: this.cardData.turno,
+      operador: this.cardData.operador,
+      jefe_guardia: this.cardData.jefeGuardia,
+      equipo: this.cardData.equipo,
+      n_equipo: this.cardData.codigo,
+      seccion: this.cardData.seccion,
+      tipo_equipo: this.cardData.tipo_equipo,
+      modelo_equipo: this.cardData.modelo_equipo,
 
-    registros: JSON.stringify(this.tablaData),
+      registros: this.tablaData,
 
-    horometros: JSON.stringify(this.formatearHorometros(this.horometrosData)),
+      horometros: JSON.stringify(this.formatearHorometros(this.horometrosData)),
 
-    condiciones_equipo: JSON.stringify({
-      aceiteMotor: this.condicionesData.aceiteMotor,
-      aceiteHidraulico: this.condicionesData.aceiteHidraulico,
-      aceiteTransmision: this.condicionesData.aceiteTransmision,
-      combustible: this.condicionesData.combustible,
-      descripcion: this.condicionesData.descripcion,
-      horaLlenado: this.condicionesData.horaLlenado,
-      lugar: this.condicionesData.lugar,
-      op: this.condicionesData.operativo,
-      noOp: this.condicionesData.noOperativo,
-    }),
+      condiciones_equipo: JSON.stringify({
+        aceiteMotor: this.condicionesData.aceiteMotor,
+        aceiteHidraulico: this.condicionesData.aceiteHidraulico,
+        aceiteTransmision: this.condicionesData.aceiteTransmision,
+        combustible: this.condicionesData.combustible,
+        descripcion: this.condicionesData.descripcion,
+        horaLlenado: this.condicionesData.horaLlenado,
+        lugar: this.condicionesData.lugar,
+        op: this.condicionesData.operativo,
+        noOp: this.condicionesData.noOperativo,
+      }),
 
-    check_list: JSON.stringify(
-  this.checkListData.map(item => ({
-    ...item,
-    decision: item.decision ? 1 : 0 // 🔥 conversión clave
-  }))
-),
+      check_list: this.checkListData.map((item) => ({
+        ...item,
+        decision: item.decision ? 1 : 0, // 🔥 conversión clave
+      })),
 
-    control_llantas: JSON.stringify({
-      numero1: this.llantasData.numero1,
-      numero2: this.llantasData.numero2,
-      numero3: this.llantasData.numero3,
-      numero4: this.llantasData.numero4,
-    }),
-  };
-}
+      control_llantas: {
+        numero1: this.llantasData.numero1,
+        numero2: this.llantasData.numero2,
+        numero3: this.llantasData.numero3,
+        numero4: this.llantasData.numero4,
+      },
+    };
+  }
 
-formatearHorometros(data: any) {
-  if (!data) return null;
+  formatearHorometros(data: any) {
+    if (!data) return null;
 
-  const map = (item: any) => ({
-    inicio: Number(item?.inicio ?? 0),
-    final: Number(item?.final ?? 0),
-    op: !!item?.op,
-    inop: !!item?.inop,
-  });
+    const map = (item: any) => ({
+      inicio: Number(item?.inicio ?? 0),
+      final: Number(item?.final ?? 0),
+      op: !!item?.op,
+      inop: !!item?.inop,
+    });
 
-  return {
-    diesel: data.diesel ? map(data.diesel) : null,
-    electrico: data.electrico ? map(data.electrico) : null,
-    percusion: data.percusion ? map(data.percusion) : null,
-  };
-}
+    return {
+      diesel: data.diesel ? map(data.diesel) : null,
+      electrico: data.electrico ? map(data.electrico) : null,
+      percusion: data.percusion ? map(data.percusion) : null,
+    };
+  }
 
   // 🔥 CENTRALIZAS TODOS LOS MAPEOS
   mapearDatos() {

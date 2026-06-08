@@ -1,9 +1,23 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
+
 import * as echarts from 'echarts/core';
 import { BarChart } from 'echarts/charts';
-import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, ToolboxComponent } from 'echarts/components';
+
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  ToolboxComponent,
+  DataZoomComponent,
+} from 'echarts/components';
+
 import { CanvasRenderer } from 'echarts/renderers';
+import {
+  calcularZoomInicial,
+  CHART_THEME,
+} from '../../../../../../../shared/chart-theme';
 
 echarts.use([
   BarChart,
@@ -12,7 +26,8 @@ echarts.use([
   GridComponent,
   LegendComponent,
   ToolboxComponent,
-  CanvasRenderer
+  DataZoomComponent,
+  CanvasRenderer,
 ]);
 
 @Component({
@@ -21,81 +36,131 @@ echarts.use([
   imports: [NgxEchartsDirective],
   providers: [provideEchartsCore({ echarts })],
   templateUrl: './rendimiento-equipo.component.html',
-  styleUrl: './rendimiento-equipo.component.css'
 })
 export class RendimientoEquipoComponent implements OnChanges {
-
   @Input() data: any[] = [];
 
-  chartOptions: any = this.getBaseOptions();
+  chartOptions: any = {};
+  private chartInstance: any;
+
+  onChartInit(ec: any): void {
+    this.chartInstance = ec;
+  }
+
+  getChartImage(): string | null {
+    if (!this.chartInstance) return null;
+
+    return this.chartInstance.getDataURL({
+      type: 'jpeg',
+      pixelRatio: 1.2,
+      backgroundColor: '#FFFFFF',
+      excludeComponents: ['toolbox', 'dataZoom'],
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      //console.log('📊 DATA RENDIMIENTO:', this.data);
       this.actualizarGrafico();
     }
   }
 
-  // 🔥 BASE DEL GRAFICO (ESTÁTICO)
-  getBaseOptions() {
-    return {
+  actualizarGrafico(): void {
+    if (!Array.isArray(this.data) || this.data.length === 0) {
+      this.chartOptions = {};
+      return;
+    }
+
+    const categorias = this.data.map(
+      (item) =>
+        `${item.modelo_equipo || 'SIN EQUIPO'} (${item.seccion || 'N/A'})`,
+    );
+
+    const dmData = this.data.map((item) =>
+      Number(((item.DM_FR || 0) * 100).toFixed(2)),
+    );
+
+    const utiData = this.data.map((item) =>
+      Number(((item.UTI_FR || 0) * 100).toFixed(2)),
+    );
+
+    const zoomEnd = calcularZoomInicial(categorias.length, 'categorias');
+
+    this.chartOptions = {
+      color: [CHART_THEME.colors.primary, CHART_THEME.colors.success],
+
       title: {
-        text: 'DM y UTI por Equipo (%)',
-        left: 'center',
-        top: 10,
-        textStyle: {
-          fontSize: 16,
-          fontWeight: 'bold',
-          color: '#333'
-        }
+        ...CHART_THEME.title,
+        text: 'DM Y UTI POR EQUIPO (%)',
       },
+
       tooltip: {
-        trigger: 'axis',
-        axisPointer: { type: 'shadow' },
+        ...CHART_THEME.tooltip,
         formatter: (params: any) => {
-          let result = `${params[0].axisValue}<br/>`;
+          let result = `<strong>${params[0].axisValue}</strong><br/><br/>`;
+
           params.forEach((p: any) => {
-            result += `${p.seriesName}: ${p.value}%<br/>`;
+            result += `${p.marker} ${p.seriesName}: <strong>${p.value}%</strong><br/>`;
           });
+
           return result;
-        }
-      },
-      legend: {
-  data: ['DM', 'UTI'],
-  bottom: 5,
-  left: 'center',
-  orient: 'horizontal',
-  itemWidth: 18,
-  itemHeight: 10,
-  textStyle: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#2c3e50'
-  }
-},
-      grid: {
-        left: '8%',
-        right: '5%',
-        top: '18%',
-        bottom: '12%',
-        containLabel: true
-      },
-      xAxis: {
-        type: 'category',
-        data: [],
-        axisLabel: {
-          interval: 0,
-          fontSize: 12,
-          lineHeight: 16,
-          fontWeight: 'bold',
-          color: '#333'
         },
-        axisTick: {
-          alignWithLabel: true
-        }
       },
+
+      legend: {
+        ...CHART_THEME.legend,
+        data: ['DM', 'UTI'],
+        bottom: 5,
+      },
+
+      toolbox: {
+        show: true,
+        right: 10,
+        top: 10,
+        feature: {
+          saveAsImage: {
+            title: 'Descargar',
+            name: 'rendimiento-equipo',
+          },
+          restore: {
+            title: 'Restaurar',
+          },
+        },
+      },
+
+      grid: {
+        ...CHART_THEME.grid,
+      },
+
+      dataZoom:
+        categorias.length > 6
+          ? [
+              {
+                ...CHART_THEME.dataZoom.inside,
+                start: 0,
+                end: zoomEnd,
+              },
+              {
+                ...CHART_THEME.dataZoom.slider,
+                start: 0,
+                end: zoomEnd,
+              },
+            ]
+          : [],
+
+      xAxis: {
+        ...CHART_THEME.xAxisCategory,
+        data: categorias,
+        axisLabel: {
+          ...CHART_THEME.xAxisCategory.axisLabel,
+          fontSize: 11,
+          lineHeight: 16,
+          interval: 0,
+          rotate: categorias.length > 8 ? 25 : 0,
+        },
+      },
+
       yAxis: {
-        type: 'value',
+        ...CHART_THEME.yAxisValue,
         name: 'Porcentaje (%)',
         nameLocation: 'middle',
         nameGap: 45,
@@ -103,41 +168,9 @@ export class RendimientoEquipoComponent implements OnChanges {
         max: 100,
         interval: 20,
         axisLabel: {
-          formatter: '{value}%'
+          ...CHART_THEME.yAxisValue.axisLabel,
+          formatter: '{value}%',
         },
-        splitLine: {
-          lineStyle: {
-            type: 'dashed',
-            color: '#ccc'
-          }
-        }
-      },
-      series: []
-    };
-  }
-
-  // 🚀 TRANSFORMAR DATA → GRAFICO
-  actualizarGrafico(): void {
-    if (!this.data || this.data.length === 0) return;
-
-    const categorias = this.data.map(item =>
-      `${item.modelo_equipo}\n(${item.seccion || 'N/A'})`
-    );
-
-    const dmData = this.data.map(item =>
-      Number((item.DM_FR * 100).toFixed(2))
-    );
-
-    const utiData = this.data.map(item =>
-      Number((item.UTI_FR * 100).toFixed(2))
-    );
-
-    this.chartOptions = {
-      ...this.chartOptions,
-
-      xAxis: {
-        ...this.chartOptions.xAxis,
-        data: categorias
       },
 
       series: [
@@ -145,36 +178,46 @@ export class RendimientoEquipoComponent implements OnChanges {
           name: 'DM',
           type: 'bar',
           data: dmData,
+          barWidth: CHART_THEME.bar.barWidth,
           barGap: '20%',
+
           itemStyle: {
-            borderRadius: [5, 5, 0, 0],
-            color: '#3498db'
+            ...CHART_THEME.bar.itemStyle,
+            color: CHART_THEME.colors.primary,
+            borderRadius: [6, 6, 0, 0],
           },
+
           label: {
+            ...CHART_THEME.bar.label,
             show: true,
             position: 'top',
+            color: CHART_THEME.colors.secondary,
             formatter: '{c}%',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
           },
-          barWidth: '35%'
         },
         {
           name: 'UTI',
           type: 'bar',
           data: utiData,
+          barWidth: CHART_THEME.bar.barWidth,
+
           itemStyle: {
-            borderRadius: [5, 5, 0, 0],
-            color: '#2ecc71'
+            ...CHART_THEME.bar.itemStyle,
+            color: CHART_THEME.colors.secondary,
+            borderRadius: [6, 6, 0, 0],
           },
+
           label: {
+            ...CHART_THEME.bar.label,
             show: true,
             position: 'top',
+            color: CHART_THEME.colors.secondary,
             formatter: '{c}%',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
           },
-          barWidth: '35%'
-        }
-      ]
+        },
+      ],
     };
   }
 }

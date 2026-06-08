@@ -2,10 +2,23 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import * as echarts from 'echarts/core';
 import { BarChart } from 'echarts/charts';
-import { TitleComponent, TooltipComponent, GridComponent, LegendComponent } from 'echarts/components';
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+} from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
+import { CHART_THEME, colorPorRendimiento } from '../../../../../../../shared/chart-theme';
 
-echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, CanvasRenderer]);
+echarts.use([
+  BarChart,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  CanvasRenderer,
+]);
 
 @Component({
   selector: 'app-mhr-equipo',
@@ -13,27 +26,28 @@ echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendCo
   imports: [NgxEchartsDirective],
   providers: [provideEchartsCore({ echarts })],
   templateUrl: './mhr-equipo.component.html',
-  styleUrl: './mhr-equipo.component.css'
+  styleUrl: './mhr-equipo.component.css',
 })
 export class MhrEquipoComponent implements OnChanges {
-
   @Input() data: any[] = [];
 
   chartOptions: any = {};
+  private chartInstance: any;
 
-  // Paleta de colores azules
-  private readonly paletaAzules: string[] = [
-    '#1E88E5', // Azul intenso
-    '#42A5F5', // Azul medio
-    '#64B5F6', // Azul claro
-    '#1565C0', // Azul oscuro
-    '#1976D2', // Azul principal
-    '#2196F3', // Azul estándar
-    '#0D47A1', // Azul muy oscuro
-    '#90CAF9', // Azul muy claro
-    '#2C3E50', // Azul grisáceo
-    '#2980B9'  // Azul petróleo
-  ];
+  onChartInit(ec: any): void {
+    this.chartInstance = ec;
+  }
+
+  getChartImage(): string | null {
+    if (!this.chartInstance) return null;
+
+    return this.chartInstance.getDataURL({
+      type: 'jpeg',
+      pixelRatio: 1.2,
+      backgroundColor: '#FFFFFF',
+      excludeComponents: ['toolbox', 'dataZoom'],
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
@@ -48,20 +62,13 @@ export class MhrEquipoComponent implements OnChanges {
     }
 
     // Preparar datos para el gráfico
-    const xAxisData = this.data.map(item => 
-      `${item.modelo_equipo || 'N/A'}`
-    );
-    
-    const seriesData = this.data.map(item => Number(item.fr_mhr_hp) || 0);
-    
+    const xAxisData = this.data.map((item) => `${item.modelo_equipo || 'N/A'}`);
+
+    const seriesData = this.data.map((item) => Number(item.fr_mhr_hp) || 0);
+
     // Calcular max redondeado hacia arriba (múltiplo de 20 para ejes limpios)
     const maxMH = Math.max(...seriesData);
     const maxY = Math.ceil(maxMH / 20) * 20;
-
-    // Asignar colores azules a cada barra
-    const coloresBarras = seriesData.map((_, index) => 
-      this.paletaAzules[index % this.paletaAzules.length]
-    );
 
     this.chartOptions = {
       title: {
@@ -71,28 +78,24 @@ export class MhrEquipoComponent implements OnChanges {
         textStyle: {
           fontSize: 14,
           fontWeight: 'bold',
-          color: '#333'
-        }
+          color: '#333',
+        },
       },
       tooltip: {
         trigger: 'axis',
         axisPointer: {
-          type: 'shadow'
+          type: 'shadow',
         },
         formatter: (params: any) => {
           const item = this.data[params[0].dataIndex];
           return `<strong>${item.modelo_equipo}</strong><br/>
                   Metros perforados: ${item.metros_perforados?.toFixed(2) || 0} m<br/>
                   Dif. Percusión: ${item.dif_percusion?.toFixed(2) || 0}<br/>
-                  <strong style="color: ${this.paletaAzules[params[0].dataIndex % this.paletaAzules.length]};">Rendimiento: ${params[0].value.toFixed(2)} m/hr</strong>`;
-        }
+                  <strong>Rendimiento: ${params[0].value.toFixed(2)} m/hr</strong>`;
+        },
       },
       grid: {
-        left: '12%',     // Más espacio a la izquierda para el eje Y
-        right: '8%',
-        top: '15%',
-        bottom: '10%',
-        containLabel: true
+        ...CHART_THEME.grid,
       },
       xAxis: {
         type: 'category',
@@ -101,16 +104,16 @@ export class MhrEquipoComponent implements OnChanges {
           fontSize: 11,
           fontWeight: 'bold',
           interval: 0,
-          rotate: 0
+          rotate: 0,
         },
         axisLine: {
           lineStyle: {
-            color: '#333'
-          }
+            color: '#333',
+          },
         },
         axisTick: {
-          alignWithLabel: true
-        }
+          alignWithLabel: true,
+        },
       },
       yAxis: {
         type: 'value',
@@ -122,37 +125,37 @@ export class MhrEquipoComponent implements OnChanges {
         interval: maxY / 4, // 5 intervalos limpios (0, 30, 60, 90, 120)
         axisLabel: {
           fontSize: 10,
-          formatter: '{value} m/hr'
+          formatter: '{value} m/hr',
         },
         splitLine: {
           show: true,
           lineStyle: {
             type: 'dashed',
             color: '#e0e0e0',
-            width: 1
-          }
+            width: 1,
+          },
         },
         axisLine: {
-          show: false  // Oculta la línea del eje Y para menos ruido
+          show: false, // Oculta la línea del eje Y para menos ruido
         },
         axisTick: {
-          show: false  // Oculta las marquitas del eje Y
-        }
+          show: false, // Oculta las marquitas del eje Y
+        },
       },
       series: [
         {
           name: 'M/HR',
           type: 'bar',
-          data: seriesData.map((value, index) => ({
+          data: seriesData.map((value) => ({
             value: value,
             itemStyle: {
-              color: coloresBarras[index]
-            }
+              color: colorPorRendimiento(value),
+            },
           })),
           itemStyle: {
             borderRadius: [5, 5, 0, 0],
             shadowColor: 'rgba(0, 0, 0, 0.1)',
-            shadowBlur: 4
+            shadowBlur: 4,
           },
           label: {
             show: true,
@@ -161,12 +164,12 @@ export class MhrEquipoComponent implements OnChanges {
             fontWeight: 'bold',
             fontSize: 11,
             color: '#333',
-            offset: [0, 5]  // Separar la etiqueta de la barra
+            offset: [0, 5], // Separar la etiqueta de la barra
           },
-          barWidth: '50%',
-          barCategoryGap: '30%'
-        }
-      ]
+          barWidth: CHART_THEME.bar.barWidth,
+          barCategoryGap: '30%',
+        },
+      ],
     };
   }
 }

@@ -1,11 +1,26 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
+
 import * as echarts from 'echarts/core';
-import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components';
 import { PieChart } from 'echarts/charts';
+
+import {
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+} from 'echarts/components';
+
 import { CanvasRenderer } from 'echarts/renderers';
 
-echarts.use([TitleComponent, TooltipComponent, LegendComponent, PieChart, CanvasRenderer]);
+import { CHART_THEME } from '../../../../../../../shared/chart-theme';
+
+echarts.use([
+  PieChart,
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  CanvasRenderer,
+]);
 
 @Component({
   selector: 'app-disparos-tipo-perforacion',
@@ -13,133 +28,172 @@ echarts.use([TitleComponent, TooltipComponent, LegendComponent, PieChart, Canvas
   imports: [NgxEchartsDirective],
   providers: [provideEchartsCore({ echarts })],
   templateUrl: './disparos-tipo-perforacion.component.html',
-  styleUrl: './disparos-tipo-perforacion.component.css'
 })
 export class DisparosTipoPerforacionComponent implements OnChanges {
-
   @Input() data: any[] = [];
 
   chartOptions: any = {};
+  private chartInstance: any;
+  
+  onChartInit(ec: any): void {
+    this.chartInstance = ec;
+  }
+
+  getChartImage(): string | null {
+    if (!this.chartInstance) return null;
+
+    return this.chartInstance.getDataURL({
+      type: 'jpeg',
+      pixelRatio: 1.2,
+      backgroundColor: '#FFFFFF',
+      excludeComponents: ['toolbox', 'dataZoom'],
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      //console.log('🔥 DISPAROS POR TIPO DE PERFORACIÓN RECIBIDO:', this.data);
-
-      if (Array.isArray(this.data)) {
-        // Usar setTimeout para evitar el error de main process
-        setTimeout(() => {
-          this.generarGrafico();
-        }, 0);
-      }
+      this.generarGrafico();
     }
   }
 
-  generarGrafico() {
-    // Datos de prueba (por si no hay datos reales)
-    if (!this.data || this.data.length === 0) {
-      this.chartOptions = this.getOpcionesGrafico([
-        { name: 'FRENTE COMPLETO', value: 50 },
-        { name: 'BREASTING', value: 25 },
-        { name: 'DESQUINCHE', value: 25 }
-      ]);
+  generarGrafico(): void {
+    if (!Array.isArray(this.data) || this.data.length === 0) {
+      this.chartOptions = {};
       return;
     }
 
-    // Agrupar por tipo de perforación
-    const agrupado: { [key: string]: number } = {};
+    const agrupado = new Map<string, number>();
 
-    this.data.forEach(item => {
-      const tipo = item.tipo || item.tipo_perforacion || 'SIN TIPO';
-      const n_disparos = Number(item.n_disparos) || Number(item.n_frentes) || 0;
+    this.data.forEach((item) => {
+      const tipo = this.normalizarTipo(
+        item.tipo || item.tipo_perforacion || 'SIN TIPO',
+      );
 
-      if (!agrupado[tipo]) {
-        agrupado[tipo] = 0;
-      }
-      agrupado[tipo] += n_disparos;
+      const nDisparos =
+        Number(item.n_disparos || 0) || Number(item.n_frentes || 0);
+
+      agrupado.set(tipo, (agrupado.get(tipo) || 0) + nDisparos);
     });
 
-    // Convertir a formato echarts
-    const dataGrafico = Object.keys(agrupado).map(tipo => ({
-      name: tipo,
-      value: agrupado[tipo]
-    }));
+    const dataGrafico = Array.from(agrupado.entries())
+      .map(([tipo, valor]) => ({
+        name: tipo,
+        value: Number(valor || 0),
+      }))
+      .filter((item) => item.value > 0)
+      .sort((a, b) => b.value - a.value);
 
-    //console.log('🔥 DATA GRAFICO DISPAROS:', dataGrafico);
+    if (dataGrafico.length === 0) {
+      this.chartOptions = {};
+      return;
+    }
 
     this.chartOptions = this.getOpcionesGrafico(dataGrafico);
   }
 
-  getOpcionesGrafico(data: any[]) {
-    // Colores para cada tipo
-    const colores: { [key: string]: string } = {
-      'FRENTE COMPLETO': '#3498db',
-      'BREASTING': '#2ecc71',
-      'DESQUINCHE': '#e74c3c'
-    };
+  getOpcionesGrafico(dataGrafico: any[]): any {
+    const colores = CHART_THEME.colors.primaryScale3;
 
-    // Asignar color a cada dato
-    const datosConColor = data.map(item => ({
+    const datosConColor = dataGrafico.map((item, index) => ({
       ...item,
-      itemStyle: { color: colores[item.name] || '#95a5a6' }
+      itemStyle: {
+        color: colores[index % colores.length],
+      },
     }));
 
     return {
+      color: colores,
+
       title: {
+        ...CHART_THEME.title,
         text: 'DISPAROS POR TIPO DE PERFORACIÓN',
-        left: 'center',
-        top: 20,
-        textStyle: {
-          fontSize: 16,
-          fontWeight: 'bold',
-          color: '#333'
-        }
+        top: 10,
       },
+
       tooltip: {
+        ...CHART_THEME.tooltip,
         trigger: 'item',
-        formatter: '{b}: {c} n_disparos ({d}%)'
+        formatter: (params: any) => {
+          const valor = Number(params.value || 0).toLocaleString('en-US', {
+            maximumFractionDigits: 0,
+          });
+
+          return `
+            <strong>${params.name}</strong><br/><br/>
+            ${params.marker} Disparos:
+            <strong>${valor}</strong><br/>
+            Participación:
+            <strong>${params.percent}%</strong>
+          `;
+        },
       },
+
       legend: {
-  orient: 'horizontal',
-  bottom: 5,
-  left: 'center',
-  data: data.map(d => d.name),
-  itemWidth: 18,
-  itemHeight: 10,
-  textStyle: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#2c3e50'
-  }
-},
+        ...CHART_THEME.legend,
+        type: 'scroll',
+        orient: 'horizontal',
+        bottom: 5,
+        left: 'center',
+        data: dataGrafico.map((item) => item.name),
+        itemWidth: 18,
+        itemHeight: 10,
+      },
+
       series: [
         {
           name: 'Disparos',
           type: 'pie',
-          radius: '55%',
-          center: ['50%', '55%'],
+          radius: ['35%', '65%'],
+          center: ['50%', '48%'],
           data: datosConColor,
+
+          itemStyle: {
+            borderRadius: 8,
+            borderColor: '#FFFFFF',
+            borderWidth: 2,
+          },
+
           label: {
             show: true,
-            formatter: '{b}\n{c} ({d}%)',
-            fontSize: 12,
-            fontWeight: 'bold'
+            color: CHART_THEME.colors.secondary,
+            fontSize: 11,
+            fontWeight: 'bold',
+            formatter: (params: any) => {
+              const valor = Number(params.value || 0).toLocaleString('en-US', {
+                maximumFractionDigits: 0,
+              });
+
+              return `${params.name}\n${valor} (${params.percent}%)`;
+            },
           },
+
+          labelLine: {
+            show: true,
+            length: 12,
+            length2: 8,
+          },
+
           emphasis: {
+            scale: true,
+            scaleSize: 8,
             label: {
               show: true,
               fontSize: 14,
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              color: CHART_THEME.colors.secondary,
             },
-            scale: true,
-            scaleSize: 10
           },
-          itemStyle: {
-            borderRadius: 8,
-            borderColor: '#fff',
-            borderWidth: 2
-          }
-        }
-      ]
+        },
+      ],
     };
+  }
+
+  private normalizarTipo(valor: any): string {
+    return String(valor || 'SIN TIPO')
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .toUpperCase();
   }
 }

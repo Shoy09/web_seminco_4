@@ -1,21 +1,25 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
+
 import * as echarts from 'echarts/core';
 
-import { BarChart } from 'echarts/charts';
+import { PieChart } from 'echarts/charts';
+
 import {
   TitleComponent,
   TooltipComponent,
-  GridComponent,
   LegendComponent
 } from 'echarts/components';
+
 import { CanvasRenderer } from 'echarts/renderers';
 
+import { CHART_THEME } from '../../../../../../../shared/chart-theme';
+import { normalizarTexto } from '../../../../../../../utils/fecha-utils';
+
 echarts.use([
-  BarChart,
+  PieChart,
   TitleComponent,
   TooltipComponent,
-  GridComponent,
   LegendComponent,
   CanvasRenderer
 ]);
@@ -25,8 +29,7 @@ echarts.use([
   standalone: true,
   imports: [NgxEchartsDirective],
   providers: [provideEchartsCore({ echarts })],
-  templateUrl: './promedio-estados-echarts.component.html',
-  styleUrl: './promedio-estados-echarts.component.css'
+  templateUrl: './promedio-estados-echarts.component.html'
 })
 export class PromedioEstadosEchartsComponent implements OnChanges {
 
@@ -34,245 +37,304 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
 
   chartOptions: any = {};
 
-  // Almacenar tipos_estado con sus horas por estado
-  private tiposPorEstado: Map<string, Map<string, { horas: number, categoria: string | null }>> = new Map();
+  private tiposPorEstado: Map<string, Map<string, { horas: number; categoria: string | null }>> = new Map();
 
-  coloresPorEstado: any = {
-    'OPERATIVO': '#4CAF50',
-    'DEMORA': '#FFC107',
-    'MANTENIMIENTO': '#F44336',
-    'RESERVA': '#FF9800',
-    'FUERA DE PLAN': '#2196F3'
+  private readonly coloresPorEstado: Record<string, string> = {
+    OPERATIVO: CHART_THEME.colors.primaryScale3?.[0] || '#38BDF8',
+    DEMORA: CHART_THEME.colors.primaryScale3?.[1] || '#6DCCFA',
+    MANTENIMIENTO: CHART_THEME.colors.primaryScale3?.[2] || '#9BDBFC',
+    RESERVA: CHART_THEME.colors.primaryScale3?.[1] || '#6DCCFA',
+    'FUERA DE PLAN': CHART_THEME.colors.primaryScale3?.[0] || '#38BDF8'
   };
+  private chartInstance: any;
+
+  onChartInit(ec: any): void {
+    this.chartInstance = ec;
+  }
+
+  getChartImage(): string | null {
+    if (!this.chartInstance) return null;
+
+    return this.chartInstance.getDataURL({
+      type: 'jpeg',
+      pixelRatio: 1.2,
+      backgroundColor: '#FFFFFF',
+      excludeComponents: ['toolbox', 'dataZoom'],
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      console.log('🔥 PROMEDIO DE HORAS POR ESTADO RECIBIDO:', this.data);
-      setTimeout(() => {
-        this.buildChart();
-      }, 0);
+      this.buildChart();
     }
   }
 
-  buildChart() {
-    if (!this.data || this.data.length === 0) {
-      this.chartOptions = this.getOpcionesGrafico([]);
+  buildChart(): void {
+    if (!Array.isArray(this.data) || this.data.length === 0) {
+      this.chartOptions = {};
       return;
     }
 
-    // Reiniciar el mapa de tipos por estado
     this.tiposPorEstado.clear();
 
-    // ⏱ Calcular duración y agrupar por estado y tipo_estado
     const datosConDuracion = this.data.map(item => {
       const inicio = this.parseHora(item.hora_inicio).getTime();
       const fin = this.parseHora(item.hora_final).getTime();
 
       let duracion = (fin - inicio) / (1000 * 60 * 60);
-      if (duracion < 0) duracion += 24;
 
-      return { ...item, duracion };
+      if (duracion < 0) {
+        duracion += 24;
+      }
+
+      return {
+        ...item,
+        duracion
+      };
     });
 
-    // 📊 Agrupar por estado y por tipo_estado
-    const sumas: any = {};
+    const sumas = new Map<string, number>();
     const codigosOperacion = new Set<string>();
 
-    datosConDuracion.forEach(d => {
-      const estado = (d.estado || '').toUpperCase().trim();
-      const tipoEstado = d.tipo_estado || 'SIN TIPO';
-      const categoria = d.categoria || null;
-      
-      codigosOperacion.add(d.codigoOperacion);
-      sumas[estado] = (sumas[estado] || 0) + d.duracion;
-      
-      // Guardar tipo_estado y acumular sus horas
+    datosConDuracion.forEach(item => {
+      const estado = normalizarTexto(item.estado || 'SIN ESTADO');
+      const tipoEstado = normalizarTexto(item.tipo_estado || 'SIN TIPO');
+      const categoria = item.categoria || null;
+
+      if (item.codigoOperacion) {
+        codigosOperacion.add(item.codigoOperacion);
+      }
+
+      sumas.set(estado, (sumas.get(estado) || 0) + item.duracion);
+
       if (!this.tiposPorEstado.has(estado)) {
         this.tiposPorEstado.set(estado, new Map());
       }
+
       const tiposMap = this.tiposPorEstado.get(estado)!;
-      const dataActual = tiposMap.get(tipoEstado) || { horas: 0, categoria: categoria };
-      dataActual.horas += d.duracion;
-      // Actualizar categoría si no existe o si encontramos una mejor
+
+      const dataActual = tiposMap.get(tipoEstado) || {
+        horas: 0,
+        categoria
+      };
+
+      dataActual.horas += item.duracion;
+
       if (!dataActual.categoria && categoria) {
         dataActual.categoria = categoria;
       }
+
       tiposMap.set(tipoEstado, dataActual);
     });
 
-    const totalCodigos = codigosOperacion.size;
-    const estados = Object.keys(sumas);
+    const totalCodigos = codigosOperacion.size || 1;
 
-    // 📉 Calcular promedios
-    const dataGrafico = estados.map(estado => ({
-      name: estado,
-      value: totalCodigos ? +(sumas[estado] / totalCodigos).toFixed(2) : 0
-    }));
+    const dataGrafico = Array.from(sumas.entries())
+      .map(([estado, horas]) => ({
+        name: estado,
+        value: Number((horas / totalCodigos).toFixed(2))
+      }))
+      .filter(item => item.value > 0)
+      .sort((a, b) => b.value - a.value);
+
+    if (dataGrafico.length === 0) {
+      this.chartOptions = {};
+      return;
+    }
 
     this.chartOptions = this.getOpcionesGrafico(dataGrafico);
   }
 
-  getOpcionesGrafico(data: any[]) {
-    // Asignar color a cada estado
-    const datosConColor = data.map(item => ({
+  getOpcionesGrafico(dataGrafico: any[]): any {
+    const colores = CHART_THEME.colors.primaryScale3;
+
+    const datosConColor = dataGrafico.map((item, index) => ({
       ...item,
-      itemStyle: { color: this.coloresPorEstado[item.name] || '#757575' }
+      itemStyle: {
+        color:
+          this.coloresPorEstado[item.name] ||
+          colores[index % colores.length]
+      }
     }));
 
-    // Guardar referencia al componente para usar en tooltip
-    const self = this;
-    const coloresPorEstadoTooltip = this.coloresPorEstado;
-
     return {
+      color: colores,
+
       title: {
+        ...CHART_THEME.title,
         text: 'HORAS PROMEDIO POR ESTADO',
-        left: 'center',
-        top: 20,
-        textStyle: {
-          fontSize: 16,
-          fontWeight: 'bold',
-          color: '#333'
-        }
+        top: 10
       },
+
       tooltip: {
+        ...CHART_THEME.tooltip,
         trigger: 'item',
         backgroundColor: 'rgba(0, 0, 0, 0)',
         borderWidth: 0,
         padding: 0,
         enterable: true,
         hideDelay: 300,
-        position: function(point: any, params: any, dom: any, rect: any, size: any) {
+        position: (point: any, params: any, dom: any) => {
           const x = point[0] + 20;
           const y = point[1] - 50;
-          
+
           const tooltipWidth = dom ? dom.clientWidth : 320;
-          const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
-          
+          const windowWidth = typeof window !== 'undefined'
+            ? window.innerWidth
+            : 1200;
+
           if (x + tooltipWidth > windowWidth) {
             return [point[0] - tooltipWidth - 20, y];
           }
-          
+
           return [x, y];
         },
-        formatter: function(params: any) {
+        formatter: (params: any) => {
           const estado = params.name;
-          const color = coloresPorEstadoTooltip[estado] || '#757575';
-          const horasPromedio = params.value;
-          const porcentaje = params.percent.toFixed(1);
-          
-          // Obtener los tipos_estado con sus horas para este estado
-          const tiposMap = self.tiposPorEstado.get(estado);
-          
+          const color =
+            this.coloresPorEstado[estado] ||
+            CHART_THEME.colors.primaryScale3[0];
+
+          const horasPromedio = Number(params.value || 0).toFixed(2);
+          const porcentaje = Number(params.percent || 0).toFixed(1);
+
+          const tiposMap = this.tiposPorEstado.get(estado);
+
           let tiposHtml = '';
+
           if (tiposMap && tiposMap.size > 0) {
-            // Convertir a array y ordenar por horas (descendente)
             const tiposArray = Array.from(tiposMap.entries())
-              .map(([tipo, { horas, categoria }]) => ({ 
-                tipo, 
-                horas: horas.toFixed(2),
-                categoria 
+              .map(([tipo, { horas, categoria }]) => ({
+                tipo,
+                horas: Number(horas || 0).toFixed(2),
+                categoria
               }))
-              .sort((a, b) => parseFloat(b.horas) - parseFloat(a.horas));
-            
-            // 🔥 Mostrar tipo_estado con su categoría
+              .sort((a, b) => Number(b.horas) - Number(a.horas));
+
             const itemsHtml = tiposArray.map(item => `
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
-                <div style="flex: 1;">
-                  <span style="display: inline-block; background: ${color}20; color: ${color}; padding: 4px 10px; border-radius: 14px; font-size: 11px; font-weight: 600; margin-bottom: 4px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0f0;">
+                <div style="flex:1;">
+                  <span style="display:inline-block;background:${color}20;color:${color};padding:4px 10px;border-radius:14px;font-size:11px;font-weight:700;margin-bottom:4px;">
                     ${item.tipo}
                   </span>
                 </div>
-                <span style="font-size: 12px; font-weight: 600; color: #333; margin-left: 12px;">
+                <span style="font-size:12px;font-weight:700;color:${CHART_THEME.colors.secondary};margin-left:12px;">
                   ${item.horas} hrs
                 </span>
               </div>
             `).join('');
-            
-            // 🔥 Limitar altura pero con mejor scroll
+
             const scrollHeight = tiposArray.length > 6 ? '200px' : 'auto';
-            
+
             tiposHtml = `
-              <div style="margin-top: 12px;">
-                <div style="font-size: 11px; font-weight: 600; color: #666; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 4px; border-bottom: 2px solid ${color};">
-                  📋 DESGLOSE POR TIPO DE ESTADO
+              <div style="margin-top:12px;">
+                <div style="font-size:11px;font-weight:700;color:${CHART_THEME.colors.textMuted};margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;padding-bottom:4px;border-bottom:2px solid ${color};">
+                  DESGLOSE POR TIPO DE ESTADO
                 </div>
-                <div style="max-height: ${scrollHeight}; overflow-y: auto; padding-right: 6px;">
+
+                <div style="max-height:${scrollHeight};overflow-y:auto;padding-right:6px;">
                   ${itemsHtml}
                 </div>
-                <div style="margin-top: 8px; text-align: center; font-size: 10px; color: #999; padding-top: 4px; border-top: 1px solid #f0f0f0;">
+
+                <div style="margin-top:8px;text-align:center;font-size:10px;color:${CHART_THEME.colors.textMuted};padding-top:4px;border-top:1px solid #f0f0f0;">
                   Total tipos: ${tiposArray.length}
                 </div>
               </div>
             `;
           }
-          
+
           return `
-            <div style="background: white; border-radius: 12px; box-shadow: 0 6px 16px rgba(0,0,0,0.15); padding: 0; overflow: hidden; min-width: 280px; max-width: 350px;">
-              <!-- Header con color del estado -->
-              <div style="background: ${color}; padding: 12px 16px;">
-                <div style="color: white; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">
+            <div style="background:white;border-radius:12px;box-shadow:0 6px 16px rgba(0,0,0,0.15);padding:0;overflow:hidden;min-width:280px;max-width:350px;">
+              
+              <div style="background:${color};padding:12px 16px;">
+                <div style="color:white;font-size:16px;font-weight:800;letter-spacing:0.5px;">
                   ${estado}
                 </div>
               </div>
-              
-              <!-- Cuerpo del tooltip -->
-              <div style="padding: 16px;">
-                <!-- Métricas principales -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px;">
+
+              <div style="padding:16px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;">
+                  
                   <div>
-                    <div style="font-size: 11px; color: #666;">⏱️ Horas promedio</div>
-                    <div style="font-size: 22px; font-weight: bold; color: ${color};">${horasPromedio}</div>
+                    <div style="font-size:11px;color:${CHART_THEME.colors.textMuted};">
+                      Horas promedio
+                    </div>
+                    <div style="font-size:22px;font-weight:800;color:${color};">
+                      ${horasPromedio}
+                    </div>
                   </div>
+
                   <div>
-                    <div style="font-size: 11px; color: #666;">📊 Porcentaje</div>
-                    <div style="font-size: 18px; font-weight: bold; color: #333;">${porcentaje}%</div>
+                    <div style="font-size:11px;color:${CHART_THEME.colors.textMuted};">
+                      Porcentaje
+                    </div>
+                    <div style="font-size:18px;font-weight:800;color:${CHART_THEME.colors.secondary};">
+                      ${porcentaje}%
+                    </div>
                   </div>
+
                 </div>
+
                 ${tiposHtml}
               </div>
             </div>
           `;
         }
       },
+
       legend: {
+        ...CHART_THEME.legend,
+        type: 'scroll',
         orient: 'horizontal',
         bottom: 5,
         left: 'center',
-        data: data.map(d => d.name),
+        data: dataGrafico.map(item => item.name),
         itemWidth: 18,
-        itemHeight: 10,
-        textStyle: {
-          fontSize: 11,
-          fontWeight: 'bold',
-          color: '#2c3e50'
-        }
+        itemHeight: 10
       },
+
       series: [
         {
           name: 'Horas Promedio por Estado',
           type: 'pie',
-          radius: '55%',
-          center: ['50%', '55%'],
+          radius: ['35%', '65%'],
+          center: ['50%', '48%'],
           data: datosConColor,
+
+          itemStyle: {
+            borderRadius: 8,
+            borderColor: '#FFFFFF',
+            borderWidth: 2
+          },
+
           label: {
             show: true,
-            formatter: '{b}\n{c} hrs ({d}%)',
-            fontSize: 12,
-            fontWeight: 'bold'
+            color: CHART_THEME.colors.secondary,
+            fontSize: 11,
+            fontWeight: 'bold',
+            formatter: (params: any) => {
+              const valor = Number(params.value || 0).toFixed(2);
+              const porcentaje = Number(params.percent || 0).toFixed(1);
+
+              return `${params.name}\n${valor} hrs (${porcentaje}%)`;
+            }
           },
+
+          labelLine: {
+            show: true,
+            length: 12,
+            length2: 8
+          },
+
           emphasis: {
+            scale: true,
+            scaleSize: 8,
             label: {
               show: true,
               fontSize: 14,
-              fontWeight: 'bold'
-            },
-            scale: true,
-            scaleSize: 10
-          },
-          itemStyle: {
-            borderRadius: 8,
-            borderColor: '#fff',
-            borderWidth: 2
+              fontWeight: 'bold',
+              color: CHART_THEME.colors.secondary
+            }
           }
         }
       ]
@@ -280,9 +342,14 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
   }
 
   parseHora(hora: string): Date {
-    const [h, m] = (hora || '00:00').split(':').map(Number);
-    const d = new Date();
-    d.setHours(h || 0, m || 0, 0, 0);
-    return d;
+    const [h, m] = String(hora || '00:00')
+      .split(':')
+      .map(Number);
+
+    const fecha = new Date();
+
+    fecha.setHours(h || 0, m || 0, 0, 0);
+
+    return fecha;
   }
 }

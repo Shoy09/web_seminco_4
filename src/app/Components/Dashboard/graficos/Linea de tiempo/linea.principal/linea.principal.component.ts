@@ -1,18 +1,33 @@
 import { Component } from '@angular/core';
-import { SchedulerComponent } from "../scheduler/scheduler.component";
+import { SchedulerComponent } from '../scheduler/scheduler.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EstadoService } from '../../../../../services/estado.service';
 import { OperacionBase } from '../../../../../models/OperacionBase.models';
 import { OperacionesService } from '../../../../../services/operaciones.service';
 
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { ButtonModule } from 'primeng/button';
 @Component({
   selector: 'app-linea.principal',
-  imports: [CommonModule, FormsModule, SchedulerComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    SchedulerComponent,
+    InputTextModule,
+    SelectModule,
+    ButtonModule,
+  ],
   templateUrl: './linea.principal.component.html',
-  styleUrl: './linea.principal.component.css'
+  styleUrl: './linea.principal.component.css',
 })
 export class LineaPrincipalComponent {
+  turnos = [
+    { label: 'Todos', value: '' },
+    { label: 'Día', value: 'DÍA' },
+    { label: 'Noche', value: 'NOCHE' },
+  ];
 
   // Variables para el filtro de fechas
   fechaInicio: string = '';
@@ -46,10 +61,9 @@ export class LineaPrincipalComponent {
   mapaEstadosEmpernador: Map<string, any> = new Map();
   mapaEstadosScoop: Map<string, any> = new Map();
 
-
   constructor(
     private estadoService: EstadoService,
-    private operacionesService: OperacionesService
+    private operacionesService: OperacionesService,
   ) {}
 
   ngOnInit(): void {
@@ -57,74 +71,72 @@ export class LineaPrincipalComponent {
     this.fechaInicio = hoy;
     this.fechaFin = hoy;
     this.turnoSeleccionado = this.getTurnoActual();
-    
+
     // Cargar estados para ambos procesos
     this.obtenerTodosLosEstados();
   }
 
   //OPERACIONES--------------------
-  cargarOperacionesHorizontal() { 
+  cargarOperacionesHorizontal() {
     const tipo = 'tal_horizontal';
     this.operacionesService.getAllAprobados(tipo).subscribe({
       next: (resp) => {
         this.operacionesOriginalHorizontal = resp.data;
         this.aplicarFiltro();
-      }
+      },
     });
   }
 
-  cargarOperacionesLargo() { 
+  cargarOperacionesLargo() {
     const tipo = 'tal_largo';
     this.operacionesService.getAllAprobados(tipo).subscribe({
       next: (resp) => {
         this.operacionesOriginalLargo = resp.data;
         this.aplicarFiltro();
-      }
+      },
     });
   }
 
-  cargarOperacionesEmpernador() { 
+  cargarOperacionesEmpernador() {
     const tipo = 'empernador';
     this.operacionesService.getAllAprobados(tipo).subscribe({
       next: (resp) => {
         this.operacionesOriginalEmpernador = resp.data;
         this.aplicarFiltro();
-      }
+      },
     });
   }
 
-  cargarOperacionesScoop() { 
+  cargarOperacionesScoop() {
     const tipo = 'carguio';
     this.operacionesService.getAllAprobados(tipo).subscribe({
       next: (resp) => {
         this.operacionesOriginalScoops = resp.data;
         this.aplicarFiltro();
-      }
+      },
     });
   }
 
-
   //----------------------------------
   obtenerTodosLosEstados() {
-    this.estadoService.getEstados()
-      .subscribe({
-        next: (data) => {
-          this.estadosProceso = data;
-          console.log('Todos los estados:', data);
-          
-          // Separar los estados por proceso
-          this.separarEstadosPorProceso();
-          
-          // Cargar las operaciones después de tener los estados
-          this.cargarOperacionesHorizontal();
-          this.cargarOperacionesLargo();
-          this.cargarOperacionesEmpernador();
-          this.cargarOperacionesScoop();
-        },
-        error: (err) => {
-          console.error('Error al traer estados', err);
-        }
-      });
+    this.estadoService.getEstados().subscribe({
+      next: (data) => {
+        this.estadosProceso = data;
+        console.log('Todos los estados:', data);
+
+        // Separar los estados por proceso
+        this.separarEstadosPorProceso();
+
+        // Cargar las operaciones después de tener los estados
+        this.cargarOperacionesHorizontal();
+        this.cargarOperacionesLargo();
+        this.cargarOperacionesEmpernador();
+        this.cargarOperacionesScoop();
+      },
+      error: (err) => {
+        console.error('Error al traer estados', err);
+      },
+    });
   }
 
   /**
@@ -135,27 +147,27 @@ export class LineaPrincipalComponent {
     this.mapaEstadosLargo.clear();
     this.mapaEstadosEmpernador.clear();
 
-    this.estadosProceso.forEach(estado => {
+    this.estadosProceso.forEach((estado) => {
       const codigo = String(estado.codigo || '').trim();
       const proceso = estado.proceso || '';
-      
+
       // Clasificar según el proceso
       if (proceso === 'PERFORACIÓN HORIZONTAL') {
         this.mapaEstadosHorizontal.set(codigo, estado);
       } else if (proceso === 'PERFORACIÓN TALADROS LARGOS') {
         this.mapaEstadosLargo.set(codigo, estado);
-      }else if (proceso === 'EMPERNADOR') {
+      } else if (proceso === 'EMPERNADOR') {
         this.mapaEstadosEmpernador.set(codigo, estado);
-      }else if (proceso === 'SCOOPTRAM') {
+      } else if (proceso === 'SCOOPTRAM') {
         this.mapaEstadosScoop.set(codigo, estado);
       }
     });
 
-  //   console.log('📊 Estados HORIZONTAL:', this.mapaEstadosHorizontal.size);
-  //   console.log('📊 Estados LARGO:', this.mapaEstadosLargo.size);
-  //   console.log('Estados Horizontal:', Array.from(this.mapaEstadosHorizontal.values()));
-  //   console.log('Estados Largo:', Array.from(this.mapaEstadosLargo.values()));
-   }
+    //   console.log('📊 Estados HORIZONTAL:', this.mapaEstadosHorizontal.size);
+    //   console.log('📊 Estados LARGO:', this.mapaEstadosLargo.size);
+    //   console.log('Estados Horizontal:', Array.from(this.mapaEstadosHorizontal.values()));
+    //   console.log('Estados Largo:', Array.from(this.mapaEstadosLargo.values()));
+  }
 
   private getTurnoActual(): string {
     const hora = new Date().getHours();
@@ -180,45 +192,55 @@ export class LineaPrincipalComponent {
     this.turnoAplicado = this.turnoSeleccionado;
 
     // 🔹 HORIZONTAL
-    this.operacionesFiltradasHorizontal = this.operacionesOriginalHorizontal.filter(op => {
-      if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
-      if (this.fechaFin && op.fecha > this.fechaFin) return false;
-      if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
-      return true;
-    });
+    this.operacionesFiltradasHorizontal =
+      this.operacionesOriginalHorizontal.filter((op) => {
+        if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
+        if (this.fechaFin && op.fecha > this.fechaFin) return false;
+        if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
+        return true;
+      });
 
     // 🔹 LARGO
-    this.operacionesFiltradasLargo = this.operacionesOriginalLargo.filter(op => {
-      if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
-      if (this.fechaFin && op.fecha > this.fechaFin) return false;
-      if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
-      return true;
-    });
+    this.operacionesFiltradasLargo = this.operacionesOriginalLargo.filter(
+      (op) => {
+        if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
+        if (this.fechaFin && op.fecha > this.fechaFin) return false;
+        if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
+        return true;
+      },
+    );
 
     // 🔹 EMPERNADOR
-    this.operacionesFiltradasEmpernador = this.operacionesOriginalEmpernador.filter(op => {
-      if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
-      if (this.fechaFin && op.fecha > this.fechaFin) return false;
-      if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
-      return true;
-    });
+    this.operacionesFiltradasEmpernador =
+      this.operacionesOriginalEmpernador.filter((op) => {
+        if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
+        if (this.fechaFin && op.fecha > this.fechaFin) return false;
+        if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
+        return true;
+      });
 
     // 🔹 SCOOPS
-    this.operacionesFiltradasScoops = this.operacionesOriginalScoops.filter(op => {
-      if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
-      if (this.fechaFin && op.fecha > this.fechaFin) return false;
-      if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
-      return true;
-    });
+    this.operacionesFiltradasScoops = this.operacionesOriginalScoops.filter(
+      (op) => {
+        if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
+        if (this.fechaFin && op.fecha > this.fechaFin) return false;
+        if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
+        return true;
+      },
+    );
 
     this.procesarTodo();
   }
 
   quitarFiltro() {
     // 🔹 Restaurar datos originales
-    this.operacionesFiltradasHorizontal = [...this.operacionesOriginalHorizontal];
+    this.operacionesFiltradasHorizontal = [
+      ...this.operacionesOriginalHorizontal,
+    ];
     this.operacionesFiltradasLargo = [...this.operacionesOriginalLargo];
-    this.operacionesFiltradasEmpernador = [...this.operacionesOriginalEmpernador];
+    this.operacionesFiltradasEmpernador = [
+      ...this.operacionesOriginalEmpernador,
+    ];
     this.operacionesFiltradasScoops = [...this.operacionesOriginalScoops];
 
     // 🔹 Limpiar filtros
@@ -233,31 +255,34 @@ export class LineaPrincipalComponent {
   procesarTodo() {
     // Pasar el mapa correspondiente a cada construcción
     this.ganttHorizontal = this.construirGanttData(
-      this.operacionesFiltradasHorizontal, 
-      this.mapaEstadosHorizontal  // Solo estados de horizontal
+      this.operacionesFiltradasHorizontal,
+      this.mapaEstadosHorizontal, // Solo estados de horizontal
     );
-    
+
     this.ganttLargo = this.construirGanttData(
-      this.operacionesFiltradasLargo, 
-      this.mapaEstadosLargo  // Solo estados de largo
+      this.operacionesFiltradasLargo,
+      this.mapaEstadosLargo, // Solo estados de largo
     );
 
     this.ganttEmpernador = this.construirGanttData(
-      this.operacionesFiltradasEmpernador, 
-      this.mapaEstadosEmpernador  // Solo estados de largo
+      this.operacionesFiltradasEmpernador,
+      this.mapaEstadosEmpernador, // Solo estados de largo
     );
 
     this.ganttScoops = this.construirGanttData(
-      this.operacionesFiltradasScoops, 
-      this.mapaEstadosScoop  // Solo estados de largo
+      this.operacionesFiltradasScoops,
+      this.mapaEstadosScoop, // Solo estados de largo
     );
   }
 
   //GANTT - Ahora recibe el mapa de estados específico
-  private construirGanttData(data: OperacionBase[], mapaEstados: Map<string, any>): any[] {
+  private construirGanttData(
+    data: OperacionBase[],
+    mapaEstados: Map<string, any>,
+  ): any[] {
     const fechaMap: Record<string, any> = {};
 
-    data.forEach(op => {
+    data.forEach((op) => {
       const fecha = op.fecha || 'SIN_FECHA';
       const turno = op.turno || 'SIN_TURNO';
       const equipoCodigo = `${op.equipo} - ${op.n_equipo}`;
@@ -267,7 +292,7 @@ export class LineaPrincipalComponent {
         fechaMap[key] = {
           fecha,
           turno,
-          equipos: {}
+          equipos: {},
         };
       }
 
@@ -299,7 +324,7 @@ export class LineaPrincipalComponent {
           tipo_estado: estadoMatch?.tipo_estado || null,
           categoria: estadoMatch?.categoria || null,
           estado_principal: estadoMatch?.estado_principal || null,
-          proceso: estadoMatch?.proceso || null  // Agregado para debug
+          proceso: estadoMatch?.proceso || null, // Agregado para debug
         });
       });
     });
@@ -310,16 +335,14 @@ export class LineaPrincipalComponent {
       groups: Object.entries(item.equipos).map(
         ([equipoCodigo, labores]: any) => ({
           equipoCodigo,
-          rows: Object.entries(labores).map(
-            ([labor, tasks]: any) => ({
-              labor,
-              tasks: tasks.sort((a: any, b: any) =>
-                a.start.localeCompare(b.start)
-              )
-            })
-          )
-        })
-      )
+          rows: Object.entries(labores).map(([labor, tasks]: any) => ({
+            labor,
+            tasks: tasks.sort((a: any, b: any) =>
+              a.start.localeCompare(b.start),
+            ),
+          })),
+        }),
+      ),
     }));
   }
 }

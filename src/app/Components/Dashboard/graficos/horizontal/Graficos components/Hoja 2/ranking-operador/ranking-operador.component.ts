@@ -1,9 +1,27 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
+
 import * as echarts from 'echarts/core';
+
 import { BarChart, LineChart } from 'echarts/charts';
-import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, ToolboxComponent } from 'echarts/components';
+
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  ToolboxComponent,
+  DataZoomComponent,
+} from 'echarts/components';
+
 import { CanvasRenderer } from 'echarts/renderers';
+
+import {
+  CHART_LINE_STYLE,
+  CHART_SPLIT_LINE,
+  CHART_THEME,
+  calcularZoomInicial,
+} from '../../../../../../../shared/chart-theme';
 
 echarts.use([
   BarChart,
@@ -13,7 +31,8 @@ echarts.use([
   GridComponent,
   LegendComponent,
   ToolboxComponent,
-  CanvasRenderer
+  DataZoomComponent,
+  CanvasRenderer,
 ]);
 
 @Component({
@@ -22,148 +41,267 @@ echarts.use([
   imports: [NgxEchartsDirective],
   providers: [provideEchartsCore({ echarts })],
   templateUrl: './ranking-operador.component.html',
-  styleUrl: './ranking-operador.component.css'
 })
 export class RankingOperadorComponent implements OnChanges {
-
   @Input() data: any[] = [];
 
   chartOptions: any = {};
+  private chartInstance: any;
+
+  onChartInit(ec: any): void {
+    this.chartInstance = ec;
+  }
+
+  getChartImage(pixelRatio: number = 2): string | null {
+    if (!this.chartInstance) return null;
+
+    return this.chartInstance.getDataURL({
+      type: 'jpeg',
+      pixelRatio,
+      backgroundColor: '#FFFFFF',
+      excludeComponents: ['toolbox', 'dataZoom'],
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      //console.log('🏆 RANKING OPERADOR RECIBIDO:', this.data);
       this.actualizarGrafico();
     }
   }
 
   actualizarGrafico(): void {
-    if (!this.data || !this.data.length) return;
+    if (!Array.isArray(this.data) || this.data.length === 0) {
+      this.chartOptions = {};
+      return;
+    }
 
-    // 🔥 Ordenar
     const sortedData = [...this.data].sort(
-      (a, b) => (b.metros_perforados || 0) - (a.metros_perforados || 0)
+      (a, b) =>
+        Number(b.metros_perforados || 0) - Number(a.metros_perforados || 0),
     );
 
-    // 🔥 Datos
-    const operadores = sortedData.map(item => item.operador || 'N/A');
-    const metrosPerforados = sortedData.map(item => item.metros_perforados || 0);
-    const mhrValues = sortedData.map(item => item.fr_mhr_hp || 0);
+    const operadores = sortedData.map((item) => item.operador || 'N/A');
 
-    // 🔥 NOMBRES EN 2 LÍNEAS (CLAVE)
-    const operadoresFormateados = operadores.map(op => {
-      const palabras = op.split(' ');
-      if (palabras.length >= 2) {
-        const mitad = Math.ceil(palabras.length / 2);
-        return palabras.slice(0, mitad).join(' ') + '\n' + palabras.slice(mitad).join(' ');
-      }
-      return op;
-    });
+    const operadoresFormateados = operadores.map((op) =>
+      this.formatearNombreOperador(op),
+    );
+
+    const metrosPerforados = sortedData.map((item) =>
+      Number(item.metros_perforados || 0),
+    );
+
+    const mhrValues = sortedData.map((item) => Number(item.fr_mhr_hp || 0));
+
+    const mostrarZoom = operadoresFormateados.length > 6;
+    const zoomEnd = calcularZoomInicial(
+      operadoresFormateados.length,
+      'categorias',
+    );
+
+    const colores = CHART_THEME.colors.primaryScale3;
 
     this.chartOptions = {
+      color: [colores[0], colores[1]],
+
       title: {
+        ...CHART_THEME.title,
         text: 'RANKING OPERADOR',
-        left: 'center',
-        top: 10,
-        textStyle: {
-          fontSize: 16,
-          fontWeight: 'bold',
-          color: '#2c3e50'
-        }
       },
 
       tooltip: {
+        ...CHART_THEME.tooltip,
         trigger: 'axis',
-        axisPointer: { type: 'shadow' },
+        axisPointer: {
+          type: 'shadow',
+        },
         formatter: (params: any) => {
-          const i = params[0].dataIndex;
+          const index = params[0].dataIndex;
+          const operador = operadores[index];
+
+          const metros = metrosPerforados[index].toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+
+          const mhr = mhrValues[index].toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+
+          const barra = params.find((p: any) => p.seriesName === 'Metros');
+          const linea = params.find((p: any) => p.seriesName === 'M/HR');
+
           return `
-            <strong>${operadores[i]}</strong><br/>
-            ${params[0].marker} Metros: ${metrosPerforados[i].toFixed(2)} m<br/>
-            ${params[1].marker} M/HR: ${mhrValues[i].toFixed(2)}
+            <strong>${operador}</strong><br/><br/>
+            ${barra?.marker || ''} Metros:
+            <strong>${metros} m</strong><br/>
+            ${linea?.marker || ''} M/HR:
+            <strong>${mhr}</strong>
           `;
-        }
+        },
       },
 
       legend: {
+        ...CHART_THEME.legend,
         data: ['Metros', 'M/HR'],
-        top: 45
+        top: 45,
+        bottom: undefined,
+      },
+
+      toolbox: {
+        show: true,
+        right: 10,
+        top: 10,
+        feature: {
+          saveAsImage: {
+            title: 'Descargar',
+            name: 'ranking-operador',
+          },
+          restore: {
+            title: 'Restaurar',
+          },
+        },
       },
 
       grid: {
-        left: '10%',
-        right: '10%',
-        top: '20%',
-        bottom: '22%', // 🔥 MÁS ESPACIO PARA NOMBRES
-        containLabel: true
+        ...CHART_THEME.grid,
+        left: '8%',
+        right: '8%',
+        top: '22%',
+        bottom: mostrarZoom ? '28%' : '20%',
+        containLabel: true,
       },
+
+      dataZoom: mostrarZoom
+        ? [
+            {
+              ...CHART_THEME.dataZoom.inside,
+              start: 0,
+              end: zoomEnd,
+            },
+            {
+              ...CHART_THEME.dataZoom.slider,
+              start: 0,
+              end: zoomEnd,
+            },
+          ]
+        : [],
 
       xAxis: {
-        type: 'category',
+        ...CHART_THEME.xAxisCategory,
         data: operadoresFormateados,
         axisLabel: {
+          ...CHART_THEME.xAxisCategory.axisLabel,
           interval: 0,
           fontSize: 10,
-          lineHeight: 14
+          lineHeight: 14,
+          rotate: operadoresFormateados.length > 10 ? 25 : 0,
+          margin: 12,
         },
         axisTick: {
-          alignWithLabel: true
-        }
+          alignWithLabel: true,
+        },
       },
 
-      yAxis: {
-        type: 'value',
-        name: 'Metros',
-        axisLabel: {
-          formatter: '{value} m'
+      yAxis: [
+        {
+          ...CHART_THEME.yAxisValue,
+          type: 'value',
+          name: 'Metros',
+          nameLocation: 'middle',
+          nameGap: 55,
+          min: 0,
+          axisLabel: {
+            ...CHART_THEME.yAxisValue.axisLabel,
+            formatter: '{value} m',
+          },
         },
-        splitLine: {
-          lineStyle: { type: 'dashed' }
-        }
-      },
+        {
+          ...CHART_THEME.yAxisValue,
+          type: 'value',
+          name: 'M/HR',
+          nameLocation: 'middle',
+          nameGap: 45,
+          min: 0,
+          axisLabel: {
+            ...CHART_THEME.yAxisValue.axisLabel,
+            formatter: '{value}',
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+      ],
 
       series: [
         {
           name: 'Metros',
           type: 'bar',
+          yAxisIndex: 0,
           data: metrosPerforados,
           barWidth: '45%',
           z: 1,
+
           itemStyle: {
+            ...CHART_THEME.bar.itemStyle,
+            color: colores[0],
             borderRadius: [6, 6, 0, 0],
-            color: '#4A90E2'
           },
+
           label: {
+            ...CHART_THEME.bar.label,
             show: true,
             position: 'top',
+            color: colores[0],
             fontSize: 11,
-            formatter: (p: any) => `${p.value.toFixed(0)}`
-          }
+            formatter: (params: any) =>
+              Number(params.value || 0).toLocaleString('en-US', {
+                maximumFractionDigits: 0,
+              }),
+          },
         },
-
         {
           name: 'M/HR',
           type: 'line',
-          data: mhrValues, // ✅ SIN ESCALAR
+          yAxisIndex: 1,
+          data: mhrValues,
           smooth: true,
           symbol: 'circle',
           symbolSize: 7,
-          z: 3, // 🔥 SIEMPRE ENCIMA
+          z: 3,
+
           lineStyle: {
-            width: 2,
-            color: '#E74C3C'
+            ...CHART_LINE_STYLE.lineStyle,
           },
+
           itemStyle: {
-            color: '#E74C3C'
+            ...CHART_LINE_STYLE.itemStyle,
           },
+
           label: {
             show: true,
             position: 'top',
+            ...CHART_LINE_STYLE.label,
             fontSize: 10,
-            formatter: (p: any) => p.value.toFixed(0)
-          }
-        }
-      ]
+            fontWeight: 'bold',
+            formatter: (params: any) => Number(params.value || 0).toFixed(0),
+          },
+        },
+      ],
     };
+  }
+
+  private formatearNombreOperador(nombre: string): string {
+    const palabras = String(nombre || 'N/A')
+      .trim()
+      .split(/\s+/);
+
+    if (palabras.length < 2) {
+      return palabras[0] || 'N/A';
+    }
+
+    const mitad = Math.ceil(palabras.length / 2);
+
+    return `${palabras.slice(0, mitad).join(' ')}\n${palabras.slice(mitad).join(' ')}`;
   }
 }

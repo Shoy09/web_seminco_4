@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { OperacionBase } from '../../../../../models/OperacionBase.models';
+import { OperacionBaseScoop } from '../../../../../models/OperacionBase.models';
 import { PlanProduccion } from '../../../../../models/plan_produccion.model';
 import { PlanMensualService } from '../../../../../services/plan-mensual.service';
 import { FechasPlanMensualService } from '../../../../../services/fechas-plan-mensual.service';
@@ -8,62 +8,110 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ResumenComponent } from '../Graficos components/Hoja 1/resumen/resumen.component';
-import { CucharasLaborComponent } from '../Graficos components/Hoja 1/cucharas-labor/cucharas-labor.component';
-import { CucharasEquipoComponent } from '../Graficos components/Hoja 1/cucharas-equipo/cucharas-equipo.component';
-import { RendimientoEquipoComponent } from '../Graficos components/Hoja 1/rendimiento-equipo/rendimiento-equipo.component';
-import { DemorasOperativasComponent } from '../Graficos components/Hoja 1/demoras-operativas/demoras-operativas.component';
-import { DemorasInoperativasComponent } from '../Graficos components/Hoja 1/demoras-inoperativas/demoras-inoperativas.component';
-import { HorasMantenimientoComponent } from '../Graficos components/Hoja 1/horas-mantenimiento/horas-mantenimiento.component';
-import { TonelajeEquipoComponent } from '../Graficos components/Hoja 1/tonelaje-equipo/tonelaje-equipo.component';
-import { TnHrEquipoComponent } from '../Graficos components/Hoja 1/tn-hr-equipo/tn-hr-equipo.component';
-import { HorometroDieselComponent } from '../Graficos components/Hoja 1/horometro-diesel/horometro-diesel.component';
-import { HorometroDieselTotalComponent } from '../../sostenimiento/Graficos components/Hoja 1/horometro-diesel-total/horometro-diesel-total.component';
-import { ScatterTurnosComponent } from '../Graficos components/Hoja 2/scatter-turnos/scatter-turnos.component';
-import { ScatterTurnosNocheComponent } from '../Graficos components/Hoja 2/scatter-turnos-noche/scatter-turnos-noche.component';
-import { HorasPrimerViajeComponent } from '../Graficos components/Hoja 2/horas-primer-viaje/horas-primer-viaje.component';
-import { ResumenEquiposComponent } from '../Graficos components/Hoja 2/resumen-equipos/resumen-equipos.component';
-import { MejoresOperadoresComponent } from '../Graficos components/Hoja 2/mejores-operadores/mejores-operadores.component';
-import { MejoresOperadoresGraficoComponent } from '../Graficos components/Hoja 2/mejores-operadores-grafico/mejores-operadores-grafico.component';
-import { ObservacionesComponent } from '../Graficos components/Hoja 2/observaciones/observaciones.component';
-import { SchedulerComponent } from '../../Linea de tiempo/scheduler/scheduler.component';
 import { EstadoService } from '../../../../../services/estado.service';
+import { DisponibilidadDiaComponent } from '../Graficos components/Disponibilidad/disponibilidad-dia/disponibilidad-dia.component';
+import { DisponibilidadEquipoComponent } from '../Graficos components/Disponibilidad/disponibilidad-equipo/disponibilidad-equipo.component';
+import { DisponibilidadEstadoComponent } from '../Graficos components/Disponibilidad/disponibilidad-estado/disponibilidad-estado.component';
+import { DisponibilidadGuardiaComponent } from '../Graficos components/Disponibilidad/disponibilidad-guardia/disponibilidad-guardia.component';
+import { DisponibilidadMesComponent } from '../Graficos components/Disponibilidad/disponibilidad-mes/disponibilidad-mes.component';
+import { DisponibilidadSemanaComponent } from '../Graficos components/Disponibilidad/disponibilidad-semana/disponibilidad-semana.component';
+import { RendimientoGeneralComponent } from '../Graficos components/Rendimiento/rendimiento-general/rendimiento-general.component';
+import { RendimientoGuardiaComponent } from "../Graficos components/Rendimiento/rendimiento-guardia/rendimiento-guardia.component";
+import { RendimientoSeccionLaborComponent } from "../Graficos components/Rendimiento/rendimiento-seccion-labor/rendimiento-seccion-labor.component";
+import { RendimientoMesAnoComponent } from "../Graficos components/Rendimiento/rendimiento-mes-ano/rendimiento-mes-ano.component";
+import { TopEquiposComponent } from "../Graficos components/Rendimiento/top-equipos/top-equipos.component";
+import { RendimientoDiaMesComponent } from "../Graficos components/Rendimiento/rendimiento-dia-mes/rendimiento-dia-mes.component";
+import { RankingOperadorUtilizacionComponent } from "../Graficos components/Ranking operador/ranking-operador-utilizacion/ranking-operador-utilizacion.component";
+import { RankingOperadorRendimientoComponent } from "../Graficos components/Ranking operador/ranking-operador-rendimiento/ranking-operador-rendimiento.component";
+import { UtilizacionEquipoComponent } from "../Graficos components/Utilizacion/utilizacion-equipo/utilizacion-equipo.component";
+import { UtilizacionSemanaComponent } from "../Graficos components/Utilizacion/utilizacion-semana/utilizacion-semana.component";
+import { UtilizacionMesComponent } from "../Graficos components/Utilizacion/utilizacion-mes/utilizacion-mes.component";
+import { UtilizacionGuardiaComponent } from "../Graficos components/Utilizacion/utilizacion-guardia/utilizacion-guardia.component";
+import { HorasDemoraCodigoComponent } from "../Graficos components/Utilizacion/horas-demora-codigo/horas-demora-codigo.component";
+import { UtilizacionDiaMesComponent } from "../Graficos components/Utilizacion/app-utilizacion-dia-mes/app-utilizacion-dia-mes.component";
+import { DisponibilidadRankingGuardiaComponent } from "../Graficos components/Ranking Guardia/disponibilidad-guardia/disponibilidad-guardia.component";
+import { MineralRankingGuardiaComponent } from "../Graficos components/Ranking Guardia/mineral-guardia/mineral-guardia.component";
+import { RendimientoRankingGuardiaComponent } from "../Graficos components/Ranking Guardia/rendimiento-guardia/rendimiento-guardia.component";
+import { UtilizacionRankingGuardiaComponent } from "../Graficos components/Ranking Guardia/utilizacion-guardia/utilizacion-guardia.component";
+import { PromediosMaterialesEquipoComponent } from "../Graficos components/Ranking Guardia/promedios-materiales-equipo/promedios-materiales-equipo.component";
+import { PromedioMaterialGuardiaComponent } from "../Graficos components/Ranking Guardia/promedio-material-guardia/promedio-material-guardia.component";
+import { ParetoNoProgramadasComponent } from "../Graficos components/Dis_Pareto_Detalle/pareto-no-programada/pareto-no-programada.component";
+import { DiagramaParetoComponent } from "../Graficos components/Util_Pareto_Detalle/diagrama-pareto/diagrama-pareto.component";
+import { MtbfEquipoComponent } from '../Graficos components/MTBF-MTTR/MTBF/mtbf-equipo/mtbf-equipo.component';
+import { MtbfSemanasComponent } from '../Graficos components/MTBF-MTTR/MTBF/mtbf-semanas/mtbf-semanas.component';
+import { MtbfAnoComponent } from '../Graficos components/MTBF-MTTR/MTBF/mtbf-ano/mtbf-ano.component';
+import { MtbfMesComponent } from '../Graficos components/MTBF-MTTR/MTBF/mtbf-mes/mtbf-mes.component';
+import { MttrEquipoComponent } from "../Graficos components/MTBF-MTTR/MTTR/mttr-equipo/mttr-equipo.component";
+import { MttrAnoComponent } from "../Graficos components/MTBF-MTTR/MTTR/mttr-ano/mttr-ano.component";
+import { MttrSemanasComponent } from "../Graficos components/MTBF-MTTR/MTTR/mttr-semanas/mttr-semanas.component";
+import { MttrMesComponent } from "../Graficos components/MTBF-MTTR/MTTR/mttr-mes/mttr-mes.component";
+import { EquipoService } from '../../../../../services/equipo.service';
+import { Equipo } from '../../../../../models/equipo.model';
+import { MatDialog } from '@angular/material/dialog';
+import { PresentacionDialogComponent } from '../presentacion-dialog/presentacion-dialog.component';
+import { HorasOperativasDiaComponent } from '../Graficos components/HorasOperativas/horas-operativas-dia/horas-operativas-dia.component';
+import { HorasOperativasMesComponent } from '../Graficos components/HorasOperativas/horas-operativas-mes/horas-operativas-mes.component';
+import { HorasOperativasSemanaComponent } from '../Graficos components/HorasOperativas/horas-operativas-semana/horas-operativas-semana.component';
+import { generarDiasEntreFechas, MESES_CORTOS, obtenerPeriodo, obtenerPeriodoDesdeKey, obtenerRangoSemanaISO, obtenerSemanaISO, parseFechaLocal, parseFechaSimple } from '../../../../../utils/fecha-utils';
+
+
 
 @Component({
   selector: 'app-principal-grafico-scoops',
   imports: [
     CommonModule,
     FormsModule,
-    ResumenComponent,
-    CucharasLaborComponent,
-    CucharasEquipoComponent,
-    RendimientoEquipoComponent,
-    DemorasOperativasComponent,
-    DemorasInoperativasComponent,
-    HorasMantenimientoComponent,
-    TonelajeEquipoComponent,
-    TnHrEquipoComponent,
-    HorometroDieselComponent,
-    HorometroDieselTotalComponent,
-    ScatterTurnosComponent,
-    ScatterTurnosNocheComponent,
-    HorasPrimerViajeComponent,
-    ResumenEquiposComponent,
-    MejoresOperadoresComponent,
-    MejoresOperadoresGraficoComponent,
-    ObservacionesComponent,
-    SchedulerComponent,
-  ],
+    //DisponibilidadEquipoComponent,
+    //DisponibilidadSemanaComponent,
+    //DisponibilidadMesComponent,
+    //DisponibilidadGuardiaComponent,
+    // DisponibilidadEstadoComponent,
+    //DisponibilidadDiaComponent,
+    RendimientoGeneralComponent,
+    RendimientoGuardiaComponent,
+    RendimientoSeccionLaborComponent,
+    RendimientoMesAnoComponent,
+    TopEquiposComponent,
+    RendimientoDiaMesComponent,
+    RankingOperadorUtilizacionComponent,
+    RankingOperadorRendimientoComponent,
+    UtilizacionEquipoComponent,
+    UtilizacionSemanaComponent,
+    UtilizacionMesComponent,
+    UtilizacionGuardiaComponent,
+    // HorasDemoraCodigoComponent,
+    UtilizacionDiaMesComponent,
+    DisponibilidadRankingGuardiaComponent,
+    MineralRankingGuardiaComponent,
+    RendimientoRankingGuardiaComponent,
+    UtilizacionRankingGuardiaComponent,
+    PromediosMaterialesEquipoComponent,
+    PromedioMaterialGuardiaComponent,
+    ParetoNoProgramadasComponent,
+    DiagramaParetoComponent,
+    MtbfEquipoComponent,
+    MtbfSemanasComponent,
+    MtbfMesComponent,
+    MtbfAnoComponent,
+    MttrEquipoComponent,
+    MttrAnoComponent,
+    MttrSemanasComponent,
+    MttrMesComponent,
+    //HorasOperativasDiaComponent,
+    //HorasOperativasSemanaComponent,
+    //HorasOperativasMesComponent,
+],
   templateUrl: './principal-grafico-scoops.component.html',
   styleUrl: './principal-grafico-scoops.component.css',
 })
 export class PrincipalGraficoScoopsComponent implements OnInit {
   anio!: number;
   mes!: string;
+  showZoom: boolean = false;
 
   // DATA ORIGINAL (sin filtrar)
-  operacionesOriginal: OperacionBase[] = [];
-  operacionesFiltradas: OperacionBase[] = [];
+  operacionesOriginal: OperacionBaseScoop[] = [];
+  operacionesFiltradas: OperacionBaseScoop[] = [];
   planesMensuales: PlanProduccion[] = [];
 
   fechaInicio: string = '';
@@ -73,38 +121,62 @@ export class PrincipalGraficoScoopsComponent implements OnInit {
   cargandoPDF = false;
 
   //DATA
-  resumenSC = {
-    SC_Conteo_Equipos: 0,
-    totalCucharas: 0,
-    ViajesPorEquipo: 0,
-    N_labores_limpiadas: 0,
-  };
-  DataCucharadasLabor: any[] = [];
-  DataDMyUTI: any[] = [];
-  DataEstadosSOS: any[] = [];
-  dataDemoraIno: any[] = [];
-  dataHoraMantenimiento: any[] = [];
-  dataToneladas: any[] = [];
-  dataTn_Hr: any[] = [];
-  dataDiferenciaDisel: any[] = [];
-  dataDiferenciaDiselTotal: any[] = [];
+DataDisponibilidadPorEquipo: any[] = [];
+DataDisponibilidadPorSemana: any[] = [];
+DataDisponibilidadPorMes: any[] = [];
+DataDisponibilidadPorDia: any[] = [];
+DataDisponibilidadPorSeccion: any[] = [];
+DataParetoDisponibilidad: any[] = [];
+DataUtilizacionPorEquipo: any[] = [];
+DataUtilizacionPorSemana: any[] = [];
+DataUtilizacionPorMes: any[] = [];
+DataUtilizacionPorDia: any[] = [];
+DataUtilizacionPorSeccionDetallada: any[] = [];
+DataParetoUtilizacion: any[] = [];
+DataRendimientoPorSeccionDetallado: any[] = [];
+DataprocesarEquiposConCapacidad: any[] = [];
+DataRendimientoPorMes: any[] = [];
+DataRendimientoPorDia: any[] = [];
+DataDisponibilidadPorOperador: any[] = [];
 
-  dataHorasNumericas: any[] = [];
-  dataViajesSC: any[] = [];
-  dataDetalleEquipo: any[] = [];
+DataRendimientoPorOperador: any[] = [];
+DataHorasPorObservacion: any[] = [];
+DataHorasDemoraPorCodigoCompleto: any[] = [];
 
-  dataMejoresOperadores: any[] = [];
-  dataLaborFRDetallado: any[] = [];
+DataMTBFPorEquipo: any[] = [];
+DataMTBFPorAnio: any[] = [];
+DataMTBFPorSemanas: any[] = [];
+DataMTBFPorMes: any[] = [];
+DataMTTRPorEquipo: any[] = [];
+DataMTTRPorAnio: any[] = [];
+DataMTTRPorSemanas: any[] = [];
+DataMTTRPorMes: any[] = [];
+
+DataDisponiblidadPorGuardia: any[] = [];
+DataRendimientoPorGuardia: any[] = [];
+DataMineralGuardia: any[] = [];
+DataUtilizacionGuardia: any[] = [];
+DataToneladasPorHora: any[] = [];
+DataToneladasPorEquipoYRangoHora: any[] = [];
 
   estadosProceso: any[] = [];
-    ganttData: any[] = [];
 vistaPrincipal: boolean = true;
 
-  constructor(
+importandoExcel = false;
+equiposProceso: Equipo[] = [];
+
+dataHorasOperativasDia: any[] = [];
+dataHorasOperativasSemana: any[] = [];
+dataHorasOperativasMes: any[] = [];
+
+constructor(
     private planMensualService: PlanMensualService,
     private fechasPlanMensualService: FechasPlanMensualService,
     private operacionesService: OperacionesService,
-        private estadoService: EstadoService
+        private estadoService: EstadoService,
+        //private excelImportService: ExcelImportService,
+        private equipoService: EquipoService,
+        private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -118,7 +190,52 @@ vistaPrincipal: boolean = true;
 
     this.cargarOperaciones();
     this.obtenerEstadosPorProceso('SCOOPTRAM');
+    this.obtenerEquiposPorProceso('SCOOPTRAM');
   }
+
+  toggleDataZoom(): void {
+    this.showZoom = !this.showZoom;
+  }
+
+  Presentacion() {
+  if (!this.operacionesFiltradas || this.operacionesFiltradas.length === 0) {
+    console.warn('No hay datos filtrados para mostrar');
+    return;
+  }
+
+  const dialogRef = this.dialog.open(PresentacionDialogComponent, {
+    width: '1800px',
+    maxHeight: '90vh',
+    data: {
+      operaciones: this.operacionesFiltradas,
+      turnoAplicado: this.turnoAplicado,
+      fechaInicio: this.fechaInicio,
+      fechaFin: this.fechaFin,
+      equipos: this.equiposProceso,
+    },
+    disableClose: false,
+    autoFocus: true
+  });
+
+  // Opcional: Escuchar cuando se cierre el diálogo
+  dialogRef.afterClosed().subscribe(result => {
+    console.log('Diálogo cerrado', result);
+  });
+}
+
+  obtenerEquiposPorProceso(proceso: string) {
+  this.equipoService.getEquiposByProceso(proceso)
+    .subscribe({
+      next: (data) => {
+        this.equiposProceso = data;
+
+        console.log('Equipos por proceso:', data);
+      },
+      error: (err) => {
+        console.error('Error al traer equipos por proceso', err);
+      }
+    });
+}
 
   obtenerEstadosPorProceso(proceso: string) {
   this.estadoService.getEstadosByProceso(proceso)
@@ -208,31 +325,60 @@ mapaEstados: Map<string, any> = new Map();
   }
 
   procesarTodo() {
-    if (!this.operacionesFiltradas.length || !this.planesMensuales.length)
-      return;
+  if (!this.operacionesFiltradas.length || !this.planesMensuales.length)
+    return;
 
-    this.procesarResumenSC();
-    this.DataCucharadasLabor = this.CucharasPorLabor();
-    this.DataDMyUTI = this.ProcesarDM_SC_UTI_SC();
+  // 🔥 DISPONIBILIDAD
+  this.DataDisponibilidadPorEquipo = this.DisponibilidadPorEquipo();
+  this.DataDisponibilidadPorSemana = this.DisponibilidadPorSemana();
+  this.DataDisponibilidadPorMes = this.DisponibilidadPorMes();
+  this.DataParetoDisponibilidad = this.ParetoDisponibilidad();
+  this.DataDisponibilidadPorDia = this.DisponibilidadPorDia();
+  this.DataDisponibilidadPorSeccion = this.DisponibilidadPorSeccion();
+  //UTILIZACION
+  this.DataUtilizacionPorEquipo = this.UtilizacionPorEquipo();
+  this.DataUtilizacionPorSemana = this.UtilizacionPorSemana();
+  this.DataUtilizacionPorMes = this.UtilizacionPorMes();
+  this.DataUtilizacionPorDia = this.UtilizacionPorDia();
+  this.DataUtilizacionPorSeccionDetallada = this.UtilizacionPorSeccionDetallada();
+  this.DataParetoUtilizacion = this.ParetoUtilizacion();
+  //RENDIMIENTO
+  //this.DataRendimientoPorSeccionDetallado = this.RendimientoPorSeccionDetallado();
+  //this.DataprocesarEquiposConCapacidad = this.RendimientoPorEquipo();
+  //this.DataRendimientoPorMes = this.RendimientoPorMes();
+  //this.DataRendimientoPorDia = this.RendimientoPorDia();
+  //RANKING OPERADOR
+   //DIS_PARETO DETALLE
+  this.DataHorasPorObservacion = this.HorasPorObservacion();
 
-    this.DataEstadosSOS = this.procesarDemorasOperativas();
-    this.dataDemoraIno = this.procesarDemorasInoperativas();
-    this.dataHoraMantenimiento = this.procesarHorasMantenimiento();
-    this.dataToneladas = this.ProcesarTonelajeSC();
-    this.dataTn_Hr = this.ProcesarTonelajePorHoraSC();
-    this.dataDiferenciaDisel = this.ProcesarDiferenciaDiesel();
-    this.dataDiferenciaDiselTotal = this.ProcesarDiferenciaDieselTotal();
+  //UTIL_PARETO DETALLE
+  this.DataHorasDemoraPorCodigoCompleto = this.HorasDemoraPorCodigoCompleto();
 
-    this.dataHorasNumericas = this.procesarHorasNumericas();
-    this.dataViajesSC = this.ProcesarContViajesSC();
-    this.dataDetalleEquipo = this.ProcesarDetalleEquipoSC();
-    //Grafico 14
-    this.dataMejoresOperadores = this.ProcesarOperadorTurnoSC();
-    this.dataLaborFRDetallado = this.procesarLaborFRDetallado();
+  // MTBF - MTTR
+  this.DataMTBFPorEquipo = this.MTBFPorEquipo();
+  this.DataMTBFPorAnio = this.MTBFPorAño();
+  this.DataMTBFPorSemanas = this.MTBFPorSemana();
+  this.DataMTBFPorMes = this.MTBFPorMes();
+  this.DataMTTRPorEquipo = this.MTTRPorEquipo();
+  this.DataMTTRPorAnio = this.MTTRPorAño();
+  this.DataMTTRPorSemanas = this.MTTRPorSemana();
+  this.DataMTTRPorMes = this.MTTRPorMes();
 
-    this.construirGanttDataNuevo();
-    //console.log('🔥 DATA DISPAROS EQUIPO:', this.dataDisparosEquipo);
-  }
+  // Ranking Guardia
+  this.DataDisponiblidadPorGuardia = this.DisponibilidadPorGuardia();
+  this.DataUtilizacionGuardia = this.UtilizacionGuardia();
+
+
+  this.DataDisponibilidadPorOperador = this.DisponibilidadPorOperador();
+  //this.DataRendimientoPorOperador = this.RendimientoPorOperador();
+
+
+  // this.DataToneladasPorHora = this.ToneladasPorRangoHoraCompleto() 
+   //this.DataToneladasPorEquipoYRangoHora = this.ToneladasPorEquipoYRangoHora(this.turnoSeleccionado);
+  this.dataHorasOperativasDia = this.HorasOperativasPorDia();
+  this.dataHorasOperativasSemana = this.HorasOperativasPorSemana();
+  this.dataHorasOperativasMes = this.HorasOperativasPorMes();
+}
 
   // =========================================
   // 🔥 FILTRO POR FECHA
@@ -349,1343 +495,2030 @@ mapaEstados: Map<string, any> = new Map();
   //=========================================
   //HOJA 1
   //=========================================
+//GRAFICO 1 - DISPONIBILIDAD POR EQUIPO
+  DisponibilidadPorEquipo() {
+  const resultadoMap = new Map<string, any>();
 
-  procesarResumenSC() {
-    let totalCucharas = 0;
+  this.operacionesFiltradas.forEach((op) => {
+    const modeloEquipo = `${op.n_equipo}`;
+    const HORAS_TOTALES = 12;
+    let horasMtto = 0;
 
-    const equiposSet = new Set<string>();
-    const laboresSet = new Set<string>();
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
 
-    this.operacionesFiltradas.forEach((op) => {
-      const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
-      equiposSet.add(modeloEquipo);
+    for (const registro of registrosArray) {
+      if (registro.estado !== 'MANTENIMIENTO') continue;
+      
+      const horas = this.calcularDuracionHoras(
+        registro.hora_inicio,
+        registro.hora_final!
+      );
+      horasMtto += horas;
+    }
 
+    horasMtto = Math.min(horasMtto, HORAS_TOTALES);
+
+    if (!resultadoMap.has(modeloEquipo)) {
+      resultadoMap.set(modeloEquipo, {
+        modeloEquipo,
+        horasTotales: 0,
+        horasMtto: 0,
+        disponibilidad: 0,
+        cantidadPartes: 0
+      });
+    }
+
+    const item = resultadoMap.get(modeloEquipo);
+    item.horasTotales += HORAS_TOTALES;
+    item.horasMtto += horasMtto;
+    item.cantidadPartes += 1;
+
+    // 🔥 CON SI.ERROR - usando try-catch
+    try {
+      const disponibilidadActual = ((item.horasTotales - item.horasMtto) / item.horasTotales) * 100;
+      item.disponibilidad = Number(disponibilidadActual.toFixed(2));
+    } catch (error) {
+      item.disponibilidad = 0; // 🔥 como el SI.ERROR
+    }
+  });
+
+  const resultado = Array.from(resultadoMap.values());
+  // console.log('📊 DISPONIBILIDAD POR EQUIPO:', resultado);
+  return resultado;
+}
+
+private calcularDuracionHoras(
+  horaInicio: string,
+  horaFinal: string
+): number {
+
+  if (!horaInicio || !horaFinal) return 0;
+
+  const [h1, m1] = horaInicio.split(':').map(Number);
+  const [h2, m2] = horaFinal.split(':').map(Number);
+
+  let inicio = h1 * 60 + m1;
+  let fin = h2 * 60 + m2;
+
+  // 🔥 cruza medianoche
+  if (fin < inicio) {
+    fin += 24 * 60;
+  }
+
+  return Number(((fin - inicio) / 60).toFixed(2));
+}
+
+
+
+private obtenerNumeroSemana(fecha: string): number {
+
+  const date = new Date(fecha);
+
+  // 🔥 inicio año
+  const inicioAnio = new Date(date.getFullYear(), 0, 1);
+
+  // 🔥 días transcurridos
+  const dias =
+    Math.floor(
+      (
+        date.getTime() -
+        inicioAnio.getTime()
+      ) / 86400000
+    );
+
+  // 🔥 semana del año
+  return Math.ceil((dias + inicioAnio.getDay() + 1) / 7);
+}
+
+
+  DisponibilidadPorDia() {
+    return this.calcularDisponibilidadBasePorDia(
+      this.operacionesFiltradas,
+      true,
+    );
+  }
+
+  DisponibilidadPorSemana() {
+    return this.calcularDisponibilidadPorPeriodoVisual('SEMANA');
+  }
+
+  DisponibilidadPorMes() {
+    return this.calcularDisponibilidadPorPeriodoVisual('MES');
+  }
+  private calcularDisponibilidadPorPeriodoVisual(tipo: 'SEMANA' | 'MES') {
+    const resultadoMap = this.crearPeriodosVisiblesDisponibilidad(tipo);
+
+    // Usa operacionesOriginal para que fechaInicio y fechaFin NO afecten el cálculo
+    // Solo se filtra por turno, si corresponde
+    const dataCalculo = this.filtrarSoloPorTurno(this.operacionesOriginal);
+
+    const datosPorDia = this.calcularDisponibilidadBasePorDia(
+      dataCalculo,
+      false,
+    );
+
+    datosPorDia.forEach((dia) => {
+      const periodo = obtenerPeriodoDesdeKey(dia.key, tipo);
+
+      if (!periodo) return;
+
+      // Solo muestra semanas/meses dentro del rango visual seleccionado
+      if (!resultadoMap.has(periodo.key)) return;
+
+      const item = resultadoMap.get(periodo.key);
+
+      item.horasTotales += Number(dia.horasTotales || 0);
+      item.horasMtto += Number(dia.horasMtto || 0);
+      item.horasDisponibles += Number(dia.horasDisponibles || 0);
+
+      item.cantidadOperaciones += Number(dia.cantidadOperaciones || 0);
+      item.cantidadRegistros += Number(dia.cantidadRegistros || 0);
+      item.cantidadRegistrosMtto += Number(dia.cantidadRegistrosMtto || 0);
+    });
+
+    const resultado = Array.from(resultadoMap.values()).map((item) => {
+      if (item.horasTotales > 0) {
+        item.disponibilidad = Number(
+          ((item.horasDisponibles / item.horasTotales) * 100).toFixed(2),
+        );
+      } else {
+        item.disponibilidad = 0;
+      }
+
+      item.horasTotales = Number(item.horasTotales.toFixed(2));
+      item.horasMtto = Number(item.horasMtto.toFixed(2));
+      item.horasDisponibles = Number(item.horasDisponibles.toFixed(2));
+
+      return item;
+    });
+
+    resultado.sort((a, b) => String(a.key).localeCompare(String(b.key)));
+
+    return resultado;
+  }
+  private crearPeriodosVisiblesDisponibilidad(tipo: 'SEMANA' | 'MES') {
+    const resultadoMap = new Map<string, any>();
+
+    if (!this.fechaInicio || !this.fechaFin) {
+      return resultadoMap;
+    }
+
+    const diasRango = generarDiasEntreFechas(this.fechaInicio, this.fechaFin);
+
+    diasRango.forEach((dia) => {
+      const periodo = obtenerPeriodoDesdeKey(dia.key, tipo);
+
+      if (!periodo) return;
+
+      if (!resultadoMap.has(periodo.key)) {
+        resultadoMap.set(periodo.key, {
+          key: periodo.key,
+          periodo: periodo.label,
+          anio: periodo.anio || null,
+          fechaInicio: periodo.fechaInicio || null,
+          fechaFin: periodo.fechaFin || null,
+
+          horasTotales: 0,
+          horasMtto: 0,
+          horasDisponibles: 0,
+          disponibilidad: 0,
+
+          cantidadDiasRango: 0,
+
+          cantidadOperaciones: 0,
+          cantidadRegistros: 0,
+          cantidadRegistrosMtto: 0,
+        });
+      }
+
+      const item = resultadoMap.get(periodo.key);
+      item.cantidadDiasRango += 1;
+    });
+
+    return resultadoMap;
+  }
+  private calcularDisponibilidadBasePorDia(
+    dataOperaciones: OperacionBaseScoop[],
+    crearRangoVisual: boolean,
+  ) {
+    const resultadoMap = new Map<string, any>();
+
+    // Solo para DisponibilidadPorDia:
+    // crea todos los días del rango seleccionado, incluso si no tienen data
+    if (crearRangoVisual && this.fechaInicio && this.fechaFin) {
+      const diasRango = generarDiasEntreFechas(this.fechaInicio, this.fechaFin);
+
+      diasRango.forEach((dia) => {
+        resultadoMap.set(dia.key, {
+          key: dia.key,
+          periodo: dia.label,
+
+          horasTotales: 0,
+          horasMtto: 0,
+          horasDisponibles: 0,
+          disponibilidad: 0,
+
+          cantidadOperaciones: 0,
+          cantidadRegistros: 0,
+          cantidadRegistrosMtto: 0,
+        });
+      });
+    }
+
+    dataOperaciones.forEach((op) => {
       const registrosArray = op.registros;
 
       if (!Array.isArray(registrosArray)) return;
 
-      registrosArray.forEach((registro) => {
-        if (registro.estado !== 'OPERATIVO') return;
+      const fecha = op.fecha;
 
-        const opReg = registro.operacion || registro;
+      if (!fecha) return;
 
-        // 🔹 SUMA n_cucharas
-        const nCucharas = Number(opReg.n_cucharas) || 0;
-        totalCucharas += nCucharas;
+      const periodo = obtenerPeriodo(fecha, 'DIA');
 
-        // 🔹 LABOR_INICIO_SC (igual que DAX)
-        const tipo = opReg.tipo_labor_inicio || '';
-        const labor = opReg.labor_inicio || '';
-        const ala = opReg.ala_inicio || '';
-        const nivel = opReg.nivel_inicio || '';
+      if (!periodo) return;
 
-        let laborConcat = `${tipo}${labor}`;
+      if (!resultadoMap.has(periodo.key)) {
+        resultadoMap.set(periodo.key, {
+          key: periodo.key,
+          periodo: periodo.label,
 
-        if (ala !== '') {
-          laborConcat += `-${ala}`;
+          horasTotales: 0,
+          horasMtto: 0,
+          horasDisponibles: 0,
+          disponibilidad: 0,
+
+          cantidadOperaciones: 0,
+          cantidadRegistros: 0,
+          cantidadRegistrosMtto: 0,
+        });
+      }
+
+      const item = resultadoMap.get(periodo.key);
+
+      item.cantidadOperaciones += 1;
+
+      for (const registro of registrosArray) {
+        if (!registro.hora_inicio || !registro.hora_final) continue;
+
+        const horas = this.calcularDuracionHoras(
+          registro.hora_inicio,
+          registro.hora_final,
+        );
+
+        if (!horas || horas <= 0) continue;
+
+        const estado = String(registro.estado || '')
+          .trim()
+          .toUpperCase();
+
+        // SUMA(HORAS)
+        item.horasTotales += horas;
+        item.cantidadRegistros += 1;
+
+        // SUMA(HRS MANTENIMIENTO)
+        if (estado === 'MANTENIMIENTO') {
+          item.horasMtto += horas;
+          item.cantidadRegistrosMtto += 1;
         }
-
-        // fallback a nivel si está vacío
-        if (!laborConcat || laborConcat.trim() === '') {
-          laborConcat = nivel;
-        }
-
-        // 🔹 DISTINCTCOUNT (solo válidos)
-        if (laborConcat && laborConcat.trim() !== '') {
-          laboresSet.add(laborConcat.trim());
-        }
-      });
+      }
     });
 
-    const conteoEquipos = equiposSet.size;
+    const resultado = Array.from(resultadoMap.values()).map((item) => {
+      item.horasDisponibles = item.horasTotales - item.horasMtto;
 
-    const viajesPorEquipo =
-      conteoEquipos > 0 ? totalCucharas / conteoEquipos : 0;
+      if (item.horasTotales > 0) {
+        item.disponibilidad = Number(
+          ((item.horasDisponibles / item.horasTotales) * 100).toFixed(2),
+        );
+      } else {
+        item.disponibilidad = 0;
+      }
 
-    this.resumenSC = {
-      SC_Conteo_Equipos: conteoEquipos,
-      totalCucharas: totalCucharas,
-      ViajesPorEquipo: Number(viajesPorEquipo.toFixed(2)),
-      N_labores_limpiadas: laboresSet.size,
-    };
+      item.horasTotales = Number(item.horasTotales.toFixed(2));
+      item.horasMtto = Number(item.horasMtto.toFixed(2));
+      item.horasDisponibles = Number(item.horasDisponibles.toFixed(2));
 
-    //console.log('📊 RESUMEN SC:', this.resumenSC);
+      return item;
+    });
+
+    resultado.sort((a, b) => String(a.key).localeCompare(String(b.key)));
+
+    return resultado;
   }
 
-  //Grafico 2 y 3
 
-  CucharasPorLabor() {
+DisponibilidadPorSeccion() {
+  const resultadoMap = new Map<string, any>();
+
+  this.operacionesFiltradas.forEach((op) => {
+    const seccion = op.seccion || 'SIN SECCION';
+    const HORAS_TOTALES = 12;
+    let horasMtto = 0;
+
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    for (const registro of registrosArray) {
+      if (registro.estado !== 'MANTENIMIENTO') continue;
+
+      const horas = this.calcularDuracionHoras(
+        registro.hora_inicio,
+        registro.hora_final!
+      );
+
+      horasMtto += horas;
+    }
+
+    horasMtto = Math.min(horasMtto, HORAS_TOTALES);
+
+    if (!resultadoMap.has(seccion)) {
+      resultadoMap.set(seccion, {
+        seccion,
+        horasTotales: 0,
+        horasMtto: 0,
+        disponibilidad: 0,
+        cantidadPartes: 0
+      });
+    }
+
+    const item = resultadoMap.get(seccion);
+
+    item.horasTotales += HORAS_TOTALES;
+    item.horasMtto += horasMtto;
+    item.cantidadPartes += 1;
+
+    try {
+      const disponibilidadActual =
+        ((item.horasTotales - item.horasMtto) / item.horasTotales) * 100;
+
+      item.disponibilidad = Number(disponibilidadActual.toFixed(2));
+    } catch (error) {
+      item.disponibilidad = 0;
+    }
+  });
+
+  const resultado = Array.from(resultadoMap.values());
+
+   //console.log('📊 DISPONIBILIDAD POR SECCION:', resultado);
+
+  return resultado;
+}
+
+//=========================================
+//HOJA 2
+//=========================================
+
+//GRAFICO 1 - UTILIZACIÓN POR EQUIPO
+UtilizacionPorEquipo() {
+  const resultadoMap = new Map<string, any>();
+
+  this.operacionesFiltradas.forEach((op) => {
+    const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
+    const HORAS_TOTALES = 12;
+    let horasMtto = 0;
+    let horasOperativas = 0;
+
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    for (const registro of registrosArray) {
+      const horas = this.calcularDuracionHoras(
+        registro.hora_inicio,
+        registro.hora_final!
+      );
+
+      // 🔥 Acumular horas de MANTENIMIENTO
+      if (registro.estado === 'MANTENIMIENTO') {
+        horasMtto += horas;
+      }
+      
+      // 🔥 Acumular horas de OPERATIVO
+      if (registro.estado === 'OPERATIVO') {
+        horasOperativas += horas;
+      }
+    }
+
+    // Limitar horasMtto al total disponible
+    horasMtto = Math.min(horasMtto, HORAS_TOTALES);
+    // Limitar horasOperativas al total disponible
+    horasOperativas = Math.min(horasOperativas, HORAS_TOTALES);
+
+    if (!resultadoMap.has(modeloEquipo)) {
+      resultadoMap.set(modeloEquipo, {
+        modeloEquipo,
+        horasTotales: 0,
+        horasMtto: 0,
+        horasOperativas: 0,
+        utilizacion: 0,
+        cantidadPartes: 0
+      });
+    }
+
+    const item = resultadoMap.get(modeloEquipo);
+    item.horasTotales += HORAS_TOTALES;
+    item.horasMtto += horasMtto;
+    item.horasOperativas += horasOperativas;
+    item.cantidadPartes += 1;
+
+    // 🔥 Fórmula: Utilizacion = HRS OPERATIVAS / (HORAS - HRS MTTO)
+    // CON SI.ERROR - usando try-catch
+    try {
+      const denominador = item.horasTotales - item.horasMtto;
+      
+      if (denominador === 0) {
+        item.utilizacion = 0; // 🔥 Evitar división por cero
+      } else {
+        const utilizacionActual = (item.horasOperativas / denominador) * 100;
+        item.utilizacion = Number(utilizacionActual.toFixed(2));
+      }
+    } catch (error) {
+      item.utilizacion = 0; // 🔥 como el SI.ERROR
+    }
+  });
+
+  const resultado = Array.from(resultadoMap.values());
+  // console.log('📊 UTILIZACIÓN POR EQUIPO:', resultado);
+  return resultado;
+}
+
+//GRAFICO 4 FALTA
+
+// 🔥 Método auxiliar para obtener descripción de cada código
+private obtenerDescripcionDemora(codigo: string): string {
+
+  const descripciones: { [key: string]: string } = {
+
+    '301': 'Abastecimiento de Combustible',
+    '302': 'Charla/Reparto de guardia/Traslado de personal',
+    '303': 'Despeje por Voladura',
+    '304': 'Inspección de la Labor',
+    '305': 'Lavado de Equipo',
+    '306': 'Llenado de Check List del Equipo',
+    '307': 'Refrigerio/Almuerzo',
+    '308': 'Parada Planta',
+    '309': 'Paro Sindical',
+    '310': 'Operador No Entrega su Reporte',
+    '311': 'Incidente/Accidente personal',
+    '312': 'Otros'
+
+  };
+
+  return descripciones[codigo] || 'DEMORA DESCONOCIDA';
+}
+
+//GRAFICO 6 - UTILIZACIÓN POR DÍA
+  UtilizacionPorDia() {
+    return this.calcularUtilizacionBasePorDia(this.operacionesFiltradas, true);
+  }
+
+  UtilizacionPorSemana() {
+    return this.calcularUtilizacionPorPeriodoVisual('SEMANA');
+  }
+
+  UtilizacionPorMes() {
+    return this.calcularUtilizacionPorPeriodoVisual('MES');
+  }
+
+  private calcularUtilizacionPorPeriodoVisual(tipo: 'SEMANA' | 'MES') {
+    const resultadoMap = this.crearPeriodosVisiblesUtilizacion(tipo);
+
+    // Usa data original para que fechaInicio y fechaFin NO afecten el cálculo
+    // Solo filtro por turno, si corresponde
+    const dataCalculo = this.filtrarSoloPorTurno(this.operacionesOriginal);
+
+    const datosPorDia = this.calcularUtilizacionBasePorDia(dataCalculo, false);
+
+    datosPorDia.forEach((dia) => {
+      const periodo = obtenerPeriodoDesdeKey(dia.key, tipo);
+
+      if (!periodo) return;
+
+      // Solo se muestran semanas/meses que están dentro del rango visual seleccionado
+      if (!resultadoMap.has(periodo.key)) return;
+
+      const item = resultadoMap.get(periodo.key);
+
+      item.horasTotales += Number(dia.horasTotales || 0);
+      item.horasMtto += Number(dia.horasMtto || 0);
+      item.horasDisponibles += Number(dia.horasDisponibles || 0);
+      item.horasOperativas += Number(dia.horasOperativas || 0);
+
+      item.cantidadOperaciones += Number(dia.cantidadOperaciones || 0);
+      item.cantidadRegistros += Number(dia.cantidadRegistros || 0);
+      item.cantidadRegistrosOperativos += Number(
+        dia.cantidadRegistrosOperativos || 0,
+      );
+      item.cantidadRegistrosMtto += Number(dia.cantidadRegistrosMtto || 0);
+
+      if (dia.horasDisponibles > 0) {
+        item.sumaUtilizacion += Number(dia.utilizacion || 0);
+        item.cantidadDiasConDatos += 1;
+      }
+    });
+
+    const resultado = Array.from(resultadoMap.values()).map((item) => {
+      if (item.cantidadDiasConDatos > 0) {
+        item.utilizacion = Number(
+          (item.sumaUtilizacion / item.cantidadDiasConDatos).toFixed(2),
+        );
+      } else {
+        item.utilizacion = 0;
+      }
+
+      item.sumaUtilizacion = Number(item.sumaUtilizacion.toFixed(2));
+      item.horasTotales = Number(item.horasTotales.toFixed(2));
+      item.horasMtto = Number(item.horasMtto.toFixed(2));
+      item.horasDisponibles = Number(item.horasDisponibles.toFixed(2));
+      item.horasOperativas = Number(item.horasOperativas.toFixed(2));
+
+      return item;
+    });
+
+    resultado.sort((a, b) => a.key.localeCompare(b.key));
+
+    return resultado;
+  }
+  private calcularUtilizacionBasePorDia(
+    dataOperaciones: OperacionBaseScoop[],
+    usarRangoFechas: boolean,
+  ) {
+    const resultadoMap = new Map<string, any>();
+
+    // Solo para el gráfico por día: crear todos los días del rango seleccionado
+    if (usarRangoFechas && this.fechaInicio && this.fechaFin) {
+      const diasRango = generarDiasEntreFechas(this.fechaInicio, this.fechaFin);
+
+      diasRango.forEach((dia) => {
+        resultadoMap.set(dia.key, {
+          key: dia.key,
+          periodo: dia.label,
+
+          horasTotales: 0,
+          horasMtto: 0,
+          horasDisponibles: 0,
+          horasOperativas: 0,
+          utilizacion: 0,
+
+          cantidadOperaciones: 0,
+          cantidadRegistros: 0,
+          cantidadRegistrosOperativos: 0,
+          cantidadRegistrosMtto: 0,
+        });
+      });
+    }
+
+    dataOperaciones.forEach((op) => {
+      const registrosArray = op.registros;
+
+      if (!Array.isArray(registrosArray)) return;
+
+      const fecha = op.fecha;
+
+      if (!fecha) return;
+
+      const periodo = obtenerPeriodo(fecha, 'DIA');
+
+      if (!periodo) return;
+
+      if (!resultadoMap.has(periodo.key)) {
+        resultadoMap.set(periodo.key, {
+          key: periodo.key,
+          periodo: periodo.label,
+
+          horasTotales: 0,
+          horasMtto: 0,
+          horasDisponibles: 0,
+          horasOperativas: 0,
+          utilizacion: 0,
+
+          cantidadOperaciones: 0,
+          cantidadRegistros: 0,
+          cantidadRegistrosOperativos: 0,
+          cantidadRegistrosMtto: 0,
+        });
+      }
+
+      const item = resultadoMap.get(periodo.key);
+
+      item.cantidadOperaciones += 1;
+
+      for (const registro of registrosArray) {
+        if (!registro.hora_inicio || !registro.hora_final) continue;
+
+        const horas = this.calcularDuracionHoras(
+          registro.hora_inicio,
+          registro.hora_final,
+        );
+
+        if (!horas || horas <= 0) continue;
+
+        const estado = String(registro.estado || '')
+          .trim()
+          .toUpperCase();
+
+        const codigo = String(registro.codigo || '').trim();
+
+        item.horasTotales += horas;
+        item.cantidadRegistros += 1;
+
+        if (estado === 'MANTENIMIENTO') {
+          item.horasMtto += horas;
+          item.cantidadRegistrosMtto += 1;
+        }
+
+        if (this.CODIGOS_OPERATIVOS.includes(codigo)) {
+          item.horasOperativas += horas;
+          item.cantidadRegistrosOperativos += 1;
+        }
+      }
+    });
+
+    const resultado = Array.from(resultadoMap.values()).map((item) => {
+      item.horasDisponibles = item.horasTotales - item.horasMtto;
+
+      if (item.horasDisponibles > 0) {
+        item.utilizacion = Number(
+          ((item.horasOperativas / item.horasDisponibles) * 100).toFixed(2),
+        );
+      } else {
+        item.utilizacion = 0;
+      }
+
+      item.horasTotales = Number(item.horasTotales.toFixed(2));
+      item.horasMtto = Number(item.horasMtto.toFixed(2));
+      item.horasDisponibles = Number(item.horasDisponibles.toFixed(2));
+      item.horasOperativas = Number(item.horasOperativas.toFixed(2));
+
+      return item;
+    });
+
+    resultado.sort((a, b) => a.key.localeCompare(b.key));
+
+    return resultado;
+  }
+  private crearPeriodosVisiblesUtilizacion(tipo: 'SEMANA' | 'MES') {
+    const resultadoMap = new Map<string, any>();
+
+    if (!this.fechaInicio || !this.fechaFin) {
+      return resultadoMap;
+    }
+
+    const diasRango = generarDiasEntreFechas(this.fechaInicio, this.fechaFin);
+
+    diasRango.forEach((dia) => {
+      const periodo = obtenerPeriodoDesdeKey(dia.key, tipo);
+
+      if (!periodo) return;
+
+      if (!resultadoMap.has(periodo.key)) {
+        resultadoMap.set(periodo.key, {
+          key: periodo.key,
+          periodo: periodo.label,
+          anio: periodo.anio || null,
+          fechaInicio: periodo.fechaInicio || null,
+          fechaFin: periodo.fechaFin || null,
+
+          sumaUtilizacion: 0,
+          utilizacion: 0,
+
+          // días que entran en el rango visual seleccionado
+          cantidadDiasRango: 0,
+
+          // días reales con datos usados para el promedio
+          cantidadDiasConDatos: 0,
+
+          horasTotales: 0,
+          horasMtto: 0,
+          horasDisponibles: 0,
+          horasOperativas: 0,
+
+          cantidadOperaciones: 0,
+          cantidadRegistros: 0,
+          cantidadRegistrosOperativos: 0,
+          cantidadRegistrosMtto: 0,
+        });
+      }
+
+      const item = resultadoMap.get(periodo.key);
+      item.cantidadDiasRango += 1;
+    });
+
+    return resultadoMap;
+  }
+  private filtrarSoloPorTurno(data: OperacionBaseScoop[]) {
+    return data.filter((op) => {
+      if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
+      return true;
+    });
+  }
+
+//GRAFICO - UTILIZACIÓN POR SECCIÓN (CON DETALLES)
+UtilizacionPorSeccionDetallada() {
+  const resultadoMap = new Map<string, any>();
+
+  this.operacionesFiltradas.forEach((op) => {
+    const seccion = op.seccion;
+    if (!seccion) return;
+    
+    const HORAS_TOTALES = 12;
+    let horasMtto = 0;
+    let horasOperativas = 0;
+    let totalCucharas = 0;
+
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    for (const registro of registrosArray) {
+      const horas = this.calcularDuracionHoras(
+        registro.hora_inicio,
+        registro.hora_final!
+      );
+
+      if (registro.estado === 'MANTENIMIENTO') {
+        horasMtto += horas;
+      }
+      
+      if (registro.estado === 'OPERATIVO') {
+        horasOperativas += horas;
+        
+        // 🔥 Contar cucharas operativas
+        const n_cucharas = registro.operacion?.n_cucharas;
+        if (n_cucharas && !isNaN(Number(n_cucharas))) {
+          totalCucharas += Number(n_cucharas);
+        }
+      }
+    }
+
+    horasMtto = Math.min(horasMtto, HORAS_TOTALES);
+    horasOperativas = Math.min(horasOperativas, HORAS_TOTALES);
+
+    if (!resultadoMap.has(seccion)) {
+      resultadoMap.set(seccion, {
+        seccion: seccion,
+        horasTotales: 0,
+        horasMtto: 0,
+        horasOperativas: 0,
+        totalCucharas: 0,
+        utilizacion: 0,
+        cantidadOperaciones: 0,
+        cantidadEquipos: new Set() // Para contar equipos únicos
+      });
+    }
+
+    const item = resultadoMap.get(seccion);
+    item.horasTotales += HORAS_TOTALES;
+    item.horasMtto += horasMtto;
+    item.horasOperativas += horasOperativas;
+    item.totalCucharas += totalCucharas;
+    item.cantidadOperaciones += 1;
+    item.cantidadEquipos.add(`${op.equipo}-${op.n_equipo}`);
+
+    // 🔥 Calcular utilización
+    const denominador = item.horasTotales - item.horasMtto;
+    if (denominador > 0) {
+      item.utilizacion = Number(((item.horasOperativas / denominador) * 100).toFixed(2));
+    }
+  });
+
+  // 🔥 Convertir Set a número
+  const resultado = Array.from(resultadoMap.values())
+    .map(item => ({
+      ...item,
+      cantidadEquipos: item.cantidadEquipos.size
+    }))
+    .sort((a, b) => a.seccion.localeCompare(b.seccion));
+
+  //console.log('📊 UTILIZACIÓN POR SECCIÓN DETALLADA:', resultado);
+  return resultado;
+}
+
+//=========================================
+//HOJA 3
+//|=========================================
+
+
+
+
+
+//=========================================
+//HOJA 4
+//|=========================================
+DisponibilidadPorOperador() {
+  const resultadoMap = new Map<string, any>();
+
+  this.operacionesFiltradas.forEach((op) => {
+    const operador = op.operador || 'SIN OPERADOR';
+    const HORAS_TOTALES = 12;
+    let horasMtto = 0;
+
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    for (const registro of registrosArray) {
+      if (registro.estado !== 'MANTENIMIENTO') continue;
+      const horas = this.calcularDuracionHoras(
+        registro.hora_inicio,
+        registro.hora_final!
+      );
+      horasMtto += horas;
+    }
+
+    horasMtto = Math.min(horasMtto, HORAS_TOTALES);
+
+    if (!resultadoMap.has(operador)) {
+      resultadoMap.set(operador, {
+        operador,
+        horasTotales: 0,
+        horasMtto: 0,
+        disponibilidad: 0,
+        cantidadOperaciones: 0
+      });
+    }
+
+    const item = resultadoMap.get(operador);
+    item.horasTotales += HORAS_TOTALES;
+    item.horasMtto += horasMtto;
+    item.cantidadOperaciones += 1;
+
+    try {
+      const disponibilidadActual = ((item.horasTotales - item.horasMtto) / item.horasTotales) * 100;
+      item.disponibilidad = Number(disponibilidadActual.toFixed(2));
+    } catch (error) {
+      item.disponibilidad = 0;
+    }
+  });
+
+  const resultado = Array.from(resultadoMap.values())
+    .sort((a, b) => b.disponibilidad - a.disponibilidad); // Ordenar por mejor disponibilidad
+
+  //console.log('📊 DISPONIBILIDAD POR OPERADOR:', resultado);
+  return resultado;
+}
+
+//=========================================
+//HOJA 6
+//|=========================================
+
+//GRAFICO - HORAS POR OBSERVACIÓN
+HorasPorObservacion() {
+  const resultadoMap = new Map<string, any>();
+
+  // 🔥 Códigos de actividad permitidos (opcional, puedes quitarlos si quieres todas)
+  const codigosPermitidos = [
+  '301',
+  '302',
+  '303',
+  '304',
+  '305',
+  '306',
+  '307',
+  '308',
+  '309',
+  '310',
+  '311',
+  '312'
+];
+  
+  // 🔥 Estados que quieres considerar (puedes ajustar según necesites)
+  const estadosPermitidos = ['DEMORA'];
+
+  this.operacionesFiltradas.forEach((op) => {
+    const HORAS_TOTALES = 12;
+    
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    for (const registro of registrosArray) {
+      
+      // 🔥 Filtrar por estado si es necesario
+      const estado = registro.estado || '';
+      if (!estadosPermitidos.includes(estado)) continue;
+      
+      // 🔥 Filtrar por código si es necesario
+      const codigo = registro.codigo || '';
+      if (!codigosPermitidos.includes(codigo)) continue;
+      
+      // 🔥 Obtener la observación de la operación
+      const observacion = registro.operacion?.observaciones || 'SIN OBSERVACIÓN';
+      
+      // 🔥 Si la observación está vacía o es solo espacios, la tratamos como "SIN OBSERVACIÓN"
+      const observacionTrim = observacion.trim();
+      const claveObservacion = observacionTrim === '' ? 'SIN OBSERVACIÓN' : observacionTrim;
+      
+      // 🔥 Calcular horas
+      let horas = this.calcularDuracionHoras(
+        registro.hora_inicio,
+        registro.hora_final!
+      );
+      
+      // 🔥 Limitar horas al total disponible (máximo 12 por operación)
+      horas = Math.min(horas, HORAS_TOTALES);
+      
+      // 🔥 Crear o actualizar item en el mapa
+      if (!resultadoMap.has(claveObservacion)) {
+        resultadoMap.set(claveObservacion, {
+          observacion: claveObservacion,
+          horasTotales: 0,
+          cantidadRegistros: 0,
+          cantidadOperaciones: 0,
+          // 🔥 Para tracking adicional
+          codigosRelacionados: new Set(),
+          estadosRelacionados: new Set()
+        });
+      }
+      
+      const item = resultadoMap.get(claveObservacion);
+      item.horasTotales += horas;
+      item.cantidadRegistros += 1;
+      item.codigosRelacionados.add(codigo);
+      item.estadosRelacionados.add(estado);
+    }
+  });
+  
+  // 🔥 Agregar operaciones únicas al final (contar operaciones distintas)
+  // Esto se hace después de procesar todos los registros
+  const resultado = Array.from(resultadoMap.values())
+    .map(item => ({
+      ...item,
+      cantidadOperaciones: item.cantidadRegistros, // o podrías calcular operaciones únicas
+      codigosRelacionados: Array.from(item.codigosRelacionados),
+      estadosRelacionados: Array.from(item.estadosRelacionados)
+    }))
+    .sort((a, b) => b.horasTotales - a.horasTotales)
+    .map(item => ({
+      ...item,
+      horasTotales: Number(item.horasTotales.toFixed(2))
+    }));
+  
+  //console.log('📊 HORAS POR OBSERVACIÓN:', resultado);
+  return resultado;
+}
+DisponibilidadPorGuardia() {
+  const resultadoMap = new Map<string, any>();
+
+  this.operacionesFiltradas.forEach((op) => {
+    const guardia = op.seccion || 'SIN GUARDIA';
+    const key = guardia;
+
+    const registrosArray = op.registros;
+
+    if (!Array.isArray(registrosArray)) return;
+
+    let horasTotalesOperacion = 0;
+    let horasMttoOperacion = 0;
+
+    for (const registro of registrosArray) {
+      if (!registro.hora_inicio || !registro.hora_final) continue;
+
+      const horas = this.calcularDuracionHoras(
+        registro.hora_inicio,
+        registro.hora_final
+      );
+
+      if (!horas || horas <= 0) continue;
+
+      // Suma todas las horas del registro
+      horasTotalesOperacion += horas;
+
+      // Solo suma como mantenimiento si el estado es MANTENIMIENTO
+      if ((registro.estado || '').trim().toUpperCase() === 'MANTENIMIENTO') {
+        horasMttoOperacion += horas;
+      }
+    }
+
+    if (!resultadoMap.has(key)) {
+      resultadoMap.set(key, {
+        guardia: key,
+        horasTotales: 0,
+        horasMtto: 0,
+        horasOperativas: 0,
+        disponibilidad: 0,
+        cantidadOperaciones: 0
+      });
+    }
+
+    const item = resultadoMap.get(key);
+
+    item.horasTotales += horasTotalesOperacion;
+    item.horasMtto += horasMttoOperacion;
+    item.horasOperativas = item.horasTotales - item.horasMtto;
+    item.cantidadOperaciones += 1;
+  });
+
+  const resultado = Array.from(resultadoMap.values()).map((item) => {
+    if (item.horasTotales > 0) {
+      const disponibilidad =
+        ((item.horasTotales - item.horasMtto) / item.horasTotales) * 100;
+
+      item.disponibilidad = Number(disponibilidad.toFixed(2));
+      item.horasTotales = Number(item.horasTotales.toFixed(2));
+      item.horasMtto = Number(item.horasMtto.toFixed(2));
+      item.horasOperativas = Number(item.horasOperativas.toFixed(2));
+    } else {
+      item.disponibilidad = 0;
+    }
+
+    return item;
+  });
+
+  resultado.sort((a, b) => b.disponibilidad - a.disponibilidad);
+
+  //console.log('📊 DISPONIBILIDAD POR GUARDIA:', resultado);
+
+  return resultado;
+}
+
+
+UtilizacionGuardia() {
+  const resultadoMap = new Map<string, any>();
+
+  const CODIGOS_OPERATIVOS = ['101', '102', '105', '106', '108'];
+
+  this.operacionesFiltradas.forEach((op) => {
+    const guardia = op.seccion || 'SIN GUARDIA';
+
+    const key = guardia;
+
+    const registrosArray = op.registros;
+
+    if (!Array.isArray(registrosArray)) return;
+
+    if (!resultadoMap.has(key)) {
+      resultadoMap.set(key, {
+        guardia,
+        horasTotales: 0,
+        horasMtto: 0,
+        horasDisponibles: 0,
+        horasOperativas: 0,
+        utilizacion: 0,
+        cantidadOperaciones: 0,
+        cantidadRegistrosOperativos: 0,
+        cantidadRegistrosMtto: 0
+      });
+    }
+
+    const item = resultadoMap.get(key);
+
+    item.cantidadOperaciones += 1;
+
+    for (const registro of registrosArray) {
+      if (!registro.hora_inicio || !registro.hora_final) continue;
+
+      const horas = this.calcularDuracionHoras(
+        registro.hora_inicio,
+        registro.hora_final
+      );
+
+      if (!horas || horas <= 0) continue;
+
+      const estado = String(registro.estado || '')
+        .trim()
+        .toUpperCase();
+
+      const codigo = String(registro.codigo || '')
+        .trim();
+
+      // SUMA(HORAS): todas las horas de todos los registros
+      item.horasTotales += horas;
+
+      // SUMA(HRS MANTENIMIENTO)
+      if (estado === 'MANTENIMIENTO') {
+        item.horasMtto += horas;
+        item.cantidadRegistrosMtto += 1;
+      }
+
+      // SUMA(HRS OPERATIVAS): solo códigos productivos
+      if (CODIGOS_OPERATIVOS.includes(codigo)) {
+        item.horasOperativas += horas;
+        item.cantidadRegistrosOperativos += 1;
+      }
+    }
+  });
+
+  const resultado = Array.from(resultadoMap.values()).map((item) => {
+    item.horasDisponibles = item.horasTotales - item.horasMtto;
+
+    if (item.horasDisponibles > 0) {
+      const utilizacion =
+        (item.horasOperativas / item.horasDisponibles) * 100;
+
+      item.utilizacion = Number(utilizacion.toFixed(2));
+    } else {
+      item.utilizacion = 0;
+    }
+
+    item.horasTotales = Number(item.horasTotales.toFixed(2));
+    item.horasMtto = Number(item.horasMtto.toFixed(2));
+    item.horasDisponibles = Number(item.horasDisponibles.toFixed(2));
+    item.horasOperativas = Number(item.horasOperativas.toFixed(2));
+
+    return item;
+  });
+
+  resultado.sort((a, b) => b.utilizacion - a.utilizacion);
+
+  //console.log('📊 UTILIZACIÓN POR GUARDIA:', resultado);
+
+  return resultado;
+}
+
+//=========================================
+//HOJA 7
+//|=========================================
+
+//GRAFICO - HORAS DE DEMORA POR CÓDIGO (OPERATIVAS Y NO OPERATIVAS)
+HorasDemoraPorCodigoCompleto() {
+  const resultadoMap = new Map<string, any>();
+
+  // 🔥 Códigos de demora NO OPERATIVAS
+  const codigosDemoraNoOperativa = [
+    '301', '302', '303', '304', '305', '306',
+    '307', '308', '309', '310', '311', '312'
+  ];
+  
+  // 🔥 Códigos de demora OPERATIVAS (problemas con equipos)
+  const codigosDemoraOperativa = [
+  '401', '402', '403', '404', '405', '406',
+  '407', '408', '409', '410', '411', '412'
+];
+  // 🔥 Unir todos los códigos de demora
+  const todosCodigosDemora = [...codigosDemoraNoOperativa, ...codigosDemoraOperativa];
+  
+  // 🔥 Estados que quieres considerar
+  const estadosPermitidos = ['DEMORA'];
+
+  this.operacionesFiltradas.forEach((op) => {
+    const HORAS_TOTALES = 12;
+    
+    const registrosArray = op.registros;
+    if (!Array.isArray(registrosArray)) return;
+
+    for (const registro of registrosArray) {
+      
+      // 🔥 Filtrar por estado
+      const estado = registro.estado || '';
+      if (!estadosPermitidos.includes(estado)) continue;
+      
+      // 🔥 Filtrar por código de demora
+      const codigo = registro.codigo || '';
+      if (!todosCodigosDemora.includes(codigo)) continue;
+      
+      // 🔥 Determinar tipo de demora
+      const tipoDemora = codigosDemoraNoOperativa.includes(codigo) 
+        ? 'NO OPERATIVA' 
+        : 'OPERATIVA';
+      
+      // 🔥 Calcular horas
+      let horas = this.calcularDuracionHoras(
+        registro.hora_inicio,
+        registro.hora_final!
+      );
+      
+      horas = Math.min(horas, HORAS_TOTALES);
+      
+      if (!resultadoMap.has(codigo)) {
+        resultadoMap.set(codigo, {
+          codigo: codigo,
+          tipoDemora: tipoDemora,
+          horasDemora: 0,
+          cantidadRegistros: 0,
+          descripcion: this.obtenerDescripcionCompleta(codigo, tipoDemora),
+          equiposRelacionados: new Set()
+        });
+      }
+      
+      const item = resultadoMap.get(codigo);
+      item.horasDemora += horas;
+      item.cantidadRegistros += 1;
+      item.equiposRelacionados.add(`${op.equipo}-${op.n_equipo}`);
+    }
+  });
+  
+  const resultado = Array.from(resultadoMap.values())
+    .map(item => ({
+      ...item,
+      equiposRelacionados: Array.from(item.equiposRelacionados)
+    }))
+    .sort((a, b) => b.horasDemora - a.horasDemora)
+    .map(item => ({
+      ...item,
+      horasDemora: Number(item.horasDemora.toFixed(2))
+    }));
+  
+  //console.log('📊 HORAS DE DEMORA POR CÓDIGO COMPLETO:', resultado);
+  return resultado;
+}
+
+private obtenerDescripcionCompleta(codigo: string, tipoDemora: string): string {
+  const descripciones: { [key: string]: string } = {
+    // OPERATIVAS (equipo)
+    '401': 'ESPERA DE ORDEN DE TRABAJO/EVALUACIÓN GEOMECÁNICA',
+    '402': 'ESPERA POR CONDICIÓN DE LABOR',
+    '403': 'ESPERA DE VOLQUETE',
+    '404': 'ESPERA TRASLADO DE PERSONAL',
+    '405': 'FALTA DE COMBUSTIBLE',
+    '406': 'FALTA DE ILUMINACIÓN',
+    '407': 'FALTA DE OPERADOR',
+    '408': 'FALTA DE VENTILACIÓN',
+    '409': 'OBSTRUCCIÓN DE VÍAS-MATERIAL/EQUIPO',
+    '410': 'STAND BY',
+    '411': 'OTROS',
+    '412': 'SIN ÁREA DE TRABAJO',
+    
+    // NO OPERATIVAS (externas)
+    '301': 'ABASTECIMIENTO DE COMBUSTIBLE',
+    '302': 'CHARLA/REPARTO DE GUARDIA/TRASLADO DE PERSONAL',
+    '303': 'DESPEJE POR VOLADURA',
+    '304': 'INSPECCIÓN DE LA LABOR',
+    '305': 'LAVADO DE EQUIPO',
+    '306': 'LLENADO DE CHECK LIST DEL EQUIPO',
+    '307': 'REFRIGERIO/ALMUERZO',
+    '308': 'PARADA PLANTA',
+    '309': 'PARO SINDICAL',
+    '310': 'OPERADOR NO ENTREGA SU REPORTE',
+    '311': 'INCIDENTE/ACCIDENTE PERSONAL',
+    '312': 'OTROS'
+  };
+  
+  return descripciones[codigo] || `CÓDIGO ${codigo} - ${tipoDemora}`;
+}
+
+
+//=========================================
+//HOJA 8
+//|=========================================
+
+//GRAFICO - MTBF POR EQUIPO (Mean Time Between Failures)
+  MTTRPorEquipo() {
     const resultadoMap = new Map<string, any>();
 
     this.operacionesFiltradas.forEach((op) => {
-      const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
-      const seccion = op.seccion || 'SIN_SECCION';
+      const equipo = op.equipo || 'SIN EQUIPO';
+      const nEquipo = op.n_equipo || 'SIN N° EQUIPO';
+      const modeloEquipo = op.modelo_equipo || nEquipo;
+
+      const key = modeloEquipo;
 
       const registrosArray = op.registros;
+
+      if (!Array.isArray(registrosArray)) return;
+
+      if (!resultadoMap.has(key)) {
+        resultadoMap.set(key, {
+          equipo,
+          n_equipo: nEquipo,
+          modelo_equipo: modeloEquipo,
+
+          horasMttoCorrectivo: 0,
+          fallas: 0,
+          mttr: 0,
+
+          cantidadOperaciones: 0,
+          cantidadRegistros: 0,
+          cantidadRegistrosMttoCorrectivo: 0,
+        });
+      }
+
+      const item = resultadoMap.get(key);
+
+      item.cantidadOperaciones += 1;
+
+      for (const registro of registrosArray) {
+        const codigo = String(registro.codigo || '').trim();
+        const estado = String(registro.estado || '')
+          .trim()
+          .toUpperCase();
+
+        if (!registro.hora_inicio || !registro.hora_final) continue;
+
+        const horas = this.calcularDuracionHoras(
+          registro.hora_inicio,
+          registro.hora_final,
+        );
+
+        if (!horas || horas <= 0) continue;
+
+        item.cantidadRegistros += 1;
+
+        if (this.esMantenimientoCorrectivo(codigo)) {
+          item.horasMttoCorrectivo += horas;
+
+          // Cada registro de mantenimiento correctivo cuenta como una falla
+          item.fallas += 1;
+
+          item.cantidadRegistrosMttoCorrectivo += 1;
+        }
+      }
+    });
+
+    const resultado = Array.from(resultadoMap.values()).map((item) => {
+      if (item.fallas > 0) {
+        item.mttr = Number((item.horasMttoCorrectivo / item.fallas).toFixed(2));
+      } else {
+        item.mttr = 0;
+      }
+
+      item.horasMttoCorrectivo = Number(item.horasMttoCorrectivo.toFixed(2));
+
+      return item;
+    });
+
+    resultado.sort((a, b) => b.mttr - a.mttr);
+
+    return resultado;
+  }
+  MTBFPorEquipo() {
+    const resultadoMap = new Map<string, any>();
+
+    this.operacionesFiltradas.forEach((op) => {
+      const equipo = op.equipo || 'SIN EQUIPO';
+      const nEquipo = op.n_equipo || 'SIN N° EQUIPO';
+      const modeloEquipo = op.modelo_equipo || nEquipo;
+
+      const key = modeloEquipo;
+
+      const registrosArray = op.registros;
+
+      if (!Array.isArray(registrosArray)) return;
+
+      if (!resultadoMap.has(key)) {
+        resultadoMap.set(key, {
+          equipo,
+          n_equipo: nEquipo,
+          modelo_equipo: modeloEquipo,
+
+          horasTotales: 0,
+          horasMttoCorrectivo: 0,
+          horasSinMttoCorrectivo: 0,
+
+          fallas: 0,
+          mtbf: 0,
+
+          cantidadOperaciones: 0,
+          cantidadRegistros: 0,
+          cantidadRegistrosMttoCorrectivo: 0,
+        });
+      }
+
+      const item = resultadoMap.get(key);
+
+      item.cantidadOperaciones += 1;
+
+      for (const registro of registrosArray) {
+        const codigo = String(registro.codigo || '').trim();
+        const estado = String(registro.estado || '')
+          .trim()
+          .toUpperCase();
+
+        if (!registro.hora_inicio || !registro.hora_final) continue;
+
+        const horas = this.calcularDuracionHoras(
+          registro.hora_inicio,
+          registro.hora_final,
+        );
+
+        if (!horas || horas <= 0) continue;
+
+        // SUMA(BD_JUMBOS[HORAS])
+        item.horasTotales += horas;
+        item.cantidadRegistros += 1;
+
+        // SUMA(BD_JUMBOS[Hrs. Mtto. Correctivo])
+        if (this.esMantenimientoCorrectivo(codigo)) {
+          item.horasMttoCorrectivo += horas;
+
+          // SUMA(BD_JUMBOS[#FALLAS])
+          item.fallas += 1;
+
+          item.cantidadRegistrosMttoCorrectivo += 1;
+        }
+      }
+    });
+
+    const resultado = Array.from(resultadoMap.values()).map((item) => {
+      item.horasSinMttoCorrectivo =
+        item.horasTotales - item.horasMttoCorrectivo;
+
+      const divisorFallas = item.fallas === 0 ? 1 : item.fallas;
+
+      item.mtbf = Number(
+        (item.horasSinMttoCorrectivo / divisorFallas).toFixed(2),
+      );
+
+      item.horasTotales = Number(item.horasTotales.toFixed(2));
+      item.horasMttoCorrectivo = Number(item.horasMttoCorrectivo.toFixed(2));
+      item.horasSinMttoCorrectivo = Number(
+        item.horasSinMttoCorrectivo.toFixed(2),
+      );
+
+      return item;
+    });
+
+    resultado.sort((a, b) => b.mtbf - a.mtbf);
+
+    return resultado;
+  }
+
+  MTBFPorSemana() {
+    return this.calcularMTTRMTBFPorPeriodoVisual('SEMANA');
+  }
+
+  MTBFPorMes() {
+    return this.calcularMTTRMTBFPorPeriodoVisual('MES');
+  }
+
+  MTBFPorAño() {
+    return this.calcularMTTRMTBFPorPeriodoVisual('ANIO');
+  }
+
+  MTTRPorSemana() {
+    return this.calcularMTTRMTBFPorPeriodoVisual('SEMANA');
+  }
+
+  MTTRPorMes() {
+    return this.calcularMTTRMTBFPorPeriodoVisual('MES');
+  }
+
+  MTTRPorAño() {
+    return this.calcularMTTRMTBFPorPeriodoVisual('ANIO');
+  }
+
+
+
+  private calcularMTTRMTBFPorPeriodoVisual(
+  tipo: 'SEMANA' | 'MES' | 'ANIO'
+) {
+  const resultadoMap = this.crearPeriodosVisiblesMTTRMTBF(tipo);
+
+  const dataCalculo = this.operacionesOriginal;
+
+  dataCalculo.forEach((op) => {
+    const registrosArray = op.registros;
+
+    if (!Array.isArray(registrosArray)) return;
+
+    const fecha = op.fecha;
+
+    if (!fecha) return;
+
+    const periodo = this.obtenerPeriodoMTBFMTTR(fecha, tipo);
+
+    if (!periodo) return;
+
+    /**
+     * Clave:
+     * Si el mes/año no está dentro del rango visual seleccionado,
+     * no se muestra.
+     * Pero si está, el cálculo usa TODA la data original de ese mes/año.
+     */
+    if (!resultadoMap.has(periodo.key)) return;
+
+    const item = resultadoMap.get(periodo.key);
+
+    for (const registro of registrosArray) {
+      const codigo = String(registro.codigo || '').trim();
+
+      if (!registro.hora_inicio || !registro.hora_final) continue;
+
+      const horas = this.calcularDuracionHoras(
+        registro.hora_inicio,
+        registro.hora_final
+      );
+
+      if (!horas || horas <= 0) continue;
+
+      item.horasTotales += horas;
+      item.cantidadRegistros += 1;
+
+      if (this.esMantenimientoCorrectivo(codigo)) {
+        item.horasMttoCorrectivo += horas;
+        item.fallas += 1;
+        item.cantidadRegistrosMttoCorrectivo += 1;
+      }
+    }
+  });
+
+  const resultado = Array.from(resultadoMap.values()).map((item) => {
+    item.horasSinMttoCorrectivo =
+      item.horasTotales - item.horasMttoCorrectivo;
+
+    if (item.fallas > 0) {
+      item.mttr = Number(
+        (item.horasMttoCorrectivo / item.fallas).toFixed(2)
+      );
+    } else {
+      item.mttr = 0;
+    }
+
+    const divisorFallas = item.fallas === 0 ? 1 : item.fallas;
+
+    item.mtbf = Number(
+      (item.horasSinMttoCorrectivo / divisorFallas).toFixed(2)
+    );
+
+    item.horasTotales = Number(item.horasTotales.toFixed(2));
+    item.horasMttoCorrectivo = Number(item.horasMttoCorrectivo.toFixed(2));
+    item.horasSinMttoCorrectivo = Number(
+      item.horasSinMttoCorrectivo.toFixed(2)
+    );
+
+    return item;
+  });
+
+  resultado.sort((a, b) => String(a.key).localeCompare(String(b.key)));
+
+  return resultado;
+  }
+
+  private crearPeriodosVisiblesMTTRMTBF(
+    tipo: 'SEMANA' | 'MES' | 'ANIO'
+  ) {
+  const resultadoMap = new Map<string, any>();
+
+  if (!this.fechaInicio || !this.fechaFin) {
+    return resultadoMap;
+  }
+
+  const diasRango = generarDiasEntreFechas(this.fechaInicio, this.fechaFin);
+
+  diasRango.forEach((dia) => {
+    const periodo = this.obtenerPeriodoMTBFMTTR(dia.key, tipo);
+
+    if (!periodo) return;
+
+    if (!resultadoMap.has(periodo.key)) {
+      resultadoMap.set(periodo.key, {
+        key: periodo.key,
+        periodo: periodo.label,
+        anio: periodo.anio || null,
+        fechaInicio: periodo.fechaInicio || null,
+        fechaFin: periodo.fechaFin || null,
+
+        horasTotales: 0,
+        horasMttoCorrectivo: 0,
+        horasSinMttoCorrectivo: 0,
+
+        fallas: 0,
+        mttr: 0,
+        mtbf: 0,
+
+        cantidadDiasRango: 0,
+        cantidadRegistros: 0,
+        cantidadRegistrosMttoCorrectivo: 0,
+      });
+    }
+
+    const item = resultadoMap.get(periodo.key);
+    item.cantidadDiasRango += 1;
+  });
+
+  return resultadoMap;
+  }
+
+  private obtenerPeriodoMTBFMTTR(
+      fecha: string,
+      tipo: 'DIA' | 'SEMANA' | 'MES' | 'ANIO',
+    ) {
+      if (tipo === 'DIA') {
+        return obtenerPeriodo(fecha, 'DIA');
+      }
+  
+      if (tipo === 'SEMANA') {
+        return obtenerPeriodoDesdeKey(fecha, 'SEMANA');
+      }
+  
+      if (tipo === 'MES') {
+        return obtenerPeriodoDesdeKey(fecha, 'MES');
+      }
+  
+      if (tipo === 'ANIO') {
+        const date = parseFechaSimple(fecha);
+  
+        if (!date) return null;
+  
+        const anio = date.getFullYear();
+  
+        return {
+          key: `${anio}`,
+          label: `${anio}`,
+          anio,
+        };
+      }
+  
+      return null;
+    }
+  
+  private esMantenimientoCorrectivo(codigo: string): boolean {
+    return String(codigo || '').trim() === '202';
+  }
+
+  ParetoUtilizacion() {
+    const resultadoMap = new Map<string, any>();
+
+    this.operacionesFiltradas.forEach((op) => {
+      const registrosArray = op.registros;
+
       if (!Array.isArray(registrosArray)) return;
 
       for (const registro of registrosArray) {
-        if (registro.estado !== 'OPERATIVO') continue;
+        const codigo = String(registro.codigo || '').trim();
 
-        const opReg = registro.operacion || registro;
+        if (!codigo) continue;
 
-        // 🔹 n_cucharas
-        const nCucharas = Number(opReg.n_cucharas) || 0;
-        if (nCucharas <= 0) continue;
+        // Solo DEMORAS OPERATIVAS y DEMORAS NO OPERATIVAS
+        if (!this.esDemoraPorCodigo(codigo)) continue;
 
-        // 🔹 LABOR_INICIO_SC (igual a DAX)
-        const tipo = opReg.tipo_labor_inicio || '';
-        const labor = opReg.labor_inicio || '';
-        const ala = opReg.ala_inicio || '';
-        const nivel = opReg.nivel_inicio || '';
+        if (!registro.hora_inicio || !registro.hora_final) continue;
 
-        let laborConcat = `${tipo}${labor}`;
+        const horas = this.calcularDuracionHoras(
+          registro.hora_inicio,
+          registro.hora_final,
+        );
 
-        if (ala !== '') {
-          laborConcat += `-${ala}`;
+        if (!horas || horas <= 0) continue;
+
+        const actividad = this.obtenerActividadPorCodigo(codigo);
+
+        if (!resultadoMap.has(actividad)) {
+          resultadoMap.set(actividad, {
+            actividad,
+            horasDemora: 0,
+            paretoAct: 0,
+            porcentajeHoras: 0,
+            cantidadRegistros: 0,
+            codigos: new Set<string>(),
+          });
         }
 
-        if (!laborConcat || laborConcat.trim() === '') {
-          laborConcat = nivel;
-        }
+        const item = resultadoMap.get(actividad);
 
-        const laborFinal = laborConcat || 'SIN_LABOR';
+        item.horasDemora += horas;
+        item.cantidadRegistros += 1;
+        item.codigos.add(codigo);
+      }
+    });
 
-        // 🔑 clave (agrupación)
-        const key = `${seccion}|${modeloEquipo}|${laborFinal}`;
+    let resultado = Array.from(resultadoMap.values()).map((item) => {
+      item.horasDemora = Number(item.horasDemora.toFixed(2));
+      item.codigos = Array.from(item.codigos);
+      return item;
+    });
+
+    // Orden Pareto: mayor HorasDemora primero.
+    // Si empatan, orden alfabético por actividad.
+    resultado.sort((a, b) => {
+      if (b.horasDemora !== a.horasDemora) {
+        return b.horasDemora - a.horasDemora;
+      }
+
+      return String(a.actividad).localeCompare(String(b.actividad));
+    });
+
+    const totalHorasDemora = resultado.reduce(
+      (sum, item) => sum + item.horasDemora,
+      0,
+    );
+
+    let acumulado = 0;
+
+    resultado = resultado.map((item) => {
+      acumulado += item.horasDemora;
+
+      item.paretoAct =
+        totalHorasDemora > 0
+          ? Number(((acumulado / totalHorasDemora) * 100).toFixed(2))
+          : 0;
+
+      item.porcentajeHoras =
+        totalHorasDemora > 0
+          ? Number(((item.horasDemora / totalHorasDemora) * 100).toFixed(2))
+          : 0;
+
+      item.totalHorasDemora = Number(totalHorasDemora.toFixed(2));
+
+      return item;
+    });
+
+    return resultado;
+  }
+
+    ParetoDisponibilidad() {
+    const resultadoMap = new Map<string, any>();
+
+    this.operacionesFiltradas.forEach((op) => {
+      const registrosArray = op.registros;
+
+      if (!Array.isArray(registrosArray)) return;
+
+      for (const registro of registrosArray) {
+        const codigo = String(registro.codigo || '').trim();
+
+        if (!codigo) continue;
+
+        /**
+         * Solo considerar registros que afectan DISPONIBILIDAD.
+         * Normalmente son registros de MANTENIMIENTO.
+         */
+        const estadoRegistro = this.normalizarTexto(registro.estado);
+
+        const esMantenimiento =
+          estadoRegistro.includes('MANTENIMIENTO') ||
+          this.esMantenimientoPorCodigo(codigo);
+
+        if (!esMantenimiento) continue;
+
+        if (!registro.hora_inicio || !registro.hora_final) continue;
+
+        const horas = this.calcularDuracionHoras(
+          registro.hora_inicio,
+          registro.hora_final,
+        );
+
+        if (!horas || horas <= 0) continue;
+
+        const observacion = String(
+          registro.operacion?.observaciones || 'SIN OBSERVACIÓN',
+        )
+          .trim()
+          .toUpperCase();
+
+        const key = observacion || 'SIN OBSERVACIÓN';
 
         if (!resultadoMap.has(key)) {
           resultadoMap.set(key, {
-            seccion,
-            modeloEquipo,
-            labor: laborFinal,
-            totalCucharas: 0,
+            observacion: key,
+            horasGeneral: 0,
+            paretoDispObs: 0,
+            porcentajeHoras: 0,
+            totalHorasGeneral: 0,
+            cantidadRegistros: 0,
+            codigos: new Set<string>(),
           });
         }
 
-        resultadoMap.get(key).totalCucharas += nCucharas;
+        const item = resultadoMap.get(key);
+
+        item.horasGeneral += horas;
+        item.cantidadRegistros += 1;
+        item.codigos.add(codigo);
       }
     });
 
-    const resultado = Array.from(resultadoMap.values());
+    let resultado = Array.from(resultadoMap.values()).map((item) => {
+      item.horasGeneral = Number(item.horasGeneral.toFixed(2));
+      item.codigos = Array.from(item.codigos);
 
-    //console.log('📊 DATA GRAFICO SC:', resultado);
-
-    return resultado;
-  }
-
-  //Grafico 4
-  ProcesarDM_SC_UTI_SC() {
-    const mapa = new Map<string, any>();
-
-    this.operacionesFiltradas.forEach((op) => {
-      const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
-      const seccion = op.seccion || 'SIN_SECCION';
-
-      const registros = op.registros;
-      if (!Array.isArray(registros)) return;
-
-      const key = `${modeloEquipo}|${seccion}`;
-
-      if (!mapa.has(key)) {
-        mapa.set(key, {
-          modeloEquipo,
-          seccion,
-          n_operaciones: 0,
-          horas_mantenimiento: 0,
-          horas_demoras_206: 0, // Cambiado: solo demoras 206
-          horas_trabajadas: 0,
-        });
-      }
-
-      const grupo = mapa.get(key);
-
-      // 1. OPERACIONES
-      grupo.n_operaciones++;
-
-      // 2. MANTENIMIENTO (todos los mantenimientos)
-      const mantenimiento = this.calcularDuracionEstado(
-        registros,
-        'MANTENIMIENTO',
-      );
-      grupo.horas_mantenimiento += mantenimiento;
-
-      // 3. DEMORA solo código 206 (igual que Power BI)
-      const demoras206 = this.calcularDuracionEstado(
-        registros,
-        'DEMORA',
-        '206',
-      );
-      grupo.horas_demoras_206 += demoras206;
-
-      // 4. HORAS TRABAJADAS (Diferencia Diesel como en Power BI)
-      const horasTrabajadas = this.calcularHorasTrabajadas(op);
-      grupo.horas_trabajadas += horasTrabajadas;
+      return item;
     });
 
-    const resultado = Array.from(mapa.values()).map((item) => {
-      const HayRegistros = item.n_operaciones > 0;
-
-      // Horas programadas: N_operaciones * 10
-      const HorasProgramadas = item.n_operaciones * 10;
-
-      // SC_Duracion_MANTENIMIENTO + SC_Duracion_DEMORAS (solo código 206)
-      const HorasMantenimiento =
-        item.horas_mantenimiento + item.horas_demoras_206;
-
-      // Ajuste: si HorasMantenimiento = 0, usar 0.5 * n_operaciones
-      const HorasMantenimientoAjustado =
-        HorasMantenimiento === 0
-          ? 0.5 * item.n_operaciones
-          : HorasMantenimiento;
-
-      // =========================================================
-      // DM_SC (igual que Power BI)
-      // =========================================================
-      let DM_SC = null;
-
-      if (HayRegistros && HorasProgramadas > 0) {
-        DM_SC =
-          (HorasProgramadas - HorasMantenimientoAjustado) / HorasProgramadas;
+    /**
+     * Mismo criterio que tu DAX:
+     * [Horas General] > curHoras
+     * o empate por observación alfabética.
+     */
+    resultado.sort((a, b) => {
+      if (b.horasGeneral !== a.horasGeneral) {
+        return b.horasGeneral - a.horasGeneral;
       }
 
-      // =========================================================
-      // UTI_SC (igual que Power BI)
-      // =========================================================
-      const denominador = HorasProgramadas - HorasMantenimientoAjustado;
-
-      let UTI_SC = null;
-
-      if (HayRegistros && denominador > 0) {
-        UTI_SC = item.horas_trabajadas / denominador;
-      }
-
-      return {
-        modeloEquipo: item.modeloEquipo,
-        seccion: item.seccion,
-        DM_SC: DM_SC !== null ? Number(DM_SC.toFixed(4)) : null,
-        UTI_SC: UTI_SC !== null ? Number(UTI_SC.toFixed(4)) : null,
-        HorasProgramadas: HorasProgramadas,
-        HorasMantenimiento: Number(HorasMantenimiento.toFixed(2)),
-        HorasMantenimientoAjustado: Number(
-          HorasMantenimientoAjustado.toFixed(2),
-        ),
-        HorasTrabajadas: Number(item.horas_trabajadas.toFixed(2)),
-        Operaciones: item.n_operaciones,
-      };
+      return String(a.observacion).localeCompare(String(b.observacion));
     });
 
-    //console.log('📊 DM_SC + UTI_SC:', resultado);
-    return resultado;
-  }
+    const totalHorasGeneral = resultado.reduce(
+      (sum, item) => sum + Number(item.horasGeneral || 0),
+      0,
+    );
 
-  calcularDuracionEstado(registros: any[], estado: string, codigo?: string) {
-    let total = 0;
-
-    for (const r of registros) {
-      if (r.estado !== estado) continue;
-
-      if (codigo && r.codigo !== codigo) continue;
-
-      const inicio = r.hora_inicio;
-      const fin = r.hora_final;
-
-      if (!inicio || !fin) continue;
-
-      const diff = this.calcularHoras(inicio, fin);
-      total += diff;
-    }
-
-    return total;
-  }
-
-  calcularHorasTrabajadas(op: any) {
-    // ⚠️ IMPORTANTE: Las horas trabajadas son la diferencia de horometros
-    // NO la suma de duraciones de estados OPERATIVOS
-
-    const horometros = op.horometros?.horometro;
-
-    if (!horometros) return 0;
-
-    const inicio = horometros.inicio;
-    const fin = horometros.final;
-
-    if (inicio === undefined || fin === undefined) return 0;
-
-    // Diferencia Diesel como en Power BI
-    const diferencia = Number((fin - inicio).toFixed(2));
-
-    //console.log('Horas trabajadas (Diferencia Diesel):', diferencia);
-
-    return diferencia;
-  }
-
-  calcularHoras(inicio: string, fin: string) {
-    const [hi, mi] = inicio.split(':').map(Number);
-    const [hf, mf] = fin.split(':').map(Number);
-
-    const diff = (hf * 60 + mf - (hi * 60 + mi)) / 60;
-
-    // Redondear a 2 decimales para mantener consistencia
-    return Number(diff.toFixed(2));
-  }
-
-  //Grafico 5
-  procesarDemorasOperativas() {
-    const mapa = new Map<string, any>();
-    const tiposEstados = this.getTiposEstadosSOS(); // Obtiene SOLO los 8 estados
-    const equiposUnicos = new Set<string>();
-
-    // 🔥 Lista de códigos permitidos (solo estos 8)
-    const codigosPermitidos = new Set([
-      '201',
-      '202',
-      '203',
-      '204',
-      '205',
-      '207',
-      '208',
-      '211',
-    ]);
-
-    this.operacionesFiltradas.forEach((op) => {
-      const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
-
-      // DISTINCTCOUNT
-      if (modeloEquipo) {
-        equiposUnicos.add(modeloEquipo);
-      }
-
-      const registros = op.registros;
-      if (!Array.isArray(registros)) return;
-
-      registros.forEach((r) => {
-        // 🔥 FILTRO CRÍTICO: Solo procesar si el código está en la lista permitida
-        if (!codigosPermitidos.has(r.codigo)) return;
-
-        const tipo = tiposEstados[r.codigo];
-        if (!tipo) return; // Por seguridad, aunque debería existir
-
-        const duracion = this.calcularDuracionHoras(
-          r.hora_inicio,
-          r.hora_final,
-        );
-        if (!duracion || duracion <= 0) return;
-
-        if (mapa.has(tipo)) {
-          mapa.get(tipo).horas += duracion;
-        } else {
-          mapa.set(tipo, {
-            tipo_estado: tipo,
-            horas: duracion,
-          });
-        }
-      });
-    });
-
-    const nEquipos = equiposUnicos.size;
-
-    // Convertir a array (ya solo contiene los 8 estados filtrados)
-    let resultado = Array.from(mapa.values())
-      .filter((x) => x.horas > 0)
-      .map((x) => ({
-        tipo_estado: x.tipo_estado,
-        horas: x.horas,
-        promedio: nEquipos > 0 ? x.horas / nEquipos : 0,
-      }));
-
-    // RANKX DESC (solo entre los 8 estados)
-    resultado.sort((a, b) => b.horas - a.horas);
-
-    // RANK DENSE
-    let rank = 1;
-    resultado = resultado.map((item, index, arr) => {
-      if (index > 0 && item.horas < arr[index - 1].horas) {
-        rank = index + 1;
-      }
-      return {
-        ...item,
-        rank,
-      };
-    });
-
-    // ACUMULADO (solo entre los 8 estados)
     let acumulado = 0;
-    const totalHoras = resultado.reduce((sum, x) => sum + x.horas, 0);
 
     resultado = resultado.map((item) => {
-      acumulado += item.horas;
-      return {
-        ...item,
-        tiempo_acu: acumulado,
-        tiempo_acu_pct: totalHoras > 0 ? acumulado / totalHoras : 0,
-      };
+      acumulado += Number(item.horasGeneral || 0);
+
+      item.paretoDispObs =
+        totalHorasGeneral > 0
+          ? Number(((acumulado / totalHorasGeneral) * 100).toFixed(2))
+          : 0;
+
+      item.porcentajeHoras =
+        totalHorasGeneral > 0
+          ? Number(((item.horasGeneral / totalHorasGeneral) * 100).toFixed(2))
+          : 0;
+
+      item.totalHorasGeneral = Number(totalHorasGeneral.toFixed(2));
+
+      return item;
     });
 
-    //console.log('📊 ESTADOS SOS (solo 8 estados):', resultado);
     return resultado;
   }
 
-  // 🔥 MAPPING DE CÓDIGOS A TIPOS DE ESTADOS
-  getTiposEstadosSOS(): Record<string, string> {
-    return {
-      // OPERATIVO
-      '101': 'Limpieza de mineral',
-      '102': 'Perforación de repaso en mineral',
-      '111': 'Perforación en desmonte',
-      '112': 'Perforación de repaso en desmonte',
-      '120': 'Perforación para sostenimiento',
+  private esDemoraPorCodigo(codigo: string): boolean {
+    const estado = this.mapaEstados.get(codigo);
 
-      // DEMORA
-      '201': 'Falta de Operador',
-      '202': 'MpL - mantenimiento preventivo de labor',
-      '203': 'Ingreso - Salida',
-      '204': 'Charla',
-      '205': 'Traslado al equipo',
-      '206': 'Inspección de equipo',
-      '207': 'Refrigerio',
-      '208': 'Traslado de equipo',
-      '209': 'Falta de labor',
-      '210': 'Falta de servicios (energía - agua - aire)',
-      '211': 'Instalación de equipo',
-      '212': 'Apoyo en servicios mineros',
-      '213': 'Falta de aceros',
-      '214': 'Falta de ventilación',
-      '215': 'Trabajos varios',
-      '216': 'Accidente de equipo',
-      '217': 'Recuperación de aceros',
+    if (!estado) return false;
 
-      // MANTENIMIENTO
-      '301': 'Mp inicial/final',
-      '302': 'Mantenimiento programado',
-      '303': 'Mantenimiento correctivo',
+    const categoria = this.normalizarTexto(estado.categoria);
+    const estadoPrincipal = this.normalizarTexto(estado.estado_principal);
 
-      // RESERVA
-      '401': 'Reserva',
-
-      // FUERA DE PLAN
-      '501': 'Fuera De Plan',
-    };
+    return categoria.includes('DEMORA') || estadoPrincipal.includes('DEMORA');
   }
-  //Grafico 6
-  procesarDemorasInoperativas() {
-    const mapa = new Map<string, any>();
-    const tiposEstados = this.getTiposEstadosSOS(); // Obtiene SOLO los 8 estados
-    const equiposUnicos = new Set<string>();
 
-    // 🔥 Lista de códigos permitidos (solo estos 8)
-    const codigosPermitidos = new Set([
-      '206',
-      '209',
-      '210',
-      '212',
-      '213',
-      '214',
-      '215',
-      '216',
-    ]);
+  private esMantenimientoPorCodigo(codigo: string): boolean {
+    const estado = this.mapaEstados.get(codigo);
 
-    this.operacionesFiltradas.forEach((op) => {
-      const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
+    if (!estado) return false;
 
-      // DISTINCTCOUNT
-      if (modeloEquipo) {
-        equiposUnicos.add(modeloEquipo);
-      }
+    const estadoPrincipal = this.normalizarTexto(estado.estado_principal);
+    const categoria = this.normalizarTexto(estado.categoria);
 
-      const registros = op.registros;
-      if (!Array.isArray(registros)) return;
+    return (
+      estadoPrincipal.includes('MANTENIMIENTO') ||
+      categoria.includes('MANTENIMIENTO')
+    );
+  }
 
-      registros.forEach((r) => {
-        // 🔥 FILTRO CRÍTICO: Solo procesar si el código está en la lista permitida
-        if (!codigosPermitidos.has(r.codigo)) return;
+  private obtenerActividadPorCodigo(codigo: string): string {
+    const estado = this.mapaEstados.get(codigo);
 
-        const tipo = tiposEstados[r.codigo];
-        if (!tipo) return; // Por seguridad, aunque debería existir
+    if (!estado) return `COD ${codigo}`;
 
-        const duracion = this.calcularDuracionHoras(
-          r.hora_inicio,
-          r.hora_final,
-        );
-        if (!duracion || duracion <= 0) return;
+    return (
+      estado.tipo_estado ||
+      estado.categoria ||
+      estado.estado_principal ||
+      `COD ${codigo}`
+    );
+  }
 
-        if (mapa.has(tipo)) {
-          mapa.get(tipo).horas += duracion;
-        } else {
-          mapa.set(tipo, {
-            tipo_estado: tipo,
-            horas: duracion,
-          });
-        }
+  private normalizarTexto(valor: any): string {
+    return String(valor || '')
+      .trim()
+      .toUpperCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  }
+
+private readonly CODIGOS_OPERATIVOS = ['101', '102', '105', '106', '108'];
+
+HorasOperativasPorDia() {
+  return this.calcularHorasOperativasPorPeriodo('DIA');
+}
+
+HorasOperativasPorSemana() {
+  return this.calcularHorasOperativasPorPeriodo('SEMANA');
+}
+
+HorasOperativasPorMes() {
+  return this.calcularHorasOperativasPorPeriodo('MES');
+}
+
+private calcularHorasOperativasPorPeriodo(tipo: 'DIA' | 'SEMANA' | 'MES') {
+  const datosPorDia = this.calcularHorasOperativasBasePorDia();
+
+  if (tipo === 'DIA') {
+    return datosPorDia;
+  }
+
+  const resultadoMap = new Map<string, any>();
+
+  datosPorDia.forEach((dia) => {
+    const periodo = obtenerPeriodoDesdeKey(dia.key, tipo);
+
+    if (!periodo) return;
+
+    if (!resultadoMap.has(periodo.key)) {
+      resultadoMap.set(periodo.key, {
+        key: periodo.key,
+        periodo: periodo.label,
+        fechaInicio: periodo.fechaInicio || null,
+        fechaFin: periodo.fechaFin || null,
+        sumaHorasOperativas: 0,
+        horasOperativas: 0,
+        cantidadDias: 0,
+        cantidadOperaciones: 0,
+        cantidadRegistrosOperativos: 0
       });
-    });
-
-    const nEquipos = equiposUnicos.size;
-
-    // Convertir a array (ya solo contiene los 8 estados filtrados)
-    let resultado = Array.from(mapa.values())
-      .filter((x) => x.horas > 0)
-      .map((x) => ({
-        tipo_estado: x.tipo_estado,
-        horas: x.horas,
-        promedio: nEquipos > 0 ? x.horas / nEquipos : 0,
-      }));
-
-    // RANKX DESC (solo entre los 8 estados)
-    resultado.sort((a, b) => b.horas - a.horas);
-
-    // RANK DENSE
-    let rank = 1;
-    resultado = resultado.map((item, index, arr) => {
-      if (index > 0 && item.horas < arr[index - 1].horas) {
-        rank = index + 1;
-      }
-      return {
-        ...item,
-        rank,
-      };
-    });
-
-    // ACUMULADO (solo entre los 8 estados)
-    let acumulado = 0;
-    const totalHoras = resultado.reduce((sum, x) => sum + x.horas, 0);
-
-    resultado = resultado.map((item) => {
-      acumulado += item.horas;
-      return {
-        ...item,
-        tiempo_acu: acumulado,
-        tiempo_acu_pct: totalHoras > 0 ? acumulado / totalHoras : 0,
-      };
-    });
-
-    //console.log('📊 ESTADOS SOS (solo 8 estados):', resultado);
-    return resultado;
-  }
-
-  //Grafico 7
-  procesarHorasMantenimiento() {
-    const mapa = new Map<string, any>();
-    const tiposEstados = this.getTiposEstadosSOS(); // Obtiene SOLO los 8 estados
-    const equiposUnicos = new Set<string>();
-
-    // 🔥 Lista de códigos permitidos (solo estos 8)
-    const codigosPermitidos = new Set(['301', '302', '303', '206']);
-
-    this.operacionesFiltradas.forEach((op) => {
-      const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
-
-      // DISTINCTCOUNT
-      if (modeloEquipo) {
-        equiposUnicos.add(modeloEquipo);
-      }
-
-      const registros = op.registros;
-      if (!Array.isArray(registros)) return;
-
-      registros.forEach((r) => {
-        // 🔥 FILTRO CRÍTICO: Solo procesar si el código está en la lista permitida
-        if (!codigosPermitidos.has(r.codigo)) return;
-
-        const tipo = tiposEstados[r.codigo];
-        if (!tipo) return; // Por seguridad, aunque debería existir
-
-        const duracion = this.calcularDuracionHoras(
-          r.hora_inicio,
-          r.hora_final,
-        );
-        if (!duracion || duracion <= 0) return;
-
-        if (mapa.has(tipo)) {
-          mapa.get(tipo).horas += duracion;
-        } else {
-          mapa.set(tipo, {
-            tipo_estado: tipo,
-            horas: duracion,
-          });
-        }
-      });
-    });
-
-    const nEquipos = equiposUnicos.size;
-
-    // Convertir a array (ya solo contiene los 8 estados filtrados)
-    let resultado = Array.from(mapa.values())
-      .filter((x) => x.horas > 0)
-      .map((x) => ({
-        tipo_estado: x.tipo_estado,
-        horas: x.horas,
-        promedio: nEquipos > 0 ? x.horas / nEquipos : 0,
-      }));
-
-    // RANKX DESC (solo entre los 8 estados)
-    resultado.sort((a, b) => b.horas - a.horas);
-
-    // RANK DENSE
-    let rank = 1;
-    resultado = resultado.map((item, index, arr) => {
-      if (index > 0 && item.horas < arr[index - 1].horas) {
-        rank = index + 1;
-      }
-      return {
-        ...item,
-        rank,
-      };
-    });
-
-    // ACUMULADO (solo entre los 8 estados)
-    let acumulado = 0;
-    const totalHoras = resultado.reduce((sum, x) => sum + x.horas, 0);
-
-    resultado = resultado.map((item) => {
-      acumulado += item.horas;
-      return {
-        ...item,
-        tiempo_acu: acumulado,
-        tiempo_acu_pct: totalHoras > 0 ? acumulado / totalHoras : 0,
-      };
-    });
-
-    //console.log('📊 ESTADOS SOS (solo 8 estados):', resultado);
-    return resultado;
-  }
-
-  private calcularDuracionHoras(horaInicio: string, horaFinal: string): number {
-    if (!horaInicio || !horaFinal) return 0;
-
-    const [h1, m1] = horaInicio.split(':').map(Number);
-    const [h2, m2] = horaFinal.split(':').map(Number);
-
-    let inicio = h1 * 60 + m1;
-    let fin = h2 * 60 + m2;
-
-    // 🔥 si cruza medianoche
-    if (fin < inicio) {
-      fin += 24 * 60;
     }
 
-    return Number(((fin - inicio) / 60).toFixed(2));
-  }
-  //Grafico 8
-  ProcesarTonelajeSC() {
-    const mapa = new Map<string, any>();
-
-    this.operacionesFiltradas.forEach((op) => {
-      const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
-      const seccion = op.seccion || 'SIN_SECCION';
-      const capacidad = Number(op.capacidad) || 0;
-
-      const registros = op.registros;
-      if (!Array.isArray(registros)) return;
-
-      const key = `${modeloEquipo}|${seccion}`;
-
-      if (!mapa.has(key)) {
-        mapa.set(key, {
-          modeloEquipo,
-          seccion,
-          tonelaje: 0,
-          mineral: 0,
-          desmonte: 0,
-        });
-      }
-
-      const grupo = mapa.get(key);
-
-      registros.forEach((r) => {
-        if (r.estado !== 'OPERATIVO') return;
-
-        const opReg = r.operacion || r;
-
-        const codigo = r.codigo;
-        const nCucharas = Number(opReg.n_cucharas) || 0;
-
-        if (nCucharas <= 0 || capacidad <= 0) return;
-
-        // 🔹 FACTOR BASE
-        const base = capacidad * nCucharas * 0.7646;
-
-        // 🔵 MINERAL
-        if (['101', '102', '103'].includes(codigo)) {
-          const ton = base * 3.8;
-
-          grupo.mineral += ton;
-          grupo.tonelaje += ton;
-        }
-
-        // 🟤 DESMONTE
-        if (['111', '112', '113', '120'].includes(codigo)) {
-          const ton = base * 2.7;
-
-          grupo.desmonte += ton;
-          grupo.tonelaje += ton;
-        }
-      });
-    });
-
-    const resultado = Array.from(mapa.values()).map((item) => ({
-      modeloEquipo: item.modeloEquipo,
-      seccion: item.seccion,
-
-      Tonelaje: Number(item.tonelaje.toFixed(2)),
-      Mineral: Number(item.mineral.toFixed(2)),
-      Desmonte: Number(item.desmonte.toFixed(2)),
-    }));
-
-    //console.log('📊 TONELAJE SC:', resultado);
-
-    return resultado;
-  }
-
-  //Grafico 9
-
-  ProcesarTonelajePorHoraSC() {
-    const mapa = new Map<string, any>();
-
-    this.operacionesFiltradas.forEach((op) => {
-      const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
-      const seccion = op.seccion || 'SIN_SECCION';
-      const capacidad = Number(op.capacidad) || 0;
-
-      const registros = op.registros;
-      if (!Array.isArray(registros)) return;
-
-      const key = `${modeloEquipo}|${seccion}`;
-
-      if (!mapa.has(key)) {
-        mapa.set(key, {
-          modeloEquipo,
-          seccion,
-          tonelaje: 0,
-          horas_operativo: 0,
-        });
-      }
-
-      const grupo = mapa.get(key);
-
-      registros.forEach((r) => {
-        const opReg = r.operacion || r;
-
-        const codigo = String(r.codigo);
-        const nCucharas = Number(opReg.n_cucharas) || 0;
-
-        // =====================================================
-        // 🔵 1. TONELAJE (igual que ya hiciste)
-        // =====================================================
-        if (r.estado === 'OPERATIVO' && nCucharas > 0 && capacidad > 0) {
-          const base = capacidad * nCucharas * 0.7646;
-
-          // Mineral
-          if (['101', '102', '103'].includes(codigo)) {
-            grupo.tonelaje += base * 3.8;
-          }
-
-          // Desmonte
-          if (['111', '112', '113', '120'].includes(codigo)) {
-            grupo.tonelaje += base * 2.7;
-          }
-        }
-
-        // =====================================================
-        // 🔴 2. SC_Duracion_OPERATIVO
-        // =====================================================
-        if (r.estado === 'OPERATIVO') {
-          const inicio = r.hora_inicio;
-          const fin = r.hora_final;
-
-          if (!inicio || !fin) return;
-
-          const horas = this.calcularHoras(inicio, fin);
-
-          grupo.horas_operativo += horas;
-        }
-      });
-    });
-
-    // 🔥 RESULTADO FINAL
-    const resultado = Array.from(mapa.values()).map((item) => {
-      const Tn_h_SC =
-        item.horas_operativo > 0 ? item.tonelaje / item.horas_operativo : 0;
-
-      return {
-        modeloEquipo: item.modeloEquipo,
-        seccion: item.seccion,
-
-        Tonelaje: Number(item.tonelaje.toFixed(2)),
-        HorasOperativo: Number(item.horas_operativo.toFixed(2)),
-        Tn_h_SC: Math.round(Tn_h_SC),
-      };
-    });
-
-    //console.log('📊 TN/h SC:', resultado);
-
-    return resultado;
-  }
-
-  //Grafico 10
-
-  ProcesarDiferenciaDiesel() {
-    const mapa = new Map<string, any>();
-
-    this.operacionesFiltradas.forEach((op) => {
-      const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
-
-      const horometro = (op as any).horometros?.horometro;
-
-      const inicio = horometro?.inicio;
-      const fin = horometro?.final;
-
-      if (inicio == null || fin == null) return;
-
-      // 🔹 Diferencia Diesel (igual a BI)
-      const diferencia = Number((fin - inicio).toFixed(2));
-
-      if (!mapa.has(modeloEquipo)) {
-        mapa.set(modeloEquipo, {
-          modeloEquipo,
-          totalDiferencia: 0,
-          operaciones: 0,
-        });
-      }
-
-      const grupo = mapa.get(modeloEquipo);
-
-      grupo.totalDiferencia += diferencia;
-      grupo.operaciones++;
-    });
-
-    // 🔥 Resultado final
-    const resultado = Array.from(mapa.values()).map((item) => ({
-      modeloEquipo: item.modeloEquipo,
-
-      // 🔹 suma total (igual que SUM en BI)
-      DiferenciaDiesel: Number(item.totalDiferencia.toFixed(2)),
-
-      // opcional (útil para KPI)
-      PromedioPorOperacion: Number(
-        (item.totalDiferencia / item.operaciones).toFixed(2),
-      ),
-
-      Operaciones: item.operaciones,
-    }));
-
-    //console.log('📊 DIFERENCIA DIESEL:', resultado);
-
-    return resultado;
-  }
-
-  //Grafico 11
-  ProcesarDiferenciaDieselTotal() {
-    let totalDiferencia = 0;
-    let operaciones = 0;
-
-    this.operacionesFiltradas.forEach((op) => {
-      const horometro = (op as any).horometros?.horometro;
-
-      const inicio = horometro?.inicio;
-      const fin = horometro?.final;
-
-      if (inicio == null || fin == null) return;
-
-      const diferencia = Number((fin - inicio).toFixed(2));
-
-      totalDiferencia += diferencia;
-      operaciones++;
-    });
-
-    const resultado = {
-      DiferenciaDiesel: Number(totalDiferencia.toFixed(2)),
-      PromedioPorOperacion:
-        operaciones > 0
-          ? Number((totalDiferencia / operaciones).toFixed(2))
-          : 0,
-      Operaciones: operaciones,
-    };
-
-    //console.log('📊 DIFERENCIA DIESEL TOTAL:', resultado);
-
-    // 🔥 AQUÍ EL FIX
-    return [resultado];
-  }
-
-  //========================================
-  //SEGUNDA HOJA
-  //==========================================
-
-  //Grafico 11
-  procesarHorasNumericas() {
-    //const equiposValidos = ['BOLTER-3', 'BOLTER-5'];
-
-    // 🔥 usa lista (más limpio y escalable)
-    const codigosValidos = ['101', '103', '111'];
-
-    const result: any[] = [];
-
-    //console.log('🔍 TOTAL operaciones:', this.operacionesFiltradas?.length);
-
-    this.operacionesFiltradas.forEach((op, i) => {
-      const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
-      const fecha = op.fecha || 'SIN_FECHA';
-
-      // console.log(`➡️ OP[${i}]`, {
-      //   modeloEquipo,
-      //   fecha,
-      //   tieneRegistros: Array.isArray(op.registros)
-      // });
-
-      // 🔥 FILTRO DE EQUIPO
-      // if (!equiposValidos.includes(modeloEquipo)) {
-      //   // console.log('⛔ FUERA POR EQUIPO:', modeloEquipo);
-      //   return;
-      // }
-
-      const registrosArray = op.registros;
-      if (!Array.isArray(registrosArray)) {
-        // console.log('⛔ SIN REGISTROS ARRAY');
-        return;
-      }
-
-      // console.log(`✅ REGISTROS encontrados: ${registrosArray.length}`);
-
-      registrosArray.forEach((r, j) => {
-        // 🔥 FIX REAL: limpiar codigo
-        const codigo = String(r?.codigo ?? '').trim();
-
-        //console.log(`   📌 REG[${j}] codigo: [${codigo}]`);
-
-        // 🔥 FILTRO CODIGO (ahora correcto)
-        if (!codigosValidos.includes(codigo)) {
-          //console.log('   ⛔ DESCARTADO POR CODIGO');
-          return;
-        }
-
-        const horaStr = r?.hora_inicio;
-
-        if (!horaStr || typeof horaStr !== 'string') {
-          //console.log('   ⛔ HORA INVALIDA:', horaStr);
-          return;
-        }
-
-        const partes = horaStr.split(':').map(Number);
-
-        if (partes.length < 2 || isNaN(partes[0]) || isNaN(partes[1])) {
-          //console.log('   ⛔ FORMATO HORA MALO:', horaStr);
-          return;
-        }
-
-        const h = partes[0] || 0;
-        const m = partes[1] || 0;
-        const s = partes[2] || 0;
-
-        const hora_decimal = Number((h + m / 60 + s / 3600).toFixed(4));
-
-        //console.log('   ✅ OK →', { horaStr, hora_decimal });
-
-        result.push({
-          modeloEquipo,
-          fecha,
-          hora_inicio: horaStr,
-          hora_decimal,
-          codigo,
-        });
-      });
-    });
-
-    //console.log('📊 RESULTADO FINAL:', result);
-
-    return result.sort((a, b) => {
-      if (a.fecha === b.fecha) {
-        return a.hora_decimal - b.hora_decimal;
-      }
-      return a.fecha.localeCompare(b.fecha);
-    });
-  }
-
-  //Grafico 12
-  ProcesarContViajesSC() {
-    const resultado: any[] = [];
-
-    this.operacionesFiltradas.forEach((op) => {
-      const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
-      const fecha = op.fecha || null;
-      const turno = op.turno || 'SIN_TURNO';
-
-      const registros = op.registros;
-      if (!Array.isArray(registros)) return;
-
-      // 🔥 SOLO EL PRIMER OPERATIVO
-      const primerOperativo = registros.find((r) => r.estado === 'OPERATIVO');
-
-      if (!primerOperativo) return;
-
-      const opReg = primerOperativo.operacion || primerOperativo;
-
-      const horaInicio = primerOperativo.hora_inicio || null;
-
-      // 🔹 LABOR_INICIO_SC
-      const tipo = opReg.tipo_labor_inicio || '';
-      const labor = opReg.labor_inicio || '';
-      const ala = opReg.ala_inicio || '';
-      const nivel = opReg.nivel_inicio || '';
-
-      let laborConcat = `${tipo}${labor}`;
-
-      if (ala !== '') {
-        laborConcat += `-${ala}`;
-      }
-
-      if (!laborConcat || laborConcat.trim() === '') {
-        laborConcat = nivel;
-      }
-
-      const laborFinal =
-        laborConcat && laborConcat.trim() !== ''
-          ? laborConcat.trim()
-          : 'SIN_LABOR';
-
-      resultado.push({
-        modeloEquipo,
-        fecha,
-        turno,
-        hora_inicio: horaInicio,
-        labor: laborFinal,
-      });
-    });
-
-    //console.log('📊 PRIMER OPERATIVO SC:', resultado);
-
-    return resultado;
-  }
-
-  //Grafico 13
-
-  ProcesarDetalleEquipoSC() {
-    const resultado: any[] = [];
-
-    this.operacionesFiltradas.forEach((op) => {
-      const modeloEquipo = `${op.equipo}-${op.n_equipo}`;
-      const capacidad = Number(op.capacidad) || 0;
-
-      const registros = op.registros;
-      if (!Array.isArray(registros)) return;
-
-      const horometro = (op as any).horometros?.horometro;
-
-      const inicio = horometro?.inicio;
-      const fin = horometro?.final;
-
-      let diferenciaDiesel = 0;
-
-      if (inicio != null && fin != null) {
-        diferenciaDiesel = Number((fin - inicio).toFixed(2));
-      }
-
-      let tonelaje = 0;
-      let horasOperativo = 0;
-      let totalCucharas = 0; // 🔥 NUEVO
-
-      registros.forEach((r) => {
-        const opReg = r.operacion || r;
-        const codigo = String(r.codigo);
-        const nCucharas = Number(opReg.n_cucharas) || 0;
-
-        // 🔥 ACUMULAR CUCHARAS
-        if (r.estado === 'OPERATIVO' && nCucharas > 0) {
-          totalCucharas += nCucharas;
-        }
-
-        // 🔵 TONELAJE
-        if (r.estado === 'OPERATIVO' && nCucharas > 0 && capacidad > 0) {
-          const base = capacidad * nCucharas * 0.7646;
-
-          if (['101', '102', '103'].includes(codigo)) {
-            tonelaje += base * 3.8;
-          }
-
-          if (['111', '112', '113', '120'].includes(codigo)) {
-            tonelaje += base * 2.7;
-          }
-        }
-
-        // 🔴 HORAS OPERATIVO
-        if (r.estado === 'OPERATIVO') {
-          const inicio = r.hora_inicio;
-          const fin = r.hora_final;
-
-          if (!inicio || !fin) return;
-
-          const horas = this.calcularHoras(inicio, fin);
-
-          if (horas > 0) {
-            horasOperativo += horas;
-          }
-        }
-      });
-
-      const tn_h = horasOperativo > 0 ? tonelaje / horasOperativo : 0;
-
-      resultado.push({
-        modeloEquipo,
-
-        DiferenciaDiesel: Number(diferenciaDiesel.toFixed(2)),
-        Tonelaje: Number(tonelaje.toFixed(2)),
-        HorasOperativo: Number(horasOperativo.toFixed(2)),
-        Tn_h_SC: Number(tn_h.toFixed(2)),
-        TotalCucharas: totalCucharas, // 🔥 NUEVO
-      });
-    });
-
-    //console.log('📊 DETALLE EQUIPO SC:', resultado);
-
-    return resultado;
-  }
-
-  //Grafico 15
-  ProcesarOperadorTurnoSC() {
-    const mapa = new Map<string, any>();
-
-    this.operacionesFiltradas.forEach((op) => {
-      const operador = op.operador || 'SIN_OPERADOR';
-      const turno = op.turno || 'SIN_TURNO';
-      const capacidad = Number(op.capacidad) || 0;
-
-      const registros = op.registros;
-      if (!Array.isArray(registros)) return;
-
-      let tonelaje = 0;
-      let horasOperativo = 0;
-
-      registros.forEach((r) => {
-        const opReg = r.operacion || r;
-        const codigo = String(r.codigo);
-        const nCucharas = Number(opReg.n_cucharas) || 0;
-
-        // 🔵 TONELAJE
-        if (r.estado === 'OPERATIVO' && nCucharas > 0 && capacidad > 0) {
-          const base = capacidad * nCucharas * 0.7646;
-
-          if (['101', '102', '103'].includes(codigo)) {
-            tonelaje += base * 3.8;
-          }
-
-          if (['111', '112', '113', '120'].includes(codigo)) {
-            tonelaje += base * 2.7;
-          }
-        }
-
-        // 🔴 HORAS OPERATIVO
-        if (r.estado === 'OPERATIVO') {
-          const inicio = r.hora_inicio;
-          const fin = r.hora_final;
-
-          if (!inicio || !fin) return;
-
-          const horas = this.calcularHoras(inicio, fin);
-
-          if (horas > 0) {
-            horasOperativo += horas;
-          }
-        }
-      });
-
-      // 🔑 clave operador + turno
-      const key = `${operador}|${turno}`;
-
-      if (!mapa.has(key)) {
-        mapa.set(key, {
-          operador,
-          turno,
-          tonelaje: 0,
-          horasOperativo: 0,
-        });
-      }
-
-      const grupo = mapa.get(key);
-
-      grupo.tonelaje += tonelaje;
-      grupo.horasOperativo += horasOperativo;
-    });
-
-    // 🔥 RESULTADO FINAL
-    const resultado = Array.from(mapa.values()).map((item) => {
-      const tn_h =
-        item.horasOperativo > 0 ? item.tonelaje / item.horasOperativo : 0;
-
-      return {
-        operador: item.operador,
-        turno: item.turno,
-
-        Tonelaje: Number(item.tonelaje.toFixed(2)),
-        HorasOperativo: Number(item.horasOperativo.toFixed(2)),
-        Tn_h_SC: Number(tn_h.toFixed(2)),
-      };
-    });
-
-    //console.log('📊 OPERADOR + TURNO SC:', resultado);
-
-    return resultado;
-  }
-
-  //Grafico 16
-  procesarLaborFRDetallado() {
-    const mapa = new Map<string, any>();
-
-    this.operacionesFiltradas.forEach((op) => {
-      const registrosArray = op.registros;
-      if (!Array.isArray(registrosArray)) return;
-
-      const modelo =
-        op.equipo && op.n_equipo ? `${op.equipo}-${op.n_equipo}` : 'SIN_EQUIPO';
-
-      const operador = op.operador || 'SIN_OPERADOR';
-
-      registrosArray.forEach((r) => {
-        const opReg = r?.operacion || {};
-
-        // 🔥 CAMPOS BI
-        const tipo = opReg.tipo_labor_inicio || '';
-        const labor = opReg.labor_inicio || '';
-        const ala = opReg.ala_inicio || '';
-        const nivel = opReg.nivel_inicio || '';
-
-        const observaciones = opReg.observaciones;
-
-        // ❌ filtrar observaciones vacías
-        if (!observaciones || !observaciones.trim()) return;
-
-        // =====================================================
-        // 🔵 LABOR_INICIO_SC (IGUAL A DAX)
-        // =====================================================
-        let concat = `${tipo}${labor}`;
-
-        if (ala !== '') {
-          concat += `-${ala}`;
-        }
-
-        if (!concat || concat.trim() === '') {
-          concat = nivel;
-        }
-
-        const laborFinal =
-          concat && concat.trim() !== '' ? concat.trim() : 'SIN_LABOR';
-
-        // 🔑 clave
-        const key = `${modelo}|${operador}|${laborFinal}`;
-
-        if (!mapa.has(key)) {
-          mapa.set(key, {
-            modelo_equipo: modelo,
-            operador,
-            labor: laborFinal, // 🔥 actualizado
-            observaciones,
-            count: 0,
-          });
-        }
-
-        const item = mapa.get(key)!;
-
-        item.count += 1;
-      });
-    });
-
-    const resultado = Array.from(mapa.values());
-
-    console.log('📊 LABOR FR DETALLADO:', resultado);
-
-    return resultado;
-  }
-
-   //GANTT
-private construirGanttDataNuevo(): void {
-
-  const fechaMap: Record<string, any> = {};
-
-  this.operacionesFiltradas.forEach(op => {
-
-    const fecha = op.fecha || 'SIN_FECHA';
-    const turno = op.turno || 'SIN_TURNO';
-    const equipoCodigo = `${op.equipo} - ${op.n_equipo}`;
-
-    // 🔥 clave combinada
-    const key = `${fecha}|${turno}`;
-
-    if (!fechaMap[key]) {
-      fechaMap[key] = {
-        fecha,
-        turno,
-        equipos: {}
-      };
-    }
-
-    if (!fechaMap[key].equipos[equipoCodigo]) {
-      fechaMap[key].equipos[equipoCodigo] = {};
-    }
-
-    const registros = Array.isArray(op.registros)
-      ? op.registros
-      : [];
-
-    registros.forEach((reg: any) => {
-
-      const estado = (reg.estado || 'SIN ESTADO').toUpperCase().trim();
-      const codigo = String(reg.codigo || '').trim();
-
-      if (!reg.hora_inicio || !reg.hora_final) return;
-
-      // 🔥 MATCH CONTRA MAPA (igual que tu otro proceso)
-      const estadoMatch = this.mapaEstados.get(codigo);
-
-      // 🔥 puedes mantener estado o usar categoría (te dejo listo)
-      const labor = estadoMatch?.estado_principal || estado;
-
-      if (!fechaMap[key].equipos[equipoCodigo][labor]) {
-        fechaMap[key].equipos[equipoCodigo][labor] = [];
-      }
-
-      fechaMap[key].equipos[equipoCodigo][labor].push({
-        start: reg.hora_inicio,
-        end: reg.hora_final,
-
-        estado,
-        description: codigo,
-
-        // 🔥 CAMPOS ENRIQUECIDOS
-        tipo_estado: estadoMatch?.tipo_estado || null,
-        categoria: estadoMatch?.categoria || null,
-        estado_principal: estadoMatch?.estado_principal || null
-      });
-
-      // 🔍 debug opcional
-      // if (!estadoMatch) {
-      //   console.warn('❌ SIN MATCH GANTT:', codigo, reg);
-      // }
-
-    });
-
+    const item = resultadoMap.get(periodo.key);
+
+    item.sumaHorasOperativas += Number(dia.horasOperativas || 0);
+    item.cantidadDias += 1;
+    item.cantidadOperaciones += Number(dia.cantidadOperaciones || 0);
+    item.cantidadRegistrosOperativos += Number(dia.cantidadRegistrosOperativos || 0);
   });
 
-  // 🔁 NORMALIZACIÓN FINAL
-  this.ganttData = Object.values(fechaMap).map((item: any) => ({
+  const resultado = Array.from(resultadoMap.values()).map((item) => {
+    item.horasOperativas = item.cantidadDias > 0
+      ? Number((item.sumaHorasOperativas / item.cantidadDias).toFixed(2))
+      : 0;
 
-    fecha: item.fecha,
-    turno: item.turno,
+    item.sumaHorasOperativas = Number(item.sumaHorasOperativas.toFixed(2));
 
-    groups: Object.entries(item.equipos).map(
-      ([equipoCodigo, labores]: any) => ({
-        equipoCodigo,
-        rows: Object.entries(labores).map(
-          ([labor, tasks]: any) => ({
-            labor,
-            tasks: tasks.sort((a: any, b: any) =>
-              a.start.localeCompare(b.start)
-            )
-          })
-        )
-      })
-    )
+    return item;
+  });
 
-  }));
+  resultado.sort((a, b) => a.key.localeCompare(b.key));
 
-  console.log('📊 GANTT DATA NUEVO:', this.ganttData);
+  return resultado;
 }
+
+private calcularHorasOperativasBasePorDia() {
+  const resultadoMap = new Map<string, any>();
+
+  // Crear todos los días del rango con 0
+  if (this.fechaInicio && this.fechaFin) {
+    const diasRango = generarDiasEntreFechas(this.fechaInicio, this.fechaFin);
+
+    diasRango.forEach((dia) => {
+      resultadoMap.set(dia.key, {
+        key: dia.key,
+        periodo: dia.label,
+
+        // suma total de horas operativas del día
+        sumaHorasOperativas: 0,
+
+        // promedio final que se mostrará en el gráfico
+        horasOperativas: 0,
+
+        cantidadOperaciones: 0,
+        cantidadRegistrosOperativos: 0
+      });
+    });
+  }
+
+  this.operacionesFiltradas.forEach((op) => {
+    const registrosArray = op.registros;
+
+    if (!Array.isArray(registrosArray)) return;
+
+    const fecha = op.fecha;
+
+    if (!fecha) return;
+
+    const periodo = obtenerPeriodo(fecha, 'DIA');
+
+    if (!periodo) return;
+
+    if (!resultadoMap.has(periodo.key)) {
+      resultadoMap.set(periodo.key, {
+        key: periodo.key,
+        periodo: periodo.label,
+        sumaHorasOperativas: 0,
+        horasOperativas: 0,
+        cantidadOperaciones: 0,
+        cantidadRegistrosOperativos: 0
+      });
+    }
+
+    const item = resultadoMap.get(periodo.key);
+
+    let horasOperativasOperacion = 0;
+    let tieneHorasOperativas = false;
+
+    for (const registro of registrosArray) {
+      const codigo = String(registro.codigo || '').trim();
+
+      if (!this.CODIGOS_OPERATIVOS.includes(codigo)) continue;
+
+      const horas = this.calcularDuracionHoras(
+        registro.hora_inicio,
+        registro.hora_final!
+      );
+
+      if (!horas || horas <= 0) continue;
+
+      horasOperativasOperacion += horas;
+      item.cantidadRegistrosOperativos += 1;
+      tieneHorasOperativas = true;
+    }
+
+    // Solo cuenta la operación si tuvo horas operativas reales
+    if (tieneHorasOperativas) {
+      item.sumaHorasOperativas += horasOperativasOperacion;
+      item.cantidadOperaciones += 1;
+    }
+  });
+
+  const resultado = Array.from(resultadoMap.values()).map((item) => {
+    if (item.cantidadOperaciones > 0) {
+      item.horasOperativas = Number(
+        (item.sumaHorasOperativas / item.cantidadOperaciones).toFixed(2)
+      );
+    } else {
+      item.horasOperativas = 0;
+    }
+
+    item.sumaHorasOperativas = Number(item.sumaHorasOperativas.toFixed(2));
+
+    return item;
+  });
+
+  resultado.sort((a, b) => a.key.localeCompare(b.key));
+
+  return resultado;
+}
+
 }

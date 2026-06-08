@@ -1,10 +1,10 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
+import { TooltipModule } from 'primeng/tooltip';
 @Component({
   selector: 'app-scheduler',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TooltipModule],
   templateUrl: './scheduler.component.html',
   styleUrl: './scheduler.component.css'
 })

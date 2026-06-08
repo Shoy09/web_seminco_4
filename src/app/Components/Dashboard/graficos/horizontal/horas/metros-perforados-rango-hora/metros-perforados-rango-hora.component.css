@@ -1,0 +1,286 @@
+.dashboard-container {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+
+  padding: 16px;
+  background: #f5f7fa;
+  border-radius: 12px;
+
+  box-sizing: border-box;
+}
+
+/* =========================
+   GRÁFICO
+========================= */
+
+.grafico-columna {
+  flex: 3;
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  display: flex;
+  flex-direction: column;
+}
+
+.grafico-echarts {
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+}
+
+/* =========================
+   SIDEBAR DERECHA
+========================= */
+
+.sidebar-columna {
+  flex: 1.2;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.contenedor-inferior {
+  display: flex;
+  flex-direction: column;  /* ← Cambia de 'row' a 'column' */
+  gap: 15px;
+  height: 100%;
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.totales-columna,
+.equipos-columna {
+  flex: 1;
+
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.totales-header {
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+
+  flex-shrink: 0;
+}
+
+.totales-header h4 {
+  margin: 0;
+
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+
+  color: #2c3e50;
+}
+
+/* =========================
+   LISTA
+========================= */
+
+
+.tooltip-labores {
+  white-space: pre-line;
+  font-size: 12px;
+}
+
+.totales-lista {
+  flex: 1;
+  overflow-y: auto;
+  
+  /* Cambia de flex a grid */
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);  /* 2 columnas iguales */
+  gap: 8px;
+  
+  padding-right: 5px;
+  min-height: 0;
+}
+
+/* Scroll */
+
+.totales-lista::-webkit-scrollbar {
+  width: 6px;
+}
+
+.totales-lista::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.totales-lista::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+/* =========================
+   ITEMS
+========================= */
+
+.total-item {
+  padding: 10px 12px;
+
+  border-radius: 8px;
+  background: #f8f9fa;
+  border: 1px solid transparent;
+
+  transition: all 0.2s ease;
+}
+
+.total-item:hover {
+  background: #eef2f7;
+  border-color: #dbe4ee;
+
+  transform: translateY(-1px);
+}
+
+.total-item-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 10px;
+  width: 100%;
+}
+
+.total-item-nombre {
+  font-weight: 600;
+  font-size: 12px;
+  color: #495057;
+
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.total-item-valor {
+  font-weight: 700;
+  font-size: 14px;
+  color: #2c3e50;
+
+  white-space: nowrap;
+}
+
+/* =========================
+   TOTAL GENERAL
+========================= */
+
+.total-general {
+  padding-top: 12px;
+  margin-top: 10px;
+
+  border-top: 2px solid #e9ecef;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  font-size: 14px;
+  font-weight: bold;
+
+  flex-shrink: 0;
+}
+
+.total-general span {
+  color: #6c757d;
+}
+
+.total-general strong {
+  font-size: 18px;
+  color: #e74c3c;
+}
+
+/* =========================
+   PLACEHOLDER EQUIPO
+========================= */
+
+.placeholder-equipo {
+  flex: 1;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  color: #adb5bd;
+  font-size: 15px;
+  font-weight: 500;
+
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px dashed #dee2e6;
+}
+
+/* =========================
+   SIN DATOS
+========================= */
+
+.sin-datos {
+  text-align: center;
+  padding: 40px;
+
+  background: #f8f9fa;
+  border-radius: 12px;
+
+  color: #6c757d;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1200px) {
+
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  .contenedor-inferior {
+    flex-direction: column;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .dashboard-container {
+    padding: 10px;
+  }
+
+  .total-item-valor {
+    font-size: 13px;
+  }
+
+  .total-item-nombre {
+    font-size: 11px;
+  }
+
+}
+/* //Totales */
+.total-general-label {
+  font-size: 11px;
+}
+
+.total-general-value {
+  font-size: 14px;
+}

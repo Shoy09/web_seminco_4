@@ -1,0 +1,103 @@
+<div class="dialog-container" [class.fullscreen]="isFullscreen">
+  <!-- Header con información de filtros -->
+  <div class="dialog-header">
+    <h2>Dashboard de Operaciones</h2>
+    <div class="flex items-center gap-2">
+      <!-- Pantalla completa -->
+      <button
+        type="button"
+        class="flex h-9 w-9 items-center justify-center rounded-lg border border-white/20 bg-primary text-white transition hover:bg-primary/20 active:scale-95"
+        (click)="toggleFullscreen()"
+        [title]="
+          isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'
+        "
+      >
+        <i
+          class="pi text-sm"
+          [ngClass]="isFullscreen ? 'pi-window-minimize' : 'pi-window-maximize'"
+        ></i>
+      </button>
+
+      <!-- Cerrar -->
+      <button
+        type="button"
+        class="flex h-9 w-9 items-center justify-center rounded-lg border border-red-300/40 bg-red-500/90 text-white transition hover:bg-red-600 active:scale-95"
+        (click)="cerrar()"
+        title="Cerrar"
+      >
+        <i class="pi pi-times text-sm"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="nav-bar">
+    <!-- Filtros a la izquierda -->
+    <div class="filtros-resumen">
+      <span class="filtro-badge"
+        >Turno: {{ data.turnoAplicado || "Todos" }}</span
+      >
+      <span class="filtro-badge"
+        >Fecha Inicio: {{ data.fechaInicio || "Sin filtro" }}</span
+      >
+      <span class="filtro-badge"
+        >Fecha Fin: {{ data.fechaFin || "Sin filtro" }}</span
+      >
+      <span class="filtro-badge"
+        >Total Registros: {{ data.operaciones?.length || 0 }}</span
+      >
+    </div>
+
+    <!-- Botones a la derecha -->
+    <div class="nav-buttons">
+      <button
+        class="nav-btn"
+        [class.active]="hojaActual === 'hoja1'"
+        (click)="cambiarHoja('hoja1')"
+      >
+        🚜 Horas
+      </button>
+    </div>
+  </div>
+
+  <!-- CONTENIDO DE LAS HOJAS -->
+
+  <div *ngIf="hojaActual === 'hoja1'" class="hoja-content">
+    <div class="graficos-wrapper one-column-full">
+      <div class="graph-card">
+        <app-metros-perforados-rango-hora
+          [data]="DataMetrosPerforadosPorHora"
+          [turno]="turnoAplicado"
+          unidad="m"
+          tituloGrafico="METROS PERFORADOS POR RANGO DE HORA"
+          tituloTotalTipo="📊 TOTAL POR TIPO DE PERFORACIÓN"
+          tituloTotalEquipo="🚜 TOTAL POR EQUIPO"
+          labelCategoria="tipo de perforación"
+          labelEquipo="equipos"
+          mensajeSinDatos="No hay datos de metros perforados por rango de hora disponibles"
+        >
+        </app-metros-perforados-rango-hora>
+      </div>
+    </div>
+
+    <!-- Tabla de Metros Perforados por Equipo y Rango de Hora (1 columna - alto completo) -->
+    <div class="graficos-wrapper one-column-full">
+      <div class="graph-card">
+        <app-tabla-metros-perforados-equipo
+          [data]="DataMetrosPerforadosPorLaborYRangoHora"
+          [turno]="turnoAplicado"
+          unidad="m"
+          titulo="📏 METROS PERFORADOS POR LABOR Y RANGO DE HORA"
+          labelTotalLabor="TOTAL x LABOR"
+          labelTotalRango="Total x Hora"
+          mensajeSinDatos="No hay datos de metros perforados disponibles para el turno seleccionado"
+        >
+        </app-tabla-metros-perforados-equipo>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer con acciones -->
+  <div class="dialog-footer">
+    <button class="btn-secundario" (click)="cerrar()">Cerrar</button>
+  </div>
+</div>

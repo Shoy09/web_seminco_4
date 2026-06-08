@@ -28,6 +28,7 @@
     "html2canvas": "^1.4.1",
     "install": "^0.13.0",
     "jspdf": "^3.0.4",
+    "jspdf-autotable": "^5.0.8",
     "ng-apexcharts": "^1.15.0",
     "ngx-echarts": "^19.0.0",
     "ngx-toastr": "^19.0.0",

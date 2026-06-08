@@ -1,0 +1,411 @@
+<div class="space-y-5">
+
+  <!-- HEADER -->
+  <div class="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
+      <div>
+        <h1 class="text-2xl font-extrabold text-secondary">
+          Monitoreo de Scoops en Vivo
+        </h1>
+
+        <p class="mt-1 text-sm font-medium text-ink-75">
+          Seguimiento operativo en tiempo real de tonelaje, estados y eventos de scoops.
+        </p>
+
+        <p class="mt-2 text-xs font-bold text-ink-75">
+          Última actualización:
+          <span class="text-secondary">{{ ultimaActualizacion || '-' }}</span>
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-2 sm:flex-row">
+
+        <button
+          pButton
+          type="button"
+          label="Actualizar"
+          icon="pi pi-refresh"
+          severity="secondary"
+          outlined="true"
+          (click)="actualizarData()">
+        </button>
+
+        <button
+          pButton
+          type="button"
+          label="Pantalla completa"
+          icon="pi pi-window-maximize"
+          class="!bg-secondary !border-secondary !text-white hover:!bg-secondary/90"
+          (click)="abrirPantallaCompleta()">
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FILTROS / CONTEXTO EN TIEMPO REAL -->
+<div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+
+  <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+
+    <!-- CONTEXTO ACTUAL -->
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:flex-1">
+
+      <div class="rounded-xl border border-border bg-surface-soft px-4 py-3">
+        <span class="text-xs font-bold uppercase text-ink-75">
+          Fecha actual
+        </span>
+        <p class="mt-1 text-sm font-extrabold text-secondary">
+          {{ fechaActual || '-' }}
+        </p>
+      </div>
+
+      <div class="rounded-xl border border-border bg-surface-soft px-4 py-3">
+        <span class="text-xs font-bold uppercase text-ink-75">
+          Turno actual
+        </span>
+        <p class="mt-1 text-sm font-extrabold text-secondary">
+          {{ turnoActual || '-' }}
+        </p>
+      </div>
+
+      <div class="rounded-xl border border-border bg-surface-soft px-4 py-3">
+        <span class="text-xs font-bold uppercase text-ink-75">
+          Última actualización
+        </span>
+        <p class="mt-1 text-sm font-extrabold text-secondary">
+          {{ ultimaActualizacion || '-' }}
+        </p>
+      </div>
+
+    </div>
+
+    <!-- FILTRO EQUIPO -->
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-[260px_auto_auto]">
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">
+          Equipo
+        </label>
+
+        <p-select
+          [options]="scoops"
+          [(ngModel)]="scoopSeleccionado"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Todos los scoops"
+          styleClass="w-full"
+          appendTo="body">
+        </p-select>
+      </div>
+
+      <div class="flex items-end">
+        <button
+          pButton
+          type="button"
+          label="Aplicar"
+          icon="pi pi-filter"
+          class="w-full !bg-secondary !border-secondary !text-white hover:!bg-secondary/90"
+          (click)="aplicarFiltro()">
+        </button>
+      </div>
+
+      <div class="flex items-end">
+        <button
+          pButton
+          type="button"
+          label="Limpiar"
+          icon="pi pi-filter-slash"
+          severity="secondary"
+          outlined="true"
+          class="w-full"
+          (click)="quitarFiltro()">
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+  <!-- KPI CARDS -->
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+
+    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <span class="text-xs font-bold uppercase text-ink-75">Scoops activos</span>
+      <p class="mt-1 text-2xl font-extrabold text-secondary">
+        {{ resumen.scoopsActivos }}
+      </p>
+    </div>
+
+    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <span class="text-xs font-bold uppercase text-ink-75">Operativos</span>
+      <p class="mt-1 text-2xl font-extrabold text-primary">
+        {{ resumen.operativos }}
+      </p>
+    </div>
+
+    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <span class="text-xs font-bold uppercase text-ink-75">En demora</span>
+      <p class="mt-1 text-2xl font-extrabold text-accent">
+        {{ resumen.enDemora }}
+      </p>
+    </div>
+
+    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <span class="text-xs font-bold uppercase text-ink-75">Toneladas turno</span>
+      <p class="mt-1 text-2xl font-extrabold text-secondary">
+        {{ resumen.toneladasTurno | number:'1.2-2' }} t
+      </p>
+    </div>
+
+    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <span class="text-xs font-bold uppercase text-ink-75">Viajes</span>
+      <p class="mt-1 text-2xl font-extrabold text-secondary">
+        {{ resumen.viajes }}
+      </p>
+    </div>
+
+  </div>
+
+  <!-- CUERPO PRINCIPAL -->
+  <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_360px]">
+
+    <!-- GRÁFICO TONELADAS POR HORA -->
+    <div class="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-extrabold text-secondary">
+            Toneladas por rango de hora
+          </h2>
+          <p class="text-sm text-ink-75">
+            Producción horaria de scoops durante el turno seleccionado.
+          </p>
+        </div>
+
+        <button
+          pButton
+          type="button"
+          icon="pi pi-window-maximize"
+          severity="secondary"
+          rounded="true"
+          text="true"
+          title="Ver en pantalla completa"
+          (click)="abrirPantallaCompleta()">
+        </button>
+      </div>
+
+      <div
+        echarts
+        [options]="chartTonHoraOptions"
+        [autoResize]="true"
+        class="h-[420px] w-full">
+      </div>
+    </div>
+
+    <!-- ESTADO ACTUAL SCOOPS -->
+    <div class="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+      <h2 class="text-lg font-extrabold text-secondary">
+        Estado actual
+      </h2>
+
+      <p class="mb-4 text-sm text-ink-75">
+        Último estado reportado por scoop.
+      </p>
+
+      <div class="space-y-3">
+        <div
+          *ngFor="let scoop of estadoActualScoops"
+          class="rounded-2xl border border-border bg-surface-soft p-4"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-sm font-extrabold text-secondary">
+                {{ scoop.equipo }}
+              </p>
+
+              <p class="text-xs font-semibold text-ink-75">
+                {{ scoop.labor || '-' }}
+              </p>
+            </div>
+
+            <p-tag
+              [value]="scoop.estado"
+              [severity]="getSeverityEstado(scoop.estado)">
+            </p-tag>
+          </div>
+
+          <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span class="font-bold text-ink-75">Código</span>
+              <p class="font-extrabold text-ink">{{ scoop.codigo || '-' }}</p>
+            </div>
+
+            <div>
+              <span class="font-bold text-ink-75">Desde</span>
+              <p class="font-extrabold text-ink">{{ scoop.horaInicio || '-' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TABLA EVENTOS RECIENTES -->
+  <div class="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+    <h2 class="mb-4 text-lg font-extrabold text-secondary">
+      Eventos recientes
+    </h2>
+
+    <p-table
+      [value]="eventosRecientes"
+      [paginator]="true"
+      [rows]="8"
+      [rowsPerPageOptions]="[8, 15, 30]"
+      styleClass="p-datatable-sm"
+      [showGridlines]="true"
+      [tableStyle]="{ 'min-width': '900px' }"
+      responsiveLayout="scroll"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Hora inicio</th>
+          <th>Hora fin</th>
+          <th>Scoop</th>
+          <th>Estado</th>
+          <th>Código</th>
+          <th>Labor</th>
+          <th>Toneladas</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td>{{ row.horaInicio }}</td>
+          <td>{{ row.horaFin || '-' }}</td>
+          <td class="font-bold text-secondary">{{ row.equipo }}</td>
+          <td>
+            <p-tag
+              [value]="row.estado"
+              [severity]="getSeverityEstado(row.estado)">
+            </p-tag>
+          </td>
+          <td>{{ row.codigo }}</td>
+          <td>{{ row.labor }}</td>
+          <td class="font-bold">{{ row.toneladas | number:'1.2-2' }} t</td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7">
+            <div class="py-8 text-center font-semibold text-ink-75">
+              No hay eventos recientes.
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>
+
+<!-- DIALOG PANTALLA COMPLETA -->
+<p-dialog
+  [(visible)]="dialogPantallaCompleta"
+  [modal]="true"
+  [closable]="true"
+  [dismissableMask]="false"
+  [draggable]="false"
+  [resizable]="false"
+  [maximizable]="true"
+  [style]="{ width: '100vw', height: '100vh', maxWidth: '100vw' }"
+  [contentStyle]="{ padding: '0', height: '100%', overflow: 'hidden' }"
+  appendTo="body"
+  (onShow)="onDialogShow()"
+>
+  <div class="flex h-full w-full flex-col overflow-hidden bg-surface-soft">
+
+    <!-- HEADER FULLSCREEN -->
+    <div class="shrink-0 border-b border-border bg-surface px-6 py-4">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-extrabold text-secondary">
+            Monitoreo Scoops en Vivo
+          </h2>
+          <p class="text-sm font-semibold text-ink-75">
+            Última actualización: {{ ultimaActualizacion || '-' }}
+          </p>
+        </div>
+
+        <div class="hidden gap-3 md:flex">
+          <div class="rounded-xl bg-primary-25 px-4 py-2 text-center">
+            <span class="block text-xs font-bold uppercase text-ink-75">Toneladas</span>
+            <strong class="text-lg text-secondary">{{ resumen.toneladasTurno | number:'1.2-2' }} t</strong>
+          </div>
+
+          <div class="rounded-xl bg-primary-25 px-4 py-2 text-center">
+            <span class="block text-xs font-bold uppercase text-ink-75">Operativos</span>
+            <strong class="text-lg text-secondary">{{ resumen.operativos }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENIDO FULLSCREEN -->
+    <div class="min-h-0 flex-1 overflow-y-auto p-5">
+
+      <div class="grid h-full grid-cols-1 gap-5 xl:grid-cols-[1fr_380px]">
+
+        <div class="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+          <h3 class="mb-3 text-xl font-extrabold text-secondary">
+            Toneladas por hora
+          </h3>
+
+          <div
+            echarts
+            [options]="chartTonHoraOptions"
+            [autoResize]="true"
+            class="h-[calc(100vh-220px)] min-h-[520px] w-full">
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+          <h3 class="mb-3 text-xl font-extrabold text-secondary">
+            Estado actual scoops
+          </h3>
+
+          <div class="space-y-3">
+            <div
+              *ngFor="let scoop of estadoActualScoops"
+              class="rounded-xl border border-border bg-surface-soft p-4"
+            >
+              <div class="flex items-center justify-between gap-3">
+                <strong class="text-secondary">{{ scoop.equipo }}</strong>
+                <p-tag
+                  [value]="scoop.estado"
+                  [severity]="getSeverityEstado(scoop.estado)">
+                </p-tag>
+              </div>
+
+              <p class="mt-2 text-sm font-semibold text-ink-75">
+                {{ scoop.labor || '-' }}
+              </p>
+
+              <p class="mt-1 text-xs font-bold text-ink-75">
+                Código: {{ scoop.codigo || '-' }} | Desde: {{ scoop.horaInicio || '-' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</p-dialog>

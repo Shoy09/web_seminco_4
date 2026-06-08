@@ -1,0 +1,33 @@
+<div class="contenedor-mtbf-ano">
+  <div
+    class="gauge-card"
+    *ngFor="let item of tarjetas"
+    [attr.data-tooltip]="getTooltipText(item)"
+  >
+    <div class="gauge-title">
+      {{ item.titulo }}
+    </div>
+
+    <div class="gauge-container">
+      <div
+        class="gauge"
+        [style.--value]="item.porcentaje"
+        [style.--color]="item.color"
+      >
+        <div class="gauge-center">
+          <span class="valor">{{ item.valor }}</span>
+          <span class="unidad">{{ item.unidad }}</span>
+        </div>
+      </div>
+
+      <div class="gauge-scale">
+        <span>0</span>
+        <span>{{ objetivoMtbf }} hrs</span>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="tarjetas.length === 0" class="no-data">
+    No hay datos de MTBF disponibles
+  </div>
+</div>

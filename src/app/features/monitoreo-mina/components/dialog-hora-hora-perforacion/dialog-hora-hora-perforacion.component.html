@@ -1,0 +1,40 @@
+<p-dialog
+  [header]="titulo"
+  [visible]="visible"
+  (visibleChange)="onVisibleChange($event)"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '92vw' }"
+  [contentStyle]="{ overflow: 'visible' }"
+>
+  <div class="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+    <div>
+      <p class="m-0 text-sm text-ink-50">
+        Datos:
+        <span class="font-bold text-secondary">
+          {{ fechaInicio || '-' }} - {{ fechaFin || '-' }}
+        </span>
+        |
+        Turno:
+        <span class="font-bold text-secondary">
+          {{ textoTurno }}
+        </span>
+      </p>
+    </div>
+
+    <p-tag
+      severity="info"
+      [value]="'Total: ' + (totalMetrosHoraHora | number: '1.2-2') + ' m'">
+    </p-tag>
+  </div>
+
+  <div class="h-[520px] w-full min-w-0">
+    <div
+      echarts
+      [options]="chartHoraHoraOptions"
+      (chartInit)="onChartInit($event)"
+      class="h-full w-full">
+    </div>
+  </div>
+</p-dialog>

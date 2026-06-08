@@ -1,0 +1,291 @@
+<div class="min-h-screen bg-surface-soft p-4">
+  <div
+    class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+  >
+    <div>
+      <h2 class="m-0 text-xl font-bold text-secondary">
+        Monitoreo de Perforación Horizontal
+      </h2>
+
+      <p class="mt-1 text-sm text-ink-75">
+        Actualización automática cada 30 segundos
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <p-tag
+        [severity]="monitoreoActivo ? 'success' : 'warning'"
+        [value]="monitoreoActivo ? 'Monitoreo activo' : 'Monitoreo detenido'"
+      >
+      </p-tag>
+
+      <p-button
+        icon="pi pi-chart-bar"
+        label="Hora-hora"
+        size="small"
+        severity="info"
+        (onClick)="abrirDialogHoraHora()"
+      >
+      </p-button>
+
+      <p-button
+        icon="pi pi-refresh"
+        label="Actualizar"
+        size="small"
+        [loading]="cargando"
+        (onClick)="refrescarAhora()"
+      >
+      </p-button>
+    </div>
+  </div>
+
+  <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <p class="mb-1 text-xs font-bold uppercase text-ink-50">Operaciones</p>
+      <h3 class="m-0 text-2xl font-bold text-secondary">
+        {{ resumen.totalOperaciones }}
+      </h3>
+    </div>
+
+    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <p class="mb-1 text-xs font-bold uppercase text-ink-50">Equipos</p>
+      <h3 class="m-0 text-2xl font-bold text-secondary">
+        {{ resumen.totalEquipos }}
+      </h3>
+    </div>
+
+    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <p class="mb-1 text-xs font-bold uppercase text-ink-50">Operadores</p>
+      <h3 class="m-0 text-2xl font-bold text-secondary">
+        {{ resumen.totalOperadores }}
+      </h3>
+    </div>
+
+    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <p class="mb-1 text-xs font-bold uppercase text-ink-50">Registros</p>
+      <h3 class="m-0 text-2xl font-bold text-secondary">
+        {{ resumen.totalRegistros }}
+      </h3>
+    </div>
+
+    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <p class="mb-1 text-xs font-bold uppercase text-ink-50">Observaciones</p>
+      <h3 class="m-0 text-2xl font-bold text-secondary">
+        {{ resumen.totalObservaciones }}
+      </h3>
+    </div>
+  </div>
+
+  <div class="mb-4 rounded-2xl border border-border bg-surface p-4 shadow-sm">
+    <div
+      class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between"
+    >
+      <div>
+        <p class="m-0 text-sm font-bold text-secondary">
+          {{ nombreOperacion }}
+        </p>
+
+        <p class="m-0 text-xs text-ink-50">
+          Última actualización:
+          <span class="font-semibold text-ink">
+            {{
+              ultimaActualizacion
+                ? (ultimaActualizacion | date: "dd/MM/yyyy HH:mm:ss")
+                : "-"
+            }}
+          </span>
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <p-progressSpinner
+          *ngIf="cargando"
+          strokeWidth="4"
+          styleClass="h-6 w-6"
+        >
+        </p-progressSpinner>
+
+        <span
+          *ngIf="!error"
+          class="rounded-full bg-primary-25 px-3 py-1 text-xs font-bold text-secondary"
+        >
+          Datos sincronizados
+        </span>
+
+        <span
+          *ngIf="error"
+          class="rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700"
+        >
+          {{ error }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+    <p-table
+      [value]="operacionesVista"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} operaciones"
+      responsiveLayout="scroll"
+      styleClass="tabla-header-primary rounded-xl overflow-hidden"
+    >
+      <ng-template pTemplate="caption">
+        <div class="flex items-center justify-between gap-3 pb-3">
+          <h3 class="m-0 text-base font-bold text-secondary">
+            Operaciones aprobadas
+          </h3>
+
+          <span class="text-xs font-medium text-ink-50">
+            Tipo: {{ tipoOperacion }}
+          </span>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th
+            class="bg-primary px-3 py-3 text-left text-sm font-bold text-white"
+          >
+            Fecha
+          </th>
+          <th
+            class="bg-primary px-3 py-3 text-left text-sm font-bold text-white"
+          >
+            Turno
+          </th>
+          <th
+            class="bg-primary px-3 py-3 text-left text-sm font-bold text-white"
+          >
+            Equipo
+          </th>
+          <th
+            class="bg-primary px-3 py-3 text-left text-sm font-bold text-white"
+          >
+            Operador
+          </th>
+          <th
+            class="bg-primary px-3 py-3 text-center text-sm font-bold text-white"
+          >
+            Registros
+          </th>
+          <th
+            class="bg-primary px-3 py-3 text-left text-sm font-bold text-white"
+          >
+            Hora inicio
+          </th>
+          <th
+            class="bg-primary px-3 py-3 text-left text-sm font-bold text-white"
+          >
+            Hora final
+          </th>
+          <th
+            class="bg-primary px-3 py-3 text-center text-sm font-bold text-white"
+          >
+            Observ.
+          </th>
+          <th
+            class="bg-primary px-3 py-3 text-center text-sm font-bold text-white"
+          >
+            Estado
+          </th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-item>
+        <tr class="transition-colors hover:bg-primary-25/40">
+          <td class="px-3 py-3 text-sm font-medium text-ink">
+            {{ item.fecha }}
+          </td>
+
+          <td class="px-3 py-3 text-sm text-ink">
+            {{ item.turno }}
+          </td>
+
+          <td class="px-3 py-3 text-sm font-bold text-secondary">
+            {{ item.equipo }}
+          </td>
+
+          <td class="px-3 py-3 text-sm text-ink">
+            {{ item.operador }}
+          </td>
+
+          <td class="px-3 py-3 text-center text-sm font-bold text-ink">
+            {{ item.registros }}
+          </td>
+
+          <td class="px-3 py-3 text-sm text-ink">
+            {{ item.horaInicio }}
+          </td>
+
+          <td class="px-3 py-3 text-sm text-ink">
+            {{ item.horaFinal }}
+          </td>
+
+          <td class="px-3 py-3 text-center text-sm font-bold text-warning">
+            {{ item.observaciones }}
+          </td>
+
+          <td class="px-3 py-3 text-center">
+            <p-tag
+              [severity]="getEstadoSeverity(item.estado)"
+              [value]="item.estado"
+            >
+            </p-tag>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td
+            colspan="9"
+            class="px-4 py-8 text-center text-sm font-medium text-ink-50"
+          >
+            No hay operaciones disponibles para monitoreo.
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<p-dialog
+  header="Metros perforados hora-hora"
+  [(visible)]="mostrarDialogHoraHora"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '80vw' }"
+  [contentStyle]="{ overflow: 'visible' }"
+>
+  <div
+    class="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between"
+  >
+    <div>
+      <p class="m-0 text-sm text-ink-50">
+        Turno actual:
+        <span class="font-bold text-secondary">
+          {{ turnoActual.nombre || "-" }}
+        </span>
+      </p>
+    </div>
+
+    <p-tag
+      severity="info"
+      [value]="
+        ultimaActualizacion
+          ? 'Actualizado: ' + (ultimaActualizacion | date: 'HH:mm:ss')
+          : 'Sin actualización'
+      "
+    >
+    </p-tag>
+  </div>
+
+  <div class="h-[520px] w-full min-w-0">
+    <div echarts [options]="chartHoraHoraOptions" class="h-full w-full"></div>
+  </div>
+</p-dialog>

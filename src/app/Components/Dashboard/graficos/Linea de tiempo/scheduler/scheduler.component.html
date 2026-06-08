@@ -1,50 +1,120 @@
-<div class="scheduler-wrapper">
-  <div class="scheduler">
-    <div class="timeline-header">
-      <div class="header-left">
-        <div class="fecha-col">Fecha / Turno</div>
-        <div class="equipo-col">Equipo</div>
-      </div>
-      <div class="header-timeline">
-        <div class="hour" *ngFor="let h of hours">{{ h }}</div>
-      </div>
-    </div>
+<div class="w-full rounded-2xl border border-border bg-surface p-4 shadow-sm">
+  <!-- CONTENEDOR CON SCROLL HORIZONTAL -->
+  <div class="w-full overflow-x-auto rounded-xl border border-border bg-white">
+    <div class="min-w-full">
+      <!-- HEADER -->
+      <div
+        class="sticky top-0 z-30 flex border-b border-border bg-secondary text-white"
+      >
+        <!-- COLUMNAS FIJAS IZQUIERDA -->
+        <div
+          class="sticky left-0 z-40 grid w-[230px] shrink-0 grid-cols-[120px_110px] bg-secondary"
+        >
+          <div
+            class="border-r border-white/20 px-3 py-3 text-xs font-extrabold uppercase"
+          >
+            Fecha / Turno
+          </div>
 
-    <div class="timeline-body">
-      <ng-container *ngFor="let fecha of groups; let i = index">
-        <div class="fecha-group">
-          <div class="fecha-row">
-            <div class="fecha-cell">{{ fecha.fechaTurno }}</div>
-            <div class="fecha-tasks">
-              <div class="equipo-row" *ngFor="let equipo of fecha.equipos">
-                <div class="equipo-cell">{{ equipo.equipoCodigo }}</div>
-                <div class="timeline-row">
+          <div
+            class="border-r border-white/20 px-3 py-3 text-xs font-extrabold uppercase"
+          >
+            Equipo
+          </div>
+        </div>
+
+        <!-- HORAS -->
+        <div
+          class="grid flex-1"
+          [style.gridTemplateColumns]="
+            'repeat(' + hours.length + ', minmax(72px, 1fr))'
+          "
+          [style.minWidth.px]="hours.length * 72"
+        >
+          <div
+            *ngFor="let h of hours"
+            class="border-r border-white/20 px-2 py-3 text-center text-xs font-extrabold"
+          >
+            {{ h }}
+          </div>
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div *ngIf="groups?.length; else sinDatos">
+        <ng-container *ngFor="let fecha of groups; let i = index">
+          <div class="flex border-b border-border">
+            <!-- FECHA / TURNO -->
+            <div
+              class="sticky left-0 z-20 flex w-[120px] shrink-0 items-center justify-center border-r border-border bg-surface-soft px-3 py-4 text-center text-xs font-extrabold text-secondary"
+            >
+              {{ fecha.fechaTurno }}
+            </div>
+
+            <!-- EQUIPOS + TIMELINE -->
+            <div class="flex flex-1 flex-col">
+              <div
+                *ngFor="let equipo of fecha.equipos"
+                class="flex min-h-12 border-b border-border last:border-b-0"
+              >
+                <!-- EQUIPO -->
+                <div
+                  class="sticky left-[120px] z-20 flex w-[110px] shrink-0 items-center border-r border-border bg-white px-3 text-xs font-extrabold text-ink"
+                >
+                  {{ equipo.equipoCodigo }}
+                </div>
+
+                <!-- FILA TIMELINE -->
+                <div
+                  class="relative h-12 flex-1 bg-white"
+                  [style.minWidth.px]="hours.length * 72"
+                >
+                  <!-- GRILLA DE HORAS -->
                   <div
-                    class="task"
-                    *ngFor="let task of equipo.tasks"
-                    [ngStyle]="getTaskStyle(task)"
-                    [attr.data-tooltip]="getTaskTooltip(task)"
+                    class="pointer-events-none absolute inset-0 grid"
+                    [style.gridTemplateColumns]="
+                      'repeat(' + hours.length + ', minmax(72px, 1fr))'
+                    "
                   >
-                    <span class="task-label">
-  {{ task.labor?.slice(0, 3) }}
-</span>
-                    <div class="task-tooltip">
-                      <div class="tooltip-title">{{ task.labor }}</div>
-                      <div *ngIf="task.description && task.description !== ''" class="tooltip-description">
-                        📝 {{ task.description }} | ⏱️ {{ minutesToTime(task.startMin) }} - {{ minutesToTime(task.endMin) }}
-                      </div>
-                      <div *ngIf="task.tipo_estado && task.tipo_estado !== ''" class="tooltip-tipo-estado">
-                        🏷️ {{ task.tipo_estado }}
-                      </div>
-                    </div>
+                    <div
+                      *ngFor="let h of hours"
+                      class="border-r border-border/70"
+                    ></div>
+                  </div>
+
+                  <!-- TAREAS -->
+                  <div
+                    *ngFor="let task of equipo.tasks"
+                    class="absolute top-1 flex h-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg px-2 text-[11px] font-extrabold text-white shadow-sm transition hover:z-30 hover:scale-[1.02] hover:shadow-lg"
+                    [ngStyle]="getTaskStyle(task)"
+                    [pTooltip]="getTaskTooltip(task)"
+                    tooltipPosition="top"
+                    appendTo="body"
+                  >
+                    <span class="truncate">
+                      {{ task.labor?.slice(0, 3) || "-" }}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="fecha-divider" *ngIf="i < groups.length - 1"></div>
+
+          <div *ngIf="i < groups.length - 1" class="h-2 bg-surface-soft"></div>
+        </ng-container>
+      </div>
+
+      <!-- SIN DATOS -->
+      <ng-template #sinDatos>
+        <div
+          class="flex min-h-40 flex-col items-center justify-center gap-2 p-8 text-ink-75"
+        >
+          <i class="pi pi-info-circle text-2xl"></i>
+          <p class="text-sm font-bold">
+            No hay datos disponibles para mostrar en la línea de tiempo.
+          </p>
         </div>
-      </ng-container>
+      </ng-template>
     </div>
   </div>
 </div>

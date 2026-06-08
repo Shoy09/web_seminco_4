@@ -1,11 +1,30 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
+
 import * as echarts from 'echarts/core';
 import { BarChart } from 'echarts/charts';
-import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, GraphicComponent } from 'echarts/components';
+
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  GraphicComponent,
+} from 'echarts/components';
+
 import { CanvasRenderer } from 'echarts/renderers';
 
-echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, GraphicComponent, CanvasRenderer]);
+import { CHART_THEME } from '../../../../../../../shared/chart-theme';
+
+echarts.use([
+  BarChart,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  GraphicComponent,
+  CanvasRenderer,
+]);
 
 @Component({
   selector: 'app-disparos-equipo',
@@ -13,255 +32,215 @@ echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendCo
   imports: [NgxEchartsDirective],
   providers: [provideEchartsCore({ echarts })],
   templateUrl: './disparos-equipo.component.html',
-  styleUrl: './disparos-equipo.component.css'
 })
 export class DisparosEquipoComponent implements OnChanges {
-  
   @Input() data: any[] = [];
 
   chartOptions: any = {};
+  private chartInstance: any;
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data'] || changes['objetivoDisparos']) {
-      console.log('📊 DATA RECIBIDASSSSSSSSSSSSSSS:', this.data);
+    if (changes['data']) {
       this.actualizarGrafico();
     }
   }
 
-actualizarGrafico(): void {
-  if (!this.data || this.data.length === 0) {
-    this.chartOptions = {};
-    return;
+  onChartInit(ec: any): void {
+    this.chartInstance = ec;
   }
 
-  // 🔹 Agrupar por seccion_labor (NO SE TOCA)
-  const gruposPorSeccionLabor = new Map<string, any[]>();
-  
-  this.data.forEach(item => {
-    const seccionLabor = item.seccion_labor || 'SIN_SECCION';
-    if (!gruposPorSeccionLabor.has(seccionLabor)) {
-      gruposPorSeccionLabor.set(seccionLabor, []);
-    }
-    gruposPorSeccionLabor.get(seccionLabor)!.push(item);
-  });
+  getChartImage(): string | null {
+    if (!this.chartInstance) return null;
 
-  // 🔹 Detectar TODOS los tipos dinámicamente
-  const tiposSet = new Set<string>();
-  this.data.forEach(item => {
-    if (item.tipos) {
-      Object.keys(item.tipos).forEach(t => tiposSet.add(t));
-    }
-  });
-  const tiposArray = Array.from(tiposSet);
-
-  // 🔹 Preparar eje X (NO SE TOCA DISEÑO)
-  const xAxisData: string[] = [];
-  const tooltipMap: Map<number, any> = new Map();
-
-  let index = 0;
-  gruposPorSeccionLabor.forEach((items) => {
-    items.forEach(item => {
-      const label = `${item.modelo_equipo}\n(${item.seccion || 'N/A'})`;
-      xAxisData.push(label);
-      tooltipMap.set(index, item);
-      index++;
+    return this.chartInstance.getDataURL({
+      type: 'jpeg',
+      pixelRatio: 1.2,
+      backgroundColor: '#FFFFFF',
+      excludeComponents: ['toolbox', 'dataZoom'],
     });
-  });
+  }
 
-  // 🔹 Colores consistentes (opcional pero recomendado)
-  const colores: any = {
-    'FRENTE COMPLETO': '#85c1e9',
-    'DESQUINCHE': '#5dade2',
-    'BREASTING': '#3498db',
-    'CIRCADO': '#2e86c1',
-    'REFUGIO': '#2874a6',
-    'SELLADA': '#21618c'
-  };
-
-  // 🔹 Crear series apiladas (AQUÍ ESTÁ LA MAGIA)
-  const series = tiposArray.map((tipo, tipoIndex) => ({
-    name: tipo,
-    type: 'bar',
-    stack: 'total',
-    barWidth: '50%',
-    data: this.data.map(item => item.tipos?.[tipo] || 0),
-    itemStyle: {
-      color: colores[tipo] || '#95a5a6',
-      borderRadius: tipoIndex === tiposArray.length - 1
-        ? [5, 5, 0, 0] // 🔥 solo la parte superior redondeada
-        : [0, 0, 0, 0],
-      shadowColor: 'rgba(0, 0, 0, 0.2)',
-      shadowBlur: 5
-    },
-    label: {
-      show: true,
-      position: 'inside',
-      fontWeight: 'bold',
-      fontSize: 11,
-      formatter: (params: any) => params.value > 0 ? params.value : ''
+  actualizarGrafico(): void {
+    if (!Array.isArray(this.data) || this.data.length === 0) {
+      this.chartOptions = {};
+      return;
     }
-  }));
 
-  // 🔹 Calcular máximo (igual que antes pero con total)
-  const totales = this.data.map(item => item.n_frentes);
-  const maxValor = Math.max(...totales);
-  const yAxisMax = Math.ceil(maxValor * 1.2);
+    const gruposPorSeccionLabor = new Map<string, any[]>();
 
-  this.chartOptions = {
-    title: {
-      text: 'DISPAROS POR EQUIPO',
-      left: 'center',
-      top: 10,
-      textStyle: {
-        fontSize: 16,
+    this.data.forEach((item) => {
+      const seccionLabor = item.seccion_labor || 'SIN_SECCION';
+
+      if (!gruposPorSeccionLabor.has(seccionLabor)) {
+        gruposPorSeccionLabor.set(seccionLabor, []);
+      }
+
+      gruposPorSeccionLabor.get(seccionLabor)!.push(item);
+    });
+
+    const tiposSet = new Set<string>();
+
+    this.data.forEach((item) => {
+      if (item.tipos) {
+        Object.keys(item.tipos).forEach((tipo) => tiposSet.add(tipo));
+      }
+    });
+
+    const tiposArray = Array.from(tiposSet);
+
+    const xAxisData: string[] = [];
+    const tooltipMap = new Map<number, any>();
+
+    let index = 0;
+
+    gruposPorSeccionLabor.forEach((items) => {
+      items.forEach((item) => {
+        const label = `${item.modelo_equipo || 'N/A'} (${item.seccion || 'N/A'})`;
+
+        xAxisData.push(label);
+        tooltipMap.set(index, item);
+        index++;
+      });
+    });
+
+    const coloresPorTipo = this.obtenerColoresPorTipo(tiposArray);
+
+    const series = tiposArray.map((tipo, tipoIndex) => ({
+      name: tipo,
+      type: 'bar',
+      stack: 'total',
+      barWidth: CHART_THEME.bar.barWidth,
+
+      data: this.data.map((item) => Number(item.tipos?.[tipo] || 0)),
+
+      itemStyle: {
+        ...CHART_THEME.bar.itemStyle,
+        color: coloresPorTipo[tipo],
+        borderRadius:
+          tipoIndex === tiposArray.length - 1
+            ? [6, 6, 0, 0]
+            : [0, 0, 0, 0],
+      },
+
+      label: {
+        ...CHART_THEME.bar.label,
+        show: true,
+        position: 'inside',
+        color: CHART_THEME.colors.secondary,
         fontWeight: 'bold',
-        color: '#333'
-      }
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' },
-      formatter: (params: any) => {
-        const item = tooltipMap.get(params[0].dataIndex);
-        if (!item) return '';
-
-        let detalle = '';
-        params.forEach((p: any) => {
-          if (p.value > 0) {
-            detalle += `${p.marker} ${p.seriesName}: ${p.value}<br/>`;
-          }
-        });
-
-        return `<strong>${item.modelo_equipo}</strong><br/>
-                Sección: ${item.seccion || 'N/A'}<br/>
-                Sección Labor: ${item.seccion_labor || 'N/A'}<br/><br/>
-                ${detalle}
-                <strong>Total: ${item.n_frentes}</strong>`;
-      }
-    },
-    legend: {
-      bottom: 0,
-      left: 'center'
-    },
-    grid: {
-      left: '10%',
-      right: '5%',
-      top: '15%',
-      bottom: '20%', // 🔥 un poco más de espacio para la leyenda
-      containLabel: true
-    },
-    xAxis: {
-      type: 'category',
-      data: xAxisData,
-      axisLabel: {
         fontSize: 11,
-        fontWeight: 'bold',
-        interval: 0
+        formatter: (params: any) => params.value > 0 ? params.value : '',
       },
-      axisLine: {
-        lineStyle: { color: '#333' }
+    }));
+
+    const totales = this.data.map((item) => Number(item.n_frentes || 0));
+    const maxValor = Math.max(...totales, 1);
+    const yAxisMax = Math.ceil(maxValor * 1.2);
+
+    this.chartOptions = {
+      color: tiposArray.map((tipo) => coloresPorTipo[tipo]),
+
+      title: {
+        ...CHART_THEME.title,
+        text: 'DISPAROS POR EQUIPO',
       },
-      axisTick: {
-        alignWithLabel: true
-      }
-    },
-    yAxis: {
-      type: 'value',
-      name: 'Cantidad de Disparos',
-      nameLocation: 'middle',
-      nameGap: 45,
-      min: 0,
-      max: yAxisMax,
-      interval: this.calcularIntervalo(yAxisMax),
-      axisLabel: { fontSize: 12 },
-      splitLine: {
-        lineStyle: { type: 'dashed' }
-      }
-    },
-    series
-  };
-}
-  agregarSeparadores(grupos: Map<string, any[]>, totalItems: number): any[] {
-    const separadores: any[] = [];
-    let acumulado = 0;
-    let grupoIndex = 0;
-    
-    grupos.forEach((items, seccionLabor) => {
-      const itemsCount = items.length;
-      acumulado += itemsCount;
-      
-      // No agregar separador después del último grupo
-      if (grupoIndex < grupos.size - 1) {
-        // Calcular posición del separador (entre grupos)
-        const posicionX = (acumulado / totalItems) * 100;
-        
-        // Agregar línea vertical separadora
-        separadores.push({
-          type: 'line',
-          shape: {
-            x1: posicionX,
-            y1: 0,
-            x2: posicionX,
-            y2: 1
-          },
-          style: {
-            stroke: '#ccc',
-            lineWidth: 1,
-            lineDash: [4, 4]
-          },
-          left: '8%',
-          right: '5%',
-          top: '10%',
-          bottom: '10%',
-          bounding: 'raw',
-          z: 50
-        });
-        
-        // Agregar texto del grupo (seccion_labor) encima de las barras
-        const posicionTexto = acumulado - (itemsCount / 2);
-        const posicionXTexto = (posicionTexto / totalItems) * 100;
-        
-        separadores.push({
-          type: 'text',
-          style: {
-            text: seccionLabor,
-            fill: '#2c3e50',
-            fontSize: 12,
-            fontWeight: 'bold',
-            fontFamily: 'Arial'
-          },
-          left: `${posicionXTexto}%`,
-          top: 5,
-          styleHtml: true,
-          z: 100,
-          bounding: 'raw'
-        });
-      } else {
-        // Para el último grupo, solo agregar el texto
-        const posicionTexto = acumulado - (itemsCount / 2);
-        const posicionXTexto = (posicionTexto / totalItems) * 100;
-        
-        separadores.push({
-          type: 'text',
-          style: {
-            text: seccionLabor,
-            fill: '#2c3e50',
-            fontSize: 12,
-            fontWeight: 'bold',
-            fontFamily: 'Arial'
-          },
-          left: `${posicionXTexto}%`,
-          top: 5,
-          styleHtml: true,
-          z: 100,
-          bounding: 'raw'
-        });
-      }
-      
-      grupoIndex++;
+
+      tooltip: {
+        ...CHART_THEME.tooltip,
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow',
+        },
+        formatter: (params: any) => {
+          const item = tooltipMap.get(params[0].dataIndex);
+
+          if (!item) return '';
+
+          let detalle = '';
+
+          params.forEach((p: any) => {
+            if (p.value > 0) {
+              detalle += `${p.marker} ${p.seriesName}: <strong>${p.value}</strong><br/>`;
+            }
+          });
+
+          return `
+            <strong>${item.modelo_equipo || 'N/A'}</strong><br/>
+            Sección: <strong>${item.seccion || 'N/A'}</strong><br/>
+            Sección Labor: <strong>${item.seccion_labor || 'N/A'}</strong><br/><br/>
+            ${detalle}
+            <strong>Total: ${item.n_frentes || 0}</strong>
+          `;
+        },
+      },
+
+      legend: {
+        ...CHART_THEME.legend,
+        data: tiposArray,
+        left: 'center',
+        itemWidth: 18,
+        itemHeight: 10,
+        itemGap: 20,
+      },
+
+      grid: {
+        ...CHART_THEME.grid,
+      },
+
+      xAxis: {
+        ...CHART_THEME.xAxisCategory,
+        data: xAxisData,
+        axisLabel: {
+          ...CHART_THEME.xAxisCategory.axisLabel,
+          fontSize: 11,
+          fontWeight: 'bold',
+          interval: 0,
+          lineHeight: 16,
+          margin: 10,
+        },
+        axisTick: {
+          alignWithLabel: true,
+        },
+      },
+
+      yAxis: {
+        ...CHART_THEME.yAxisValue,
+        name: 'Cantidad de Disparos',
+        nameLocation: 'middle',
+        nameGap: 45,
+        min: 0,
+        max: yAxisMax,
+        interval: this.calcularIntervalo(yAxisMax),
+        axisLabel: {
+          ...CHART_THEME.yAxisValue.axisLabel,
+          fontSize: 12,
+          formatter: '{value}',
+        },
+      },
+
+      series,
+    };
+  }
+
+  private obtenerColoresPorTipo(tipos: string[]): Record<string, string> {
+    const coloresBase = [
+      ...((CHART_THEME.colors as any).primaryScale3 || []),
+      (CHART_THEME.colors as any).primary,
+      (CHART_THEME.colors as any).secondary,
+      (CHART_THEME.colors as any).warning,
+      (CHART_THEME.colors as any).success,
+      (CHART_THEME.colors as any).textMuted,
+    ].filter(Boolean);
+
+    const fallback = '#94A3B8';
+
+    const coloresPorTipo: Record<string, string> = {};
+
+    tipos.forEach((tipo, index) => {
+      coloresPorTipo[tipo] = coloresBase[index % coloresBase.length] || fallback;
     });
-    
-    return separadores;
+
+    return coloresPorTipo;
   }
 
   calcularIntervalo(max: number): number {
@@ -269,6 +248,7 @@ actualizarGrafico(): void {
     if (max <= 10) return 2;
     if (max <= 20) return 5;
     if (max <= 50) return 10;
+
     return 20;
   }
 }

@@ -1,98 +1,447 @@
-<div class="filtro-fechas">
-  <div class="campo">
-    <label>Fecha inicio</label>
-    <input type="date" [(ngModel)]="fechaInicio">
-  </div>
+<div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6 items-end">
+    <!-- Tipo de filtro -->
+    <div class="flex flex-col gap-2 xl:col-span-2">
+      <label class="text-sm font-bold text-ink">Filtrar por</label>
 
-  <div class="campo">
-    <label>Fecha fin</label>
-    <input type="date" [(ngModel)]="fechaFin">
-  </div>
+      <p-selectButton
+        [options]="tiposFiltro"
+        [(ngModel)]="tipoFiltro"
+        optionLabel="label"
+        optionValue="value"
+        (onChange)="limpiarFechasPorTipo()"
+        styleClass="w-full"
+      >
+      </p-selectButton>
+    </div>
 
-  <div class="campo">
-  <label>Turno</label>
-  <select [(ngModel)]="turnoSeleccionado">
-    <option value="">Todos</option>
-    <option value="DÍA">Día</option>
-    <option value="NOCHE">Noche</option>
-  </select>
+    <!-- Año -->
+    @if (tipoFiltro === "anio") {
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Año</label>
+
+        <p-datepicker
+          [(ngModel)]="anioSeleccionado"
+          view="year"
+          dateFormat="yy"
+          [showIcon]="true"
+          iconDisplay="input"
+          [readonlyInput]="true"
+          placeholder="Seleccione año"
+          styleClass="w-full"
+        >
+        </p-datepicker>
+      </div>
+    }
+
+    <!-- Mes -->
+    @if (tipoFiltro === "mes") {
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Mes</label>
+
+        <p-datepicker
+          [(ngModel)]="mesSeleccionado"
+          view="month"
+          dateFormat="mm/yy"
+          [showIcon]="true"
+          iconDisplay="input"
+          [readonlyInput]="true"
+          placeholder="Seleccione mes"
+          styleClass="w-full"
+        >
+        </p-datepicker>
+      </div>
+    }
+
+    <!-- Semana -->
+    @if (tipoFiltro === "semana") {
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Semana</label>
+
+        <p-datepicker
+          [(ngModel)]="semanaSeleccionada"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          iconDisplay="input"
+          [readonlyInput]="true"
+          placeholder="Elija un día de la semana"
+          styleClass="w-full"
+        >
+        </p-datepicker>
+      </div>
+    }
+    <!-- Día -->
+    @if (tipoFiltro === "dia") {
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Día</label>
+
+        <p-datepicker
+          [(ngModel)]="diaSeleccionado"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          iconDisplay="input"
+          [readonlyInput]="true"
+          placeholder="Seleccione día"
+          styleClass="w-full"
+        >
+        </p-datepicker>
+      </div>
+    }
+
+    <!-- Rango de fechas -->
+    @if (tipoFiltro === "rango") {
+      <div class="flex flex-col gap-2 md:col-span-1">
+        <label class="text-sm font-bold text-ink">Rango de fechas</label>
+
+        <p-datepicker
+          [(ngModel)]="rangoFechas"
+          selectionMode="range"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          iconDisplay="input"
+          [readonlyInput]="true"
+          [showButtonBar]="true"
+          placeholder="Fecha inicio - Fecha fin"
+          styleClass="w-full"
+        >
+        </p-datepicker>
+      </div>
+    }
+
+    <!-- Turno -->
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-bold text-ink">Turno</label>
+
+      <p-select
+        [options]="turnos"
+        [(ngModel)]="turnoSeleccionado"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Todos"
+        [showClear]="true"
+        appendTo="body"
+        styleClass="w-full"
+      >
+      </p-select>
+    </div>
+
+    <!-- Botones -->
+    <div
+      class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between xl:col-span-2"
+    >
+      <!-- Acciones de filtro -->
+      <div class="flex flex-col gap-2 sm:flex-row">
+        <p-button
+          label="Aplicar"
+          icon="pi pi-filter"
+          (onClick)="aplicarFiltro()"
+          styleClass="w-full sm:w-auto bg-primary border-primary text-secondary font-bold shadow-sm hover:shadow-md"
+        >
+        </p-button>
+
+        <p-button
+          label="Quitar"
+          icon="pi pi-times"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="quitarFiltro()"
+          styleClass="w-full sm:w-auto font-semibold"
+        >
+        </p-button>
+      </div>
+
+      <!-- Acciones de reporte -->
+      <div class="flex flex-col gap-2 sm:flex-row">
+        <p-button
+          label="Presentación"
+          icon="pi pi-chart-bar"
+          severity="info"
+          [outlined]="true"
+          (onClick)="Presentacion()"
+          styleClass="w-full sm:w-auto font-semibold"
+        >
+        </p-button>
+
+        <p-button
+          label="PDF"
+          icon="pi pi-file-pdf"
+          severity="warn"
+          (onClick)="generarPDF()"
+          styleClass="w-full sm:w-auto font-bold shadow-sm hover:shadow-md"
+        >
+        </p-button>
+      </div>
+    </div>
+  </div>
 </div>
 
+<div
+  *ngIf="vistaPrincipal"
+  class="grid grid-cols-1 gap-4 md:grid-cols-6 xl:grid-cols-12"
+>
+  <!-- RESUMEN: ancho completo -->
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-resumen class="block w-full" [data]="resumen"> </app-resumen>
+  </div>
 
-  <button class="btn-aplicar" (click)="aplicarFiltro()">
-    Aplicar
-  </button>
+  <!-- DISPAROS POR EQUIPO -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-disparos-equipo class="block w-full" [data]="dataDisparosEquipo">
+    </app-disparos-equipo>
+  </div>
+  <!-- RENDIMIENTO POR EQUIPO -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-rendimiento-equipo class="block w-full" [data]="dataIndicadoresEquipo">
+    </app-rendimiento-equipo>
+  </div>
+  <!-- DISPAROS POR DÍA -->
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-disparos-dia class="block w-full" [data]="dataDisparosDia">
+    </app-disparos-dia>
+  </div>
 
-  <button class="btn-aplicar" (click)="quitarFiltro()">
-    Quitar filtro
-  </button>
+  <!-- DEMORAS OPERATIVAS -->
+  <!-- <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-demoras-operativas
+      class="block w-full"
+      [data]="dataDemorasOperativas"
+      data-page="1"
+    >
+    </app-demoras-operativas>
+  </div> -->
 
-  <button class="btn-aplicar" (click)="generarPDF()">
-  Exportar PDF
-</button>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-grafica-pareto
+      class="block w-full"
+      [data]="DataParetoHorasOperativas"
+      titulo="PARETO DE HORAS OPERATIVAS"
+    >
+    </app-grafica-pareto>
+  </div>
 
-<!-- <button class="btn-aplicar" (click)="toggleVista()">
-  {{ vistaPrincipal ? 'Ver gráfico de linea' : 'Gráficos principales' }}
-</button> -->
+  <!-- HORAS NO OPERATIVAS -->
+  <!-- <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-horas-no-operativas
+      class="block w-full"
+      [data]="dataHorasNoOperativas"
+      data-page="1"
+    >
+    </app-horas-no-operativas>
+  </div> -->
 
-</div>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-grafica-pareto
+      class="block w-full"
+      [data]="DataParetoHorasNoOperativas"
+      titulo="PARETO DE HORAS NO OPERATIVAS"
+      data-page="1"
+    >
+    </app-grafica-pareto>
+  </div>
 
-<div class="graficos-container" *ngIf="vistaPrincipal">
+  <!-- HORAS DE MANTENIMIENTO -->
+  <!-- <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-horas-de-mantenimiento
+      class="block w-full"
+      [data]="dataHorasMantenimiento"
+      data-page="1"
+    >
+    </app-horas-de-mantenimiento>
+  </div> -->
 
-<!-- Hoja 1 pdf -->
-  <app-resumen class="full-width" [data]="resumen" data-page="1"></app-resumen>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-grafica-pareto
+      class="block w-full"
+      [data]="DataParetoHorasMantenimiento"
+      titulo="PARETO DE HORAS DE MANTENIMIENTO"
+      data-page="1"
+    >
+    </app-grafica-pareto>
+  </div>
 
-  <app-disparos-equipo  [data]="dataDisparosEquipo" data-page="1"></app-disparos-equipo>
-  <app-disparos-dia [data]="dataDisparosDia" data-page="1"></app-disparos-dia>
-  <app-rendimiento-equipo [data]="dataIndicadoresEquipo" data-page="1"></app-rendimiento-equipo>
-  <app-demoras-operativas [data]="dataDemorasOperativas" data-page="1"></app-demoras-operativas>
-  
-  <app-horas-no-operativas [data]="dataHorasNoOperativas" data-page="1"></app-horas-no-operativas>
-  <app-horas-de-mantenimiento  [data]="dataHorasMantenimiento" data-page="1"></app-horas-de-mantenimiento>
-  <app-metros-perforados-disparo  [data]="dataMetrosDisparoFR" data-page="1"></app-metros-perforados-disparo>
-  <app-perforado-equipo  [data]="dataMetrosDisparoFR" data-page="1"></app-perforado-equipo>
+  <!-- METROS PERFORADOS / DISPARO -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-metros-perforados-disparo
+      class="block w-full"
+      [data]="dataMetrosDisparoFR"
+      data-page="1"
+    >
+    </app-metros-perforados-disparo>
+  </div>
 
-  <app-mhr-equipo [data]="dataMhrEquipo" data-page="1"></app-mhr-equipo>
-  <app-horometros-jumbos [data]="dataHorometrosJumbos" data-page="1"></app-horometros-jumbos>
-  <app-total-horometros  [data]="dataHorometrosJumbos" data-page="1"></app-total-horometros>
-  <!-- Hoja 2 pdf -->
-  
-  <app-horas-primera-perforacion  [data]="dataProcesoLaborFR" data-page="2"></app-horas-primera-perforacion>
+  <!-- PERFORADO POR EQUIPO -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-perforado-equipo class="block w-full" [data]="dataMetrosDisparoFR">
+    </app-perforado-equipo>
+  </div>
 
-  <app-avance-fase [data]="dataAvanceFase" data-page="2"></app-avance-fase>
-  <app-disparos-tipo-perforacion  [data]="dataTipoPerforacion" data-page="2"></app-disparos-tipo-perforacion>
-  <app-promedio-estados-echarts [data]="datosGraficoEstados" data-page="2"></app-promedio-estados-echarts>
+  <!-- MHR POR EQUIPO -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-mhr-equipo class="block w-full" [data]="dataMhrEquipo">
+    </app-mhr-equipo>
+  </div>
 
-  <app-detalle-perforacion class="full-width" data-pdf-span="2" [data]="dataPercusionConMetrosJumbos" data-page="2"></app-detalle-perforacion>
-<app-detalle-disparos class="full-width" data-pdf-span="2" [data]="datadetalleDisparos" data-page="2"></app-detalle-disparos>
-  <!-- Hoja 3 pdf -->
-  <app-mejores-operadores class="full-width"  data-pdf-span="2" [data]="dataFrPorOperadorTurno" data-page="2"></app-mejores-operadores>
-  <app-ranking-operador   data-pdf-span="2" [data]="dataFrPorOperadorTurno" data-page="1"></app-ranking-operador>
+  <!-- HORÓMETROS JUMBOS -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-horometros-jumbos class="block w-full" [data]="dataHorometrosJumbos">
+    </app-horometros-jumbos>
+  </div>
 
-  <app-observaciones class="full-width" data-pdf-span="2" [data]="dataLaborFRDetallado" data-page="2"></app-observaciones>
- <!-- Hoja 4 pdf -->
-<app-scatter-turnos 
-  *ngIf="turnoAplicado === '' || turnoAplicado === 'DÍA'"
-  class="full-width"
-  [data]="dataHorasNumericas" data-page="3" >
-</app-scatter-turnos>
+  <!-- TOTAL HORÓMETROS -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-total-horometros class="block w-full" [data]="dataHorometrosJumbos">
+    </app-total-horometros>
+  </div>
 
-<app-scatter-turnos-noche 
-  *ngIf="turnoAplicado === '' || turnoAplicado === 'NOCHE'"
-  class="full-width"
-  [data]="dataHorasNumericas" data-page="3">
-</app-scatter-turnos-noche>
+  <!-- HORAS PRIMERA PERFORACIÓN -->
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-horas-primera-perforacion
+      class="block w-full"
+      [data]="dataProcesoLaborFR"
+    >
+    </app-horas-primera-perforacion>
+  </div>
+  <!-- AVANCE POR FASE -->
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-avance-fase class="block w-full" [data]="dataAvanceFase">
+    </app-avance-fase>
+  </div>
 
+  <!-- DISPAROS TIPO PERFORACIÓN -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-disparos-tipo-perforacion
+      class="block w-full"
+      [data]="dataTipoPerforacion"
+    >
+    </app-disparos-tipo-perforacion>
+  </div>
+
+  <!-- PROMEDIO ESTADOS -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-promedio-estados-echarts
+      class="block w-full"
+      [data]="datosGraficoEstados"
+      data-page="2"
+    >
+    </app-promedio-estados-echarts>
+  </div>
+
+  <!-- DETALLE PERFORACIÓN: ancho completo -->
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-detalle-perforacion
+      class="block w-full"
+      [data]="dataPercusionConMetrosJumbos"
+    >
+    </app-detalle-perforacion>
+  </div>
+
+  <!-- DETALLE DISPAROS: ancho completo -->
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-detalle-disparos class="block w-full" [data]="datadetalleDisparos">
+    </app-detalle-disparos>
+  </div>
+
+  <!-- MEJORES OPERADORES: ancho completo -->
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-mejores-operadores
+      class="block w-full"
+      [data]="dataFrPorOperadorTurno"
+    >
+    </app-mejores-operadores>
+  </div>
+
+  <!-- RANKING OPERADOR -->
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-ranking-operador class="block w-full" [data]="dataFrPorOperadorTurno">
+    </app-ranking-operador>
+  </div>
+
+  <!-- OBSERVACIONES: ancho completo -->
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-observaciones class="block w-full" [data]="dataLaborFRDetallado">
+    </app-observaciones>
+  </div>
+
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-mapa-de-calor
+      class="block w-full"
+      [data]="dataHorasNumericas"
+      [turno]="turnoAplicado"
+    >
+    </app-mapa-de-calor>
+  </div>
 </div>
 
 <div class="graficos-container" *ngIf="!vistaPrincipal">
-
-<app-scheduler class="full-width" [data]="ganttData" data-page="6"></app-scheduler>
+  <app-scheduler
+    class="full-width"
+    [data]="ganttData"
+    data-page="6"
+  ></app-scheduler>
 </div>
-
- 
 
 <div class="overlay" *ngIf="cargandoPDF">
   <div class="spinner"></div>
   <p>Generando PDF...</p>
-</div> 
+</div>
+
+<!-- <app-dialog-hora-hora-perforacion
+  [(visible)]="mostrarDialogHoraHora"
+  [data]="operacionesFiltradas"
+  [turno]="turnoSeleccionado"
+  [fechaInicio]="fechaInicio"
+  [fechaFin]="fechaFin"
+  [usarTurnoActual]="false"
+  titulo="Metros perforados hora-hora"
+  subtitulo="Perforación horizontal filtrada por jumbos">
+</app-dialog-hora-hora-perforacion> -->
