@@ -5,6 +5,16 @@
     width: 95%; /* Permitimos que ocupe más espacio */
 }
 
+/* Estilo para que los botones de acciones estén en línea */
+.acciones-cell {
+    white-space: nowrap;
+}
+
+.acciones-cell button {
+    display: inline-flex;
+    margin: 0 2px;
+}
+
 h2 {
     text-align: center;
     color: #3f51b5;
