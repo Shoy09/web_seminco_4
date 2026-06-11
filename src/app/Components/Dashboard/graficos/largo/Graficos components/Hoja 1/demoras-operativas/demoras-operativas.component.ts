@@ -53,12 +53,15 @@ export class DemorasOperativasComponent implements OnChanges {
     // % acumulado
     const porcentajes = this.data.map((item) => item.tiempo_acu_pct * 100);
 
-    // 🔹 Calcular maxHoras con EXACTAMENTE 20% de margen (sin ceil ni redondeos extras)
+    // 🔹 Calcular maxHoras con EXACTAMENTE 20% de margen
     const maxHorasOriginal = Math.max(...horas, 1);
     const margenSuperior = 0.20; // 20% exacto
-    let maxHoras = maxHorasOriginal * (1 + margenSuperior);
+    let maxHorasCalculado = maxHorasOriginal * (1 + margenSuperior);
     
-    // 🔹 Escalar línea al eje Y
+    // 🔹 REDONDEAR maxHoras a ENTERO (para evitar decimales en el eje Y)
+    let maxHoras = Math.ceil(maxHorasCalculado);
+    
+    // 🔹 Escalar línea al eje Y (usando el maxHoras redondeado)
     const porcentajesEscalados = porcentajes.map((p) => (p / 100) * maxHoras);
 
     this.chartOptions = {
@@ -95,9 +98,9 @@ export class DemorasOperativasComponent implements OnChanges {
         orient: 'horizontal',
       },
       grid: {
-        left: '12%',
-        right: '8%',
-        top: '15%',  // Reducido para que no haya tanto espacio arriba
+        left: '3%',
+        right: '5%',
+        top: '12%',
         bottom: '10%',
         containLabel: true,
       },
@@ -130,9 +133,14 @@ export class DemorasOperativasComponent implements OnChanges {
         min: 0,
         max: maxHoras,
         axisLabel: {
-          formatter: '{value} h',
+          formatter: (value: number) => {
+            // 🔹 FORZAR a mostrar solo números enteros en el eje Y
+            if (Number.isInteger(value)) {
+              return `${value} h`;
+            }
+            return ''; // No mostrar decimales
+          },
         },
-        // 🔹 QUITAR boundaryGap para que no añada espacio extra
         splitLine: {
           show: true,
           lineStyle: {
@@ -141,6 +149,8 @@ export class DemorasOperativasComponent implements OnChanges {
             color: '#e0e0e0',
           },
         },
+        // 🔹 OPCIONAL: Definir intervalos exactos para que solo muestre números enteros
+        interval: Math.ceil(maxHoras / 5), // Divide el eje en ~5 partes enteras
       },
       series: [
         {
@@ -155,7 +165,7 @@ export class DemorasOperativasComponent implements OnChanges {
             show: true,
             position: 'top',
             formatter: '{c} h',
-            offset: [0, 3], // Reducido el offset
+            offset: [0, 3],
           },
           barCategoryGap: '30%',
           barGap: '30%',
@@ -178,7 +188,7 @@ export class DemorasOperativasComponent implements OnChanges {
           label: {
             show: true,
             position: 'top',
-            offset: [0, -5], // Reducido el offset negativo
+            offset: [0, -5],
             formatter: (params: any) =>
               `${porcentajes[params.dataIndex].toFixed(1)}%`,
             fontWeight: 'bold',
