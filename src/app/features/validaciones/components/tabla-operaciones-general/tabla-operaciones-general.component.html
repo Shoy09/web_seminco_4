@@ -1,0 +1,103 @@
+<div class="rounded-3xl border border-border bg-surface shadow-sm overflow-hidden">
+  <p-table
+    [value]="registros"
+    responsiveLayout="scroll"
+    [tableStyle]="{ 'min-width': '72rem' }"
+    styleClass="p-datatable-sm"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th class="whitespace-nowrap">#</th>
+        <th class="whitespace-nowrap">Estado</th>
+        <th class="whitespace-nowrap">Codigo</th>
+        <th class="whitespace-nowrap">Hora inicio</th>
+        <th class="whitespace-nowrap">Hora fin</th>
+        <th *ngFor="let column of operationColumns" class="min-w-44">
+          {{ column }}
+        </th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-registro>
+      <tr>
+        <td>{{ registro.numero || registro.id || '-' }}</td>
+
+        <td>
+          <input
+            pInputText
+            class="w-full"
+            [ngModel]="registro.estado"
+            (ngModelChange)="registro.estado = $event; emitChanges()"
+          />
+        </td>
+
+        <td>
+          <input
+            pInputText
+            class="w-full"
+            [ngModel]="registro.codigo"
+            (ngModelChange)="registro.codigo = $event; emitChanges()"
+          />
+        </td>
+
+        <td>
+          <input
+            pInputText
+            type="time"
+            class="w-full"
+            [ngModel]="registro.hora_inicio"
+            (ngModelChange)="registro.hora_inicio = $event; emitChanges()"
+          />
+        </td>
+
+        <td>
+          <input
+            pInputText
+            type="time"
+            class="w-full"
+            [ngModel]="registro.hora_final"
+            (ngModelChange)="registro.hora_final = $event; emitChanges()"
+          />
+        </td>
+
+        <td *ngFor="let column of operationColumns" class="align-top">
+          <ng-container [ngSwitch]="true">
+            <div *ngSwitchCase="isBoolean(getOperationValue(registro, column))" class="flex justify-center py-2">
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="getOperationValue(registro, column)"
+                (ngModelChange)="setOperationValue(registro, column, $event)"
+              ></p-checkbox>
+            </div>
+
+            <textarea
+              *ngSwitchCase="isObject(getOperationValue(registro, column))"
+              pInputTextarea
+              rows="3"
+              class="w-full"
+              [ngModel]="stringify(getOperationValue(registro, column))"
+              (ngModelChange)="updateJsonValue(registro, column, $event)"
+            ></textarea>
+
+            <input
+              *ngSwitchDefault
+              pInputText
+              [type]="isNumber(getOperationValue(registro, column)) ? 'number' : 'text'"
+              class="w-full"
+              [ngModel]="getOperationValue(registro, column)"
+              (ngModelChange)="setOperationValue(registro, column, $event)"
+            />
+          </ng-container>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td [attr.colspan]="5 + operationColumns.length" class="py-10 text-center text-sm text-ink-75">
+          No hay operaciones para editar en este registro.
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

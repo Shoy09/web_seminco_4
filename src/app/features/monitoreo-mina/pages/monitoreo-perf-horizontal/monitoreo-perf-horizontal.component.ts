@@ -25,7 +25,7 @@ import { OperacionesService } from '../../../../services/operaciones.service';
 import {
   calcularZoomInicial,
   CHART_THEME,
-} from '../../../../shared/chart-theme';
+} from '../../../../config/chart-theme';
 import { OperacionJumbo } from '../../../../models/OperacionJumbo';
 import { DialogModule } from 'primeng/dialog';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';

@@ -18,7 +18,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import {
   CHART_COLORS,
   colorPorDisponibilidad,
-} from '../../../../../../../shared/chart-theme';
+} from '../../../../../../../config/chart-theme';
 
 echarts.use([
   BarChart,

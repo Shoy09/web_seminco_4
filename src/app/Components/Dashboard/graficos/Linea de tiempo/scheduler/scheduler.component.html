@@ -1,14 +1,14 @@
 <div class="w-full rounded-2xl border border-border bg-surface p-4 shadow-sm">
   <!-- CONTENEDOR CON SCROLL HORIZONTAL -->
   <div class="w-full overflow-x-auto rounded-xl border border-border bg-white">
-    <div class="min-w-full">
+    <div class="min-w-full" [style.width.px]="totalSchedulerWidth">
       <!-- HEADER -->
       <div
         class="sticky top-0 z-30 flex border-b border-border bg-secondary text-white"
       >
         <!-- COLUMNAS FIJAS IZQUIERDA -->
         <div
-          class="sticky left-0 z-40 grid w-[230px] shrink-0 grid-cols-[120px_110px] bg-secondary"
+          class="sticky left-0 z-40 grid w-57.5 shrink-0 grid-cols-[120px_110px] bg-secondary"
         >
           <div
             class="border-r border-white/20 px-3 py-3 text-xs font-extrabold uppercase"
@@ -25,11 +25,12 @@
 
         <!-- HORAS -->
         <div
-          class="grid flex-1"
+          class="grid shrink-0"
+          [style.width.px]="timelineWidth"
+          [style.minWidth.px]="timelineWidth"
           [style.gridTemplateColumns]="
-            'repeat(' + hours.length + ', minmax(72px, 1fr))'
+            'repeat(' + hours.length + ', ' + hourWidth + 'px)'
           "
-          [style.minWidth.px]="hours.length * 72"
         >
           <div
             *ngFor="let h of hours"
@@ -52,7 +53,11 @@
             </div>
 
             <!-- EQUIPOS + TIMELINE -->
-            <div class="flex flex-1 flex-col">
+            <div
+              class="flex shrink-0 flex-col"
+              [style.width.px]="110 + timelineWidth"
+              [style.minWidth.px]="110 + timelineWidth"
+            >
               <div
                 *ngFor="let equipo of fecha.equipos"
                 class="flex min-h-12 border-b border-border last:border-b-0"
@@ -66,14 +71,15 @@
 
                 <!-- FILA TIMELINE -->
                 <div
-                  class="relative h-12 flex-1 bg-white"
-                  [style.minWidth.px]="hours.length * 72"
+                  class="relative h-12 shrink-0 bg-white"
+                  [style.width.px]="timelineWidth"
+                  [style.minWidth.px]="timelineWidth"
                 >
                   <!-- GRILLA DE HORAS -->
                   <div
                     class="pointer-events-none absolute inset-0 grid"
                     [style.gridTemplateColumns]="
-                      'repeat(' + hours.length + ', minmax(72px, 1fr))'
+                      'repeat(' + hours.length + ', ' + hourWidth + 'px)'
                     "
                   >
                     <div

@@ -23,7 +23,7 @@ import {
   CHART_SPLIT_LINE,
   CHART_THEME,
   CHART_TITLE_STYLE,
-} from '../../../../../../../shared/chart-theme';
+} from '../../../../../../../config/chart-theme';
 
 echarts.use([
   BarChart,

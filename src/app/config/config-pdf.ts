@@ -402,6 +402,8 @@ export function agregarGraficoEchartsPDFProporcional(
   y: number,
   width: number,
   height: number,
+  padding: number = 1.5,
+  modoAjuste: 'proporcional' | 'rellenar' = 'proporcional',
 ): void {
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(7);
@@ -412,33 +414,33 @@ export function agregarGraficoEchartsPDFProporcional(
   pdf.setFillColor(255, 255, 255);
   pdf.roundedRect(x, y, width, height, 2.5, 2.5, 'FD');
 
-  const padding = 1.5;
-
   const contentX = x + padding;
   const contentY = y + padding;
   const contentWidth = width - padding * 2;
   const contentHeight = height - padding * 2;
 
-  const props = pdf.getImageProperties(imgData);
-
-  const imgRatio = props.width / props.height;
-  const boxRatio = contentWidth / contentHeight;
-
+  let drawX = contentX;
+  let drawY = contentY;
   let drawWidth = contentWidth;
   let drawHeight = contentHeight;
 
-  if (imgRatio > boxRatio) {
-    // Imagen más ancha que el contenedor
-    drawWidth = contentWidth;
-    drawHeight = contentWidth / imgRatio;
-  } else {
-    // Imagen más alta que el contenedor
-    drawHeight = contentHeight;
-    drawWidth = contentHeight * imgRatio;
-  }
+  if (modoAjuste === 'proporcional') {
+    const props = pdf.getImageProperties(imgData);
 
-  const drawX = contentX + (contentWidth - drawWidth) / 2;
-  const drawY = contentY + (contentHeight - drawHeight) / 2;
+    const imgRatio = props.width / props.height;
+    const boxRatio = contentWidth / contentHeight;
+
+    if (imgRatio > boxRatio) {
+      drawWidth = contentWidth;
+      drawHeight = contentWidth / imgRatio;
+    } else {
+      drawHeight = contentHeight;
+      drawWidth = contentHeight * imgRatio;
+    }
+
+    drawX = contentX + (contentWidth - drawWidth) / 2;
+    drawY = contentY + (contentHeight - drawHeight) / 2;
+  }
 
   pdf.addImage(
     imgData,

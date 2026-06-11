@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FechasPlanMensualService } from '../../../../../services/fechas-plan-mensual.service';
 import { OperacionesService } from '../../../../../services/operaciones.service';
-import { OperacionBase, OperacionBaseTLargos } from '../../../../../models/OperacionBase.models';
+import {
+  OperacionBase,
+  OperacionBaseTLargos,
+} from '../../../../../models/OperacionBase.models';
 import { PlanMensual } from '../../../../../models/plan-mensual.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -33,6 +36,14 @@ import html2canvas from 'html2canvas';
 import { SchedulerComponent } from '../../Linea de tiempo/scheduler/scheduler.component';
 import { EstadoService } from '../../../../../services/estado.service';
 import { OperacionTLargos } from '../../../../../models/OperacionTLargos';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { DatePickerModule } from 'primeng/datepicker';
+import { SelectModule } from 'primeng/select';
+import { ButtonModule } from 'primeng/button';
+import {
+  FiltrosReporte,
+  FiltrosReporteComponent,
+} from '../../../../../features/monitoreo-mina/components/filtros-reporte/filtros-reporte.component';
 
 @Component({
   selector: 'app-principal-grafico-largo',
@@ -51,8 +62,8 @@ import { OperacionTLargos } from '../../../../../models/OperacionTLargos';
     TotalHorometrosComponent,
     HorasPrimeraPerforacionComponent,
     AvanceFaseComponent,
-    DetallePerforacionComponent,
-    DetalleDisparosComponent,
+   // DetallePerforacionComponent,
+    //DetalleDisparosComponent,
     MejoresOperadoresComponent,
     RankingOperadorComponent,
     ObservacionesComponent,
@@ -60,6 +71,11 @@ import { OperacionTLargos } from '../../../../../models/OperacionTLargos';
     ScatterTurnosNocheComponent,
     RendimientoEquipoComponent,
     SchedulerComponent,
+    SelectButtonModule,
+    DatePickerModule,
+    SelectModule,
+    ButtonModule,
+    FiltrosReporteComponent,
   ],
   templateUrl: './principal-grafico-largo.component.html',
   styleUrl: './principal-grafico-largo.component.css',
@@ -96,8 +112,6 @@ export class PrincipalGraficoLargoComponent implements OnInit {
   dataHorasNumericas: any[] = [];
 
   // Variables para el filtro de fechas
-  fechaInicio: string = '';
-  fechaFin: string = '';
   turnoSeleccionado: string = '';
   turnoAplicado: string = '';
   resumen = {
@@ -107,75 +121,36 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     totalMetros: 0,
   };
 
-  actividadesData = [
-    // J-14
-    { recurso: 'J-14', actividad: 'DES', inicio: 12, fin: 16, label: '' },
-    {
-      recurso: 'J-14',
-      actividad: 'FRENTE COMPLETO',
-      inicio: 7,
-      fin: 12,
-      label: '',
-    },
-    {
-      recurso: 'J-14',
-      actividad: 'FRENTE COMPLETO',
-      inicio: 16,
-      fin: 19,
-      label: '',
-    },
-
-    // J-19
-    {
-      recurso: 'J-19',
-      actividad: 'FRENTE COMPLETO',
-      inicio: 7,
-      fin: 10,
-      label: '',
-    },
-    { recurso: 'J-19', actividad: 'BREASTING', inicio: 10, fin: 14, label: '' },
-    {
-      recurso: 'J-19',
-      actividad: 'FRENTE COMPLETO',
-      inicio: 14,
-      fin: 19,
-      label: '',
-    },
-
-    // J-20
-    {
-      recurso: 'J-20',
-      actividad: 'DES',
-      inicio: 7,
-      fin: 9,
-      label: 'bombeo de agua',
-    },
-    {
-      recurso: 'J-20',
-      actividad: 'FRENTE COMPLETO',
-      inicio: 9,
-      fin: 13,
-      label: '',
-    },
-    { recurso: 'J-20', actividad: 'BREASTING', inicio: 13, fin: 17, label: '' },
-    {
-      recurso: 'J-20',
-      actividad: 'FRENTE COMPLETO',
-      inicio: 17,
-      fin: 19,
-      label: '',
-    },
+  tiposFiltro = [
+    { label: 'Rango', value: 'rango' },
+    { label: 'Año', value: 'anio' },
+    { label: 'Mes', value: 'mes' },
+    { label: 'Semana', value: 'semana' },
+    { label: 'Día', value: 'dia' },
   ];
+
+  
+
+  // Variables para el filtro de fechas
+  fechaInicio: string = '';
+  fechaFin: string = '';
+  tipoFiltro: 'anio' | 'mes' | 'semana' | 'rango' | 'dia' = 'dia';
+  anioSeleccionado: Date | null = null;
+  mesSeleccionado: Date | null = null;
+  semanaSeleccionada: Date | null = null;
+  diaSeleccionado: Date | null = null;
+  rangoFechas: Date[] | null = null;
+
   estadosProceso: any[] = [];
   cargandoPDF = false;
   ganttData: any[] = [];
-vistaPrincipal: boolean = true;
+  vistaPrincipal: boolean = true;
 
   constructor(
     private planMensualService: PlanProduccionService,
     private fechasPlanMensualService: FechasPlanMensualService,
     private operacionesService: OperacionesService,
-    private estadoService: EstadoService
+    private estadoService: EstadoService,
   ) {}
 
   ngOnInit(): void {
@@ -190,39 +165,79 @@ vistaPrincipal: boolean = true;
     this.cargarOperaciones();
     this.obtenerEstadosPorProceso('PERFORACIÓN TALADROS LARGOS');
   }
+  limpiarFechasPorTipo(): void {
+    this.fechaInicio = '';
+    this.fechaFin = '';
+
+    this.diaSeleccionado = null;
+    this.anioSeleccionado = null;
+    this.mesSeleccionado = null;
+    this.semanaSeleccionada = null;
+    this.rangoFechas = null;
+  }
+
+  
+
+  aplicarFiltro(filtros: FiltrosReporte): void {
+    const {
+      tipoFiltro,
+      anioSeleccionado,
+      mesSeleccionado,
+      semanaSeleccionada,
+      diaSeleccionado,
+      rangoFechas,
+      turnoSeleccionado,
+    } = filtros;
+
+    // Aquí colocas tu lógica real de filtrado.
+    console.log('ga');
+    this.turnoAplicado = this.turnoSeleccionado; // 🔥 CLAVE
+
+    this.operacionesFiltradas = this.operacionesOriginal.filter((op) => {
+      if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
+      if (this.fechaFin && op.fecha > this.fechaFin) return false;
+
+      if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
+
+      return true;
+    });
+    console.log('DATA FILTRADA:', this.operacionesFiltradas);
+    this.procesarTodo();
+  }
+
+  Presentacion() {}
 
   obtenerEstadosPorProceso(proceso: string) {
-  this.estadoService.getEstadosByProceso(proceso)
-    .subscribe({
+    this.estadoService.getEstadosByProceso(proceso).subscribe({
       next: (data) => {
         this.estadosProceso = data;
-       //console.log('Estados por proceso:', data);
+        //console.log('Estados por proceso:', data);
 
         // 🔥 CLAVE
         this.construirMapaEstados();
       },
       error: (err) => {
         console.error('Error al traer estados por proceso', err);
-      }
+      },
     });
-}
+  }
 
-toggleVista() {
-  this.vistaPrincipal = !this.vistaPrincipal;
-}
+  toggleVista() {
+    this.vistaPrincipal = !this.vistaPrincipal;
+  }
 
-construirMapaEstados() {
-  this.mapaEstados.clear();
+  construirMapaEstados() {
+    this.mapaEstados.clear();
 
-  this.estadosProceso.forEach(e => {
-    const codigo = String(e.codigo || '').trim();
-    this.mapaEstados.set(codigo, e);
-  });
+    this.estadosProceso.forEach((e) => {
+      const codigo = String(e.codigo || '').trim();
+      this.mapaEstados.set(codigo, e);
+    });
 
- //console.log('🧩 Mapa de estados construido:', this.mapaEstados.size);
-}
+    //console.log('🧩 Mapa de estados construido:', this.mapaEstados.size);
+  }
 
-mapaEstados: Map<string, any> = new Map();
+  mapaEstados: Map<string, any> = new Map();
 
   private getTurnoActual(): string {
     const hora = new Date().getHours();
@@ -251,38 +266,18 @@ mapaEstados: Map<string, any> = new Map();
     const tipo = 'tal_largo';
 
     this.operacionesService.getAllAprobados<OperacionTLargos>(tipo).subscribe({
-
       next: (resp) => {
         this.operacionesOriginal = resp.data;
 
         console.log('🔥 DATA OPERACIONES:', this.operacionesOriginal);
 
         // 🔥 SOLO ESTO
-        this.aplicarFiltro();
+        //this.aplicarFiltro();
       },
       error: (err) => {
         //console.error('❌ Error al obtener operaciones:', err);
       },
     });
-  }
-
-  // =========================================
-  // 🔥 FILTRO POR FECHA
-  // =========================================
-  aplicarFiltro() {
-    this.turnoAplicado = this.turnoSeleccionado; // 🔥 CLAVE
-
-    this.operacionesFiltradas = this.operacionesOriginal.filter((op) => {
-      if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
-      if (this.fechaFin && op.fecha > this.fechaFin) return false;
-
-      if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
-
-      return true;
-    });
-    console.log('🔥 OPERACIONES FILTRADAS:', this.operacionesFiltradas);
-
-    this.procesarTodo();
   }
 
   quitarFiltro() {
@@ -478,7 +473,6 @@ mapaEstados: Map<string, any> = new Map();
         const registrosArray = op.registros;
 
         if (Array.isArray(registrosArray) && registrosArray.length > 0) {
-
           // Contar frentes completos
           const nFrentes = this.contarFrentesCompletos(registrosArray);
 
@@ -616,11 +610,7 @@ mapaEstados: Map<string, any> = new Map();
       registrosArray.forEach((r) => {
         const operacion = r?.operacion || {};
 
-        const labor_fr = this.construirLaborFR(
-          "",
-          operacion?.labor,
-          "",
-        );
+        const labor_fr = this.construirLaborFR('', operacion?.labor, '');
 
         // 🔥 JOIN con plan
         const area = mapaArea.get(labor_fr);
@@ -1873,7 +1863,7 @@ mapaEstados: Map<string, any> = new Map();
           .trim()
           .toUpperCase(); */
 
-        const tipoPerforacion ='';
+        const tipoPerforacion = '';
 
         // 🔥 FILTRO DAX
         if (!tiposValidos.has(tipoPerforacion)) return;
@@ -1898,9 +1888,6 @@ mapaEstados: Map<string, any> = new Map();
 
     return Array.from(mapa.values());
   }
-
-  
-  
 
   // =========================================
   // GRAFICO 22
@@ -1956,99 +1943,86 @@ mapaEstados: Map<string, any> = new Map();
     });
   }
 
-
-
   //GANTT
-private construirGanttDataNuevo(): void {
+  private construirGanttDataNuevo(): void {
+    const fechaMap: Record<string, any> = {};
 
-  const fechaMap: Record<string, any> = {};
+    this.operacionesFiltradas.forEach((op) => {
+      const fecha = op.fecha || 'SIN_FECHA';
+      const turno = op.turno || 'SIN_TURNO';
+      const equipoCodigo = `${op.equipo} - ${op.n_equipo}`;
 
-  this.operacionesFiltradas.forEach(op => {
+      // 🔥 clave combinada
+      const key = `${fecha}|${turno}`;
 
-    const fecha = op.fecha || 'SIN_FECHA';
-    const turno = op.turno || 'SIN_TURNO';
-    const equipoCodigo = `${op.equipo} - ${op.n_equipo}`;
-
-    // 🔥 clave combinada
-    const key = `${fecha}|${turno}`;
-
-    if (!fechaMap[key]) {
-      fechaMap[key] = {
-        fecha,
-        turno,
-        equipos: {}
-      };
-    }
-
-    if (!fechaMap[key].equipos[equipoCodigo]) {
-      fechaMap[key].equipos[equipoCodigo] = {};
-    }
-
-    const registros = Array.isArray(op.registros)
-      ? op.registros
-      : [];
-
-    registros.forEach((reg: any) => {
-
-      const estado = (reg.estado || 'SIN ESTADO').toUpperCase().trim();
-      const codigo = String(reg.codigo || '').trim();
-
-      if (!reg.hora_inicio || !reg.hora_final) return;
-
-      // 🔥 MATCH CONTRA MAPA (igual que tu otro proceso)
-      const estadoMatch = this.mapaEstados.get(codigo);
-
-      // 🔥 puedes mantener estado o usar categoría (te dejo listo)
-      const labor = estadoMatch?.estado_principal || estado;
-
-      if (!fechaMap[key].equipos[equipoCodigo][labor]) {
-        fechaMap[key].equipos[equipoCodigo][labor] = [];
+      if (!fechaMap[key]) {
+        fechaMap[key] = {
+          fecha,
+          turno,
+          equipos: {},
+        };
       }
 
-      fechaMap[key].equipos[equipoCodigo][labor].push({
-        start: reg.hora_inicio,
-        end: reg.hora_final,
+      if (!fechaMap[key].equipos[equipoCodigo]) {
+        fechaMap[key].equipos[equipoCodigo] = {};
+      }
 
-        estado,
-        description: codigo,
+      const registros = Array.isArray(op.registros) ? op.registros : [];
 
-        // 🔥 CAMPOS ENRIQUECIDOS
-        tipo_estado: estadoMatch?.tipo_estado || null,
-        categoria: estadoMatch?.categoria || null,
-        estado_principal: estadoMatch?.estado_principal || null
+      registros.forEach((reg: any) => {
+        const estado = (reg.estado || 'SIN ESTADO').toUpperCase().trim();
+        const codigo = String(reg.codigo || '').trim();
+
+        if (!reg.hora_inicio || !reg.hora_final) return;
+
+        // 🔥 MATCH CONTRA MAPA (igual que tu otro proceso)
+        const estadoMatch = this.mapaEstados.get(codigo);
+
+        // 🔥 puedes mantener estado o usar categoría (te dejo listo)
+        const labor = estadoMatch?.estado_principal || estado;
+
+        if (!fechaMap[key].equipos[equipoCodigo][labor]) {
+          fechaMap[key].equipos[equipoCodigo][labor] = [];
+        }
+
+        fechaMap[key].equipos[equipoCodigo][labor].push({
+          start: reg.hora_inicio,
+          end: reg.hora_final,
+
+          estado,
+          description: codigo,
+
+          // 🔥 CAMPOS ENRIQUECIDOS
+          tipo_estado: estadoMatch?.tipo_estado || null,
+          categoria: estadoMatch?.categoria || null,
+          estado_principal: estadoMatch?.estado_principal || null,
+        });
+
+        // 🔍 debug opcional
+        // if (!estadoMatch) {
+        //   console.warn('❌ SIN MATCH GANTT:', codigo, reg);
+        // }
       });
-
-      // 🔍 debug opcional
-      // if (!estadoMatch) {
-      //   console.warn('❌ SIN MATCH GANTT:', codigo, reg);
-      // }
-
     });
 
-  });
+    // 🔁 NORMALIZACIÓN FINAL
+    this.ganttData = Object.values(fechaMap).map((item: any) => ({
+      fecha: item.fecha,
+      turno: item.turno,
 
-  // 🔁 NORMALIZACIÓN FINAL
-  this.ganttData = Object.values(fechaMap).map((item: any) => ({
-
-    fecha: item.fecha,
-    turno: item.turno,
-
-    groups: Object.entries(item.equipos).map(
-      ([equipoCodigo, labores]: any) => ({
-        equipoCodigo,
-        rows: Object.entries(labores).map(
-          ([labor, tasks]: any) => ({
+      groups: Object.entries(item.equipos).map(
+        ([equipoCodigo, labores]: any) => ({
+          equipoCodigo,
+          rows: Object.entries(labores).map(([labor, tasks]: any) => ({
             labor,
             tasks: tasks.sort((a: any, b: any) =>
-              a.start.localeCompare(b.start)
-            )
-          })
-        )
-      })
-    )
+              a.start.localeCompare(b.start),
+            ),
+          })),
+        }),
+      ),
+    }));
 
-  }));
-
-  console.log('📊 GANTT DATA NUEVO:', this.ganttData);
-}
+    console.log('📊 GANTT DATA NUEVO:', this.ganttData);
+  }
 }

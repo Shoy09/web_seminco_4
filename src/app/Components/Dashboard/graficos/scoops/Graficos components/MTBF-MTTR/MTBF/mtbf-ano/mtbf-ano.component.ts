@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
-import { CHART_TINTS, colorPorMTBF } from '../../../../../../../../shared/chart-theme';
+import { CHART_TINTS, colorPorMTBF } from '../../../../../../../../config/chart-theme';
 
 @Component({
   selector: 'app-mtbf-ano',

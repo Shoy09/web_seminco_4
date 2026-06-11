@@ -26,7 +26,7 @@ import {
 } from 'echarts/components';
 
 import { CanvasRenderer } from 'echarts/renderers';
-import { CHART_THEME } from '../../../../shared/chart-theme';
+import { CHART_THEME } from '../../../../config/chart-theme';
 import { OperacionJumbo } from '../../../../models/OperacionJumbo';
 
 echarts.use([

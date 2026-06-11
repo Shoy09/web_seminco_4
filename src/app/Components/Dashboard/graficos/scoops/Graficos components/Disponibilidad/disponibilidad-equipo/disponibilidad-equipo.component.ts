@@ -19,7 +19,7 @@ import {
 } from 'echarts/components';
 
 import { CanvasRenderer } from 'echarts/renderers';
-import { CHART_COLORS, colorPorDisponibilidad } from '../../../../../../../shared/chart-theme';
+import { CHART_COLORS, colorPorDisponibilidad } from '../../../../../../../config/chart-theme';
 
 echarts.use([
   BarChart,

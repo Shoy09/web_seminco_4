@@ -6,16 +6,15 @@ import { TooltipModule } from 'primeng/tooltip';
   standalone: true,
   imports: [CommonModule, TooltipModule],
   templateUrl: './scheduler.component.html',
-  styleUrl: './scheduler.component.css'
+  styleUrl: './scheduler.component.css',
 })
 export class SchedulerComponent implements OnChanges {
-
   @Input() data: any[] = [];
 
   // ================= TURNO CONFIG =================
-  shiftStartHour = 7;                 // 07:00 AM
-  timelineStart = this.shiftStartHour * 60;   // 420
-  timelineEnd   = this.timelineStart + 24 * 60; // 1860 (por defecto)
+  shiftStartHour = 7; // 07:00 AM
+  timelineStart = this.shiftStartHour * 60; // 420
+  timelineEnd = this.timelineStart + 24 * 60; // 1860 (por defecto)
 
   hours: string[] = [];
   groups: any[] = [];
@@ -38,7 +37,7 @@ export class SchedulerComponent implements OnChanges {
     let minStart = Infinity;
     let maxEnd = -Infinity;
 
-    this.groups.forEach(fecha => {
+    this.groups.forEach((fecha) => {
       fecha.equipos.forEach((equipo: any) => {
         equipo.tasks.forEach((task: any) => {
           if (task.startMin < minStart) minStart = task.startMin;
@@ -66,9 +65,9 @@ export class SchedulerComponent implements OnChanges {
 
   // ================= NORMALIZE =================
   normalizeData(): void {
-    this.groups = this.data.map(fechaItem => {
+    this.groups = this.data.map((fechaItem) => {
       const fechaTurno = `${fechaItem.fecha} - ${this.formatearTurno(fechaItem.turno)}`;
-      
+
       return {
         fecha: fechaItem.fecha,
         turno: fechaItem.turno,
@@ -78,9 +77,8 @@ export class SchedulerComponent implements OnChanges {
 
           grupo.rows.forEach((row: any) => {
             row.tasks.forEach((task: any) => {
-
               let startMin = this.toMinutes(task.start);
-              let endMin   = this.toMinutes(task.end);
+              let endMin = this.toMinutes(task.end);
 
               if (endMin <= startMin) {
                 endMin += 1440;
@@ -89,25 +87,25 @@ export class SchedulerComponent implements OnChanges {
               const baseStart = this.shiftStartHour * 60;
               if (startMin < baseStart) {
                 startMin += 1440;
-                endMin   += 1440;
+                endMin += 1440;
               }
 
               tasks.push({
                 ...task,
                 labor: row.labor || '',
-                description: task.description || '',  // Aseguramos que description existe
-                tipo_estado: task.tipo_estado || '',  // Aseguramos que tipo_estado existe
+                description: task.description || '', // Aseguramos que description existe
+                tipo_estado: task.tipo_estado || '', // Aseguramos que tipo_estado existe
                 startMin,
-                endMin
+                endMin,
               });
             });
           });
 
           return {
             equipoCodigo: grupo.equipoCodigo,
-            tasks
+            tasks,
           };
-        })
+        }),
       };
     });
 
@@ -117,10 +115,10 @@ export class SchedulerComponent implements OnChanges {
   // ================= Formatear turno =================
   formatearTurno(turno: string): string {
     const turnosMap: { [key: string]: string } = {
-      'DÍA': 'DÍA',
-      'NOCHE': 'NOCHE',
-      'MAÑANA': 'MAÑANA',
-      'TARDE': 'TARDE'
+      DÍA: 'DÍA',
+      NOCHE: 'NOCHE',
+      MAÑANA: 'MAÑANA',
+      TARDE: 'TARDE',
     };
     return turnosMap[turno] || turno;
   }
@@ -142,18 +140,18 @@ export class SchedulerComponent implements OnChanges {
     return {
       left: `${Math.max(0, leftPercent)}%`,
       width: `calc(${Math.min(100, widthPercent)}% - 1px)`,
-      background: this.getColor(task.estado)
+      background: this.getColor(task.estado),
     };
   }
 
   // ================= COLORS =================
   getColor(estado: string): string {
     const colors: any = {
-      OPERATIVO: "#2ECC71",
-      DEMORA: "#F1C40F",
-      MANTENIMIENTO: "#E74C3C",
-      RESERVA: "#E67E22",
-      "FUERA DE PLAN": "#3498DB"
+      OPERATIVO: '#2ECC71',
+      DEMORA: '#F1C40F',
+      MANTENIMIENTO: '#E74C3C',
+      RESERVA: '#E67E22',
+      'FUERA DE PLAN': '#3498DB',
     };
     return colors[estado] || '#95a5a6';
   }
@@ -164,7 +162,9 @@ export class SchedulerComponent implements OnChanges {
   }
 
   trackByTask(_: number, item: any) {
-    return item.start + item.end + item.labor + item.description + item.tipo_estado;
+    return (
+      item.start + item.end + item.labor + item.description + item.tipo_estado
+    );
   }
 
   minutesToTime(min: number): string {
@@ -178,21 +178,35 @@ export class SchedulerComponent implements OnChanges {
   getTaskTooltip(task: any): string {
     const inicio = this.minutesToTime(task.startMin);
     const fin = this.minutesToTime(task.endMin);
-    
+
     let tooltip = `Labor: ${task.labor}\n`;
     tooltip += `Inicio: ${inicio}\n`;
     tooltip += `Fin: ${fin}\n`;
     tooltip += `Estado: ${task.estado || 'N/A'}\n`;
-    
+
     if (task.description && task.description !== '') {
       tooltip += `Descripción: ${task.description}\n`;
     }
-    
+
     if (task.tipo_estado && task.tipo_estado !== '') {
       tooltip += `Tipo Estado: ${task.tipo_estado}`;
     }
-    
+
     return tooltip;
   }
-  
+  get hourWidth(): number {
+    return 72;
+  }
+
+  get timelineWidth(): number {
+    return this.hours.length * this.hourWidth;
+  }
+
+  get leftWidth(): number {
+    return 230;
+  }
+
+  get totalSchedulerWidth(): number {
+    return this.leftWidth + this.timelineWidth;
+  }
 }

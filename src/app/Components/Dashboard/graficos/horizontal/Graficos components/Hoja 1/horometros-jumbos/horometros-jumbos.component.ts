@@ -17,7 +17,7 @@ import {
   calcularZoomInicial,
   CHART_THEME,
   CHART_TINTS,
-} from '../../../../../../../shared/chart-theme';
+} from '../../../../../../../config/chart-theme';
 
 echarts.use([
   BarChart,

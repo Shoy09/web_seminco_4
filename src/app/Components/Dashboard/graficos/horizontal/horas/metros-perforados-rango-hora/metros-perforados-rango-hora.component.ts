@@ -17,7 +17,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { CommonModule } from '@angular/common';
-import { colorPorTipoPerforacion } from '../../../../../../shared/chart-theme';
+import { colorPorTipoPerforacion } from '../../../../../../config/chart-theme';
 
 // Registramos los componentes necesarios
 echarts.use([

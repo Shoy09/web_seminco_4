@@ -16,7 +16,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import {
   calcularZoomInicial,
   CHART_THEME,
-} from '../../../../../../../shared/chart-theme';
+} from '../../../../../../../config/chart-theme';
 
 echarts.use([
   BarChart,

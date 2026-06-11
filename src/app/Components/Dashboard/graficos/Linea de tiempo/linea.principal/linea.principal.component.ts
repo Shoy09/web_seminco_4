@@ -9,6 +9,8 @@ import { OperacionesService } from '../../../../../services/operaciones.service'
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
+import { DatePickerModule } from 'primeng/datepicker';
+import { formatearFecha } from '../../../../../utils/fecha-utils';
 @Component({
   selector: 'app-linea.principal',
   imports: [
@@ -18,6 +20,7 @@ import { ButtonModule } from 'primeng/button';
     InputTextModule,
     SelectModule,
     ButtonModule,
+    DatePickerModule,
   ],
   templateUrl: './linea.principal.component.html',
   styleUrl: './linea.principal.component.css',
@@ -34,6 +37,8 @@ export class LineaPrincipalComponent {
   fechaFin: string = '';
   turnoSeleccionado: string = '';
   turnoAplicado: string = '';
+  tipoFiltro: 'dia' = 'dia';
+  diaSeleccionado: Date | null = null;
 
   estadosProceso: any[] = [];
 
@@ -54,6 +59,7 @@ export class LineaPrincipalComponent {
   ganttLargo: any[] = [];
   ganttEmpernador: any[] = [];
   ganttScoops: any[] = [];
+  ganttGeneral: any[] = [];
 
   // Mapas separados para cada proceso
   mapaEstadosHorizontal: Map<string, any> = new Map();
@@ -74,6 +80,59 @@ export class LineaPrincipalComponent {
 
     // Cargar estados para ambos procesos
     this.obtenerTodosLosEstados();
+  }
+
+  calcularRangoFechas(): boolean {
+    if (!this.diaSeleccionado) return false;
+
+    const inicio = new Date(this.diaSeleccionado);
+    const fin = new Date(this.diaSeleccionado);
+
+    inicio.setHours(0, 0, 0, 0);
+    fin.setHours(23, 59, 59, 999);
+
+    this.fechaInicio = formatearFecha(inicio);
+    this.fechaFin = formatearFecha(fin);
+
+    return true;
+  }
+
+  private construirGanttGeneral(): void {
+    this.ganttGeneral = [
+      ...this.agregarTipoOperacion(
+        this.ganttHorizontal,
+        'Perforación Horizontal',
+        'HORIZONTAL',
+      ),
+      ...this.agregarTipoOperacion(
+        this.ganttLargo,
+        'Perforación Taladro Largo',
+        'TALADRO_LARGO',
+      ),
+      ...this.agregarTipoOperacion(
+        this.ganttEmpernador,
+        'Empernador',
+        'EMPERNADOR',
+      ),
+      ...this.agregarTipoOperacion(this.ganttScoops, 'Scooptram', 'SCOOPTRAM'),
+    ];
+  }
+  private agregarTipoOperacion(
+    data: any[],
+    tipoOperacion: string,
+    codigoOperacion: string,
+  ): any[] {
+    if (!Array.isArray(data)) return [];
+
+    return data.map((item) => ({
+      ...item,
+      tipoOperacion,
+      codigoOperacion,
+
+      // Opcional: ayuda a que no se mezclen equipos con el mismo código
+      equipoCodigoOriginal: item.equipoCodigo,
+      equipoCodigo: `${codigoOperacion} - ${item.equipoCodigo}`,
+    }));
   }
 
   //OPERACIONES--------------------
@@ -185,51 +244,55 @@ export class LineaPrincipalComponent {
     return `${year}-${month}-${day}`;
   }
 
+  private filtrarPorFechaYTurno(data: any[]): any[] {
+    if (!Array.isArray(data)) return [];
+
+    return data.filter((op) => {
+      if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
+      if (this.fechaFin && op.fecha > this.fechaFin) return false;
+      if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
+
+      return true;
+    });
+  }
+
   // =========================================
   // 🔥 FILTRO POR FECHA
   // =========================================
-  aplicarFiltro() {
+  aplicarFiltro(): void {
+    const fechasValidas = this.calcularRangoFechas();
+
+    if (!fechasValidas) {
+      console.warn('Seleccione un día para aplicar el filtro.');
+      return;
+    }
     this.turnoAplicado = this.turnoSeleccionado;
 
     // 🔹 HORIZONTAL
-    this.operacionesFiltradasHorizontal =
-      this.operacionesOriginalHorizontal.filter((op) => {
-        if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
-        if (this.fechaFin && op.fecha > this.fechaFin) return false;
-        if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
-        return true;
-      });
+    this.operacionesFiltradasHorizontal = this.filtrarPorFechaYTurno(
+      this.operacionesOriginalHorizontal,
+    );
 
     // 🔹 LARGO
-    this.operacionesFiltradasLargo = this.operacionesOriginalLargo.filter(
-      (op) => {
-        if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
-        if (this.fechaFin && op.fecha > this.fechaFin) return false;
-        if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
-        return true;
-      },
+    this.operacionesFiltradasLargo = this.filtrarPorFechaYTurno(
+      this.operacionesOriginalLargo,
     );
 
     // 🔹 EMPERNADOR
-    this.operacionesFiltradasEmpernador =
-      this.operacionesOriginalEmpernador.filter((op) => {
-        if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
-        if (this.fechaFin && op.fecha > this.fechaFin) return false;
-        if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
-        return true;
-      });
-
-    // 🔹 SCOOPS
-    this.operacionesFiltradasScoops = this.operacionesOriginalScoops.filter(
-      (op) => {
-        if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
-        if (this.fechaFin && op.fecha > this.fechaFin) return false;
-        if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
-        return true;
-      },
+    this.operacionesFiltradasEmpernador = this.filtrarPorFechaYTurno(
+      this.operacionesOriginalEmpernador,
     );
 
+    // 🔹 SCOOPS
+    this.operacionesFiltradasScoops = this.filtrarPorFechaYTurno(
+      this.operacionesOriginalScoops,
+    );
+
+    // Primero procesas cada grupo individual
     this.procesarTodo();
+
+    // Luego unes todo en un solo Gantt
+    this.construirGanttGeneral();
   }
 
   quitarFiltro() {

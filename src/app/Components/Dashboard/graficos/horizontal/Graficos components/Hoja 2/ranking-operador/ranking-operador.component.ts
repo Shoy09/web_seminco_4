@@ -21,7 +21,7 @@ import {
   CHART_SPLIT_LINE,
   CHART_THEME,
   calcularZoomInicial,
-} from '../../../../../../../shared/chart-theme';
+} from '../../../../../../../config/chart-theme';
 
 echarts.use([
   BarChart,

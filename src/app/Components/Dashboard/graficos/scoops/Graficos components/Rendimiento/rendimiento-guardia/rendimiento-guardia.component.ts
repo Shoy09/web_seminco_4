@@ -4,7 +4,7 @@ import * as echarts from 'echarts/core';
 import { BarChart } from 'echarts/charts';
 import { TitleComponent, TooltipComponent, GridComponent, ToolboxComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { colorPorRendimiento } from '../../../../../../../shared/chart-theme';
+import { colorPorRendimiento } from '../../../../../../../config/chart-theme';
 
 @Component({
   selector: 'app-rendimiento-guardia',

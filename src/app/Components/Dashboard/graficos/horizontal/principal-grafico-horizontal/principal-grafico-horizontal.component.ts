@@ -6,11 +6,8 @@ import {
   ViewChildren,
 } from '@angular/core';
 import { AvanceFaseComponent } from '../Graficos components/Hoja 1/avance-fase/avance-fase.component';
-import { DemorasOperativasComponent } from '../Graficos components/Hoja 1/demoras-operativas/demoras-operativas.component';
 import { DisparosDiaComponent } from '../Graficos components/Hoja 1/disparos-dia/disparos-dia.component';
 import { DisparosEquipoComponent } from '../Graficos components/Hoja 1/disparos-equipo/disparos-equipo.component';
-import { HorasDeMantenimientoComponent } from '../Graficos components/Hoja 1/horas-de-mantenimiento/horas-de-mantenimiento.component';
-import { HorasNoOperativasComponent } from '../Graficos components/Hoja 1/horas-no-operativas/horas-no-operativas.component';
 import { HorometrosJumbosComponent } from '../Graficos components/Hoja 1/horometros-jumbos/horometros-jumbos.component';
 import { MetrosPerforadosDisparoComponent } from '../Graficos components/Hoja 1/metros-perforados-disparo/metros-perforados-disparo.component';
 import { MhrEquipoComponent } from '../Graficos components/Hoja 1/mhr-equipo/mhr-equipo.component';
@@ -70,7 +67,7 @@ import {
   configurarCabeceraPDF,
   obtenerImagenChart,
   PdfChartConfig,
-} from '../../../../../shared/config-pdf';
+} from '../../../../../config/config-pdf';
 import { DialogHoraHoraPerforacionComponent } from '../../../../../features/monitoreo-mina/components/dialog-hora-hora-perforacion/dialog-hora-hora-perforacion.component';
 import { MatDialog } from '@angular/material/dialog';
 import { PresentacionHorizontalDialogComponent } from '../presentacion-dialog/presentacion-dialog.component';
@@ -84,9 +81,6 @@ import { OperacionJumbo } from '../../../../../models/OperacionJumbo';
     DisparosEquipoComponent,
     DisparosDiaComponent,
     RendimientoEquipoComponent,
-    DemorasOperativasComponent,
-    HorasNoOperativasComponent,
-    HorasDeMantenimientoComponent,
     MetrosPerforadosDisparoComponent,
     PerforadoEquipoComponent,
     MhrEquipoComponent,
@@ -110,7 +104,7 @@ import { OperacionJumbo } from '../../../../../models/OperacionJumbo';
     SelectButtonModule,
     ButtonModule,
     MapaDeCalorComponent,
-    DialogHoraHoraPerforacionComponent,
+    //DialogHoraHoraPerforacionComponent,
   ],
   templateUrl: './principal-grafico-horizontal.component.html',
   styleUrl: './principal-grafico-horizontal.component.css',
@@ -487,16 +481,6 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     return `${anio}-${mes}-${dia}`;
   }
 
-  /* quitarFiltro() {
-  this.operacionesFiltradas = [...this.operacionesOriginal];
-  this.fechaInicio = '';
-  this.fechaFin = '';
-  this.turnoAplicado = '';
-  this.turnoSeleccionado = '';
-
-  this.procesarTodo();
-} */
-
   // =========================================
   // 🔥 PLAN
   // =========================================
@@ -537,7 +521,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   // 🔥 PROCESAMIENTO TOTAL
   // =========================================
   procesarTodo() {
-    if (!this.operacionesFiltradas.length || !this.planesMensuales.length)
+    if (!this.operacionesFiltradas.length)
       return;
 
     this.dataAvanceFase = this.procesarAvanceFase();
@@ -859,10 +843,14 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     let totalFrentes = 0;
     const equiposSet = new Set<string>();
 
+      console.log("ga");
     this.operacionesFiltradas.forEach((op, index) => {
+      console.log("ga1");
+
       if (op.modelo_equipo) {
         equiposSet.add(op.modelo_equipo);
       }
+      console.log("ga2");
 
       const registrosArray = op.registros;
 
@@ -870,6 +858,8 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
         console.warn(`⚠️ Operación ${index} sin registros`);
         return;
       }
+
+      console.log("ga");
 
       // 🔹 Metros
       const metros = this.calcularMetrosPerforados(registrosArray);
@@ -3336,6 +3326,8 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
         posiciones[4].y,
         cardWidth,
         cardHeight,
+        0.3,
+        'rellenar'
       );
     }
 

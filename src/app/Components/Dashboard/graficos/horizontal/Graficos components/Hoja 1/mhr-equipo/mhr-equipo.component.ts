@@ -9,7 +9,7 @@ import {
   LegendComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { CHART_THEME, colorPorRendimiento } from '../../../../../../../shared/chart-theme';
+import { CHART_THEME, colorPorRendimiento } from '../../../../../../../config/chart-theme';
 
 echarts.use([
   BarChart,

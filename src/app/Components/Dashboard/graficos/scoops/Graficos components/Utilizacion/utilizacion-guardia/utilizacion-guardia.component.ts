@@ -4,7 +4,7 @@ import * as echarts from 'echarts/core';
 import { BarChart } from 'echarts/charts';
 import { TitleComponent, TooltipComponent, GridComponent, ToolboxComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { CHART_COLORS, colorPorUtilizacion } from '../../../../../../../shared/chart-theme';
+import { CHART_COLORS, colorPorUtilizacion } from '../../../../../../../config/chart-theme';
 
 echarts.use([
   BarChart,

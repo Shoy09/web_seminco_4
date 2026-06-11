@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
-import { colorPorMTTR } from '../../../../../../../../shared/chart-theme';
+import { colorPorMTTR } from '../../../../../../../../config/chart-theme';
 
 @Component({
   selector: 'app-mttr-ano',

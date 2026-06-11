@@ -16,7 +16,7 @@ import {
   calcularZoomInicial,
   CHART_THEME,
   getTurnoColor,
-} from '../../../../../../../shared/chart-theme';
+} from '../../../../../../../config/chart-theme';
 
 echarts.use([
   BarChart,

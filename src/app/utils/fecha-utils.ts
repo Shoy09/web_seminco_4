@@ -1,3 +1,5 @@
+import { FiltrosReporte } from "../features/monitoreo-mina/components/filtros-reporte/filtros-reporte.component";
+
 export type TipoPeriodo = 'DIA' | 'SEMANA' | 'MES';
 
 export const MESES_CORTOS = [

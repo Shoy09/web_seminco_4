@@ -11,21 +11,7 @@ import { UsuarioComponent } from './Components/Usuario/usuario/usuario.component
 import { AutocadMineroComponent } from './Components/autocad-minero/autocad-minero.component';
 import { CheckListListaComponent } from './Components/Crear datos/check list/check-list-lista/check-list-lista.component';
 import { ChecklistTelemandoListaComponent } from './Components/Crear datos/check List Carguip/checklist-telemando-lista/checklist-telemando-lista.component';
-import { OperacionesListComponent } from './Components/Jefe mina/Tal largo/operaciones-list/operaciones-list.component';
-import { EquiposMenuComponent } from './Components/Jefe mina/equipos-menu/equipos-menu.component';
-import { OperacionesListHorizontalComponent } from './Components/Jefe mina/Tal horizontal/operaciones-list/operaciones-list.component';
-import { OperacionesListScooComponent } from './Components/Jefe mina/SCOOPTRAM/operaciones-list/operaciones-list.component';
-import { OperacionesLisScissorComponent } from './Components/Jefe mina/SCISSOR/operaciones-list/operaciones-list.component';
-import { OperacionesListScalaminComponent } from './Components/Jefe mina/SCALAMIN/operaciones-list/operaciones-list.component';
-import { OperacionesListRompebancosComponent } from './Components/Jefe mina/ROMPEBANCOS/operaciones-list/operaciones-list.component';
-import { OperacionesListEmpernadorComponent } from './Components/Jefe mina/Empernador/operaciones-list/operaciones-list.component';
-import { OperacionesListDumperComponent } from './Components/Jefe mina/DUMPER/operaciones-list/operaciones-list.component';
-import { OperacionesListAnfochaComponent } from './Components/Jefe mina/ANFOCHANGER/operaciones-list/operaciones-list.component';
-import { PrincipalTalLargoComponent } from './Components/Jefe mina/aprobaciones/Tal largo/principal/principal.component';
-import { PrincipalTalHorizontalComponent } from './Components/Jefe mina/aprobaciones/Tal horizontal/principal/principal.component';
-import { PrincipalScoopsComponent } from './Components/Jefe mina/aprobaciones/Scoop/principal/principal.component';
 import { PowerBiPublicComponent } from './Components/Dashboard/Pu-PowerBi/power-bi-public/power-bi-public.component';
-import { PrincipalSostenimientoComponent } from './Components/Jefe mina/aprobaciones/enpernador/principal/principal.component';
 import { PrincipalGraficoHorizontalComponent } from './Components/Dashboard/graficos/horizontal/principal-grafico-horizontal/principal-grafico-horizontal.component';
 import { ExplosivosComponent } from './Components/Crear datos/explosivos/explosivos.component';
 import { ExplosivosGraficosComponent } from './Components/Dashboard/Explosivos/explosivos-graficos/explosivos-graficos.component';
@@ -37,6 +23,9 @@ import { LineaPrincipalComponent } from './Components/Dashboard/graficos/Linea d
 import { LayoutComponent } from './Components/Principales/layout/layout.component';
 import { MonitoreoScoopsComponent } from './features/monitoreo-mina/pages/monitoreo-scoops/monitoreo-scoops.component';
 import { MonitoreoPerfHorizontalComponent } from './features/monitoreo-mina/pages/monitoreo-perf-horizontal/monitoreo-perf-horizontal.component';
+import { SeleccionEquipoPageComponent } from './features/validaciones/pages/seleccion-equipo/seleccion-equipo-page.component';
+import { MonitoreoValidacionesPageComponent } from './features/validaciones/pages/monitoreo-validaciones/monitoreo-validaciones-page.component';
+import { DetalleValidacionPageComponent } from './features/validaciones/pages/detalle-validacion/detalle-validacion-page.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -88,68 +77,12 @@ export const routes: Routes = [
       {
         path: 'validaciones',
         children: [
-          { path: 'jefe-mina', component: EquiposMenuComponent },
-          { path: 'jefe-mina/tal-largo', component: OperacionesListComponent },
+          { path: 'jefe-mina', component: SeleccionEquipoPageComponent },
           {
-            path: 'jefe-mina/tal-largo/operacion/:id',
-            component: PrincipalTalLargoComponent,
+            path: 'jefe-mina/:equipo/operacion/:id',
+            component: DetalleValidacionPageComponent,
           },
-
-          {
-            path: 'jefe-mina/tal-horizontal',
-            component: OperacionesListHorizontalComponent,
-          },
-          {
-            path: 'jefe-mina/tal-horizontal/operacion/:id',
-            component: PrincipalTalHorizontalComponent,
-          },
-
-          {
-            path: 'jefe-mina/empernador',
-            component: OperacionesListEmpernadorComponent,
-          },
-          {
-            path: 'jefe-mina/empernador/operacion/:id',
-            component: PrincipalSostenimientoComponent,
-          },
-
-          {
-            path: 'jefe-mina/scooptram',
-            component: OperacionesListScooComponent,
-          },
-          {
-            path: 'jefe-mina/scooptram/operacion/:id',
-            component: PrincipalScoopsComponent,
-          },
-
-          {
-            path: 'jefe-mina/dumper',
-            component: OperacionesListDumperComponent,
-          },
-
-          {
-            path: 'jefe-mina/scissor',
-            component: OperacionesLisScissorComponent,
-          },
-          /* {
-            path: 'jefe-mina/scissor/operacion/:id',
-            component: PrincipalScissorComponent,
-          }, */
-
-          {
-            path: 'jefe-mina/rompebancos',
-            component: OperacionesListRompebancosComponent,
-          },
-          // {path:'jefe-mina/rompebancos/operacion/:id', component:PrincipalRompebancosComponent},
-
-          {
-            path: 'jefe-mina/scalamin',
-            component: OperacionesListScalaminComponent,
-          },
-          {
-            path: 'jefe-mina/anfochanger',
-            component: OperacionesListAnfochaComponent,
-          },
+          { path: 'jefe-mina/:equipo', component: MonitoreoValidacionesPageComponent },
 
           { path: 'power-bi', component: PowerBiPublicComponent },
         ],
