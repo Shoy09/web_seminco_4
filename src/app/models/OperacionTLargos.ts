@@ -1,14 +1,19 @@
 export interface OperacionTLargos {
-  barras: BarrasTLargos[];
+  nivel: string;
+  tipo_labor: string;
   labor: string;
-  //long_barras: string;
-  observaciones: string;
-}
-
-export interface BarrasTLargos {
-  //n_taladro: number;
-  //n_barras: number;
-  n_fila: number;
-  longitud_perforacion: number;
+  ala: string;
+  n_taladros_produccion: number;
+  metros_perforados_produccion: number;
+  n_taladros_rimados: number;
+  metros_perforados_rimados: number;
+  n_taladros_alivio: number;
+  metros_perforados_alivio: number;
+  n_taladros_repaso: number;
+  metros_perforados_repaso: number;
+  long_barras: string;
+  num_barras: string;
   tipo_perforacion: string;
+  tipo_perforacion_id: number;
+  observaciones: string;
 }

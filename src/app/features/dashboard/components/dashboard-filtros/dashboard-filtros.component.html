@@ -1,0 +1,152 @@
+<div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+  <div class="grid grid-cols-1 items-end gap-4 md:grid-cols-2 xl:grid-cols-6">
+    <div class="flex flex-col gap-2 xl:col-span-2">
+      <label class="text-sm font-bold text-ink">Filtrar por</label>
+
+      <p-selectButton
+        [options]="tiposFiltro"
+        [(ngModel)]="tipoFiltro"
+        optionLabel="label"
+        optionValue="value"
+        (onChange)="limpiarFechasPorTipo()"
+        styleClass="w-full"
+      />
+    </div>
+
+    @if (tipoFiltro === 'anio') {
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Año</label>
+        <p-datepicker
+          [(ngModel)]="anioSeleccionado"
+          view="year"
+          dateFormat="yy"
+          [showIcon]="true"
+          iconDisplay="input"
+          [readonlyInput]="true"
+          placeholder="Seleccione año"
+          styleClass="w-full"
+        />
+      </div>
+    }
+
+    @if (tipoFiltro === 'mes') {
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Mes</label>
+        <p-datepicker
+          [(ngModel)]="mesSeleccionado"
+          view="month"
+          dateFormat="mm/yy"
+          [showIcon]="true"
+          iconDisplay="input"
+          [readonlyInput]="true"
+          placeholder="Seleccione mes"
+          styleClass="w-full"
+        />
+      </div>
+    }
+
+    @if (tipoFiltro === 'semana') {
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Semana</label>
+        <p-datepicker
+          [(ngModel)]="semanaSeleccionada"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          iconDisplay="input"
+          [readonlyInput]="true"
+          placeholder="Elija un día de la semana"
+          styleClass="w-full"
+        />
+      </div>
+    }
+
+    @if (tipoFiltro === 'dia') {
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Día</label>
+        <p-datepicker
+          [(ngModel)]="diaSeleccionado"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          iconDisplay="input"
+          [readonlyInput]="true"
+          placeholder="Seleccione día"
+          styleClass="w-full"
+        />
+      </div>
+    }
+
+    @if (tipoFiltro === 'rango') {
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Rango de fechas</label>
+        <p-datepicker
+          [(ngModel)]="rangoFechas"
+          selectionMode="range"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          iconDisplay="input"
+          [readonlyInput]="true"
+          [showButtonBar]="true"
+          placeholder="Fecha inicio - Fecha fin"
+          styleClass="w-full"
+        />
+      </div>
+    }
+
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-bold text-ink">Turno</label>
+      <p-select
+        [options]="turnos"
+        [(ngModel)]="turnoSeleccionado"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Todos"
+        [showClear]="true"
+        appendTo="body"
+        styleClass="w-full"
+      />
+    </div>
+
+    <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between xl:col-span-2">
+      <div class="flex flex-col gap-2 sm:flex-row">
+        <p-button
+          label="Aplicar"
+          icon="pi pi-filter"
+          (onClick)="aplicarFiltro()"
+          styleClass="w-full sm:w-auto bg-primary border-primary text-secondary font-bold shadow-sm hover:shadow-md"
+        />
+
+        <p-button
+          label="Quitar"
+          icon="pi pi-times"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="quitarFiltro()"
+          styleClass="w-full sm:w-auto font-semibold"
+        />
+      </div>
+
+      <div class="flex flex-col gap-2 sm:flex-row">
+        @if (mostrarPresentacion) {
+          <p-button
+            label="Presentación"
+            icon="pi pi-chart-bar"
+            severity="info"
+            [outlined]="true"
+            (onClick)="presentacion.emit()"
+            styleClass="w-full sm:w-auto font-semibold"
+          />
+        }
+
+        @if (mostrarPdf) {
+          <p-button
+            label="PDF"
+            icon="pi pi-file-pdf"
+            severity="warn"
+            (onClick)="pdf.emit()"
+            styleClass="w-full sm:w-auto font-bold shadow-sm hover:shadow-md"
+          />
+        }
+      </div>
+    </div>
+  </div>
+</div>

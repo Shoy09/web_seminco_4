@@ -2,7 +2,7 @@
   <p-table
     [value]="registros"
     responsiveLayout="scroll"
-    [tableStyle]="{ 'min-width': '72rem' }"
+    [tableStyle]="{ 'min-width': '56rem' }"
     styleClass="p-datatable-sm"
   >
     <ng-template pTemplate="header">
@@ -12,9 +12,7 @@
         <th class="whitespace-nowrap">Codigo</th>
         <th class="whitespace-nowrap">Hora inicio</th>
         <th class="whitespace-nowrap">Hora fin</th>
-        <th *ngFor="let column of operationColumns" class="min-w-44">
-          {{ column }}
-        </th>
+        <th class="whitespace-nowrap text-center">Acciones</th>
       </tr>
     </ng-template>
 
@@ -23,81 +21,139 @@
         <td>{{ registro.numero || registro.id || '-' }}</td>
 
         <td>
-          <input
-            pInputText
-            class="w-full"
-            [ngModel]="registro.estado"
-            (ngModelChange)="registro.estado = $event; emitChanges()"
-          />
+          <span [class]="getEstadoClass(registro.estado)">
+            {{ registro.estado || '-' }}
+          </span>
         </td>
 
-        <td>
-          <input
-            pInputText
-            class="w-full"
-            [ngModel]="registro.codigo"
-            (ngModelChange)="registro.codigo = $event; emitChanges()"
-          />
-        </td>
+        <td>{{ registro.codigo || '-' }}</td>
 
-        <td>
-          <input
-            pInputText
-            type="time"
-            class="w-full"
-            [ngModel]="registro.hora_inicio"
-            (ngModelChange)="registro.hora_inicio = $event; emitChanges()"
-          />
-        </td>
+        <td>{{ registro.hora_inicio || '-' }}</td>
 
-        <td>
-          <input
-            pInputText
-            type="time"
-            class="w-full"
-            [ngModel]="registro.hora_final"
-            (ngModelChange)="registro.hora_final = $event; emitChanges()"
-          />
-        </td>
+        <td>{{ registro.hora_final || '-' }}</td>
 
-        <td *ngFor="let column of operationColumns" class="align-top">
-          <ng-container [ngSwitch]="true">
-            <div *ngSwitchCase="isBoolean(getOperationValue(registro, column))" class="flex justify-center py-2">
-              <p-checkbox
-                [binary]="true"
-                [ngModel]="getOperationValue(registro, column)"
-                (ngModelChange)="setOperationValue(registro, column, $event)"
-              ></p-checkbox>
-            </div>
-
-            <textarea
-              *ngSwitchCase="isObject(getOperationValue(registro, column))"
-              pInputTextarea
-              rows="3"
-              class="w-full"
-              [ngModel]="stringify(getOperationValue(registro, column))"
-              (ngModelChange)="updateJsonValue(registro, column, $event)"
-            ></textarea>
-
-            <input
-              *ngSwitchDefault
-              pInputText
-              [type]="isNumber(getOperationValue(registro, column)) ? 'number' : 'text'"
-              class="w-full"
-              [ngModel]="getOperationValue(registro, column)"
-              (ngModelChange)="setOperationValue(registro, column, $event)"
-            />
-          </ng-container>
+        <td class="text-center">
+          <button
+            pButton
+            type="button"
+            icon="pi pi-pencil"
+            severity="secondary"
+            [text]="true"
+            rounded
+            aria-label="Editar operacion"
+            (click)="openEditDialog(registro)"
+          ></button>
         </td>
       </tr>
     </ng-template>
 
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td [attr.colspan]="5 + operationColumns.length" class="py-10 text-center text-sm text-ink-75">
+        <td colspan="6" class="py-10 text-center text-sm text-ink-75">
           No hay operaciones para editar en este registro.
         </td>
       </tr>
     </ng-template>
   </p-table>
 </div>
+
+<p-dialog
+  header="Editar operacion del registro"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: 'min(980px, 94vw)' }"
+  [contentStyle]="{ overflow: 'auto' }"
+  [(visible)]="showEditDialog"
+  (onHide)="closeEditDialog()"
+>
+  <ng-container *ngIf="selectedRegistro as registro">
+    <div class="space-y-5">
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="rounded-full border border-border bg-surface-soft px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-ink-75">
+          Registro {{ getRegistroIdentificador(registro) }}
+        </span>
+        <span class="rounded-full border border-border bg-surface-soft px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-ink-75">
+          Estado {{ registro['estado'] || '-' }}
+        </span>
+        <span class="rounded-full border border-border bg-surface-soft px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-ink-75">
+          Codigo {{ registro['codigo'] || '-' }}
+        </span>
+      </div>
+
+      <section class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-bold text-ink">Hora inicio</label>
+          <input
+            pInputText
+            type="time"
+            [ngModel]="registro['hora_inicio']"
+            (ngModelChange)="registro['hora_inicio'] = $event; emitChanges()"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-bold text-ink">Hora final</label>
+          <input
+            pInputText
+            type="time"
+            [ngModel]="registro['hora_final']"
+            (ngModelChange)="registro['hora_final'] = $event; emitChanges()"
+          />
+        </div>
+      </section>
+
+      <section *ngIf="isOperativo(registro); else sinOperacionEditable" class="space-y-4">
+        <div>
+          <h3 class="text-lg font-black text-secondary">Detalle de operacion</h3>
+          <p class="text-sm text-ink-75">
+            Este bloque solo se habilita cuando el estado del registro es OPERATIVO.
+          </p>
+        </div>
+
+        <div *ngIf="getRegistroOperacionKeys(registro).length; else sinCamposOperacion" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div *ngFor="let column of getRegistroOperacionKeys(registro)" class="flex flex-col gap-2 rounded-2xl border border-border bg-surface-soft p-4">
+            <label class="text-sm font-bold text-ink">{{ column }}</label>
+
+            <label *ngIf="isBoolean(getOperationValue(registro, column))" class="flex items-center gap-2 text-sm font-semibold text-ink">
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="getOperationValue(registro, column)"
+                (ngModelChange)="setOperationValue(registro, column, $event)"
+              ></p-checkbox>
+              {{ getOperationValue(registro, column) ? 'Si' : 'No' }}
+            </label>
+
+            <textarea
+              *ngIf="isObject(getOperationValue(registro, column))"
+              pInputTextarea
+              rows="4"
+              [ngModel]="stringify(getOperationValue(registro, column))"
+              (ngModelChange)="updateJsonValue(registro, column, $event)"
+            ></textarea>
+
+            <input
+              *ngIf="!isBoolean(getOperationValue(registro, column)) && !isObject(getOperationValue(registro, column))"
+              pInputText
+              [type]="isNumber(getOperationValue(registro, column)) ? 'number' : 'text'"
+              [ngModel]="getOperationValue(registro, column)"
+              (ngModelChange)="setOperationValue(registro, column, $event)"
+            />
+          </div>
+        </div>
+      </section>
+    </div>
+  </ng-container>
+</p-dialog>
+
+<ng-template #sinOperacionEditable>
+  <div class="rounded-2xl border border-dashed border-border bg-surface-soft px-4 py-8 text-center text-sm text-ink-75">
+    El detalle de operacion solo se puede editar cuando el estado es OPERATIVO.
+  </div>
+</ng-template>
+
+<ng-template #sinCamposOperacion>
+  <div class="rounded-2xl border border-dashed border-border bg-surface-soft px-4 py-8 text-center text-sm text-ink-75">
+    Este registro no trae campos de detalle de operacion para editar.
+  </div>
+</ng-template>

@@ -1,4 +1,4 @@
-import { FiltrosReporte } from "../features/monitoreo-mina/components/filtros-reporte/filtros-reporte.component";
+import { FiltrosDashboard as FiltrosReporte } from '../features/dashboard/models/dashboard-filtros.model';
 
 export type TipoPeriodo = 'DIA' | 'SEMANA' | 'MES';
 

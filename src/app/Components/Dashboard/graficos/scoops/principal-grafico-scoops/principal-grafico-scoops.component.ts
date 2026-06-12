@@ -52,6 +52,12 @@ import { PresentacionDialogComponent } from '../presentacion-dialog/presentacion
 import { HorasOperativasDiaComponent } from '../Graficos components/HorasOperativas/horas-operativas-dia/horas-operativas-dia.component';
 import { HorasOperativasMesComponent } from '../Graficos components/HorasOperativas/horas-operativas-mes/horas-operativas-mes.component';
 import { HorasOperativasSemanaComponent } from '../Graficos components/HorasOperativas/horas-operativas-semana/horas-operativas-semana.component';
+import { DashboardFiltrosComponent } from '../../../../../features/dashboard/components/dashboard-filtros/dashboard-filtros.component';
+import {
+  FiltrosDashboard,
+  OpcionFiltroDashboard,
+  TipoFiltroDashboard,
+} from '../../../../../features/dashboard/models/dashboard-filtros.model';
 import { generarDiasEntreFechas, MESES_CORTOS, obtenerPeriodo, obtenerPeriodoDesdeKey, obtenerRangoSemanaISO, obtenerSemanaISO, parseFechaLocal, parseFechaSimple } from '../../../../../utils/fecha-utils';
 
 
@@ -61,6 +67,7 @@ import { generarDiasEntreFechas, MESES_CORTOS, obtenerPeriodo, obtenerPeriodoDes
   imports: [
     CommonModule,
     FormsModule,
+    DashboardFiltrosComponent,
     //DisponibilidadEquipoComponent,
     //DisponibilidadSemanaComponent,
     //DisponibilidadMesComponent,
@@ -89,6 +96,19 @@ export class PrincipalGraficoScoopsComponent implements OnInit {
   turnoSeleccionado: string = '';
   turnoAplicado: string = '';
   cargandoPDF = false;
+  tipoFiltro: TipoFiltroDashboard = 'dia';
+  anioSeleccionado: Date | null = null;
+  mesSeleccionado: Date | null = null;
+  semanaSeleccionada: Date | null = null;
+  diaSeleccionado: Date | null = null;
+  rangoFechas: Date[] | null = null;
+  tiposFiltro: OpcionFiltroDashboard[] = [
+    { label: 'Rango', value: 'rango' },
+    { label: 'Año', value: 'anio' },
+    { label: 'Mes', value: 'mes' },
+    { label: 'Semana', value: 'semana' },
+    { label: 'Día', value: 'dia' },
+  ];
 
   //DATA
 DataDisponibilidadPorEquipo: any[] = [];
@@ -225,6 +245,22 @@ constructor(
 
 toggleVista() {
   this.vistaPrincipal = !this.vistaPrincipal;
+}
+
+aplicarFiltrosDashboard(filtros: FiltrosDashboard) {
+  this.tipoFiltro = filtros.tipoFiltro;
+  this.anioSeleccionado = filtros.anioSeleccionado;
+  this.mesSeleccionado = filtros.mesSeleccionado;
+  this.semanaSeleccionada = filtros.semanaSeleccionada;
+  this.diaSeleccionado = filtros.diaSeleccionado;
+  this.rangoFechas = filtros.rangoFechas;
+  this.turnoSeleccionado = filtros.turnoSeleccionado ?? '';
+
+  if (!this.calcularRangoFechas()) {
+    return;
+  }
+
+  this.aplicarFiltro();
 }
 
 construirMapaEstados() {
@@ -396,6 +432,62 @@ mapaEstados: Map<string, any> = new Map();
     const month = String(hoy.getMonth() + 1).padStart(2, '0');
     const day = String(hoy.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private calcularRangoFechas(): boolean {
+    if (this.tipoFiltro === 'anio') {
+      if (!this.anioSeleccionado) return false;
+      const anio = this.anioSeleccionado.getFullYear();
+      this.fechaInicio = `${anio}-01-01`;
+      this.fechaFin = `${anio}-12-31`;
+      return true;
+    }
+
+    if (this.tipoFiltro === 'dia') {
+      if (!this.diaSeleccionado) return false;
+      this.fechaInicio = this.formatearFecha(this.diaSeleccionado);
+      this.fechaFin = this.formatearFecha(this.diaSeleccionado);
+      return true;
+    }
+
+    if (this.tipoFiltro === 'mes') {
+      if (!this.mesSeleccionado) return false;
+      const anio = this.mesSeleccionado.getFullYear();
+      const mes = this.mesSeleccionado.getMonth();
+      this.fechaInicio = this.formatearFecha(new Date(anio, mes, 1));
+      this.fechaFin = this.formatearFecha(new Date(anio, mes + 1, 0));
+      return true;
+    }
+
+    if (this.tipoFiltro === 'semana') {
+      if (!this.semanaSeleccionada) return false;
+      const inicio = new Date(this.semanaSeleccionada);
+      const dia = inicio.getDay() || 7;
+      inicio.setDate(inicio.getDate() - dia + 1);
+      const fin = new Date(inicio);
+      fin.setDate(inicio.getDate() + 6);
+      this.fechaInicio = this.formatearFecha(inicio);
+      this.fechaFin = this.formatearFecha(fin);
+      return true;
+    }
+
+    if (this.tipoFiltro === 'rango') {
+      if (!this.rangoFechas || this.rangoFechas.length < 2) return false;
+      const [inicio, fin] = this.rangoFechas;
+      if (!inicio || !fin) return false;
+      this.fechaInicio = this.formatearFecha(inicio);
+      this.fechaFin = this.formatearFecha(fin);
+      return true;
+    }
+
+    return false;
+  }
+
+  private formatearFecha(fecha: Date): string {
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    return `${anio}-${mes}-${dia}`;
   }
 
   async generarPDF() {

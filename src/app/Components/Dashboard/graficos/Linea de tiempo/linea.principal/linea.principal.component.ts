@@ -12,7 +12,7 @@ import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
 import { formatearFecha } from '../../../../../utils/fecha-utils';
 @Component({
-  selector: 'app-linea.principal',
+  selector: 'app-linea-principal',
   imports: [
     CommonModule,
     FormsModule,

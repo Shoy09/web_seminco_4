@@ -11,24 +11,24 @@ import { FormsModule } from '@angular/forms';
 import { ResumenComponent } from '../Graficos components/Hoja 1/resumen/resumen.component';
 import { PernosEquipoComponent } from '../Graficos components/Hoja 1/pernos-equipo/pernos-equipo.component';
 import { PernosLaborComponent } from '../Graficos components/Hoja 1/pernos-labor/pernos-labor.component';
-import { RendimientoEquipoComponent } from '../Graficos components/Hoja 1/rendimiento-equipo/rendimiento-equipo.component';
+import { RendimientoEquipoChartComponent } from '../../../../../features/dashboard/components/rendimiento-equipo-chart/rendimiento-equipo-chart.component';
 import { DemorasOperativasComponent } from '../Graficos components/Hoja 1/demoras-operativas/demoras-operativas.component';
 import { DemorasInoperativasComponent } from '../Graficos components/Hoja 1/demoras-inoperativas/demoras-inoperativas.component';
 import { HorasMantenimientoComponent } from '../Graficos components/Hoja 1/horas-mantenimiento/horas-mantenimiento.component';
 import { PernosInstaladosTipoComponent } from '../Graficos components/Hoja 1/pernos-instalados-tipo/pernos-instalados-tipo.component';
-import { MhrEquipoComponent } from '../Graficos components/Hoja 1/mhr-equipo/mhr-equipo.component';
+import { MhrEquipoComponent, MhrEquipoItem } from '../../../../../features/dashboard/components/mhr-equipo/mhr-equipo.component';
 import { MetrosEquipoComponent } from '../Graficos components/Hoja 1/metros-equipo/metros-equipo.component';
 import { HorometroEmpernadorComponent } from '../Graficos components/Hoja 1/horometro-empernador/horometro-empernador.component';
-import { TotalHorometrosComponent } from '../Graficos components/Hoja 1/total-horometros/total-horometros.component';
+import { TotalHorometrosComponent, TotalHorometroItem } from '../../../../../features/dashboard/components/total-horometros/total-horometros.component';
 import { ScatterTurnosNocheComponent } from '../Graficos components/Hoja 2/scatter-turnos-noche/scatter-turnos-noche.component';
 import { ScatterTurnosComponent } from '../Graficos components/Hoja 2/scatter-turnos/scatter-turnos.component';
 import { PlanMensualService } from '../../../../../services/plan-mensual.service';
 import { PernosMinadoTipoComponent } from '../Graficos components/Hoja 2/pernos-minado-tipo/pernos-minado-tipo.component';
-import { HorasPrimeraPerforacionComponent } from '../Graficos components/Hoja 2/horas-primera-perforacion/horas-primera-perforacion.component';
+import { HorasPrimeraPerforacionComponent, HoraPrimeraPerforacionItem } from '../../../../../features/dashboard/components/horas-primera-perforacion/horas-primera-perforacion.component';
 import { DetalleEquipoComponent } from '../Graficos components/Hoja 2/detalle-equipo/detalle-equipo.component';
 import { DetalleSostenimientoComponent } from '../Graficos components/Hoja 2/detalle-sostenimiento/detalle-sostenimiento.component';
-import { MejoresOperadoresComponent } from '../Graficos components/Hoja 2/mejores-operadores/mejores-operadores.component';
-import { RankingOperadorComponent } from '../Graficos components/Hoja 2/ranking-operador/ranking-operador.component';
+import { MejoresOperadoresComponent, MejoresOperadorItem } from '../../../../../features/dashboard/components/mejores-operadores/mejores-operadores.component';
+import { RankingOperadorComponent, RankingOperadorItem } from '../../../../../features/dashboard/components/ranking-operador/ranking-operador.component';
 import { ObservacionesComponent } from '../Graficos components/Hoja 2/observaciones/observaciones.component';
 import { PernosDiaComponent } from '../Graficos components/Hoja 1/pernos-dia/pernos-dia.component';
 import { SchedulerComponent } from '../../Linea de tiempo/scheduler/scheduler.component';
@@ -42,7 +42,7 @@ import { EstadoService } from '../../../../../services/estado.service';
     ResumenComponent,
     PernosEquipoComponent,
     PernosLaborComponent,
-    RendimientoEquipoComponent,
+    RendimientoEquipoChartComponent,
     DemorasOperativasComponent,
     DemorasInoperativasComponent,
     HorasMantenimientoComponent,
@@ -88,18 +88,18 @@ export class PrincipalGraficoSostenimientoComponent implements OnInit {
   dataDemoraIno: any[] = [];
   dataHoraMantenimiento: any[] = [];
   dataPernosInstalados: any[] = [];
-  dataMHREquipo: any[] = [];
+  dataMHREquipo: MhrEquipoItem[] = [];
   dataMetrosEquipo: any[] = [];
   dataHorometrosEquipo: any[] = [];
-  dataHorometroGeneral: any[] = [];
+  dataHorometroGeneral: TotalHorometroItem[] = [];
 
   //HOJA 2
   dataHorasNumericas: any[] = [];
   dataPernosMinadoTipo: any[] = [];
-  dataProcesoLaborFR: any[] = [];
+  dataProcesoLaborFR: HoraPrimeraPerforacionItem[] = [];
   dataIndicadores: any[] = [];
   dataIndicadoresLabor: any[] = [];
-  dataFrPorOperadorTurno: any[] = [];
+  dataFrPorOperadorTurno: RankingOperadorItem[] = [];
   dataLaborFRDetallado: any[] = [];
 
   resumen = {

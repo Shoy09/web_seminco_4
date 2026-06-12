@@ -12,15 +12,15 @@ import { AutocadMineroComponent } from './Components/autocad-minero/autocad-mine
 import { CheckListListaComponent } from './Components/Crear datos/check list/check-list-lista/check-list-lista.component';
 import { ChecklistTelemandoListaComponent } from './Components/Crear datos/check List Carguip/checklist-telemando-lista/checklist-telemando-lista.component';
 import { PowerBiPublicComponent } from './Components/Dashboard/Pu-PowerBi/power-bi-public/power-bi-public.component';
-import { PrincipalGraficoHorizontalComponent } from './Components/Dashboard/graficos/horizontal/principal-grafico-horizontal/principal-grafico-horizontal.component';
 import { ExplosivosComponent } from './Components/Crear datos/explosivos/explosivos.component';
 import { ExplosivosGraficosComponent } from './Components/Dashboard/Explosivos/explosivos-graficos/explosivos-graficos.component';
 import { DashboardPruebaComponent } from './Components/Dashboard/sostenimiento/dashboard-prueba/dashboard-prueba.component';
-import { PrincipalGraficoLargoComponent } from './Components/Dashboard/graficos/largo/principal-grafico-largo/principal-grafico-largo.component';
 import { PrincipalGraficoSostenimientoComponent } from './Components/Dashboard/graficos/sostenimiento/principal-grafico-sostenimiento/principal-grafico-sostenimiento.component';
-import { PrincipalGraficoScoopsComponent } from './Components/Dashboard/graficos/scoops/principal-grafico-scoops/principal-grafico-scoops.component';
-import { LineaPrincipalComponent } from './Components/Dashboard/graficos/Linea de tiempo/linea.principal/linea.principal.component';
 import { LayoutComponent } from './Components/Principales/layout/layout.component';
+import { DashboardCarguioPageComponent } from './features/dashboard/pages/dashboard-carguio/dashboard-carguio-page.component';
+import { DashboardLineaTiempoPageComponent } from './features/dashboard/pages/dashboard-linea-tiempo/dashboard-linea-tiempo-page.component';
+import { DashboardTalHorizontalPageComponent } from './features/dashboard/pages/dashboard-tal-horizontal/dashboard-tal-horizontal-page.component';
+import { DashboardTalLargoPageComponent } from './features/dashboard/pages/dashboard-tal-largo/dashboard-tal-largo-page.component';
 import { MonitoreoScoopsComponent } from './features/monitoreo-mina/pages/monitoreo-scoops/monitoreo-scoops.component';
 import { MonitoreoPerfHorizontalComponent } from './features/monitoreo-mina/pages/monitoreo-perf-horizontal/monitoreo-perf-horizontal.component';
 import { SeleccionEquipoPageComponent } from './features/validaciones/pages/seleccion-equipo/seleccion-equipo-page.component';
@@ -52,11 +52,11 @@ export const routes: Routes = [
         children: [
           {
             path: 'grafico-horizontal',
-            component: PrincipalGraficoHorizontalComponent,
+            component: DashboardTalHorizontalPageComponent,
           },
           {
             path: 'grafico-tal-largo',
-            component: PrincipalGraficoLargoComponent,
+            component: DashboardTalLargoPageComponent,
           },
           {
             path: 'grafico-sostenimiento',
@@ -64,14 +64,14 @@ export const routes: Routes = [
           },
           {
             path: 'grafico-scoops',
-            component: PrincipalGraficoScoopsComponent,
+            component: DashboardCarguioPageComponent,
           },
           /* {
             path: 'grafico-acarreo',
             component: PrincipalGraficoAcarreoComponent,
           }, */
 
-          { path: 'linea-de-tiempo', component: LineaPrincipalComponent },
+          { path: 'linea-de-tiempo', component: DashboardLineaTiempoPageComponent },
         ],
       },
       {

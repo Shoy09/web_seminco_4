@@ -1,5 +1,6 @@
 import { CheckList } from './check-list';
 import { ControlLlantas } from './control-llantas';
+import { Horometros } from './horometro';
 import { OperacionJumbo } from './OperacionJumbo';
 import { OperacionScoop } from './OperacionScoop';
 import { OperacionSostenimiento } from './OperacionSostenimiento';
@@ -32,7 +33,7 @@ export interface OperacionBase<TOperacion = TipoOperacionRegistro> {
   tipo_equipo?: string;
   capacidad?: string;
 
-  horometros?: string;
+  horometros: Horometros;
   condiciones_equipo?: string;
   check_list: CheckList[];
   control_llantas: ControlLlantas;
@@ -46,7 +47,7 @@ export interface Registro<TOperacion = TipoOperacionRegistro> {
   codigo: string;
   hora_inicio: string;
   hora_final: string | null;
-  operacion: TOperacion;
+  operacion: TOperacion | null;
 }
 export type TipoOperacionRegistro =
   | OperacionJumbo

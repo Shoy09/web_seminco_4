@@ -6,9 +6,6 @@
           <i class="pi pi-arrow-left mr-2"></i>Volver a bandeja
         </a>
         <h1 class="mt-3 text-3xl font-black text-secondary">Detalle de validacion</h1>
-        <p class="mt-2 text-sm text-ink-75">
-          Edita la data operativa, revisa checklist y finalmente aprueba o rechaza el registro.
-        </p>
       </div>
 
       <div *ngIf="draft" class="flex flex-wrap items-center gap-3">
@@ -39,35 +36,35 @@
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div class="flex flex-col gap-2">
           <label class="text-sm font-bold text-ink">Fecha</label>
-          <input pInputText type="date" [(ngModel)]="draft.fecha" />
+          <input pInputText type="date" [(ngModel)]="draft.fecha" [disabled]="true" />
         </div>
         <div class="flex flex-col gap-2">
           <label class="text-sm font-bold text-ink">Turno</label>
-          <input pInputText [(ngModel)]="draft.turno" />
+          <input pInputText [(ngModel)]="draft.turno" [disabled]="true" />
         </div>
         <div class="flex flex-col gap-2">
           <label class="text-sm font-bold text-ink">Operador</label>
-          <input pInputText [(ngModel)]="draft.operador" />
+          <input pInputText [(ngModel)]="draft.operador" [disabled]="true" />
         </div>
         <div class="flex flex-col gap-2">
           <label class="text-sm font-bold text-ink">Jefe guardia</label>
-          <input pInputText [(ngModel)]="draft.jefe_guardia" />
+          <input pInputText [(ngModel)]="draft.jefe_guardia" [disabled]="true" />
         </div>
         <div class="flex flex-col gap-2">
           <label class="text-sm font-bold text-ink">Equipo</label>
-          <input pInputText [(ngModel)]="draft.equipo" />
+          <input pInputText [(ngModel)]="draft.equipo" [disabled]="true" />
         </div>
         <div class="flex flex-col gap-2">
           <label class="text-sm font-bold text-ink">Codigo equipo</label>
-          <input pInputText [(ngModel)]="draft.n_equipo" />
+          <input pInputText [(ngModel)]="draft.n_equipo" [disabled]="true" />
         </div>
         <div class="flex flex-col gap-2">
           <label class="text-sm font-bold text-ink">Seccion</label>
-          <input pInputText [(ngModel)]="draft.seccion" />
+          <input pInputText [(ngModel)]="draft.seccion" [disabled]="true" />
         </div>
         <div class="flex flex-col gap-2">
           <label class="text-sm font-bold text-ink">Modelo</label>
-          <input pInputText [(ngModel)]="draft.modelo_equipo" />
+          <input pInputText [(ngModel)]="draft.modelo_equipo" [disabled]="true" />
         </div>
       </div>
     </section>
@@ -81,134 +78,62 @@
         <app-tabla-operaciones-general [registros]="registros" (registrosChange)="registros = $event"></app-tabla-operaciones-general>
       </div>
 
-      <div class="grid grid-cols-1 gap-5 xl:grid-cols-2">
-        <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm">
-          <h2 class="text-xl font-black text-secondary">Horometros</h2>
-          <p class="mb-4 text-sm text-ink-75">Control editable por sistema reportado.</p>
-
-          <div *ngIf="getHorometroKeys().length; else sinHorometros" class="space-y-4">
-            <div *ngFor="let key of getHorometroKeys()" class="rounded-2xl border border-border bg-surface-soft p-4">
-              <div class="mb-3 flex items-center justify-between">
-                <h3 class="text-sm font-black uppercase tracking-[0.18em] text-secondary">{{ key }}</h3>
-              </div>
-
-              <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <div class="flex flex-col gap-2">
-                  <label class="text-sm font-bold text-ink">Inicio</label>
-                  <input pInputText type="number" [ngModel]="horometros[key]?.inicio" (ngModelChange)="horometros[key].inicio = $event" />
-                </div>
-                <div class="flex flex-col gap-2">
-                  <label class="text-sm font-bold text-ink">Final</label>
-                  <input pInputText type="number" [ngModel]="horometros[key]?.final" (ngModelChange)="horometros[key].final = $event" />
-                </div>
-              </div>
-
-              <div class="mt-4 flex flex-wrap gap-6">
-                <label class="flex items-center gap-2 text-sm font-semibold text-ink">
-                  <p-checkbox [binary]="true" [ngModel]="horometros[key]?.op" (ngModelChange)="horometros[key].op = $event"></p-checkbox>
-                  Operativo
-                </label>
-                <label class="flex items-center gap-2 text-sm font-semibold text-ink">
-                  <p-checkbox [binary]="true" [ngModel]="horometros[key]?.inop" (ngModelChange)="horometros[key].inop = $event"></p-checkbox>
-                  Inoperativo
-                </label>
-              </div>
-            </div>
+      <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm">
+        <div class="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 class="text-xl font-black text-secondary">Detalles complementarios</h2>
+            <p class="text-sm text-ink-75">Abre cada bloque en dialog para revisar y editar la informacion adicional.</p>
           </div>
-        </section>
+        </div>
 
-        <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm">
-          <h2 class="text-xl font-black text-secondary">Condiciones del equipo</h2>
-          <p class="mb-4 text-sm text-ink-75">Edicion flexible de los campos que llegan desde backend.</p>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <button
+            pButton
+            type="button"
+            severity="secondary"
+            class="detalle-dialog-trigger"
+            label="Horometros"
+            icon="pi pi-clock"
+            (click)="openDialog('horometros')"
+          ></button>
 
-          <div *ngIf="getCondicionKeys().length; else sinCondiciones" class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div *ngFor="let key of getCondicionKeys()" class="flex flex-col gap-2">
-              <label class="text-sm font-bold capitalize text-ink">{{ key }}</label>
+          <button
+            pButton
+            type="button"
+            severity="secondary"
+            class="detalle-dialog-trigger"
+            label="Condiciones del equipo"
+            icon="pi pi-cog"
+            (click)="openDialog('condiciones')"
+          ></button>
 
-              <label *ngIf="isBoolean(condicionesEquipo[key])" class="flex items-center gap-2 text-sm font-semibold text-ink">
-                <p-checkbox
-                  [binary]="true"
-                  [ngModel]="condicionesEquipo[key]"
-                  (ngModelChange)="updateCondicionValue(key, $event)"
-                ></p-checkbox>
-                {{ condicionesEquipo[key] ? 'Activo' : 'Inactivo' }}
-              </label>
+          <button
+            pButton
+            type="button"
+            severity="secondary"
+            class="detalle-dialog-trigger"
+            label="Checklist"
+            icon="pi pi-check-square"
+            (click)="openDialog('checklist')"
+          ></button>
 
-              <textarea
-                *ngIf="isObject(condicionesEquipo[key])"
-                pInputTextarea
-                rows="4"
-                [ngModel]="stringify(condicionesEquipo[key])"
-                (ngModelChange)="updateCondicionValue(key, $event)"
-              ></textarea>
-
-              <input
-                *ngIf="!isBoolean(condicionesEquipo[key]) && !isObject(condicionesEquipo[key])"
-                pInputText
-                [type]="isNumberLike(condicionesEquipo[key]) ? 'number' : 'text'"
-                [ngModel]="condicionesEquipo[key]"
-                (ngModelChange)="updateCondicionValue(key, $event)"
-              />
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <div class="grid grid-cols-1 gap-5 xl:grid-cols-2">
-        <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm">
-          <h2 class="text-xl font-black text-secondary">Checklist</h2>
-          <p class="mb-4 text-sm text-ink-75">Validacion operativa y observaciones por item.</p>
-
-          <div *ngIf="checkList.length; else sinChecklist" class="space-y-3">
-            <div *ngFor="let item of checkList" class="rounded-2xl border border-border bg-surface-soft p-4">
-              <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                <div class="space-y-2">
-                  <p class="text-sm font-black text-secondary">{{ item.descripcion }}</p>
-                  <p class="text-xs font-bold uppercase tracking-[0.18em] text-ink-75">{{ item.categoria }}</p>
-                </div>
-
-                <label class="flex items-center gap-2 text-sm font-semibold text-ink">
-                  <p-checkbox
-                    [binary]="true"
-                    [ngModel]="getChecklistDecision(item)"
-                    (ngModelChange)="setChecklistDecision(item, $event)"
-                  ></p-checkbox>
-                  Conforme
-                </label>
-              </div>
-
-              <div class="mt-3 flex flex-col gap-2">
-                <label class="text-sm font-bold text-ink">Observacion</label>
-                <textarea pInputTextarea rows="3" [(ngModel)]="item.observacion"></textarea>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm">
-          <h2 class="text-xl font-black text-secondary">Presion / control de llantas</h2>
-          <p class="mb-4 text-sm text-ink-75">Estado declarado por posicion.</p>
-
-          <div *ngIf="getLlantasKeys().length; else sinLlantas" class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <label
-              *ngFor="let key of getLlantasKeys()"
-              class="flex items-center justify-between rounded-2xl border border-border bg-surface-soft px-4 py-3 text-sm font-semibold text-ink"
-            >
-              <span class="capitalize">{{ key }}</span>
-              <p-checkbox [binary]="true" [ngModel]="controlLlantas[key]" (ngModelChange)="updateLlantaValue(key, $event)"></p-checkbox>
-            </label>
-          </div>
-        </section>
-      </div>
+          <button
+            pButton
+            type="button"
+            severity="secondary"
+            class="detalle-dialog-trigger"
+            label="Presion / llantas"
+            icon="pi pi-car"
+            (click)="openDialog('llantas')"
+          ></button>
+        </div>
+      </section>
     </section>
 
     <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm">
       <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2 class="text-xl font-black text-secondary">Decision de validacion</h2>
-          <p class="text-sm text-ink-75">
-            Esta accion incrementa la revision del registro y deja trazabilidad de la data previa.
-          </p>
         </div>
 
         <div class="flex flex-col gap-3 sm:flex-row">
@@ -236,6 +161,150 @@
     </section>
   </ng-container>
 </div>
+
+<p-dialog
+  header="Horometros"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: 'min(960px, 92vw)' }"
+  [contentStyle]="{ overflow: 'auto' }"
+  [(visible)]="showHorometrosDialog"
+>
+  <p class="mb-4 text-sm text-ink-75">Control editable por sistema reportado.</p>
+
+  <div *ngIf="getHorometroKeys().length; else sinHorometros" class="space-y-4">
+    <div *ngFor="let key of getHorometroKeys()" class="rounded-2xl border border-border bg-surface-soft p-4">
+      <div class="mb-3 flex items-center justify-between">
+        <h3 class="text-sm font-black uppercase tracking-[0.18em] text-secondary">{{ key }}</h3>
+      </div>
+
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-bold text-ink">Inicio</label>
+          <input pInputText type="number" [ngModel]="horometros[key]?.inicio" (ngModelChange)="horometros[key].inicio = $event" />
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-bold text-ink">Final</label>
+          <input pInputText type="number" [ngModel]="horometros[key]?.final" (ngModelChange)="horometros[key].final = $event" />
+        </div>
+      </div>
+
+      <div class="mt-4 flex flex-wrap gap-6">
+        <label class="flex items-center gap-2 text-sm font-semibold text-ink">
+          <p-checkbox [binary]="true" [ngModel]="horometros[key]?.op" (ngModelChange)="horometros[key].op = $event"></p-checkbox>
+          Operativo
+        </label>
+        <label class="flex items-center gap-2 text-sm font-semibold text-ink">
+          <p-checkbox [binary]="true" [ngModel]="horometros[key]?.inop" (ngModelChange)="horometros[key].inop = $event"></p-checkbox>
+          Inoperativo
+        </label>
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  header="Condiciones del equipo"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: 'min(960px, 92vw)' }"
+  [contentStyle]="{ overflow: 'auto' }"
+  [(visible)]="showCondicionesDialog"
+>
+  <p class="mb-4 text-sm text-ink-75">Edicion flexible de los campos que llegan desde backend.</p>
+
+  <div *ngIf="getCondicionKeys().length; else sinCondiciones" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div *ngFor="let key of getCondicionKeys()" class="flex flex-col gap-2">
+      <label class="text-sm font-bold capitalize text-ink">{{ key }}</label>
+
+      <label *ngIf="isBoolean(condicionesEquipo[key])" class="flex items-center gap-2 text-sm font-semibold text-ink">
+        <p-checkbox
+          [binary]="true"
+          [ngModel]="condicionesEquipo[key]"
+          (ngModelChange)="updateCondicionValue(key, $event)"
+        ></p-checkbox>
+        {{ condicionesEquipo[key] ? 'Activo' : 'Inactivo' }}
+      </label>
+
+      <textarea
+        *ngIf="isObject(condicionesEquipo[key])"
+        pInputTextarea
+        rows="4"
+        [ngModel]="stringify(condicionesEquipo[key])"
+        (ngModelChange)="updateCondicionValue(key, $event)"
+      ></textarea>
+
+      <input
+        *ngIf="!isBoolean(condicionesEquipo[key]) && !isObject(condicionesEquipo[key])"
+        pInputText
+        [type]="isNumberLike(condicionesEquipo[key]) ? 'number' : 'text'"
+        [ngModel]="condicionesEquipo[key]"
+        (ngModelChange)="updateCondicionValue(key, $event)"
+      />
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  header="Checklist"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: 'min(960px, 92vw)' }"
+  [contentStyle]="{ overflow: 'auto' }"
+  [(visible)]="showChecklistDialog"
+>
+  <p class="mb-4 text-sm text-ink-75">Validacion operativa y observaciones por item.</p>
+
+  <div *ngIf="checkList.length; else sinChecklist" class="space-y-3">
+    <div *ngFor="let item of checkList" class="rounded-2xl border border-border bg-surface-soft p-4">
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div class="space-y-2">
+          <p class="text-sm font-black text-secondary">{{ item.descripcion }}</p>
+          <p class="text-xs font-bold uppercase tracking-[0.18em] text-ink-75">{{ item.categoria }}</p>
+        </div>
+
+        <label class="flex items-center gap-2 text-sm font-semibold text-ink">
+          <p-checkbox
+            [binary]="true"
+            [ngModel]="getChecklistDecision(item)"
+            (ngModelChange)="setChecklistDecision(item, $event)"
+          ></p-checkbox>
+          Conforme
+        </label>
+      </div>
+
+      <div class="mt-3 flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Observacion</label>
+        <textarea pInputTextarea rows="3" [(ngModel)]="item.observacion"></textarea>
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  header="Presion / control de llantas"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: 'min(720px, 92vw)' }"
+  [contentStyle]="{ overflow: 'auto' }"
+  [(visible)]="showLlantasDialog"
+>
+  <p class="mb-4 text-sm text-ink-75">Estado declarado por posicion.</p>
+
+  <div *ngIf="getLlantasKeys().length; else sinLlantas" class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <label
+      *ngFor="let key of getLlantasKeys()"
+      class="flex items-center justify-between rounded-2xl border border-border bg-surface-soft px-4 py-3 text-sm font-semibold text-ink"
+    >
+      <span class="capitalize">{{ key }}</span>
+      <p-checkbox [binary]="true" [ngModel]="controlLlantas[key]" (ngModelChange)="updateLlantaValue(key, $event)"></p-checkbox>
+    </label>
+  </div>
+</p-dialog>
 
 <ng-template #sinHorometros>
   <div class="rounded-2xl border border-dashed border-border bg-surface-soft px-4 py-8 text-center text-sm text-ink-75">

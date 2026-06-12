@@ -1,6 +1,6 @@
 export interface TipoPerforacion {
-    id?: number;  // `id` es opcional
+    id: number;
     nombre: string;
-    proceso?: string | null;
-    permitido_medicion: number | string;
+    proceso: string;
+    permitido_medicion: number;
 }

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
+import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -33,6 +34,7 @@ import {
     RouterLink,
     ButtonModule,
     CheckboxModule,
+    DialogModule,
     InputTextModule,
     InputTextarea,
     ProgressSpinnerModule,
@@ -60,6 +62,11 @@ export class DetalleValidacionPageComponent implements OnInit {
 
   loading = false;
   saving = false;
+
+  showHorometrosDialog = false;
+  showCondicionesDialog = false;
+  showChecklistDialog = false;
+  showLlantasDialog = false;
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
@@ -194,6 +201,22 @@ export class DetalleValidacionPageComponent implements OnInit {
     return this.isObject(value) || Array.isArray(value)
       ? JSON.stringify(value, null, 2)
       : String(value);
+  }
+
+  openDialog(dialog: 'horometros' | 'condiciones' | 'checklist' | 'llantas'): void {
+    this.closeDialogs();
+
+    if (dialog === 'horometros') this.showHorometrosDialog = true;
+    if (dialog === 'condiciones') this.showCondicionesDialog = true;
+    if (dialog === 'checklist') this.showChecklistDialog = true;
+    if (dialog === 'llantas') this.showLlantasDialog = true;
+  }
+
+  closeDialogs(): void {
+    this.showHorometrosDialog = false;
+    this.showCondicionesDialog = false;
+    this.showChecklistDialog = false;
+    this.showLlantasDialog = false;
   }
 
   private tieneCambios(payload: Record<string, any>): boolean {

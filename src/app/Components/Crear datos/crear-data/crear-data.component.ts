@@ -416,9 +416,6 @@ export class CrearDataComponent implements OnInit {
           .updateTipoPerforacion(id, datosActualizados)
           .subscribe({
             next: (data) => {
-              // Convertir de vuelta para mostrar en la tabla
-              data.permitido_medicion =
-                data.permitido_medicion === 1 ? 'SI' : 'NO';
               this.modalContenido.datos[this.indiceEditando] = data;
               this.cancelarEdicion();
             },
@@ -801,9 +798,6 @@ export class CrearDataComponent implements OnInit {
           .createTipoPerforacion(nuevoRegistro)
           .subscribe({
             next: (data) => {
-              // Mapear el campo antes de insertar en la tabla
-              data.permitido_medicion =
-                data.permitido_medicion === 1 ? 'SI' : 'NO';
               this.modalContenido.datos.push(data);
             },
             error: (err) =>

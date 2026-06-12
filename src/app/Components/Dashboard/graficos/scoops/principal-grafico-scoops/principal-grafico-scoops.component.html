@@ -1,42 +1,19 @@
-<div class="filtro-fechas">
-  <div class="campo">
-    <label>Fecha inicio</label>
-    <input type="date" [(ngModel)]="fechaInicio">
-  </div>
-
-  <div class="campo">
-    <label>Fecha fin</label>
-    <input type="date" [(ngModel)]="fechaFin">
-  </div>
-
-  <div class="campo">
-  <label>Turno</label>
-  <select [(ngModel)]="turnoSeleccionado">
-    <option value="">Todos</option>
-    <option value="DÍA">Día</option>
-    <option value="NOCHE">Noche</option>
-  </select>
-</div>
-
-
-  <button class="btn-aplicar" (click)="aplicarFiltro()">
-    Aplicar
-  </button>
-
-  <button class="btn-aplicar" (click)="quitarFiltro()">
-    Quitar filtro
-  </button>
-
-  <button class="btn-aplicar" (click)="generarPDF()">
-  Exportar PDF
-</button>
-
-<!-- <button class="btn-aplicar" (click)="toggleVista()">
-  {{ vistaPrincipal ? 'Ver gráfico de linea' : 'Gráficos principales' }}
-</button> -->
-
-
-</div>
+<app-dashboard-filtros
+  [tiposFiltro]="tiposFiltro"
+  [tipoFiltro]="tipoFiltro"
+  [anioSeleccionado]="anioSeleccionado"
+  [mesSeleccionado]="mesSeleccionado"
+  [semanaSeleccionada]="semanaSeleccionada"
+  [diaSeleccionado]="diaSeleccionado"
+  [rangoFechas]="rangoFechas"
+  [turnoSeleccionado]="turnoSeleccionado"
+  [mostrarPresentacion]="true"
+  [mostrarPdf]="true"
+  (aplicar)="aplicarFiltrosDashboard($event)"
+  (quitar)="quitarFiltro()"
+  (presentacion)="Presentacion()"
+  (pdf)="generarPDF()"
+/>
 
 <div class="graficos-container" *ngIf="vistaPrincipal">
   <!-- Hoja 1 pdf -->

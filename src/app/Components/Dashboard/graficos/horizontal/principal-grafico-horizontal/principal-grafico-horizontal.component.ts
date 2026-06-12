@@ -6,38 +6,34 @@ import {
   ViewChildren,
 } from '@angular/core';
 import { AvanceFaseComponent } from '../Graficos components/Hoja 1/avance-fase/avance-fase.component';
-import { DisparosDiaComponent } from '../Graficos components/Hoja 1/disparos-dia/disparos-dia.component';
-import { DisparosEquipoComponent } from '../Graficos components/Hoja 1/disparos-equipo/disparos-equipo.component';
-import { HorometrosJumbosComponent } from '../Graficos components/Hoja 1/horometros-jumbos/horometros-jumbos.component';
+import { DisparosEquipoChartComponent } from '../../../../../features/dashboard/components/disparos-equipo-chart/disparos-equipo-chart.component';
+import { HorometrosEquipoComponent, HorometroEquipoItem } from '../../../../../features/dashboard/components/horometros-equipo/horometros-equipo.component';
 import { MetrosPerforadosDisparoComponent } from '../Graficos components/Hoja 1/metros-perforados-disparo/metros-perforados-disparo.component';
-import { MhrEquipoComponent } from '../Graficos components/Hoja 1/mhr-equipo/mhr-equipo.component';
-import { PerforadoEquipoComponent } from '../Graficos components/Hoja 1/perforado-equipo/perforado-equipo.component';
-import { RendimientoEquipoComponent } from '../Graficos components/Hoja 1/rendimiento-equipo/rendimiento-equipo.component';
+import { MhrEquipoComponent, MhrEquipoItem } from '../../../../../features/dashboard/components/mhr-equipo/mhr-equipo.component';
+import {
+  PerforadoEquipoChartComponent,
+  PerforadoEquipoChartItem,
+} from '../../../../../features/dashboard/components/perforado-equipo-chart/perforado-equipo-chart.component';
+import { RendimientoEquipoChartComponent, RendimientoEquipoChartItem } from '../../../../../features/dashboard/components/rendimiento-equipo-chart/rendimiento-equipo-chart.component';
 import { ResumenComponent } from '../Graficos components/Hoja 1/resumen/resumen.component';
-import { HorasInicioPerforacionComponent } from '../Graficos components/Hoja 2/horas-inicio-perforacion/horas-inicio-perforacion.component';
 
-import { PlanMensualService } from '../../../../../services/plan-mensual.service';
-import { FechasPlanMensualService } from '../../../../../services/fechas-plan-mensual.service';
 import { OperacionesService } from '../../../../../services/operaciones.service';
 
 import {
-  OperacionBase,
+  Registro,
   OperacionBaseJumbo,
 } from '../../../../../models/OperacionBase.models';
+import { OperacionJumbo } from '../../../../../models/OperacionJumbo';
 import { PlanMensual } from '../../../../../models/plan-mensual.model';
 import { FormsModule } from '@angular/forms';
-import { HistorialInicioPerforacionComponent } from '../Graficos components/Hoja 2/historial-inicio-perforacion/historial-inicio-perforacion.component';
-import { HorasFinPerforacionComponent } from '../Graficos components/Hoja 2/horas-fin-perforacion/horas-fin-perforacion.component';
-import { HistorialUltimoPerforacionComponent } from '../Graficos components/Hoja 2/historial-ultimo-perforacion/historial-ultimo-perforacion.component';
-import { HorasPrimeraPerforacionComponent } from '../Graficos components/Hoja 2/horas-primera-perforacion/horas-primera-perforacion.component';
+import { HorasPrimeraPerforacionComponent, HoraPrimeraPerforacionItem } from '../../../../../features/dashboard/components/horas-primera-perforacion/horas-primera-perforacion.component';
 import { DetallePerforacionComponent } from '../Graficos components/Hoja 2/detalle-perforacion/detalle-perforacion.component';
-import { MejoresOperadoresComponent } from '../Graficos components/Hoja 2/mejores-operadores/mejores-operadores.component';
+import { MejoresOperadoresComponent, MejoresOperadorItem } from '../../../../../features/dashboard/components/mejores-operadores/mejores-operadores.component';
 import { ObservacionesComponent } from '../Graficos components/Hoja 2/observaciones/observaciones.component';
-import { GanttDiagramComponent } from '../Graficos components/Hoja 2/gantt-diagram/gantt-diagram.component';
 import { DisparosTipoPerforacionComponent } from '../Graficos components/Hoja 2/disparos-tipo-perforacion/disparos-tipo-perforacion.component';
 import { DetalleDisparosComponent } from '../Graficos components/Hoja 2/detalle-disparos/detalle-disparos.component';
-import { RankingOperadorComponent } from '../Graficos components/Hoja 2/ranking-operador/ranking-operador.component';
-import { TotalHorometrosComponent } from '../Graficos components/Hoja 1/total-horometros/total-horometros.component';
+import { RankingOperadorComponent, RankingOperadorItem } from '../../../../../features/dashboard/components/ranking-operador/ranking-operador.component';
+import { TotalHorometrosComponent, TotalHorometroItem } from '../../../../../features/dashboard/components/total-horometros/total-horometros.component';
 import { ScatterPlotComponent } from '../Graficos components/Hoja 2/scatter-plot/scatter-plot.component';
 import { CommonModule } from '@angular/common';
 import { PromedioEstadosEchartsComponent } from '../Graficos components/Hoja 2/promedio-estados-echarts/promedio-estados-echarts.component';
@@ -45,17 +41,25 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { EstadoService } from '../../../../../services/estado.service';
 import { SchedulerComponent } from '../../Linea de tiempo/scheduler/scheduler.component';
-import { DatePickerModule } from 'primeng/datepicker';
-import { SelectModule } from 'primeng/select';
-import { SelectButtonModule } from 'primeng/selectbutton';
-import { ButtonModule } from 'primeng/button';
+import { DashboardFiltrosComponent } from '../../../../../features/dashboard/components/dashboard-filtros/dashboard-filtros.component';
+import {
+  DisparosEquipoChartItem,
+  DisparosEquipoSegmento,
+} from '../../../../../features/dashboard/components/disparos-equipo-chart/disparos-equipo-chart.component';
+import {
+  FiltrosDashboard,
+  OpcionFiltroDashboard,
+} from '../../../../../features/dashboard/models/dashboard-filtros.model';
 import {
   convertirNumero,
   formatearFecha,
 } from '../../../../../utils/fecha-utils';
-import { GraficaParetoComponent } from '../Graficos components/Hoja 1/grafica-pareto/grafica-pareto.component';
+import {
+  GraficaParetoChartComponent,
+  ParetoChartItem,
+} from '../../../../../features/dashboard/components/grafica-pareto-chart/grafica-pareto-chart.component';
 import autoTable from 'jspdf-autotable';
-import { MapaDeCalorComponent } from '../Graficos components/Hoja 2/mapa-de-calor/mapa-de-calor.component';
+import { MapaDeCalorComponent, MapaDeCalorItem } from '../../../../../features/dashboard/components/mapa-de-calor/mapa-de-calor.component';
 import {
   agregarCabeceraPDF,
   agregarGraficoEchartsPDFProporcional,
@@ -71,20 +75,19 @@ import {
 import { DialogHoraHoraPerforacionComponent } from '../../../../../features/monitoreo-mina/components/dialog-hora-hora-perforacion/dialog-hora-hora-perforacion.component';
 import { MatDialog } from '@angular/material/dialog';
 import { PresentacionHorizontalDialogComponent } from '../presentacion-dialog/presentacion-dialog.component';
-import { OperacionJumbo } from '../../../../../models/OperacionJumbo';
+import { DisparosDiaComponent } from "../Graficos components/Hoja 1/disparos-dia/disparos-dia.component";
 
 @Component({
   selector: 'app-principal-grafico-horizontal',
   imports: [
     AvanceFaseComponent,
     ResumenComponent,
-    DisparosEquipoComponent,
-    DisparosDiaComponent,
-    RendimientoEquipoComponent,
+    DisparosEquipoChartComponent,
+    RendimientoEquipoChartComponent,
     MetrosPerforadosDisparoComponent,
-    PerforadoEquipoComponent,
+    PerforadoEquipoChartComponent,
     MhrEquipoComponent,
-    HorometrosJumbosComponent,
+    HorometrosEquipoComponent,
     FormsModule,
     HorasPrimeraPerforacionComponent,
     DetallePerforacionComponent,
@@ -97,34 +100,40 @@ import { OperacionJumbo } from '../../../../../models/OperacionJumbo';
     TotalHorometrosComponent,
     CommonModule,
     PromedioEstadosEchartsComponent,
-    GraficaParetoComponent,
+    GraficaParetoChartComponent,
     SchedulerComponent,
-    DatePickerModule,
-    SelectModule,
-    SelectButtonModule,
-    ButtonModule,
+    DashboardFiltrosComponent,
     MapaDeCalorComponent,
-    //DialogHoraHoraPerforacionComponent,
-  ],
+    DisparosDiaComponent
+],
   templateUrl: './principal-grafico-horizontal.component.html',
   styleUrl: './principal-grafico-horizontal.component.css',
 })
 export class PrincipalGraficoHorizontalComponent implements OnInit {
-  @ViewChild(DisparosEquipoComponent)
-  disparosEquipoChart!: DisparosEquipoComponent;
-  @ViewChild(RendimientoEquipoComponent)
-  rendimientoEquipoChart!: RendimientoEquipoComponent;
+  private readonly tiposDisparoHorizontal = new Set([
+    'FRENTE COMPLETO',
+    'BREASTING',
+    'DESQUINCHE',
+    'CIRCADO',
+    'REFUGIO',
+    'SELLADA',
+  ]);
+
+  @ViewChild(DisparosEquipoChartComponent)
+  disparosEquipoChart!: DisparosEquipoChartComponent;
+  @ViewChild(RendimientoEquipoChartComponent)
+  rendimientoEquipoChart!: RendimientoEquipoChartComponent;
   @ViewChild(DisparosDiaComponent) disparosDiaChart!: DisparosDiaComponent;
-  @ViewChildren(GraficaParetoComponent)
-  paretoCharts!: QueryList<GraficaParetoComponent>;
+  @ViewChildren(GraficaParetoChartComponent)
+  paretoCharts!: QueryList<GraficaParetoChartComponent>;
   @ViewChild(MetrosPerforadosDisparoComponent)
   metrosDisparoChart!: MetrosPerforadosDisparoComponent;
 
-  @ViewChild(PerforadoEquipoComponent)
-  perforadoEquipoChart!: PerforadoEquipoComponent;
+  @ViewChild(PerforadoEquipoChartComponent)
+  perforadoEquipoChart!: PerforadoEquipoChartComponent;
   @ViewChild(MhrEquipoComponent) mhrEquipoChart!: MhrEquipoComponent;
-  @ViewChild(HorometrosJumbosComponent)
-  horometrosJumbosChart!: HorometrosJumbosComponent;
+  @ViewChild(HorometrosEquipoComponent)
+  horometrosJumbosChart!: HorometrosEquipoComponent;
   @ViewChild(TotalHorometrosComponent)
   totalHorometrosChart!: TotalHorometrosComponent;
 
@@ -143,7 +152,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   anio!: number;
   mes!: string;
 
-  tiposFiltro = [
+  tiposFiltro: OpcionFiltroDashboard[] = [
     { label: 'Rango', value: 'rango' },
     { label: 'Año', value: 'anio' },
     { label: 'Mes', value: 'mes' },
@@ -176,29 +185,30 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
   // 🔥 DATA FINAL PARA LOS GRAFICOS
   dataAvanceFase: any[] = [];
-  dataDisparosEquipo: any[] = []; // 👈 NUEVO
+  dataDisparosEquipo: any[] = [];
+  dataRendimientoEquipo: any[] = [];
   dataDisparosDia: any[] = [];
   dataIndicadoresEquipo: any[] = [];
-  dataDemorasOperativas: any[] = [];
-  DataParetoHorasOperativas: any[] = [];
-  DataParetoHorasNoOperativas: any[] = [];
+  DataParetoHorasOperativas: ParetoChartItem[] = [];
+  DataParetoHorasNoOperativas: ParetoChartItem[] = [];
   dataHorasNoOperativas: any[] = [];
   dataHorasMantenimiento: any[] = [];
-  DataParetoHorasMantenimiento: any[] = [];
+  DataParetoHorasMantenimiento: ParetoChartItem[] = [];
   dataMetrosDisparoFR: any[] = [];
-  dataMhrEquipo: any[] = [];
-  dataHorometrosJumbos: any[] = [];
+  dataPerforadoEquipo: any[] = [];
+  dataMhrEquipo: MhrEquipoItem[] = [];
+  dataHorometrosJumbos: HorometroEquipoItem[] = [];
   dataPromedioPrimeraPerfDiaFR: any[] = [];
   dataPromedioPrimeraPerfDiaFRPorFecha: any[] = [];
   dataPromedioUltimaPerfDiaFR: any[] = [];
   dataPromedioUltimaPerfDiaFRPorFecha: any[] = [];
-  dataProcesoLaborFR: any[] = [];
+  dataProcesoLaborFR: HoraPrimeraPerforacionItem[] = [];
   dataPercusionConMetrosJumbos: any[] = [];
-  dataFrPorOperadorTurno: any[] = [];
+  dataFrPorOperadorTurno: RankingOperadorItem[] = [];
   dataLaborFRDetallado: any[] = [];
   dataTipoPerforacion: any[] = [];
   datadetalleDisparos: any[] = [];
-  dataHorasNumericas: any[] = [];
+  dataHorasNumericas: MapaDeCalorItem[] = [];
 
   turnoSeleccionado: string = '';
   turnoAplicado: string = '';
@@ -232,16 +242,12 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   ESTADOS_MANTENIMIENTO = ['206', '301', '302', '303'];
 
   constructor(
-    private planMensualService: PlanMensualService,
-    private fechasPlanMensualService: FechasPlanMensualService,
     private operacionesService: OperacionesService,
     private estadoService: EstadoService,
     private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
-    this.obtenerUltimaFecha();
-
     // 🔥 SETEO AUTOMÁTICO
     const hoy = this.getFechaHoy();
     this.fechaInicio = hoy;
@@ -253,6 +259,17 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
   toggleVista() {
     this.vistaPrincipal = !this.vistaPrincipal;
+  }
+
+  aplicarFiltrosDashboard(filtros: FiltrosDashboard): void {
+    this.tipoFiltro = filtros.tipoFiltro;
+    this.anioSeleccionado = filtros.anioSeleccionado;
+    this.mesSeleccionado = filtros.mesSeleccionado;
+    this.semanaSeleccionada = filtros.semanaSeleccionada;
+    this.diaSeleccionado = filtros.diaSeleccionado;
+    this.rangoFechas = filtros.rangoFechas;
+    this.turnoSeleccionado = filtros.turnoSeleccionado ?? '';
+    this.aplicarFiltro();
   }
 
   limpiarFechasPorTipo(): void {
@@ -382,7 +399,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
       return true;
     });
-    console.log('DATA FILTRADA:', this.operacionesFiltradas);
+    console.log('operacions filtradas', this.operacionesFiltradas);
     this.procesarTodo();
   }
 
@@ -482,53 +499,15 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   }
 
   // =========================================
-  // 🔥 PLAN
-  // =========================================
-  obtenerUltimaFecha(): void {
-    this.fechasPlanMensualService.getUltimaFecha().subscribe({
-      next: (ultimaFecha) => {
-        const anio: number | undefined = ultimaFecha.fecha_ingreso;
-        const mes: string = ultimaFecha.mes;
-
-        if (anio !== undefined) {
-          this.anio = anio;
-          this.mes = mes.trim().toUpperCase();
-
-          this.obtenerPlanesMensuales(this.anio, this.mes);
-        }
-      },
-      error: (error) => {
-        //console.error('❌ Error al obtener la última fecha:', error);
-      },
-    });
-  }
-
-  obtenerPlanesMensuales(anio: number, mes: string): void {
-    this.planMensualService.getPlanMensualByYearAndMonth(anio, mes).subscribe({
-      next: (planes) => {
-        this.planesMensuales = planes;
-        //console.log('🔥 PLANES MENSUALES:', this.planesMensuales);
-
-        this.procesarTodo();
-      },
-      error: (error) => {
-        //console.error('❌ Error al obtener planes mensuales:', error);
-      },
-    });
-  }
-
-  // =========================================
   // 🔥 PROCESAMIENTO TOTAL
   // =========================================
   procesarTodo() {
-    if (!this.operacionesFiltradas.length)
-      return;
+    if (!this.operacionesFiltradas.length) return;
 
-    this.dataAvanceFase = this.procesarAvanceFase();
-    this.dataDisparosEquipo = this.procesarDisparosEquipo(); // 👈 NUEVO
+    this.dataDisparosEquipo = this.procesarDisparosEquipo();
+    this.dataRendimientoEquipo = this.procesarRendimientoEquipo();
     this.dataDisparosDia = this.procesarDisparosDia();
     this.dataIndicadoresEquipo = this.procesarIndicadoresEquipo();
-    this.dataDemorasOperativas = this.procesarDemorasOperativas();
     this.DataParetoHorasOperativas = this.ParetoHorasOperativas();
     this.DataParetoHorasNoOperativas = this.ParetoHorasNoOperativas();
     this.dataHorasNoOperativas = this.procesarHorasNoOperativas();
@@ -536,6 +515,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     this.DataParetoHorasMantenimiento = this.ParetoHorasMantenimiento();
 
     this.dataMetrosDisparoFR = this.procesarMetrosPorDisparoFR();
+    this.dataPerforadoEquipo = this.procesarPerforadoEquipo();
     this.dataMhrEquipo = this.procesarMhrEquipo();
     this.dataHorometrosJumbos = this.procesarHorometrosJumbos();
     this.dataPromedioPrimeraPerfDiaFR = this.procesarPromedioPrimeraPerfDiaFR();
@@ -561,27 +541,19 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   // =========================================
   // 🔥 CALCULO DE FRENTES COMPLETOS
   // =========================================
-  contarFrentesCompletos(registrosArray: any[]): number {
+  contarFrentesCompletos(registrosArray: Registro<OperacionJumbo>[]): number {
     if (!Array.isArray(registrosArray)) return 0;
-
-    const tiposValidos = [
-      'FRENTE COMPLETO',
-      'BREASTING',
-      'DESQUINCHE',
-      'CIRCADO',
-      'REFUGIO',
-      'SELLADA',
-    ];
 
     let contador = 0;
 
     for (const registro of registrosArray) {
-      if (registro.estado !== 'OPERATIVO') continue;
+      if (!this.esDisparoHorizontal(registro)) continue;
 
-      const operacion = registro.operacion || registro;
-      const tipo = (operacion?.tipo_perforacion || '').trim().toUpperCase();
-
-      if (tiposValidos.includes(tipo)) {
+      if (
+        this.tiposDisparoHorizontal.has(
+          this.normalizarTipoPerforacion(registro.operacion?.tipo_perforacion),
+        )
+      ) {
         contador++;
       }
     }
@@ -589,27 +561,21 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     return contador;
   }
 
-  contarFrentesPorTipo(registrosArray: any[]): Record<string, number> {
+  contarFrentesPorTipo(
+    registrosArray: Registro<OperacionJumbo>[],
+  ): Record<string, number> {
     if (!Array.isArray(registrosArray)) return {};
-
-    const tiposValidos = [
-      'FRENTE COMPLETO',
-      'BREASTING',
-      'DESQUINCHE',
-      'CIRCADO',
-      'REFUGIO',
-      'SELLADA',
-    ];
 
     const conteo: Record<string, number> = {};
 
     for (const registro of registrosArray) {
-      if (registro.estado !== 'OPERATIVO') continue;
+      if (!this.esDisparoHorizontal(registro)) continue;
 
-      const operacion = registro.operacion || registro;
-      const tipo = (operacion?.tipo_perforacion || '').trim().toUpperCase();
+      const tipo = this.normalizarTipoPerforacion(
+        registro.operacion?.tipo_perforacion,
+      );
 
-      if (tiposValidos.includes(tipo)) {
+      if (this.tiposDisparoHorizontal.has(tipo)) {
         conteo[tipo] = (conteo[tipo] || 0) + 1;
       }
     }
@@ -618,39 +584,19 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   }
 
   // =========================================
-  // 🔥 OBTENER SECCION DEL PLAN
-  // =========================================
-  obtenerSeccionDelPlan(area: string): string {
-    const plan = this.planesMensuales.find((p) => p.area === area);
-    if (plan && plan.ancho_m !== undefined && plan.alto_m !== undefined) {
-      return `${plan.ancho_m}x${plan.alto_m}`;
-    }
-    return '';
-  }
-
-  // =========================================
   // 🔥 DATA PARA GRAFICO DISPAROS EQUIPO
   // =========================================
-  procesarDisparosEquipo() {
-    const mapaDisparos = new Map<
-      string,
-      {
-        modelo_equipo: string;
-        seccion: string;
-        n_frentes: number;
-        tipos: Record<string, number>; // 🔥 nuevo
-      }
-    >();
+  procesarDisparosEquipo(): DisparosEquipoChartItem[] {
+    const mapaDisparos = new Map<string, DisparosEquipoChartItem>();
 
     this.operacionesFiltradas.forEach((op) => {
       try {
-        const registrosArray = op.registros;
+        const registrosArray = op.registros as
+          | Registro<OperacionJumbo>[]
+          | undefined;
 
         if (Array.isArray(registrosArray) && registrosArray.length > 0) {
-          // 🔥 nuevo: obtener conteo por tipo
           const conteoTipos = this.contarFrentesPorTipo(registrosArray);
-
-          // 🔥 total (por si aún lo necesitas)
           const totalFrentes = Object.values(conteoTipos).reduce(
             (a, b) => a + b,
             0,
@@ -660,21 +606,21 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
           if (mapaDisparos.has(key)) {
             const existing = mapaDisparos.get(key)!;
-
-            // 🔥 acumular total
-            existing.n_frentes += totalFrentes;
-
-            // 🔥 acumular por tipo
-            for (const tipo in conteoTipos) {
-              existing.tipos[tipo] =
-                (existing.tipos[tipo] || 0) + conteoTipos[tipo];
-            }
+            existing.totalDisparos += totalFrentes;
+            existing.segmentos = this.acumularSegmentos(
+              existing.segmentos,
+              conteoTipos,
+            );
           } else {
             mapaDisparos.set(key, {
-              modelo_equipo: op.modelo_equipo || 'SIN_EQUIPO',
+              modeloEquipo: op.modelo_equipo || 'SIN_EQUIPO',
               seccion: op.seccion || 'SIN_SECCION',
-              n_frentes: totalFrentes,
-              tipos: { ...conteoTipos }, // 🔥 inicializar
+              seccionLabor: this.obtenerSeccionLaborHorizontal(
+                registrosArray,
+                op,
+              ),
+              totalDisparos: totalFrentes,
+              segmentos: this.crearSegmentos(conteoTipos),
             });
           }
         }
@@ -682,6 +628,115 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     });
 
     return Array.from(mapaDisparos.values());
+  }
+
+  procesarRendimientoEquipo(): RendimientoEquipoChartItem[] {
+    const mapa = new Map<string, { metros: number; horas: number; seccion: string }>();
+
+    this.operacionesFiltradas.forEach((op) => {
+      try {
+        const registrosArray = op.registros;
+        if (!Array.isArray(registrosArray) || registrosArray.length === 0) return;
+
+        let metros = 0;
+        for (const r of registrosArray) {
+          if (r.estado !== 'OPERATIVO' || !r.operacion) continue;
+          metros += this.obtenerMetrosPerforadosRegistro(r.operacion);
+        }
+
+        const horas = this.calcularHorasEfectivas(registrosArray);
+        const key = op.modelo_equipo || 'SIN_EQUIPO';
+
+        if (mapa.has(key)) {
+          const acc = mapa.get(key)!;
+          acc.metros += metros;
+          acc.horas += horas;
+        } else {
+          mapa.set(key, { metros, horas, seccion: op.seccion || 'SIN_SECCION' });
+        }
+      } catch (error) {}
+    });
+
+    return Array.from(mapa.entries()).map(([key, acc]) => ({
+      modeloEquipo: key,
+      seccion: acc.seccion,
+      DM_FR: acc.horas > 0 ? Number((acc.metros / acc.horas).toFixed(2)) : 0,
+      UTI_FR: 0,
+    }));
+  }
+
+  private calcularHorasEfectivas(registrosArray: any[]): number {
+    if (!Array.isArray(registrosArray)) return 0;
+    let total = 0;
+    for (const r of registrosArray) {
+      if (r.estado !== 'OPERATIVO') continue;
+      if (!r.hora_inicio || !r.hora_final) continue;
+      total += this.calcularDuracionHoras(r.hora_inicio, r.hora_final);
+    }
+    return total;
+  }
+
+  private esDisparoHorizontal(registro: Registro<OperacionJumbo>): boolean {
+    if ((registro.estado || '').trim().toUpperCase() !== 'OPERATIVO') {
+      return false;
+    }
+
+    const tipo = this.normalizarTipoPerforacion(
+      registro.operacion?.tipo_perforacion,
+    );
+    return this.tiposDisparoHorizontal.has(tipo);
+  }
+
+  private normalizarTipoPerforacion(tipo?: string): string {
+    return (tipo || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toUpperCase();
+  }
+
+  private crearSegmentos(
+    conteoTipos: Record<string, number>,
+  ): DisparosEquipoSegmento[] {
+    return Object.entries(conteoTipos)
+      .map(([tipo, valor]) => ({ tipo, valor }))
+      .filter((segmento) => segmento.valor > 0);
+  }
+
+  private acumularSegmentos(
+    segmentosActuales: DisparosEquipoSegmento[],
+    conteoTipos: Record<string, number>,
+  ): DisparosEquipoSegmento[] {
+    const acumulado = new Map<string, number>();
+
+    segmentosActuales.forEach((segmento) => {
+      acumulado.set(segmento.tipo, segmento.valor);
+    });
+
+    Object.entries(conteoTipos).forEach(([tipo, valor]) => {
+      acumulado.set(tipo, (acumulado.get(tipo) || 0) + valor);
+    });
+
+    return Array.from(acumulado.entries()).map(([tipo, valor]) => ({
+      tipo,
+      valor,
+    }));
+  }
+
+  private obtenerSeccionLaborHorizontal(
+    registrosArray: Registro<OperacionJumbo>[],
+    operacion: OperacionBaseJumbo,
+  ): string {
+    const primerRegistroOperativo = registrosArray.find((registro) =>
+      this.esDisparoHorizontal(registro),
+    );
+
+    return (
+      primerRegistroOperativo?.operacion?.labor ||
+      primerRegistroOperativo?.operacion?.tipo_labor ||
+      operacion.seccion ||
+      'SIN_SECCION'
+    );
   }
 
   // =========================================
@@ -750,9 +805,6 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     return Number(metrosPerforados.toFixed(2));
   }
 
-  // =========================================
-  // 🔥 CALCULO METROS
-  // =========================================
   calcularMetrosPerforados(registrosArray: any[]): number {
     //console.log('=== INICIO calcularMetrosPerforados ===');
 
@@ -773,93 +825,22 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     return totalMetros;
   }
 
-  // =========================================
-  // 🔥 FILTRAR FASES DEL PLAN
-  // =========================================
-  private crearMapaPlanes(): Map<string, string> {
-    const mapa = new Map<string, string>();
-
-    this.planesMensuales.forEach((p) => {
-      const labor_fr = this.construirLaborFR(p.tipo_labor, p.labor, p.ala);
-
-      if (!p.fase) return;
-
-      // clave: labor_fr → valor: fase
-      mapa.set(labor_fr, p.fase);
-    });
-
-    return mapa;
-  }
-
-  // =========================================
-  // 🔥 DATA PARA GRAFICO AVANCE FASE
-  // =========================================
-  procesarAvanceFase() {
-    const mapaFases = this.crearMapaPlanes();
-
-    const result: any[] = [];
-
-    this.operacionesFiltradas.forEach((op) => {
-      const registrosArray = op.registros;
-      if (!Array.isArray(registrosArray)) return;
-
-      registrosArray.forEach((r) => {
-        const operacion = r?.operacion || {};
-
-        const labor_fr = this.construirLaborFR(
-          operacion?.tipo_labor,
-          operacion?.labor,
-          operacion?.ala,
-        );
-
-        // 🔥 JOIN con plan
-        const fase = mapaFases.get(labor_fr);
-
-        if (!fase) return; // solo los válidos del plan
-
-        const metros = this.calcularMetrosPerforados([r]);
-
-        result.push({
-          modelo_equipo: op.modelo_equipo,
-          fase,
-          labor_fr,
-          metros,
-        });
-      });
-    });
-
-    return result;
-  }
-
-  private construirLaborFR(tipo_labor: any, labor: any, ala: any): string {
-    return `${tipo_labor ?? ''}${labor ?? ''}${ala ?? ''}`.trim();
-  }
-
-  // =========================================
-  // SEGUNDO GRAFICO - RESUMEN
-  // =========================================
   procesarResumen() {
     let totalMetros = 0;
     let totalFrentes = 0;
     const equiposSet = new Set<string>();
 
-      console.log("ga");
     this.operacionesFiltradas.forEach((op, index) => {
-      console.log("ga1");
 
       if (op.modelo_equipo) {
         equiposSet.add(op.modelo_equipo);
       }
-      console.log("ga2");
-
       const registrosArray = op.registros;
 
       if (!Array.isArray(registrosArray)) {
         console.warn(`⚠️ Operación ${index} sin registros`);
         return;
       }
-
-      console.log("ga");
 
       // 🔹 Metros
       const metros = this.calcularMetrosPerforados(registrosArray);
@@ -879,10 +860,6 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
       totalMetros: Number(totalMetros.toFixed(0)),
     };
   }
-
-  //=========================================
-  // 🔥 GRAFICO 5
-  // =========================================
 
   procesarIndicadoresEquipo() {
     const mapa = new Map<string, any>();
@@ -1000,90 +977,8 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     return difDiesel + difElectrico;
   }
 
-  // =========================================
-  // Grafico 6
-  // =========================================
-  procesarDemorasOperativas() {
-    const mapa = new Map<string, any>();
-    const tiposEstados = this.getTiposEstadosMap();
-    const equiposUnicos = new Set<string>();
-
-    // 🔹 RECORRER DATA
-    this.operacionesFiltradas.forEach((op) => {
-      const registros = op.registros;
-      if (!Array.isArray(registros)) return;
-
-      // ✅ DISTINCTCOUNT (como DAX: TODOS los equipos)
-      if (op.modelo_equipo) {
-        equiposUnicos.add(op.modelo_equipo);
-      }
-
-      registros.forEach((r) => {
-        const tipo = tiposEstados[r.codigo];
-        if (!tipo) return;
-
-        const duracion = this.calcularDuracionHoras(
-          r.hora_inicio,
-          r.hora_final!,
-        );
-
-        if (!duracion || duracion <= 0) return;
-
-        if (mapa.has(tipo)) {
-          mapa.get(tipo).horas += duracion;
-        } else {
-          mapa.set(tipo, {
-            tipo_estado: tipo,
-            horas: duracion,
-          });
-        }
-      });
-    });
-
-    const nEquipos = equiposUnicos.size;
-
-    // 🔹 BASE (equivalente a SUMX + DIVIDE)
-    let resultado = Array.from(mapa.values())
-      .filter((x) => x.horas > 0)
-      .map((x) => ({
-        tipo_estado: x.tipo_estado,
-        horas: x.horas,
-        promedio: nEquipos > 0 ? x.horas / nEquipos : 0,
-      }));
-
-    // 🔥 ORDEN DESC (RANKX DESC)
-    resultado.sort((a, b) => b.horas - a.horas);
-
-    // 🔥 RANK DENSE (igual que DAX)
-    let rank = 1;
-    resultado = resultado.map((item, index, arr) => {
-      if (index > 0 && item.horas < arr[index - 1].horas) {
-        rank = index + 1;
-      }
-
-      return {
-        ...item,
-        rank,
-      };
-    });
-
-    // 🔥 ACUMULADO (Tiempo_Acu_FR)
-    let acumulado = 0;
-    const totalHoras = resultado.reduce((sum, x) => sum + x.horas, 0);
-
-    resultado = resultado.map((item) => {
-      acumulado += item.horas;
-
-      return {
-        ...item,
-        tiempo_acu: acumulado,
-        tiempo_acu_pct: totalHoras > 0 ? acumulado / totalHoras : 0,
-      };
-    });
-
-    return resultado;
-  }
-  ParetoHorasOperativas() {
+  
+  ParetoHorasOperativas(): ParetoChartItem[] {
     const resultadoMap = new Map<string, any>();
 
     this.operacionesFiltradas.forEach((op) => {
@@ -1173,7 +1068,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     return resultado;
   }
 
-  ParetoHorasNoOperativas() {
+  ParetoHorasNoOperativas(): ParetoChartItem[] {
     const resultadoMap = new Map<string, any>();
 
     this.operacionesFiltradas.forEach((op) => {
@@ -1481,7 +1376,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     return resultado;
   }
 
-  ParetoHorasMantenimiento() {
+  ParetoHorasMantenimiento(): ParetoChartItem[] {
     const resultadoMap = new Map<string, any>();
 
     this.operacionesFiltradas.forEach((op) => {
@@ -1580,9 +1475,40 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     };
   }
 
-  // =========================================
-  //GRAFICO 9
-  // =========================================
+  procesarPerforadoEquipo(): PerforadoEquipoChartItem[] {
+    const mapa = new Map<string, PerforadoEquipoChartItem>();
+
+    this.operacionesFiltradas.forEach((op) => {
+      try {
+        const registrosArray = op.registros;
+        if (!Array.isArray(registrosArray) || registrosArray.length === 0) return;
+
+        let metrosPerforados = 0;
+
+        for (const registro of registrosArray) {
+          if (registro.estado !== 'OPERATIVO') continue;
+          if (!registro.operacion) continue;
+          metrosPerforados += this.obtenerMetrosPerforadosRegistro(registro.operacion);
+        }
+
+        const key = op.modelo_equipo || 'SIN_EQUIPO';
+
+        if (mapa.has(key)) {
+          const existing = mapa.get(key)!;
+          existing.metrosPerforados += metrosPerforados;
+        } else {
+          mapa.set(key, {
+            modeloEquipo: op.modelo_equipo || 'SIN_EQUIPO',
+            seccion: op.seccion || 'SIN_SECCION',
+            metrosPerforados,
+          });
+        }
+      } catch (error) {}
+    });
+
+    return Array.from(mapa.values());
+  }
+
   procesarMetrosPorDisparoFR() {
     const mapa = new Map<
       string,
@@ -1633,11 +1559,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     return Array.from(mapa.values());
   }
 
-  // =========================================
-  // GRAFICO 10
-  // =========================================
-
-  procesarMhrEquipo() {
+  procesarMhrEquipo(): MhrEquipoItem[] {
     const mapa = new Map<string, any>();
 
     this.operacionesFiltradas.forEach((op) => {
@@ -1648,10 +1570,14 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
       const operativos = registrosArray.filter((r) => r.estado === 'OPERATIVO');
 
-      const metros = this.calcularMetrosPerforados(operativos);
+      let metros = 0;
+      for (const r of operativos) {
+        if (r.operacion) {
+          metros += this.obtenerMetrosPerforadosRegistro(r.operacion);
+        }
+      }
 
-      // 🔥 FIX AQUÍ
-      const perc = (op as any)?.horometros?.percusion;
+      const perc = op.horometros.percusion;
 
       const inicio = Number(perc?.inicio);
       const final = Number(perc?.final);
@@ -1691,7 +1617,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   // 🔥 GRAFICO 11
   // =========================================
 
-  procesarHorometrosJumbos() {
+  procesarHorometrosJumbos(): HorometroEquipoItem[] {
     const mapa = new Map<string, any>();
 
     this.operacionesFiltradas.forEach((op) => {
@@ -2023,7 +1949,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   // 🔥 GRAFICO 16
   //=========================================
 
-  procesarLaborFR() {
+  procesarLaborFR(): HoraPrimeraPerforacionItem[] {
     const mapa = new Map<string, Map<string, any>>();
 
     this.operacionesFiltradas.forEach((op) => {
@@ -2154,12 +2080,11 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
       item.metros_perforados += metros;
       item.percusion += difPercusion;
 
-      // =========================
-      // 🔥 RECORRER REGISTROS
-      // =========================
       if (Array.isArray(registrosArray)) {
         registrosArray.forEach((r) => {
-          const opData = r?.operacion || r;
+          if (!this.esEstadoOperativoPorCodigo(r.codigo)) return;
+
+          const opData = r.operacion!;
 
           const lb = Number(opData?.long_barras);
 
@@ -2203,7 +2128,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   // GRAFICO 18
   // =========================================
 
-  procesarFrPorOperadorTurno() {
+  procesarFrPorOperadorTurno(): RankingOperadorItem[] {
     const mapa = new Map<string, any>();
 
     this.operacionesFiltradas.forEach((op) => {
@@ -2491,7 +2416,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   // GRAFICO 22
   // =========================================
 
-  procesarHorasNumericas() {
+  procesarHorasNumericas(): MapaDeCalorItem[] {
     const result: any[] = [];
 
     this.operacionesFiltradas.forEach((op) => {
@@ -2541,7 +2466,6 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     });
   }
 
-  //---------------------------------------------
   estadosBloqueados = ['FUERA DE PLAN'];
 
   mapaEstados: Map<string, any> = new Map();
@@ -3327,7 +3251,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
         cardWidth,
         cardHeight,
         0.3,
-        'rellenar'
+        'rellenar',
       );
     }
 
