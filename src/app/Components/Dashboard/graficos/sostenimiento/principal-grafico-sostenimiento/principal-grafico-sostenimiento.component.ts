@@ -29,7 +29,7 @@ import { DetalleEquipoComponent } from '../Graficos components/Hoja 2/detalle-eq
 import { DetalleSostenimientoComponent } from '../Graficos components/Hoja 2/detalle-sostenimiento/detalle-sostenimiento.component';
 import { MejoresOperadoresComponent, MejoresOperadorItem } from '../../../../../features/dashboard/components/mejores-operadores/mejores-operadores.component';
 import { RankingOperadorComponent, RankingOperadorItem } from '../../../../../features/dashboard/components/ranking-operador/ranking-operador.component';
-import { ObservacionesComponent } from '../Graficos components/Hoja 2/observaciones/observaciones.component';
+import { ObservacionesComponent, ObservacionItem } from '../../../../../features/dashboard/components/observaciones/observaciones.component';
 import { PernosDiaComponent } from '../Graficos components/Hoja 1/pernos-dia/pernos-dia.component';
 import { SchedulerComponent } from '../../Linea de tiempo/scheduler/scheduler.component';
 import { EstadoService } from '../../../../../services/estado.service';
@@ -100,7 +100,7 @@ export class PrincipalGraficoSostenimientoComponent implements OnInit {
   dataIndicadores: any[] = [];
   dataIndicadoresLabor: any[] = [];
   dataFrPorOperadorTurno: RankingOperadorItem[] = [];
-  dataLaborFRDetallado: any[] = [];
+  dataLaborFRDetallado: ObservacionItem[] = [];
 
   resumen = {
     conteoEquipos: 0,

@@ -1,4 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  QueryList,
+  ViewChild,
+  ViewChildren,
+} from '@angular/core';
 import { FechasPlanMensualService } from '../../../../../services/fechas-plan-mensual.service';
 import { OperacionesService } from '../../../../../services/operaciones.service';
 import {
@@ -31,11 +37,12 @@ import {
   HorasPrimeraPerforacionComponent,
   HoraPrimeraPerforacionItem,
 } from '../../../../../features/dashboard/components/horas-primera-perforacion/horas-primera-perforacion.component';
-import { AvanceFaseComponent } from '../Graficos components/Hoja 1/avance-fase/avance-fase.component';
-import { DisparosDiaComponent } from '../Graficos components/Hoja 1/disparos-dia/disparos-dia.component';
-import { DetallePerforacionComponent } from '../Graficos components/Hoja 2/detalle-perforacion/detalle-perforacion.component';
-import { DisparosTipoPerforacionComponent } from '../Graficos components/Hoja 2/disparos-tipo-perforacion/disparos-tipo-perforacion.component';
-import { DetalleDisparosComponent } from '../Graficos components/Hoja 2/detalle-disparos/detalle-disparos.component';
+import {
+  DisparosDiaChartComponent,
+  DisparosDiaItem,
+} from '../../../../../features/dashboard/components/disparos-dia-chart/disparos-dia-chart.component';
+import { DetallePerforacionComponent, DetallePerforacionItem } from '../../../../../features/dashboard/components/detalle-perforacion/detalle-perforacion.component';
+import { DetalleDisparosComponent, DetalleDisparoItem } from '../../../../../features/dashboard/components/detalle-disparos/detalle-disparos.component';
 import {
   MejoresOperadoresComponent,
   MejoresOperadorItem,
@@ -44,7 +51,10 @@ import {
   RankingOperadorComponent,
   RankingOperadorItem,
 } from '../../../../../features/dashboard/components/ranking-operador/ranking-operador.component';
-import { ObservacionesComponent } from '../Graficos components/Hoja 2/observaciones/observaciones.component';
+import {
+  ObservacionesComponent,
+  ObservacionItem,
+} from '../../../../../features/dashboard/components/observaciones/observaciones.component';
 import {
   RendimientoEquipoChartComponent,
   RendimientoEquipoChartItem,
@@ -77,6 +87,26 @@ import {
 } from '../../../../../features/dashboard/models/dashboard-filtros.model';
 import { MatDialog } from '@angular/material/dialog';
 import { PresentacionTlargosDialogComponent } from '../../../../../features/dashboard/components/presentacion/presentacion-tlargos-dialog/presentacion-tlargos-dialog.component';
+import {
+  agregarCabeceraPDF,
+  agregarGraficoEchartsPDFProporcional,
+  agregarPaginaConGraficos2x3,
+  agregarTablaContinuaPDF,
+  agregarTablaPrimeraPerforacionPDF,
+  configurarCabeceraPDF,
+  obtenerImagenChart,
+  PdfChartConfig,
+} from '../../../../../config/config-pdf';
+import { MetrosPerforadosDisparoComponent, MetrosPerforadosDisparoItem } from '../../../../../features/dashboard/components/metros-perforados-disparo/metros-perforados-disparo.component';
+import { AvanceFaseComponent } from '../../horizontal/Graficos components/Hoja 1/avance-fase/avance-fase.component';
+import {
+  PromedioEstadoItem,
+  PromedioEstadosEchartsComponent,
+} from '../../../../../features/dashboard/components/promedio-estados-echarts/promedio-estados-echarts.component';
+import {
+  DisparosTipoPerforacionChartComponent,
+  DisparosTipoPerforacionItem,
+} from '../../../../../features/dashboard/components/disparos-tipo-perforacion-chart/disparos-tipo-perforacion-chart.component';
 
 type OperacionTalLargoConTipo = OperacionTLargos & {
   tipo_perforacion?: string;
@@ -105,17 +135,47 @@ type OperacionTalLargoConTipo = OperacionTLargos & {
     MapaDeCalorComponent,
     SchedulerComponent,
     DashboardFiltrosComponent,
-    DisparosDiaComponent,
+    DisparosDiaChartComponent,
     DetallePerforacionComponent,
     DetalleDisparosComponent,
+    DisparosTipoPerforacionChartComponent,
+    PromedioEstadosEchartsComponent,
   ],
   templateUrl: './principal-grafico-largo.component.html',
   styleUrl: './principal-grafico-largo.component.css',
 })
 export class PrincipalGraficoLargoComponent implements OnInit {
+  @ViewChild(DisparosEquipoChartComponent)
+  disparosEquipoChart!: DisparosEquipoChartComponent;
+  @ViewChild(RendimientoEquipoChartComponent)
+  rendimientoEquipoChart!: RendimientoEquipoChartComponent;
+  @ViewChild(DisparosDiaChartComponent)
+  disparosDiaChart!: DisparosDiaChartComponent;
+  @ViewChildren(GraficaParetoChartComponent)
+  paretoCharts!: QueryList<GraficaParetoChartComponent>;
+  @ViewChild(MetrosPerforadosDisparoComponent)
+  metrosDisparoChart!: MetrosPerforadosDisparoComponent;
+  @ViewChild(RankingOperadorComponent)
+  rankingOperadorChart!: RankingOperadorComponent;
+  @ViewChild(MapaDeCalorComponent)
+  mapaDeCalorChart!: MapaDeCalorComponent;
+
+  @ViewChild(PerforadoEquipoChartComponent)
+  perforadoEquipoChart!: PerforadoEquipoChartComponent;
+  @ViewChild(MhrEquipoComponent) mhrEquipoChart!: MhrEquipoComponent;
+  @ViewChild(HorometrosEquipoComponent)
+  horometrosJumbosChart!: HorometrosEquipoComponent;
+  @ViewChild(TotalHorometrosComponent)
+  totalHorometrosChart!: TotalHorometrosComponent;
+  @ViewChild(AvanceFaseComponent) avanceFaseChart!: AvanceFaseComponent;
+  @ViewChild(DisparosTipoPerforacionChartComponent)
+  disparosTipoPerforacionChart!: DisparosTipoPerforacionChartComponent;
+  @ViewChild(PromedioEstadosEchartsComponent)
+  promedioEstadosChart!: PromedioEstadosEchartsComponent;
+
   private readonly tiposDisparoTalLargo = new Set(['PRODUCCION', 'SLOT']);
 
-  ESTADOS_OPERATIVOS = ['101', '102','111','112','120']
+  ESTADOS_OPERATIVOS = ['101', '102', '111', '112', '120'];
   ESTADOS_NO_OPERATIVOS = [
     '209',
     '210',
@@ -137,9 +197,9 @@ export class PrincipalGraficoLargoComponent implements OnInit {
   operacionesFiltradas: OperacionBaseTLargos[] = [];
 
   // 🔥 DATA FINAL PARA LOS GRAFICOS
-  dataAvanceFase: any[] = [];
-  dataDisparosEquipo: any[] = []; // 👈 NUEVO
-  dataDisparosDia: any[] = [];
+  //dataAvanceFase: any[] = [];
+  dataDisparosEquipo: DisparosEquipoChartItem[] = [];
+  dataDisparosDia: DisparosDiaItem[] = [];
   dataIndicadoresEquipo: any[] = [];
   dataDemorasOperativas: any[] = [];
   dataHorasNoOperativas: any[] = [];
@@ -153,12 +213,13 @@ export class PrincipalGraficoLargoComponent implements OnInit {
   dataPromedioUltimaPerfDiaFR: any[] = [];
   dataPromedioUltimaPerfDiaFRPorFecha: any[] = [];
   dataProcesoLaborFR: HoraPrimeraPerforacionItem[] = [];
-  dataPercusionConMetrosJumbos: any[] = [];
+  dataPercusionConMetrosJumbos: DetallePerforacionItem[] = [];
   dataFrPorOperadorTurno: RankingOperadorItem[] = [];
-  dataLaborFRDetallado: any[] = [];
-  dataTipoPerforacion: any[] = [];
-  datadetalleDisparos: any[] = [];
+  dataObservaciones: ObservacionItem[] = [];
+  dataTipoPerforacion: DisparosTipoPerforacionItem[] = [];
+  datadetalleDisparos: DetalleDisparoItem[] = [];
   dataHorasNumericas: MapaDeCalorItem[] = [];
+  datosGraficoEstados: PromedioEstadoItem[] = [];
   dataParetoHorasOperativas: ParetoChartItem[] = [];
   dataParetoHorasNoOperativas: ParetoChartItem[] = [];
   dataParetoHorasMantenimiento: ParetoChartItem[] = [];
@@ -416,70 +477,862 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     this.procesarTodo();
   }
 
-  async generarPDF() {
+  prepararDatosGraficoEstados(): void {
+    if (!this.mapaEstados.size) {
+      console.warn(
+        '⚠️ mapaEstados vacío, asegúrate de ejecutar construirMapaEstados() antes',
+      );
+    }
+
+    this.datosGraficoEstados = this.operacionesFiltradas.flatMap(
+      (operacion) => {
+        const registros = Array.isArray(operacion.registros)
+          ? operacion.registros
+          : [];
+
+        return registros.map((estado: any) => {
+          const codigo = String(estado.codigo || '').trim();
+          const estadoOperacion = (estado.estado || '').toUpperCase().trim();
+
+          const estadoMatch = this.mapaEstados.get(codigo);
+
+          // 🔥 Debug clave (solo cuando falla)
+          if (!estadoMatch) {
+            console.warn('❌ Sin match:', {
+              codigo,
+              estadoOperacion,
+              registro: estado,
+            });
+          }
+
+          return {
+            codigoOperacion: String(
+              operacion.modelo_equipo || operacion.n_equipo || operacion.id,
+            ),
+            turno: operacion.turno,
+
+            // 🔹 base
+            estado: estadoOperacion,
+            codigoEstado: codigo,
+
+            // 🔥 enriquecido desde catálogo
+            tipo_estado: estadoMatch?.tipo_estado || null,
+            categoria: estadoMatch?.categoria || null,
+            estado_principal_match: estadoMatch?.estado_principal || null,
+
+            hora_inicio: estado.hora_inicio,
+            hora_final: estado.hora_final,
+          };
+        });
+      },
+    );
+  }
+
+  private esperarRenderizado(): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, 300);
+    });
+  }
+
+  async generarPDF(): Promise<void> {
     this.cargandoPDF = true;
 
     try {
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+      await this.esperarRenderizado();
 
-      const todasLasPaginas = document.querySelectorAll('[data-page]');
-      const elementosPorPagina = new Map<number, Element[]>();
-
-      todasLasPaginas.forEach((el) => {
-        const page = parseInt(el.getAttribute('data-page') || '1');
-        if (!elementosPorPagina.has(page)) {
-          elementosPorPagina.set(page, []);
-        }
-        elementosPorPagina.get(page)!.push(el);
+      configurarCabeceraPDF({
+        fechaInicio: this.fechaInicio,
+        fechaFin: this.fechaFin,
+        turno: this.turnoAplicado || 'TODOS',
+        tipoOperacion: 'PERFORACIÓN TAL. LARGOS',
+        fechaGeneracion: new Date(),
       });
 
-      for (const [pageNum, elementos] of Array.from(
-        elementosPorPagina.entries(),
-      )) {
-        if (pageNum > 1) pdf.addPage();
-
-        todasLasPaginas.forEach((el) => {
-          (el as HTMLElement).style.display = 'none';
-        });
-
-        elementos.forEach((el) => {
-          (el as HTMLElement).style.display = 'block';
-        });
-
-        await this.delay(300);
-
-        const container = document.querySelector(
-          '.graficos-container',
-        ) as HTMLElement;
-
-        if (container) {
-          const canvas = await html2canvas(container, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-          });
-
-          const imgData = canvas.toDataURL('image/png');
-          const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight);
-        }
-      }
-
-      todasLasPaginas.forEach((el) => {
-        (el as HTMLElement).style.display = '';
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true,
       });
 
-      pdf.save('grafico_completo_tal_largo.pdf');
+      this.agregarPaginaResumenYGraficos(pdf);
+
+      agregarPaginaConGraficos2x3(
+        pdf,
+        'REPORTE OPERATIVO - INDICADORES PRINCIPALES',
+        [
+          {
+            component: this.disparosDiaChart,
+            title: 'DISPAROS POR DÍA',
+          },
+          ...this.obtenerParetosPDF().slice(0, 3),
+          {
+            component: this.perforadoEquipoChart,
+            title: 'PERFORADO POR EQUIPO',
+          },
+          {
+            component: this.mhrEquipoChart,
+            title: 'M/HR POR EQUIPO',
+          },
+        ],
+      );
+      // GRAFICOS HOROMETROS
+      this.agregarPaginaPerforadoHorometrosConTabla(pdf);
+      // =========================
+      // PÁGINAS SIGUIENTES: TABLAS
+      // =========================
+      pdf.addPage();
+      agregarCabeceraPDF(pdf, 'REPORTE OPERATIVO - TABLAS');
+      let yTablas = 30;
+      yTablas = this.agregarTablaDetallePerforacion(pdf, yTablas);
+      yTablas = this.agregarTablaDetalleDisparos(pdf, yTablas);
+      yTablas = this.agregarTablaMejoresOperadores(pdf, yTablas);
+      yTablas = this.agregarTablaObservaciones(pdf, yTablas);
+
+      pdf.save(`resumen-operativo-${this.obtenerFechaArchivo()}.pdf`);
+    } catch (error) {
+      console.error('Error generando PDF:', error);
     } finally {
       this.cargandoPDF = false;
     }
   }
-  private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  private valorPDF(valor: any): string {
+    if (valor === null || valor === undefined || valor === '') {
+      return '-';
+    }
+
+    return String(valor);
   }
 
+  private numeroPDF(valor: any, decimales: number = 2): string {
+    const numero = Number(valor || 0);
+
+    return numero.toLocaleString('en-US', {
+      minimumFractionDigits: decimales,
+      maximumFractionDigits: decimales,
+    });
+  }
+
+  private obtenerFechaArchivo(): string {
+    const fecha = new Date();
+
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const hora = String(fecha.getHours()).padStart(2, '0');
+    const minuto = String(fecha.getMinutes()).padStart(2, '0');
+
+    return `${anio}-${mes}-${dia}_${hora}-${minuto}`;
+  }
+
+  private agregarTablaDetallePerforacion(pdf: jsPDF, startY: number): number {
+    const data = this.dataPercusionConMetrosJumbos || [];
+
+    if (!Array.isArray(data) || data.length === 0) {
+      console.warn('Sin datos para DETALLE PERFORACIÓN');
+      return startY;
+    }
+
+    const dataOrdenada = [...data].sort((a, b) =>
+      String(a.modelo_equipo || '').localeCompare(
+        String(b.modelo_equipo || ''),
+      ),
+    );
+
+    const columnas = [
+      'Equipo',
+      'Metros perforados',
+      'Percusión',
+      'Long. barras',
+      'FR M/HR',
+      'Tal. alivio',
+      'Tal. prod.',
+      'Tal. repaso',
+      'Tal. rimados',
+    ];
+
+    const filas = dataOrdenada.map((item: any) => [
+      this.valorPDF(item.modelo_equipo),
+      this.numeroPDF(item.metros_perforados, 2),
+      this.numeroPDF(item.percusion, 2),
+      this.numeroPDF(item.long_barras, 2),
+      this.numeroPDF(item.fr_mhr_hp, 2),
+      this.numeroPDF(item.tal_alivio, 0),
+      this.numeroPDF(item.tal_prod, 0),
+      this.numeroPDF(item.tal_repaso, 0),
+      this.numeroPDF(item.tal_rimados, 0),
+    ]);
+
+    const totalMetros = dataOrdenada.reduce(
+      (sum, item) => sum + Number(item.metros_perforados || 0),
+      0,
+    );
+
+    const totalPercusion = dataOrdenada.reduce(
+      (sum, item) => sum + Number(item.percusion || 0),
+      0,
+    );
+
+    const totalTalAlivio = dataOrdenada.reduce(
+      (sum, item) => sum + Number(item.tal_alivio || 0),
+      0,
+    );
+
+    const totalTalProd = dataOrdenada.reduce(
+      (sum, item) => sum + Number(item.tal_prod || 0),
+      0,
+    );
+
+    const totalTalRepaso = dataOrdenada.reduce(
+      (sum, item) => sum + Number(item.tal_repaso || 0),
+      0,
+    );
+
+    const totalTalRimados = dataOrdenada.reduce(
+      (sum, item) => sum + Number(item.tal_rimados || 0),
+      0,
+    );
+
+    const frMhrTotal = totalPercusion > 0 ? totalMetros / totalPercusion : 0;
+
+    filas.push([
+      'TOTAL',
+      this.numeroPDF(totalMetros, 2),
+      this.numeroPDF(totalPercusion, 2),
+      '-',
+      this.numeroPDF(frMhrTotal, 2),
+      this.numeroPDF(totalTalAlivio, 0),
+      this.numeroPDF(totalTalProd, 0),
+      this.numeroPDF(totalTalRepaso, 0),
+      this.numeroPDF(totalTalRimados, 0),
+    ]);
+
+    return agregarTablaContinuaPDF(pdf, {
+      tituloReporte: 'REPORTE OPERATIVO - TABLAS',
+      tituloTabla: 'DETALLE PERFORACIÓN',
+      columnas,
+      filas,
+      startY,
+      marginLeft: 8,
+      marginRight: 8,
+    });
+  }
+  private agregarTablaDetalleDisparos(pdf: jsPDF, startY: number): number {
+    const data = this.datadetalleDisparos || [];
+
+    if (!Array.isArray(data) || data.length === 0) {
+      console.warn('Sin datos para DETALLE DISPAROS');
+      return startY;
+    }
+
+    const dataOrdenada = [...data].sort((a, b) => {
+      const equipoA = String(a.modelo_equipo || '');
+      const equipoB = String(b.modelo_equipo || '');
+
+      const diffEquipo = equipoA.localeCompare(equipoB);
+      if (diffEquipo !== 0) return diffEquipo;
+
+      const horaA = String(a.hora_inicio || '');
+      const horaB = String(b.hora_inicio || '');
+
+      return horaA.localeCompare(horaB);
+    });
+
+    const columnas = [
+      'Equipo',
+      'Tipo perforación',
+      'Labor',
+      'N° Reg.',
+      'Hora inicio',
+      'Hora final',
+      'Metros',
+      'Long. barras',
+      'Tal. alivio',
+      'Tal. prod.',
+      'Tal. repaso',
+      'Tal. rimados',
+    ];
+
+    const filas = dataOrdenada.map((item: any) => [
+      this.valorPDF(item.modelo_equipo),
+      this.valorPDF(item.tipo_perforacion),
+      this.valorPDF(item.labor_fr),
+      this.valorPDF(item.numero_registro),
+      this.valorPDF(item.hora_inicio),
+      this.valorPDF(item.hora_final),
+      this.numeroPDF(item.metros_perforados, 2),
+      this.numeroPDF(item.long_barras, 2),
+      this.numeroPDF(item.tal_alivio, 0),
+      this.numeroPDF(item.tal_prod, 0),
+      this.numeroPDF(item.tal_repaso, 0),
+      this.numeroPDF(item.tal_rimados, 0),
+    ]);
+
+    const totalMetros = dataOrdenada.reduce(
+      (sum, item) => sum + Number(item.metros_perforados || 0),
+      0,
+    );
+
+    const totalTalAlivio = dataOrdenada.reduce(
+      (sum, item) => sum + Number(item.tal_alivio || 0),
+      0,
+    );
+
+    const totalTalProd = dataOrdenada.reduce(
+      (sum, item) => sum + Number(item.tal_prod || 0),
+      0,
+    );
+
+    const totalTalRepaso = dataOrdenada.reduce(
+      (sum, item) => sum + Number(item.tal_repaso || 0),
+      0,
+    );
+
+    const totalTalRimados = dataOrdenada.reduce(
+      (sum, item) => sum + Number(item.tal_rimados || 0),
+      0,
+    );
+
+    filas.push([
+      'TOTAL',
+      '-',
+      '-',
+      '-',
+      '-',
+      '-',
+      this.numeroPDF(totalMetros, 2),
+      '-',
+      this.numeroPDF(totalTalAlivio, 0),
+      this.numeroPDF(totalTalProd, 0),
+      this.numeroPDF(totalTalRepaso, 0),
+      this.numeroPDF(totalTalRimados, 0),
+    ]);
+
+    return agregarTablaContinuaPDF(pdf, {
+      tituloReporte: 'REPORTE OPERATIVO - TABLAS',
+      tituloTabla: 'DETALLE DISPAROS',
+      columnas,
+      filas,
+      startY,
+      marginLeft: 8,
+      marginRight: 8,
+    });
+  }
+  private agregarTablaMejoresOperadores(pdf: jsPDF, startY: number): number {
+    const data = this.dataFrPorOperadorTurno || [];
+
+    if (!Array.isArray(data) || data.length === 0) {
+      console.warn('Sin datos para MEJORES OPERADORES');
+      return startY;
+    }
+
+    const dataOrdenada = [...data].sort(
+      (a, b) => Number(b.fr_mhr_hp || 0) - Number(a.fr_mhr_hp || 0),
+    );
+
+    const columnas = [
+      'Ranking',
+      'Operador',
+      'Turno',
+      'Metros perforados',
+      'Percusión',
+      'FR M/HR',
+    ];
+
+    const filas = dataOrdenada.map((item: any, index: number) => [
+      String(index + 1),
+      this.valorPDF(item.operador),
+      this.valorPDF(item.turno),
+      this.numeroPDF(item.metros_perforados, 2),
+      this.numeroPDF(item.dif_percusion, 2),
+      this.numeroPDF(item.fr_mhr_hp, 2),
+    ]);
+
+    const totalMetros = dataOrdenada.reduce(
+      (sum, item) => sum + Number(item.metros_perforados || 0),
+      0,
+    );
+
+    const totalPercusion = dataOrdenada.reduce(
+      (sum, item) => sum + Number(item.dif_percusion || 0),
+      0,
+    );
+
+    const frMhrTotal = totalPercusion > 0 ? totalMetros / totalPercusion : 0;
+
+    filas.push([
+      'TOTAL',
+      '-',
+      '-',
+      this.numeroPDF(totalMetros, 2),
+      this.numeroPDF(totalPercusion, 2),
+      this.numeroPDF(frMhrTotal, 2),
+    ]);
+
+    return agregarTablaContinuaPDF(pdf, {
+      tituloReporte: 'REPORTE OPERATIVO - TABLAS',
+      tituloTabla: 'MEJORES OPERADORES',
+      columnas,
+      filas,
+      startY,
+      marginLeft: 8,
+      marginRight: 8,
+    });
+  }
+  private agregarTablaObservaciones(pdf: jsPDF, startY: number): number {
+    const data = this.dataObservaciones || [];
+
+    if (!Array.isArray(data) || data.length === 0) {
+      console.warn('Sin datos para OBSERVACIONES');
+      return startY;
+    }
+
+    const dataOrdenada = [...data].sort((a, b) => {
+      const equipoA = String(a.modelo_equipo || '');
+      const equipoB = String(b.modelo_equipo || '');
+
+      const diffEquipo = equipoA.localeCompare(equipoB);
+      if (diffEquipo !== 0) return diffEquipo;
+
+      const operadorA = String(a.operador || '');
+      const operadorB = String(b.operador || '');
+
+      const diffOperador = operadorA.localeCompare(operadorB);
+      if (diffOperador !== 0) return diffOperador;
+
+      const laborA = String(a.labor_fr || '');
+      const laborB = String(b.labor_fr || '');
+
+      return laborA.localeCompare(laborB);
+    });
+
+    const columnas = ['Equipo', 'Operador', 'Labor', 'Observaciones', 'Cant.'];
+
+    const filas = dataOrdenada.map((item: any) => [
+      this.valorPDF(item.modelo_equipo),
+      this.valorPDF(item.operador),
+      this.valorPDF(item.labor_fr),
+      this.valorPDF(item.observaciones),
+      this.numeroPDF(item.count, 0),
+    ]);
+
+    return agregarTablaContinuaPDF(pdf, {
+      tituloReporte: 'REPORTE OPERATIVO - TABLAS',
+      tituloTabla: 'OBSERVACIONES',
+      columnas,
+      filas,
+      startY,
+      marginLeft: 8,
+      marginRight: 8,
+      columnStyles: {
+        0: {
+          cellWidth: 24,
+          halign: 'center',
+        },
+        1: {
+          cellWidth: 38,
+        },
+        2: {
+          cellWidth: 28,
+        },
+        3: {
+          cellWidth: 92,
+        },
+        4: {
+          cellWidth: 12,
+          halign: 'center',
+        },
+      },
+    });
+  }
+
+  private agregarPaginaPerforadoHorometrosConTabla(pdf: jsPDF): void {
+    pdf.addPage();
+
+    agregarCabeceraPDF(pdf, 'REPORTE OPERATIVO - PERFORADO Y HORÓMETROS');
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const marginX = 8;
+    const startY = 30;
+    const bottomMargin = 8;
+
+    const gapX = 6;
+    const gapY = 7;
+
+    const cardWidth = (pageWidth - marginX * 2 - gapX) / 2;
+
+    const availableHeight = pageHeight - startY - bottomMargin;
+    const maxCardHeight = (availableHeight - gapY * 2) / 3;
+
+    // Mientras más alto el ratio, más bajo queda el cuadro.
+    // 1.7 = más alto
+    // 1.9 = equilibrado
+    // 2.1 = más compacto
+    const chartRatio = 1.9;
+
+    const cardHeight = Math.min(maxCardHeight, cardWidth / chartRatio);
+
+    const posiciones = [
+      { x: marginX, y: startY },
+      { x: marginX + cardWidth + gapX, y: startY },
+
+      { x: marginX, y: startY + cardHeight + gapY },
+      { x: marginX + cardWidth + gapX, y: startY + cardHeight + gapY },
+
+      { x: marginX, y: startY + (cardHeight + gapY) * 2 },
+      { x: marginX + cardWidth + gapX, y: startY + (cardHeight + gapY) * 2 },
+    ];
+
+    agregarTablaPrimeraPerforacionPDF(
+      pdf,
+      this.dataProcesoLaborFR || [],
+      'HORAS PRIMERA PERFORACIÓN',
+      posiciones[0].x,
+      posiciones[0].y,
+      cardWidth,
+      cardHeight,
+    );
+
+    const horometrosJumboImage = obtenerImagenChart(this.horometrosJumbosChart);
+    if (horometrosJumboImage) {
+      agregarGraficoEchartsPDFProporcional(
+        pdf,
+        horometrosJumboImage,
+        'HORÓMETROS JUMBOS',
+        posiciones[1].x,
+        posiciones[1].y,
+        cardWidth,
+        cardHeight,
+      );
+    }
+
+    const horometrosEquipoImage = obtenerImagenChart(this.totalHorometrosChart);
+    if (horometrosEquipoImage) {
+      agregarGraficoEchartsPDFProporcional(
+        pdf,
+        horometrosEquipoImage,
+        'TOTAL HORÓMETROS',
+        posiciones[2].x,
+        posiciones[2].y,
+        cardWidth,
+        cardHeight,
+      );
+    }
+    const avanceFaseImage = obtenerImagenChart(this.avanceFaseChart);
+    if (avanceFaseImage) {
+      agregarGraficoEchartsPDFProporcional(
+        pdf,
+        avanceFaseImage,
+        'METROS PERFORADOS POR FASE',
+        posiciones[3].x,
+        posiciones[3].y,
+        cardWidth,
+        cardHeight,
+      );
+    }
+    const disparosTipoPerforacionImage = obtenerImagenChart(
+      this.disparosTipoPerforacionChart,
+    );
+    if (disparosTipoPerforacionImage) {
+      agregarGraficoEchartsPDFProporcional(
+        pdf,
+        disparosTipoPerforacionImage,
+        'DISPAROS POR TIPO DE PERFORACIÓN',
+        posiciones[4].x,
+        posiciones[4].y,
+        cardWidth,
+        cardHeight,
+      );
+    }
+    const promedioEstadosImage = obtenerImagenChart(this.promedioEstadosChart);
+    if (promedioEstadosImage) {
+      agregarGraficoEchartsPDFProporcional(
+        pdf,
+        promedioEstadosImage,
+        'HORAS PROMEDIO POR ESTADO',
+        posiciones[5].x,
+        posiciones[5].y,
+        cardWidth,
+        cardHeight,
+      );
+    }
+  }
+
+  private obtenerParetosPDF(): PdfChartConfig[] {
+    const paretos = this.paretoCharts?.toArray() || [];
+
+    return paretos.map((chart) => ({
+      component: chart,
+      title: chart.getChartTitle ? chart.getChartTitle() : 'GRÁFICO PARETO',
+    }));
+  }
+
+  private agregarPaginaResumenYGraficos(pdf: jsPDF): void {
+    agregarCabeceraPDF(pdf, 'REPORTE OPERATIVO - RESUMEN');
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const marginX = 8;
+    const startY = 30;
+    const bottomMargin = 8;
+
+    const gapX = 6;
+    const gapY = 8;
+
+    const cardWidth = (pageWidth - marginX * 2 - gapX) / 2;
+
+    const availableHeight = pageHeight - startY - bottomMargin;
+    const maxCardHeight = (availableHeight - gapY * 2) / 3;
+
+    // Mientras más alto el ratio, más bajita queda la card
+    const chartRatio = 1.8;
+
+    const cardHeight = Math.min(maxCardHeight, cardWidth / chartRatio);
+
+    const posiciones = [
+      { x: marginX, y: startY },
+      { x: marginX + cardWidth + gapX, y: startY },
+
+      { x: marginX, y: startY + cardHeight + gapY },
+      { x: marginX + cardWidth + gapX, y: startY + cardHeight + gapY },
+
+      { x: marginX, y: startY + (cardHeight + gapY) * 2 },
+      { x: marginX + cardWidth + gapX, y: startY + (cardHeight + gapY) * 2 },
+    ];
+
+    // =========================
+    // CELDA 1: RESUMEN COMPACTO
+    // =========================
+    this.agregarResumenPDF(pdf, this.resumen, {
+      x: posiciones[0].x,
+      y: posiciones[0].y,
+      width: cardWidth,
+      height: cardHeight,
+    });
+
+    // =========================
+    // CELDA 2: DISPAROS POR EQUIPO
+    // =========================
+    const disparosEquipoImage = obtenerImagenChart(this.disparosEquipoChart);
+
+    if (disparosEquipoImage) {
+      agregarGraficoEchartsPDFProporcional(
+        pdf,
+        disparosEquipoImage,
+        'DISPAROS POR EQUIPO',
+        posiciones[1].x,
+        posiciones[1].y,
+        cardWidth,
+        cardHeight,
+      );
+    }
+
+    // =========================
+    // CELDA 3: RENDIMIENTO POR EQUIPO
+    // =========================
+    const rendimientoImage = obtenerImagenChart(this.rendimientoEquipoChart);
+
+    if (rendimientoImage) {
+      agregarGraficoEchartsPDFProporcional(
+        pdf,
+        rendimientoImage,
+        'RENDIMIENTO POR EQUIPO',
+        posiciones[2].x,
+        posiciones[2].y,
+        cardWidth,
+        cardHeight,
+      );
+    }
+
+    // =========================
+    // CELDA 4: METROS PERFORADOS / DISPARO
+    // =========================
+    const metrosDisparoImage = obtenerImagenChart(this.metrosDisparoChart);
+
+    if (metrosDisparoImage) {
+      agregarGraficoEchartsPDFProporcional(
+        pdf,
+        metrosDisparoImage,
+        'METROS PERFORADOS/DISPARO',
+        posiciones[3].x,
+        posiciones[3].y,
+        cardWidth,
+        cardHeight,
+      );
+    }
+    // =========================
+    // CELDA 5: RANKING OPERADOR
+    // =========================
+    const rankingImage = obtenerImagenChart(this.rankingOperadorChart);
+
+    if (rankingImage) {
+      agregarGraficoEchartsPDFProporcional(
+        pdf,
+        rankingImage,
+        'RANKING OPERADOR',
+        posiciones[4].x,
+        posiciones[4].y,
+        cardWidth,
+        cardHeight,
+        0.3,
+        'rellenar',
+      );
+    }
+
+    // =========================
+    // CELDA 6: MAPA DE CALOR
+    // =========================
+    const mapaCalorImage = obtenerImagenChart(this.mapaDeCalorChart);
+
+    if (mapaCalorImage) {
+      agregarGraficoEchartsPDFProporcional(
+        pdf,
+        mapaCalorImage,
+        'MAPA DE CALOR - INICIACIÓN',
+        posiciones[5].x,
+        posiciones[5].y,
+        cardWidth,
+        cardHeight,
+      );
+    }
+  }
+
+  private agregarResumenPDF(
+    pdf: jsPDF,
+    resumen: any,
+    posicion: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    },
+  ): void {
+    const { x, y, width, height } = posicion;
+
+    // Contenedor principal
+    pdf.setFillColor(255, 255, 255);
+    pdf.setDrawColor(220, 220, 220);
+    pdf.roundedRect(x, y, width, height, 3, 3, 'FD');
+
+    // Título
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(7.5);
+    pdf.setTextColor(11, 31, 58);
+    pdf.text('RESUMEN OPERATIVO', x + 4, y + 6);
+
+    const items = [
+      {
+        label: 'EQUIPOS',
+        value: this.formatearNumero(resumen?.conteoEquipos, 0),
+        unit: 'equipos',
+      },
+      {
+        label: 'M/LABOR',
+        value: this.formatearNumero(resumen?.metrosPorDisparo, 2),
+        unit: 'm/disparo',
+      },
+      {
+        label: 'LABORES PERF.',
+        value: this.formatearNumero(resumen?.nDisparosTL, 0),
+        unit: 'disparos',
+      },
+      {
+        label: 'TOTAL PERF.',
+        value: this.formatearNumero(resumen?.totalMetros, 0),
+        unit: 'm',
+      },
+    ];
+
+    const padding = 4;
+    const titleHeight = 9;
+    const gap = 3;
+
+    const innerX = x + padding;
+    const innerY = y + titleHeight;
+    const innerWidth = width - padding * 2;
+    const innerHeight = height - titleHeight - padding;
+
+    const miniCardWidth = (innerWidth - gap) / 2;
+    const miniCardHeight = (innerHeight - gap) / 2;
+
+    const posiciones = [
+      { x: innerX, y: innerY },
+      { x: innerX + miniCardWidth + gap, y: innerY },
+      { x: innerX, y: innerY + miniCardHeight + gap },
+      { x: innerX + miniCardWidth + gap, y: innerY + miniCardHeight + gap },
+    ];
+
+    items.forEach((item, index) => {
+      const pos = posiciones[index];
+
+      this.dibujarCardResumenCompacta(
+        pdf,
+        pos.x,
+        pos.y,
+        miniCardWidth,
+        miniCardHeight,
+        item.label,
+        item.value,
+        item.unit,
+      );
+    });
+  }
+
+  private formatearNumero(valor: any, decimales: number = 0): string {
+    const numero = Number(valor || 0);
+
+    return numero.toLocaleString('en-US', {
+      minimumFractionDigits: decimales,
+      maximumFractionDigits: decimales,
+    });
+  }
+
+  private dibujarCardResumenCompacta(
+    pdf: jsPDF,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    label: string,
+    value: string,
+    unit: string,
+  ): void {
+    pdf.setFillColor(247, 249, 248);
+    pdf.setDrawColor(230, 230, 230);
+    pdf.roundedRect(x, y, width, height, 2, 2, 'FD');
+
+    const paddingX = 3;
+
+    const labelY = y + height * 0.28;
+    const valueY = y + height * 0.58;
+    const unitY = y + height * 0.84;
+
+    // Label
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(5.6);
+    pdf.setTextColor(100, 100, 100);
+    pdf.text(label, x + paddingX, labelY);
+
+    // Valor
+    pdf.setFont('helvetica', 'bold');
+
+    const valueFontSize = String(value).length > 8 ? 8.5 : 10;
+    pdf.setFontSize(valueFontSize);
+
+    pdf.setTextColor(11, 31, 58);
+
+    const valueLines = pdf.splitTextToSize(value, width - paddingX * 2);
+    pdf.text(valueLines.slice(0, 1), x + paddingX, valueY);
+
+    // Unidad
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(5.2);
+    pdf.setTextColor(120, 120, 120);
+    pdf.text(unit, x + paddingX, unitY);
+  }
   // =========================================
   // 🔥 PROCESAMIENTO TOTAL
   // =========================================
@@ -513,7 +1366,9 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     this.dataTipoPerforacion = this.procesarTipoPerforacion();
     this.datadetalleDisparos = this.procesarDataPerforacionDetallada();
     this.dataHorasNumericas = this.procesarHorasNumericas();
+    this.dataObservaciones = this.procesarObservaciones();
     this.procesarResumen();
+    this.prepararDatosGraficoEstados();
     this.construirGanttDataNuevo();
 
     //console.log('🔥 DATA DISPAROS EQUIPO:', this.dataDisparosEquipo);
@@ -617,6 +1472,51 @@ export class PrincipalGraficoLargoComponent implements OnInit {
 
     return Array.from(mapa.values());
   }
+
+  procesarObservaciones(): ObservacionItem[] {
+    const mapa = new Map<string, any>();
+
+    this.operacionesFiltradas.forEach((op) => {
+      const registrosArray = op.registros;
+      if (!Array.isArray(registrosArray)) return;
+
+      const modelo = op.modelo_equipo || 'SIN_EQUIPO';
+      const operador = op.operador || 'SIN_OPERADOR';
+
+      registrosArray.forEach((r) => {
+        const operacion = r.operacion
+        if(!operacion) return;
+
+        const tipo_labor = operacion.tipo_labor || '';
+        const labor = operacion.labor || '';
+        const ala = operacion.ala || '';
+
+        const observaciones = operacion.observaciones;
+
+        if (!observaciones || !observaciones.trim()) return;
+
+        const labor_fr = `${tipo_labor}${labor}${ala}`.trim();
+
+        const key = `${modelo}-${operador}-${labor_fr}`;
+
+        if (!mapa.has(key)) {
+          mapa.set(key, {
+            modelo_equipo: modelo,
+            operador,
+            labor_fr,
+            observaciones,
+            count: 0,
+          });
+        }
+
+        const item = mapa.get(key)!;
+
+        item.count += 1;
+      });
+    });
+
+    return Array.from(mapa.values());
+  }
   procesarRendimientoEquipo(): RendimientoEquipoChartItem[] {
     const mapa = new Map<
       string,
@@ -647,10 +1547,15 @@ export class PrincipalGraficoLargoComponent implements OnInit {
         for (const r of registrosArray) {
           if (!r.hora_inicio || !r.hora_final) continue;
 
-          const duracion = this.calcularDuracionHoras(r.hora_inicio, r.hora_final);
+          const duracion = this.calcularDuracionHoras(
+            r.hora_inicio,
+            r.hora_final,
+          );
           if (!duracion || duracion <= 0) continue;
 
-          const estado = String(r.estado || '').trim().toUpperCase();
+          const estado = String(r.estado || '')
+            .trim()
+            .toUpperCase();
           const codigo = String(r.codigo || '').trim();
 
           tiempoTotal += duracion;
@@ -825,7 +1730,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
       });
   }
 
-  procesarDisparosDia() {
+  procesarDisparosDia(): DisparosDiaItem[] {
     const mapa = new Map<string, number>();
 
     this.operacionesFiltradas.forEach((op) => {
@@ -833,16 +1738,17 @@ export class PrincipalGraficoLargoComponent implements OnInit {
         const registrosArray = op.registros;
 
         if (Array.isArray(registrosArray) && registrosArray.length > 0) {
-          // 🔥 Fecha directa de la operación
           const fecha = op.fecha || 'SIN_FECHA';
+          const turno = op.turno || 'SIN_TURNO';
 
-          // 🔥 Contar frentes completos (igual que antes)
+          const key = `${fecha}|${turno}`;
+
           const nFrentes = this.contarFrentesCompletos(registrosArray);
 
-          if (mapa.has(fecha)) {
-            mapa.set(fecha, mapa.get(fecha)! + nFrentes);
+          if (mapa.has(key)) {
+            mapa.set(key, mapa.get(key)! + nFrentes);
           } else {
-            mapa.set(fecha, nFrentes);
+            mapa.set(key, nFrentes);
           }
         }
       } catch (error) {
@@ -850,16 +1756,20 @@ export class PrincipalGraficoLargoComponent implements OnInit {
       }
     });
 
-    // 🔥 Convertir a array
-    return (
-      Array.from(mapa.entries())
-        .map(([fecha, n_frentes]) => ({
+    return Array.from(mapa.entries())
+      .map(([key, n_frentes]) => {
+        const [fecha, turno] = key.split('|');
+
+        return {
           fecha,
+          turno,
           n_frentes,
-        }))
-        // 🔥 OPCIONAL: ordenar por fecha
-        .sort((a, b) => a.fecha.localeCompare(b.fecha))
-    );
+        };
+      })
+      .sort((a, b) => {
+        const diff = a.fecha.localeCompare(b.fecha);
+        return diff !== 0 ? diff : a.turno.localeCompare(b.turno);
+      });
   }
 
   procesarResumen() {
@@ -2140,34 +3050,21 @@ export class PrincipalGraficoLargoComponent implements OnInit {
   // =========================================
   // grafico 20
   // =========================================
-  procesarTipoPerforacion() {
-    const tiposValidos = new Set([
-      'DESQUINCHE',
-      'FRENTE COMPLETO',
-      'SELLADA',
-      'BREASTING',
-    ]);
-
-    const mapa = new Map<string, any>();
+  procesarTipoPerforacion(): DisparosTipoPerforacionItem[] {
+    const mapa = new Map<string, DisparosTipoPerforacionItem>();
 
     this.operacionesFiltradas.forEach((op) => {
       const registrosArray = op.registros;
       if (!Array.isArray(registrosArray)) return;
 
       registrosArray.forEach((r) => {
-        const operacion = r?.operacion || {};
+        const operacion = r?.operacion;
 
-        /* const tipoPerforacion = (operacion?.tipo_perforacion || '')
+        const tipoPerforacion = ((operacion as any)?.tipo_perforacion || '')
           .toString()
           .trim()
-          .toUpperCase(); */
+          .toUpperCase();
 
-        const tipoPerforacion = '';
-
-        // 🔥 FILTRO DAX
-        if (!tiposValidos.has(tipoPerforacion)) return;
-
-        // 🔥 CLAVE (puedes agrupar como quieras)
         const key = `${op.modelo_equipo}-${tipoPerforacion}`;
 
         if (!mapa.has(key)) {
@@ -2179,8 +3076,6 @@ export class PrincipalGraficoLargoComponent implements OnInit {
         }
 
         const item = mapa.get(key)!;
-
-        // 🔥 COUNTROWS equivalente
         item.n_disparos += 1;
       });
     });
@@ -2204,8 +3099,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
         if (!tipo_perforacion) return;
 
         const labor_fr =
-          `${operacion?.tipo_labor ?? ''}${operacion?.labor ?? ''}${operacion?.ala ?? ''}`.trim();
-        if (!labor_fr) return; // 🔥 también evitamos vacíos
+          `${operacion?.tipo_labor ?? ''}${operacion?.labor ?? ''}${operacion?.ala ?? ''}`.trim() || 'S/LABOR';
 
         const metros = this.obtenerMetrosPerforadosRegistro(operacion);
 

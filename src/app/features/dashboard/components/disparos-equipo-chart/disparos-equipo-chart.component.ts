@@ -37,8 +37,6 @@ export interface DisparosEquipoChartItem {
   segmentos: DisparosEquipoSegmento[];
 }
 
-type LegacyDisparosEquipoItem = Record<string, any>;
-
 @Component({
   selector: 'app-disparos-equipo',
   standalone: true,
@@ -48,7 +46,7 @@ type LegacyDisparosEquipoItem = Record<string, any>;
   styleUrl: './disparos-equipo-chart.component.css',
 })
 export class DisparosEquipoChartComponent implements OnChanges {
-  @Input() data: Array<DisparosEquipoChartItem | LegacyDisparosEquipoItem> = [];
+  @Input() data: DisparosEquipoChartItem[] = [];
 
   chartOptions: any = {};
   private chartInstance: any;
@@ -196,56 +194,10 @@ export class DisparosEquipoChartComponent implements OnChanges {
     };
   }
 
-  private normalizeData(
-    data: Array<DisparosEquipoChartItem | LegacyDisparosEquipoItem>,
-  ): DisparosEquipoChartItem[] {
-    return (data || []).map((item) => this.normalizeItem(item)).filter(Boolean);
-  }
-
-  private normalizeItem(item: DisparosEquipoChartItem | LegacyDisparosEquipoItem): DisparosEquipoChartItem {
-    const typedItem = item as DisparosEquipoChartItem;
-
-    if (Array.isArray(typedItem.segmentos)) {
-      return {
-        modeloEquipo: typedItem.modeloEquipo,
-        seccion: typedItem.seccion,
-        seccionLabor: typedItem.seccionLabor,
-        totalDisparos: Number(typedItem.totalDisparos || 0),
-        segmentos: typedItem.segmentos.map((segmento) => ({
-          tipo: segmento.tipo,
-          valor: Number(segmento.valor || 0),
-        })),
-      };
-    }
-
-    const legacyItem = item as LegacyDisparosEquipoItem;
-    const legacyTipos = legacyItem['tipos'];
-
-    if (legacyTipos && typeof legacyTipos === 'object') {
-      return {
-        modeloEquipo: legacyItem['modelo_equipo'] || 'N/A',
-        seccion: legacyItem['seccion'] || 'N/A',
-        seccionLabor: legacyItem['seccion_labor'] || 'N/A',
-        totalDisparos: Number(legacyItem['n_frentes'] || 0),
-        segmentos: Object.entries(legacyTipos).map(([tipo, valor]) => ({
-          tipo,
-          valor: Number(valor || 0),
-        })),
-      };
-    }
-
-    return {
-      modeloEquipo: legacyItem['modelo_equipo'] || 'N/A',
-      seccion: legacyItem['seccion'] || 'N/A',
-      seccionLabor: legacyItem['seccion_labor'] || 'N/A',
-      totalDisparos: Number(legacyItem['n_frentes'] || 0),
-      segmentos: [
-        {
-          tipo: 'DISPAROS',
-          valor: Number(legacyItem['n_frentes'] || 0),
-        },
-      ],
-    };
+  private normalizeData(data: DisparosEquipoChartItem[]): DisparosEquipoChartItem[] {
+    return (data || []).filter(
+      (item) => item && typeof item.modeloEquipo === 'string',
+    );
   }
 
   private getSegmentValue(item: DisparosEquipoChartItem, tipo: string): number {

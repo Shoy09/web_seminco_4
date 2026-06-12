@@ -8,7 +8,7 @@ import {
 import { AvanceFaseComponent } from '../Graficos components/Hoja 1/avance-fase/avance-fase.component';
 import { DisparosEquipoChartComponent } from '../../../../../features/dashboard/components/disparos-equipo-chart/disparos-equipo-chart.component';
 import { HorometrosEquipoComponent, HorometroEquipoItem } from '../../../../../features/dashboard/components/horometros-equipo/horometros-equipo.component';
-import { MetrosPerforadosDisparoComponent } from '../Graficos components/Hoja 1/metros-perforados-disparo/metros-perforados-disparo.component';
+import { MetrosPerforadosDisparoComponent, MetrosPerforadosDisparoItem } from '../../../../../features/dashboard/components/metros-perforados-disparo/metros-perforados-disparo.component';
 import { MhrEquipoComponent, MhrEquipoItem } from '../../../../../features/dashboard/components/mhr-equipo/mhr-equipo.component';
 import {
   PerforadoEquipoChartComponent,
@@ -26,16 +26,15 @@ import {
 import { OperacionJumbo } from '../../../../../models/OperacionJumbo';
 import { PlanMensual } from '../../../../../models/plan-mensual.model';
 import { FormsModule } from '@angular/forms';
-import { HorasPrimeraPerforacionComponent, HoraPrimeraPerforacionItem } from '../../../../../features/dashboard/components/horas-primera-perforacion/horas-primera-perforacion.component';
-import { DetallePerforacionComponent } from '../Graficos components/Hoja 2/detalle-perforacion/detalle-perforacion.component';
+import { HoraPrimeraPerforacionItem, HorasPrimeraPerforacionComponent } from '../../../../../features/dashboard/components/horas-primera-perforacion/horas-primera-perforacion.component';
+import { DetallePerforacionComponent, DetallePerforacionItem } from '../../../../../features/dashboard/components/detalle-perforacion/detalle-perforacion.component';
 import { MejoresOperadoresComponent, MejoresOperadorItem } from '../../../../../features/dashboard/components/mejores-operadores/mejores-operadores.component';
-import { ObservacionesComponent } from '../Graficos components/Hoja 2/observaciones/observaciones.component';
-import { DisparosTipoPerforacionComponent } from '../Graficos components/Hoja 2/disparos-tipo-perforacion/disparos-tipo-perforacion.component';
-import { DetalleDisparosComponent } from '../Graficos components/Hoja 2/detalle-disparos/detalle-disparos.component';
+import { ObservacionesComponent, ObservacionItem } from '../../../../../features/dashboard/components/observaciones/observaciones.component';
+import { DisparosTipoPerforacionChartComponent, DisparosTipoPerforacionItem } from '../../../../../features/dashboard/components/disparos-tipo-perforacion-chart/disparos-tipo-perforacion-chart.component';
 import { RankingOperadorComponent, RankingOperadorItem } from '../../../../../features/dashboard/components/ranking-operador/ranking-operador.component';
 import { TotalHorometrosComponent, TotalHorometroItem } from '../../../../../features/dashboard/components/total-horometros/total-horometros.component';
 import { CommonModule } from '@angular/common';
-import { PromedioEstadosEchartsComponent } from '../Graficos components/Hoja 2/promedio-estados-echarts/promedio-estados-echarts.component';
+import { PromedioEstadosEchartsComponent, PromedioEstadoItem } from '../../../../../features/dashboard/components/promedio-estados-echarts/promedio-estados-echarts.component';
 import jsPDF from 'jspdf';
 import { EstadoService } from '../../../../../services/estado.service';
 import { SchedulerComponent } from '../../Linea de tiempo/scheduler/scheduler.component';
@@ -72,13 +71,17 @@ import {
 } from '../../../../../config/config-pdf';
 import { DialogHoraHoraPerforacionComponent } from '../../../../../features/monitoreo-mina/components/dialog-hora-hora-perforacion/dialog-hora-hora-perforacion.component';
 import { MatDialog } from '@angular/material/dialog';
-import { DisparosDiaComponent } from "../Graficos components/Hoja 1/disparos-dia/disparos-dia.component";
+import {
+  DisparosDiaChartComponent,
+  DisparosDiaItem,
+} from '../../../../../features/dashboard/components/disparos-dia-chart/disparos-dia-chart.component';
 import { PresentacionHorizontalDialogComponent } from '../../../../../features/dashboard/components/presentacion/presentacion-horizontal-dialog/presentacion-horizontal-dialog.component';
+import { DetalleDisparosComponent, DetalleDisparoItem } from '../../../../../features/dashboard/components/detalle-disparos/detalle-disparos.component';
 
 @Component({
   selector: 'app-principal-grafico-horizontal',
   imports: [
-    AvanceFaseComponent,
+    //AvanceFaseComponent,
     ResumenComponent,
     DisparosEquipoChartComponent,
     RendimientoEquipoChartComponent,
@@ -87,12 +90,12 @@ import { PresentacionHorizontalDialogComponent } from '../../../../../features/d
     MhrEquipoComponent,
     HorometrosEquipoComponent,
     FormsModule,
-    HorasPrimeraPerforacionComponent,
+    //HorasPrimeraPerforacionComponent,
     DetallePerforacionComponent,
     MejoresOperadoresComponent,
     ObservacionesComponent,
     //GanttDiagramComponent,
-    DisparosTipoPerforacionComponent,
+    DisparosTipoPerforacionChartComponent,
     DetalleDisparosComponent,
     RankingOperadorComponent,
     TotalHorometrosComponent,
@@ -102,7 +105,8 @@ import { PresentacionHorizontalDialogComponent } from '../../../../../features/d
     SchedulerComponent,
     DashboardFiltrosComponent,
     MapaDeCalorComponent,
-    DisparosDiaComponent
+    DisparosDiaChartComponent,
+    HorasPrimeraPerforacionComponent,
 ],
   templateUrl: './principal-grafico-horizontal.component.html',
   styleUrl: './principal-grafico-horizontal.component.css',
@@ -121,12 +125,11 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   disparosEquipoChart!: DisparosEquipoChartComponent;
   @ViewChild(RendimientoEquipoChartComponent)
   rendimientoEquipoChart!: RendimientoEquipoChartComponent;
-  @ViewChild(DisparosDiaComponent) disparosDiaChart!: DisparosDiaComponent;
+  @ViewChild(DisparosDiaChartComponent) disparosDiaChart!: DisparosDiaChartComponent;
   @ViewChildren(GraficaParetoChartComponent)
   paretoCharts!: QueryList<GraficaParetoChartComponent>;
   @ViewChild(MetrosPerforadosDisparoComponent)
   metrosDisparoChart!: MetrosPerforadosDisparoComponent;
-
   @ViewChild(PerforadoEquipoChartComponent)
   perforadoEquipoChart!: PerforadoEquipoChartComponent;
   @ViewChild(MhrEquipoComponent) mhrEquipoChart!: MhrEquipoComponent;
@@ -136,8 +139,8 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   totalHorometrosChart!: TotalHorometrosComponent;
 
   @ViewChild(AvanceFaseComponent) avanceFaseChart!: AvanceFaseComponent;
-  @ViewChild(DisparosTipoPerforacionComponent)
-  disparosTipoPerforacionChart!: DisparosTipoPerforacionComponent;
+  @ViewChild(DisparosTipoPerforacionChartComponent)
+  disparosTipoPerforacionChart!: DisparosTipoPerforacionChartComponent;
   @ViewChild(PromedioEstadosEchartsComponent)
   promedioEstadosChart!: PromedioEstadosEchartsComponent;
 
@@ -183,16 +186,16 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
   // 🔥 DATA FINAL PARA LOS GRAFICOS
   dataAvanceFase: any[] = [];
-  dataDisparosEquipo: any[] = [];
+  dataDisparosEquipo: DisparosEquipoChartItem[] = [];
   dataRendimientoEquipo: RendimientoEquipoChartItem[] = [];
-  dataDisparosDia: any[] = [];
+  dataDisparosDia: DisparosDiaItem[] = [];
   dataIndicadoresEquipo: any[] = [];
   DataParetoHorasOperativas: ParetoChartItem[] = [];
   DataParetoHorasNoOperativas: ParetoChartItem[] = [];
   dataHorasNoOperativas: any[] = [];
   dataHorasMantenimiento: any[] = [];
   DataParetoHorasMantenimiento: ParetoChartItem[] = [];
-  dataMetrosDisparoFR: any[] = [];
+  dataMetrosDisparoFR: MetrosPerforadosDisparoItem[] = [];
   dataPerforadoEquipo: any[] = [];
   dataMhrEquipo: MhrEquipoItem[] = [];
   dataHorometrosJumbos: HorometroEquipoItem[] = [];
@@ -201,11 +204,11 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   dataPromedioUltimaPerfDiaFR: any[] = [];
   dataPromedioUltimaPerfDiaFRPorFecha: any[] = [];
   dataProcesoLaborFR: HoraPrimeraPerforacionItem[] = [];
-  dataPercusionConMetrosJumbos: any[] = [];
+  dataPercusionConMetrosJumbos: DetallePerforacionItem[] = [];
   dataFrPorOperadorTurno: RankingOperadorItem[] = [];
-  dataLaborFRDetallado: any[] = [];
-  dataTipoPerforacion: any[] = [];
-  datadetalleDisparos: any[] = [];
+  dataLaborFRDetallado: ObservacionItem[] = [];
+  dataTipoPerforacion: DisparosTipoPerforacionItem[] = [];
+  datadetalleDisparos: DetalleDisparoItem[] = [];
   dataHorasNumericas: MapaDeCalorItem[] = [];
 
   turnoSeleccionado: string = '';
@@ -217,7 +220,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     totalMetros: 0,
   };
 
-  datosGraficoEstados: any[] = [];
+  datosGraficoEstados: PromedioEstadoItem[] = [];
 
   ganttData: any[] = [];
   dataPromedioEstados: any;
@@ -2308,7 +2311,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   // =========================================
   // grafico 20
   // =========================================
-  procesarTipoPerforacion() {
+  procesarTipoPerforacion(): DisparosTipoPerforacionItem[] {
     const mapa = new Map<string, any>();
 
     this.operacionesFiltradas.forEach((op) => {
@@ -2534,8 +2537,6 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     });
   }
 
-  estadosBloqueados = ['FUERA DE PLAN'];
-
   mapaEstados: Map<string, any> = new Map();
 
   construirMapaEstados() {
@@ -2579,8 +2580,9 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
             }
 
             return {
-              codigoOperacion:
+              codigoOperacion: String(
                 operacion.modelo_equipo || operacion.n_equipo || operacion.id,
+              ),
               turno: operacion.turno,
 
               // 🔹 base
@@ -2596,7 +2598,6 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
               hora_final: estado.hora_final,
             };
           })
-          .filter((e) => !this.estadosBloqueados.includes(e.estado));
       },
     );
   }

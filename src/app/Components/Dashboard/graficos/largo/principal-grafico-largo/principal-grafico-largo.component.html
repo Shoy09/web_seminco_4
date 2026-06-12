@@ -14,27 +14,27 @@
 >
   <!-- RESUMEN -->
   <div class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm">
-    <app-resumen class="block w-full" [data]="resumen" data-page="1"></app-resumen>
+    <app-resumen class="block w-full" [data]="resumen"></app-resumen>
   </div>
 
   <!-- DISPAROS POR EQUIPO -->
   <div class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm">
-    <app-disparos-equipo class="block w-full" [data]="dataDisparosEquipo" data-page="1"></app-disparos-equipo>
+    <app-disparos-equipo class="block w-full" [data]="dataDisparosEquipo"></app-disparos-equipo>
   </div>
 
   <!-- RENDIMIENTO POR EQUIPO -->
   <div class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm">
-    <app-rendimiento-equipo class="block w-full" [data]="dataRendimientoEquipo" data-page="1"></app-rendimiento-equipo>
+    <app-rendimiento-equipo class="block w-full" [data]="dataRendimientoEquipo"></app-rendimiento-equipo>
   </div>
 
   <!-- PERFORADO POR EQUIPO -->
   <div class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm">
-    <app-perforado-equipo class="block w-full" [data]="dataPerforadoEquipo" data-page="1"></app-perforado-equipo>
+    <app-perforado-equipo class="block w-full" [data]="dataPerforadoEquipo"></app-perforado-equipo>
   </div>
 
   <!-- DISPAROS POR DÍA -->
   <div class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm">
-    <app-disparos-dia class="block w-full" [data]="dataDisparosDia" data-page="1"></app-disparos-dia>
+    <app-disparos-dia class="block w-full" [data]="dataDisparosDia" />
   </div>
 
   <!-- PARETO HORAS OPERATIVAS -->
@@ -69,22 +69,44 @@
 
   <!-- HORA PRIMERA PERFORACIÓN -->
   <div class="col-span-1 md:col-span-6 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm">
-    <app-horas-primera-perforacion class="block w-full" [data]="dataProcesoLaborFR" data-page="3"></app-horas-primera-perforacion>
+    <app-horas-primera-perforacion class="block w-full" [data]="dataProcesoLaborFR"></app-horas-primera-perforacion>
+  </div>
+
+  <!-- DISPAROS TIPO PERFORACIÓN -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-disparos-tipo-perforacion
+      class="block w-full"
+      [data]="dataTipoPerforacion"
+    >
+    </app-disparos-tipo-perforacion>
+  </div>
+
+  <!-- PROMEDIO ESTADOS -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-promedio-estados-echarts
+      class="block w-full"
+      [data]="datosGraficoEstados"
+    >
+    </app-promedio-estados-echarts>
   </div>
 
   <!-- AVANCE POR FASE -->
-  <div class="col-span-1 md:col-span-6 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm">
-    <app-avance-fase class="block w-full" [data]="dataAvanceFase" data-page="3"></app-avance-fase>
-  </div>
+  <!-- <div class="col-span-1 md:col-span-6 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm">
+    <app-avance-fase class="block w-full" [data]="dataAvanceFase"></app-avance-fase>
+  </div> -->
 
   <!-- DETALLE PERFORACIÓN -->
   <div class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm">
-    <app-detalle-perforacion class="block w-full" [data]="dataPercusionConMetrosJumbos" data-page="4"></app-detalle-perforacion>
+    <app-detalle-perforacion class="block w-full" [data]="dataPercusionConMetrosJumbos"></app-detalle-perforacion>
   </div>
 
   <!-- DETALLE DISPAROS -->
   <div class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm">
-    <app-detalle-disparos class="block w-full" [data]="datadetalleDisparos" data-page="4"></app-detalle-disparos>
+    <app-detalle-disparos class="block w-full" [data]="datadetalleDisparos"></app-detalle-disparos>
   </div>
 
   <!-- MEJORES OPERADORES -->
@@ -99,7 +121,7 @@
 
   <!-- OBSERVACIONES -->
   <div class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm">
-    <app-observaciones class="block w-full" [data]="dataLaborFRDetallado" data-page="5"></app-observaciones>
+    <app-observaciones class="block w-full" [data]="dataObservaciones" data-page="5"></app-observaciones>
   </div>
 
   <!-- MAPA DE CALOR -->
