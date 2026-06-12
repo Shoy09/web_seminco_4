@@ -11,20 +11,44 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ResumenComponent } from '../Graficos components/Hoja 1/resumen/resumen.component';
 import { DisparosEquipoChartComponent } from '../../../../../features/dashboard/components/disparos-equipo-chart/disparos-equipo-chart.component';
-import { PerforadoEquipoChartComponent, PerforadoEquipoChartItem } from '../../../../../features/dashboard/components/perforado-equipo-chart/perforado-equipo-chart.component';
-import { MhrEquipoComponent, MhrEquipoItem } from '../../../../../features/dashboard/components/mhr-equipo/mhr-equipo.component';
-import { HorometrosEquipoComponent, HorometroEquipoItem } from '../../../../../features/dashboard/components/horometros-equipo/horometros-equipo.component';
-import { TotalHorometrosComponent, TotalHorometroItem } from '../../../../../features/dashboard/components/total-horometros/total-horometros.component';
-import { HorasPrimeraPerforacionComponent, HoraPrimeraPerforacionItem } from '../../../../../features/dashboard/components/horas-primera-perforacion/horas-primera-perforacion.component';
+import {
+  PerforadoEquipoChartComponent,
+  PerforadoEquipoChartItem,
+} from '../../../../../features/dashboard/components/perforado-equipo-chart/perforado-equipo-chart.component';
+import {
+  MhrEquipoComponent,
+  MhrEquipoItem,
+} from '../../../../../features/dashboard/components/mhr-equipo/mhr-equipo.component';
+import {
+  HorometrosEquipoComponent,
+  HorometroEquipoItem,
+} from '../../../../../features/dashboard/components/horometros-equipo/horometros-equipo.component';
+import {
+  TotalHorometrosComponent,
+  TotalHorometroItem,
+} from '../../../../../features/dashboard/components/total-horometros/total-horometros.component';
+import {
+  HorasPrimeraPerforacionComponent,
+  HoraPrimeraPerforacionItem,
+} from '../../../../../features/dashboard/components/horas-primera-perforacion/horas-primera-perforacion.component';
 import { AvanceFaseComponent } from '../Graficos components/Hoja 1/avance-fase/avance-fase.component';
 import { DisparosDiaComponent } from '../Graficos components/Hoja 1/disparos-dia/disparos-dia.component';
 import { DetallePerforacionComponent } from '../Graficos components/Hoja 2/detalle-perforacion/detalle-perforacion.component';
 import { DisparosTipoPerforacionComponent } from '../Graficos components/Hoja 2/disparos-tipo-perforacion/disparos-tipo-perforacion.component';
 import { DetalleDisparosComponent } from '../Graficos components/Hoja 2/detalle-disparos/detalle-disparos.component';
-import { MejoresOperadoresComponent, MejoresOperadorItem } from '../../../../../features/dashboard/components/mejores-operadores/mejores-operadores.component';
-import { RankingOperadorComponent, RankingOperadorItem } from '../../../../../features/dashboard/components/ranking-operador/ranking-operador.component';
+import {
+  MejoresOperadoresComponent,
+  MejoresOperadorItem,
+} from '../../../../../features/dashboard/components/mejores-operadores/mejores-operadores.component';
+import {
+  RankingOperadorComponent,
+  RankingOperadorItem,
+} from '../../../../../features/dashboard/components/ranking-operador/ranking-operador.component';
 import { ObservacionesComponent } from '../Graficos components/Hoja 2/observaciones/observaciones.component';
-import { RendimientoEquipoChartComponent, RendimientoEquipoChartItem } from '../../../../../features/dashboard/components/rendimiento-equipo-chart/rendimiento-equipo-chart.component';
+import {
+  RendimientoEquipoChartComponent,
+  RendimientoEquipoChartItem,
+} from '../../../../../features/dashboard/components/rendimiento-equipo-chart/rendimiento-equipo-chart.component';
 import { PlanProduccionService } from '../../../../../services/plan-produccion.service';
 import { PlanProduccion } from '../../../../../models/plan_produccion.model';
 import jsPDF from 'jspdf';
@@ -35,7 +59,10 @@ import { ApiService } from '../../../../../services/api.service';
 import { OperacionTLargos } from '../../../../../models/OperacionTLargos';
 import { TipoPerforacion } from '../../../../../models/tipo-perforacion.model';
 import { DashboardFiltrosComponent } from '../../../../../features/dashboard/components/dashboard-filtros/dashboard-filtros.component';
-import { MapaDeCalorComponent, MapaDeCalorItem } from '../../../../../features/dashboard/components/mapa-de-calor/mapa-de-calor.component';
+import {
+  MapaDeCalorComponent,
+  MapaDeCalorItem,
+} from '../../../../../features/dashboard/components/mapa-de-calor/mapa-de-calor.component';
 import {
   DisparosEquipoChartItem,
   DisparosEquipoSegmento,
@@ -48,8 +75,12 @@ import {
   FiltrosDashboard,
   OpcionFiltroDashboard,
 } from '../../../../../features/dashboard/models/dashboard-filtros.model';
+import { MatDialog } from '@angular/material/dialog';
+import { PresentacionTlargosDialogComponent } from '../../../../../features/dashboard/components/presentacion/presentacion-tlargos-dialog/presentacion-tlargos-dialog.component';
 
-type OperacionTalLargoConTipo = OperacionTLargos & { tipo_perforacion?: string };
+type OperacionTalLargoConTipo = OperacionTLargos & {
+  tipo_perforacion?: string;
+};
 
 @Component({
   selector: 'app-principal-grafico-largo',
@@ -76,16 +107,25 @@ type OperacionTalLargoConTipo = OperacionTLargos & { tipo_perforacion?: string }
     DashboardFiltrosComponent,
     DisparosDiaComponent,
     DetallePerforacionComponent,
-    DetalleDisparosComponent
-],
+    DetalleDisparosComponent,
+  ],
   templateUrl: './principal-grafico-largo.component.html',
   styleUrl: './principal-grafico-largo.component.css',
 })
 export class PrincipalGraficoLargoComponent implements OnInit {
   private readonly tiposDisparoTalLargo = new Set(['PRODUCCION', 'SLOT']);
 
-  ESTADOS_OPERATIVOS = ['101', '111'];
-  ESTADOS_NO_OPERATIVOS = ['209', '210', '212', '213', '214', '215', '216', '217'];
+  ESTADOS_OPERATIVOS = ['101', '102','111','112','120']
+  ESTADOS_NO_OPERATIVOS = [
+    '209',
+    '210',
+    '212',
+    '213',
+    '214',
+    '215',
+    '216',
+    '217',
+  ];
   ESTADOS_MANTENIMIENTO = ['206', '301', '302', '303'];
   tipoPerforacionMap = new Map<number, string>();
 
@@ -141,8 +181,6 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     { label: 'Día', value: 'dia' },
   ];
 
-  
-
   // Variables para el filtro de fechas
   fechaInicio: string = '';
   fechaFin: string = '';
@@ -162,10 +200,10 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     private operacionesService: OperacionesService,
     private estadoService: EstadoService,
     private apiService: ApiService,
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
-
     // 🔥 SETEO AUTOMÁTICO
     const hoy = this.getFechaHoy();
     this.fechaInicio = hoy;
@@ -186,8 +224,6 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     this.semanaSeleccionada = null;
     this.rangoFechas = null;
   }
-
-  
 
   aplicarFiltro(filtros: FiltrosDashboard): void {
     this.tipoFiltro = filtros.tipoFiltro;
@@ -216,7 +252,30 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     this.procesarTodo();
   }
 
-  Presentacion() {}
+  Presentacion() {
+    if (!this.operacionesFiltradas || this.operacionesFiltradas.length === 0) {
+      console.warn('No hay datos filtrados para mostrar');
+      return;
+    }
+
+    const dialogRef = this.dialog.open(PresentacionTlargosDialogComponent, {
+      width: '1800px',
+      maxHeight: '90vh',
+      data: {
+        operaciones: this.operacionesFiltradas,
+        turnoAplicado: this.turnoAplicado,
+        fechaInicio: this.fechaInicio,
+        fechaFin: this.fechaFin,
+      },
+      disableClose: false,
+      autoFocus: true,
+    });
+
+    // Opcional: Escuchar cuando se cierre el diálogo
+    dialogRef.afterClosed().subscribe((result) => {
+      console.log('Diálogo cerrado', result);
+    });
+  }
 
   obtenerEstadosPorProceso(proceso: string) {
     this.estadoService.getEstadosByProceso(proceso).subscribe({
@@ -425,8 +484,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
   // 🔥 PROCESAMIENTO TOTAL
   // =========================================
   procesarTodo() {
-    if (!this.operacionesFiltradas.length)
-      return;
+    if (!this.operacionesFiltradas.length) return;
 
     this.dataDisparosEquipo = this.procesarDisparosEquipo(); // 👈 NUEVO
     this.dataDisparosDia = this.procesarDisparosDia();
@@ -481,7 +539,8 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     this.operacionesFiltradas.forEach((op) => {
       try {
         const registrosArray = op.registros;
-        if (!Array.isArray(registrosArray) || registrosArray.length === 0) return;
+        if (!Array.isArray(registrosArray) || registrosArray.length === 0)
+          return;
 
         const conteoTipos: Record<string, number> = {};
 
@@ -489,18 +548,25 @@ export class PrincipalGraficoLargoComponent implements OnInit {
           if (!this.esEstadoOperativoPorCodigo(registro.codigo)) continue;
           if (!registro.operacion) continue;
 
-          const tipoId = registro.operacion.tipo_perforacion_id;
-          const tipoLabel = this.tipoPerforacionMap.get(tipoId) ?? `ID ${tipoId}`;
+          const tipoLabel = registro.operacion.tipo_perforacion?.trim();
+          if (!tipoLabel) continue;
+
           conteoTipos[tipoLabel] = (conteoTipos[tipoLabel] || 0) + 1;
         }
 
-        const totalDisparos = Object.values(conteoTipos).reduce((total, valor) => total + valor, 0);
+        const totalDisparos = Object.values(conteoTipos).reduce(
+          (total, valor) => total + valor,
+          0,
+        );
         const key = op.modelo_equipo || 'SIN_EQUIPO';
 
         if (mapaDisparos.has(key)) {
           const existing = mapaDisparos.get(key)!;
           existing.totalDisparos += totalDisparos;
-          existing.segmentos = this.acumularSegmentos(existing.segmentos, conteoTipos);
+          existing.segmentos = this.acumularSegmentos(
+            existing.segmentos,
+            conteoTipos,
+          );
         } else {
           mapaDisparos.set(key, {
             modeloEquipo: op.modelo_equipo || 'SIN_EQUIPO',
@@ -521,14 +587,17 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     this.operacionesFiltradas.forEach((op) => {
       try {
         const registrosArray = op.registros;
-        if (!Array.isArray(registrosArray) || registrosArray.length === 0) return;
+        if (!Array.isArray(registrosArray) || registrosArray.length === 0)
+          return;
 
         let metrosPerforados = 0;
 
         for (const registro of registrosArray) {
           if (registro.estado !== 'OPERATIVO') continue;
           if (!registro.operacion) continue;
-          metrosPerforados += this.obtenerMetrosPerforadosRegistro(registro.operacion);
+          metrosPerforados += this.obtenerMetrosPerforadosRegistro(
+            registro.operacion,
+          );
         }
 
         const key = op.modelo_equipo || 'SIN_EQUIPO';
@@ -549,41 +618,113 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     return Array.from(mapa.values());
   }
   procesarRendimientoEquipo(): RendimientoEquipoChartItem[] {
-    const mapa = new Map<string, { metros: number; horas: number; seccion: string }>();
+    const mapa = new Map<
+      string,
+      {
+        seccion: string;
+        tiempoTotal: number;
+        horasOperativas: number;
+        horasDemora: number;
+        horasReserva: number;
+        horasFueraPlan: number;
+        horasDemoraMecanica: number;
+      }
+    >();
 
     this.operacionesFiltradas.forEach((op) => {
       try {
         const registrosArray = op.registros;
-        if (!Array.isArray(registrosArray) || registrosArray.length === 0) return;
+        if (!Array.isArray(registrosArray) || registrosArray.length === 0)
+          return;
 
-        let metros = 0;
+        let tiempoTotal = 0;
+        let horasOperativas = 0;
+        let horasDemora = 0;
+        let horasReserva = 0;
+        let horasFueraPlan = 0;
+        let horasDemoraMecanica = 0;
+
         for (const r of registrosArray) {
-          if (r.estado !== 'OPERATIVO' || !r.operacion) continue;
-          metros += this.obtenerMetrosPerforadosRegistro(r.operacion);
+          if (!r.hora_inicio || !r.hora_final) continue;
+
+          const duracion = this.calcularDuracionHoras(r.hora_inicio, r.hora_final);
+          if (!duracion || duracion <= 0) continue;
+
+          const estado = String(r.estado || '').trim().toUpperCase();
+          const codigo = String(r.codigo || '').trim();
+
+          tiempoTotal += duracion;
+
+          if (this.esEstadoOperativoPorCodigo(codigo)) {
+            horasOperativas += duracion;
+          }
+
+          if (estado === 'DEMORA') {
+            horasDemora += duracion;
+          }
+
+          if (estado === 'RESERVA') {
+            horasReserva += duracion;
+          }
+
+          if (estado === 'FUERA DE PLAN' || estado === 'FUERA DE PLANTA') {
+            horasFueraPlan += duracion;
+          }
+
+          if (this.esEstadoMantenimientoPorCodigo(codigo) || codigo === '206') {
+            horasDemoraMecanica += duracion;
+          }
         }
 
-        const horas = this.calcularHorasEfectivas(registrosArray);
         const key = op.modelo_equipo || 'SIN_EQUIPO';
 
         if (mapa.has(key)) {
           const acc = mapa.get(key)!;
-          acc.metros += metros;
-          acc.horas += horas;
+          acc.tiempoTotal += tiempoTotal;
+          acc.horasOperativas += horasOperativas;
+          acc.horasDemora += horasDemora;
+          acc.horasReserva += horasReserva;
+          acc.horasFueraPlan += horasFueraPlan;
+          acc.horasDemoraMecanica += horasDemoraMecanica;
         } else {
-          mapa.set(key, { metros, horas, seccion: op.seccion || 'SIN_SECCION' });
+          mapa.set(key, {
+            seccion: op.seccion || 'SIN_SECCION',
+            tiempoTotal,
+            horasOperativas,
+            horasDemora,
+            horasReserva,
+            horasFueraPlan,
+            horasDemoraMecanica,
+          });
         }
       } catch (error) {}
     });
 
-    return Array.from(mapa.entries()).map(([key, acc]) => ({
-      modeloEquipo: key,
-      seccion: acc.seccion,
-      DM_FR: acc.horas > 0 ? Number((acc.metros / acc.horas).toFixed(2)) : 0,
-      UTI_FR: 0,
-    }));
+    return Array.from(mapa.entries()).map(([key, acc]) => {
+      const disponibilidadMecanica =
+        acc.tiempoTotal > 0
+          ? (acc.tiempoTotal - (acc.horasFueraPlan + acc.horasDemoraMecanica)) /
+            acc.tiempoTotal
+          : 0;
+
+      const tiempoHabil =
+        acc.horasOperativas + acc.horasDemora + acc.horasReserva;
+
+      const utilizacionOperativa =
+        tiempoHabil > 0 ? acc.horasOperativas / tiempoHabil : 0;
+
+      return {
+        modeloEquipo: key,
+        seccion: acc.seccion,
+        DM_FR: Number(disponibilidadMecanica.toFixed(3)),
+        UTI_FR: Number(utilizacionOperativa.toFixed(3)),
+      };
+    });
   }
 
-  private calcularHorasEfectivas(registrosArray: Registro<OperacionTLargos>[]): number {
+  private calcularHorasEfectivas(
+    registrosArray: Registro<OperacionTLargos>[],
+  ): number {
     if (!Array.isArray(registrosArray)) return 0;
     let total = 0;
     for (const r of registrosArray) {
@@ -613,8 +754,13 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     return this.tiposDisparoTalLargo.has(tipo);
   }
 
-  private obtenerTipoPerforacionTalLargo(operacion: OperacionTLargos | undefined | null): string {
-    return ((operacion as OperacionTalLargoConTipo | undefined | null)?.tipo_perforacion || '').trim();
+  private obtenerTipoPerforacionTalLargo(
+    operacion: OperacionTLargos | undefined | null,
+  ): string {
+    return (
+      (operacion as OperacionTalLargoConTipo | undefined | null)
+        ?.tipo_perforacion || ''
+    ).trim();
   }
 
   private normalizarTipoPerforacion(tipo?: string): string {
@@ -625,7 +771,9 @@ export class PrincipalGraficoLargoComponent implements OnInit {
       .toUpperCase();
   }
 
-  private crearSegmentos(conteoTipos: Record<string, number>): DisparosEquipoSegmento[] {
+  private crearSegmentos(
+    conteoTipos: Record<string, number>,
+  ): DisparosEquipoSegmento[] {
     return Object.entries(conteoTipos)
       .map(([tipo, valor]) => ({ tipo, valor }))
       .filter((segmento) => segmento.valor > 0);
@@ -645,11 +793,18 @@ export class PrincipalGraficoLargoComponent implements OnInit {
       acumulado.set(tipo, (acumulado.get(tipo) || 0) + valor);
     });
 
-    return Array.from(acumulado.entries()).map(([tipo, valor]) => ({ tipo, valor }));
+    return Array.from(acumulado.entries()).map(([tipo, valor]) => ({
+      tipo,
+      valor,
+    }));
   }
 
-  private obtenerSeccionLaborTalLargo(registrosArray: Registro<OperacionTLargos>[]): string {
-    const primerRegistroOperativo = registrosArray.find((registro) => this.esDisparoTalLargo(registro));
+  private obtenerSeccionLaborTalLargo(
+    registrosArray: Registro<OperacionTLargos>[],
+  ): string {
+    const primerRegistroOperativo = registrosArray.find((registro) =>
+      this.esDisparoTalLargo(registro),
+    );
     return primerRegistroOperativo?.operacion?.labor || 'SIN_SECCION';
   }
 
@@ -659,12 +814,12 @@ export class PrincipalGraficoLargoComponent implements OnInit {
 
   private cargarTiposPerforacion(): void {
     this.apiService
-      .getDatos<TipoPerforacion[]>('tipo-perforaciones/por-proceso?proceso=PERFORACIÓN TALADROS LARGOS')
+      .getDatos<
+        TipoPerforacion[]
+      >('tipo-perforaciones/por-proceso?proceso=PERFORACIÓN TALADROS LARGOS')
       .subscribe({
         next: (tipos) => {
-          this.tipoPerforacionMap = new Map(
-            tipos.map((t) => [t.id, t.nombre]),
-          );
+          this.tipoPerforacionMap = new Map(tipos.map((t) => [t.id, t.nombre]));
         },
         error: () => console.warn('Error al cargar tipos de perforación'),
       });
@@ -722,18 +877,18 @@ export class PrincipalGraficoLargoComponent implements OnInit {
 
         if (Array.isArray(registrosArray)) {
           for (const registro of registrosArray) {
-            if (registro.estado !== 'OPERATIVO' || !registro.operacion) continue;
+            if (!this.esEstadoOperativoPorCodigo(registro.codigo)) continue;
+            if (!registro.operacion) continue;
 
-            const metrosRegistro = this.obtenerMetrosPerforadosRegistro(registro.operacion);
+            const metrosRegistro = this.obtenerMetrosPerforadosRegistro(
+              registro.operacion,
+            );
             totalMetros += metrosRegistro;
 
-            // 🔹 CONTADOR DE DISPAROS TL
-            /* if (
-              operacion.tipo_perforacion === 'PRODUCCIÓN' ||
-              operacion.tipo_perforacion === 'SLOT'
-            ) {
+            const tipoPerforacion = registro.operacion.tipo_perforacion?.trim();
+            if (tipoPerforacion) {
               nDisparosTL++;
-            } */
+            }
           }
         }
       } catch (error) {
@@ -749,8 +904,6 @@ export class PrincipalGraficoLargoComponent implements OnInit {
       nDisparosTL,
       totalMetros: Number(totalMetros.toFixed(0)),
     };
-
-    //console.log('📊 RESUMEN FINAL:', this.resumen);
   }
 
   //=========================================
@@ -1984,7 +2137,6 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     return Array.from(mapa.values());
   }
 
-
   // =========================================
   // grafico 20
   // =========================================
@@ -2037,85 +2189,82 @@ export class PrincipalGraficoLargoComponent implements OnInit {
   }
 
   procesarDataPerforacionDetallada() {
+    const mapa = new Map<string, any>();
 
-  const mapa = new Map<string, any>();
+    this.operacionesFiltradas.forEach((op) => {
+      const key = op.modelo_equipo || 'SIN_EQUIPO';
+      const registrosArray = op.registros;
 
-  this.operacionesFiltradas.forEach(op => {
+      if (!Array.isArray(registrosArray)) return;
 
-    const key = op.modelo_equipo || 'SIN_EQUIPO';
-    const registrosArray = op.registros;
+      registrosArray.forEach((r) => {
+        const operacion = r.operacion;
+        if (!operacion) return;
+        const tipo_perforacion = operacion.tipo_perforacion;
+        if (!tipo_perforacion) return;
 
-    if (!Array.isArray(registrosArray)) return;
+        const labor_fr =
+          `${operacion?.tipo_labor ?? ''}${operacion?.labor ?? ''}${operacion?.ala ?? ''}`.trim();
+        if (!labor_fr) return; // 🔥 también evitamos vacíos
 
-    registrosArray.forEach(r => {
+        const metros = this.obtenerMetrosPerforadosRegistro(operacion);
 
-      const operacion = r.operacion;
-      if (!operacion) return;
-      const tipo_perforacion = operacion.tipo_perforacion;
-      if (!tipo_perforacion) return;
+        const long_barras = Number(operacion?.long_barras) || 0;
+        const tal_alivio = Number(operacion?.n_taladros_alivio) || 0;
+        const tal_prod = Number(operacion?.n_taladros_produccion) || 0;
+        const tal_repaso = Number(operacion?.n_taladros_repaso) || 0;
+        const tal_rimados = Number(operacion?.n_taladros_rimados) || 0;
 
-      const labor_fr = `${operacion?.tipo_labor ?? ''}${operacion?.labor ?? ''}${operacion?.ala ?? ''}`.trim();
-      if (!labor_fr) return; // 🔥 también evitamos vacíos
+        const mapKey = `${key}-${tipo_perforacion}-${labor_fr}`;
 
-      const metros = this.obtenerMetrosPerforadosRegistro(operacion);
+        if (!mapa.has(mapKey)) {
+          mapa.set(mapKey, {
+            modelo_equipo: key,
+            tipo_perforacion,
+            labor_fr,
 
-      const long_barras = Number(operacion?.long_barras) || 0;
-      const tal_alivio = Number(operacion?.n_taladros_alivio) || 0;
-      const tal_prod = Number(operacion?.n_taladros_produccion) || 0;
-      const tal_repaso = Number(operacion?.n_taladros_repaso) || 0;
-      const tal_rimados = Number(operacion?.n_taladros_rimados) || 0;
+            metros_perforados: 0,
 
-      const mapKey = `${key}-${tipo_perforacion}-${labor_fr}`;
+            sum_long_barras: 0,
+            count_long_barras: 0,
 
-      if (!mapa.has(mapKey)) {
-        mapa.set(mapKey, {
-          modelo_equipo: key,
-          tipo_perforacion,
-          labor_fr,
+            tal_alivio: 0,
+            tal_prod: 0,
+            tal_repaso: 0,
+            tal_rimados: 0,
 
-          metros_perforados: 0,
+            long_barras: 0,
+          });
+        }
 
-          sum_long_barras: 0,
-          count_long_barras: 0,
+        const item = mapa.get(mapKey)!;
 
-          tal_alivio: 0,
-          tal_prod: 0,
-          tal_repaso: 0,
-          tal_rimados: 0,
+        item.metros_perforados += metros;
 
-          long_barras: 0
-        });
-      }
+        if (long_barras > 0) {
+          item.sum_long_barras += long_barras;
+          item.count_long_barras++;
+        }
 
-      const item = mapa.get(mapKey)!;
-
-      item.metros_perforados += metros;
-
-      if (long_barras > 0) {
-        item.sum_long_barras += long_barras;
-        item.count_long_barras++;
-      }
-
-      item.tal_alivio += tal_alivio;
-      item.tal_prod += tal_prod;
-      item.tal_repaso += tal_repaso;
-      item.tal_rimados += tal_rimados;
-
+        item.tal_alivio += tal_alivio;
+        item.tal_prod += tal_prod;
+        item.tal_repaso += tal_repaso;
+        item.tal_rimados += tal_rimados;
+      });
     });
-  });
 
-  // =========================
-  // 🔥 PROMEDIO FINAL
-  // =========================
-  for (const item of mapa.values()) {
-    item.long_barras =
-      item.count_long_barras > 0
-        ? item.sum_long_barras / item.count_long_barras
-        : 0;
+    // =========================
+    // 🔥 PROMEDIO FINAL
+    // =========================
+    for (const item of mapa.values()) {
+      item.long_barras =
+        item.count_long_barras > 0
+          ? item.sum_long_barras / item.count_long_barras
+          : 0;
+    }
+
+    return Array.from(mapa.values());
   }
-
-  return Array.from(mapa.values());
-}
 
   // =========================================
   // GRAFICO 22

@@ -34,11 +34,9 @@ import { DisparosTipoPerforacionComponent } from '../Graficos components/Hoja 2/
 import { DetalleDisparosComponent } from '../Graficos components/Hoja 2/detalle-disparos/detalle-disparos.component';
 import { RankingOperadorComponent, RankingOperadorItem } from '../../../../../features/dashboard/components/ranking-operador/ranking-operador.component';
 import { TotalHorometrosComponent, TotalHorometroItem } from '../../../../../features/dashboard/components/total-horometros/total-horometros.component';
-import { ScatterPlotComponent } from '../Graficos components/Hoja 2/scatter-plot/scatter-plot.component';
 import { CommonModule } from '@angular/common';
 import { PromedioEstadosEchartsComponent } from '../Graficos components/Hoja 2/promedio-estados-echarts/promedio-estados-echarts.component';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { EstadoService } from '../../../../../services/estado.service';
 import { SchedulerComponent } from '../../Linea de tiempo/scheduler/scheduler.component';
 import { DashboardFiltrosComponent } from '../../../../../features/dashboard/components/dashboard-filtros/dashboard-filtros.component';
@@ -74,8 +72,8 @@ import {
 } from '../../../../../config/config-pdf';
 import { DialogHoraHoraPerforacionComponent } from '../../../../../features/monitoreo-mina/components/dialog-hora-hora-perforacion/dialog-hora-hora-perforacion.component';
 import { MatDialog } from '@angular/material/dialog';
-import { PresentacionHorizontalDialogComponent } from '../presentacion-dialog/presentacion-dialog.component';
 import { DisparosDiaComponent } from "../Graficos components/Hoja 1/disparos-dia/disparos-dia.component";
+import { PresentacionHorizontalDialogComponent } from '../../../../../features/dashboard/components/presentacion/presentacion-horizontal-dialog/presentacion-horizontal-dialog.component';
 
 @Component({
   selector: 'app-principal-grafico-horizontal',

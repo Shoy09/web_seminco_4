@@ -1,20 +1,20 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
-import { MetrosPerforadosRangoHoraComponent } from '../horas/metros-perforados-rango-hora/metros-perforados-rango-hora.component';
-import { TablaMetrosPerforadosEquipoComponent } from '../horas/tabla-metros-perforados-equipo/tabla-metros-perforados-equipo.component';
 import { convertirNumero, distribuirValorPorRangosHora, normalizarTexto, obtenerRangosHoraPorTurno } from '../../../../../utils/fecha-utils';
 import { OperacionJumbo } from '../../../../../models/OperacionJumbo';
+import { MetrosPerforadosRangoHoraComponent } from '../../../../../Components/Dashboard/graficos/horizontal/horas/metros-perforados-rango-hora/metros-perforados-rango-hora.component';
+import { TablaMetrosPerforadosEquipoComponent } from '../../../../../Components/Dashboard/graficos/horizontal/horas/tabla-metros-perforados-equipo/tabla-metros-perforados-equipo.component';
 
 @Component({
-  selector: 'app-presentacion-dialog',
+  selector: 'app-presentacion-horizontal-dialog',
   imports: [
     CommonModule,
     MetrosPerforadosRangoHoraComponent,
     TablaMetrosPerforadosEquipoComponent,
   ],
-  templateUrl: './presentacion-dialog.component.html',
-  styleUrl: './presentacion-dialog.component.css',
+  templateUrl: './presentacion-horizontal-dialog.component.html',
+  styleUrl: './presentacion-horizontal-dialog.component.css',
 })
 export class PresentacionHorizontalDialogComponent implements OnInit {
   hojaActual: string = 'hoja1';
