@@ -184,7 +184,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   // 🔥 DATA FINAL PARA LOS GRAFICOS
   dataAvanceFase: any[] = [];
   dataDisparosEquipo: any[] = [];
-  dataRendimientoEquipo: any[] = [];
+  dataRendimientoEquipo: RendimientoEquipoChartItem[] = [];
   dataDisparosDia: any[] = [];
   dataIndicadoresEquipo: any[] = [];
   DataParetoHorasOperativas: ParetoChartItem[] = [];
@@ -629,38 +629,108 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   }
 
   procesarRendimientoEquipo(): RendimientoEquipoChartItem[] {
-    const mapa = new Map<string, { metros: number; horas: number; seccion: string }>();
+    const mapa = new Map<
+      string,
+      {
+        seccion: string;
+        tiempoTotal: number;
+        horasOperativas: number;
+        horasDemora: number;
+        horasReserva: number;
+        horasFueraPlan: number;
+        horasDemoraMecanica: number;
+      }
+    >();
 
     this.operacionesFiltradas.forEach((op) => {
       try {
         const registrosArray = op.registros;
-        if (!Array.isArray(registrosArray) || registrosArray.length === 0) return;
+        if (!Array.isArray(registrosArray) || registrosArray.length === 0)
+          return;
 
-        let metros = 0;
+        let tiempoTotal = 0;
+        let horasOperativas = 0;
+        let horasDemora = 0;
+        let horasReserva = 0;
+        let horasFueraPlan = 0;
+        let horasDemoraMecanica = 0;
+
         for (const r of registrosArray) {
-          if (r.estado !== 'OPERATIVO' || !r.operacion) continue;
-          metros += this.obtenerMetrosPerforadosRegistro(r.operacion);
+          if (!r.hora_inicio || !r.hora_final) continue;
+
+          const duracion = this.calcularDuracionHoras(r.hora_inicio, r.hora_final);
+          if (!duracion || duracion <= 0) continue;
+
+          const estado = String(r.estado || '').trim().toUpperCase();
+          const codigo = String(r.codigo || '').trim();
+
+          tiempoTotal += duracion;
+
+          if (this.esEstadoOperativoPorCodigo(codigo)) {
+            horasOperativas += duracion;
+          }
+
+          if (estado === 'DEMORA') {
+            horasDemora += duracion;
+          }
+
+          if (estado === 'RESERVA') {
+            horasReserva += duracion;
+          }
+
+          if (estado === 'FUERA DE PLAN' || estado === 'FUERA DE PLANTA') {
+            horasFueraPlan += duracion;
+          }
+
+          if (this.esEstadoMantenimientoPorCodigo(codigo) || codigo === '206') {
+            horasDemoraMecanica += duracion;
+          }
         }
 
-        const horas = this.calcularHorasEfectivas(registrosArray);
         const key = op.modelo_equipo || 'SIN_EQUIPO';
 
         if (mapa.has(key)) {
           const acc = mapa.get(key)!;
-          acc.metros += metros;
-          acc.horas += horas;
+          acc.tiempoTotal += tiempoTotal;
+          acc.horasOperativas += horasOperativas;
+          acc.horasDemora += horasDemora;
+          acc.horasReserva += horasReserva;
+          acc.horasFueraPlan += horasFueraPlan;
+          acc.horasDemoraMecanica += horasDemoraMecanica;
         } else {
-          mapa.set(key, { metros, horas, seccion: op.seccion || 'SIN_SECCION' });
+          mapa.set(key, {
+            seccion: op.seccion || 'SIN_SECCION',
+            tiempoTotal,
+            horasOperativas,
+            horasDemora,
+            horasReserva,
+            horasFueraPlan,
+            horasDemoraMecanica,
+          });
         }
       } catch (error) {}
     });
 
-    return Array.from(mapa.entries()).map(([key, acc]) => ({
-      modeloEquipo: key,
-      seccion: acc.seccion,
-      DM_FR: acc.horas > 0 ? Number((acc.metros / acc.horas).toFixed(2)) : 0,
-      UTI_FR: 0,
-    }));
+    return Array.from(mapa.entries()).map(([key, acc]) => {
+      const disponibilidadMecanica =
+        acc.tiempoTotal > 0
+          ? (acc.tiempoTotal - (acc.horasFueraPlan + acc.horasDemoraMecanica)) /
+            acc.tiempoTotal
+          : 0;
+
+      const tiempoHabil =
+        acc.horasOperativas + acc.horasDemora + acc.horasReserva;
+
+      const utilizacionOperativa =
+        tiempoHabil > 0 ? acc.horasOperativas / tiempoHabil : 0;
+
+      return {
+        modeloEquipo: key,
+        seccion: acc.seccion,
+        DM_FR: Number(disponibilidadMecanica.toFixed(3)),
+        UTI_FR: Number(utilizacionOperativa.toFixed(3)),
+      };
+    });
   }
 
   private calcularHorasEfectivas(registrosArray: any[]): number {
