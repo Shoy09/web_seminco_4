@@ -577,7 +577,6 @@ export class MetrosPerforadosRangoHoraComponent implements OnInit, OnChanges {
           color: '#2c3e50',
           fontFamily: 'Arial',
           rotate: 0,
-          interval: 0,
           margin: 10,
         },
         axisLine: {

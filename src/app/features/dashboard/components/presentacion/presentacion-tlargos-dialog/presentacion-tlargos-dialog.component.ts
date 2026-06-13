@@ -5,6 +5,7 @@ import { convertirNumero, distribuirValorPorRangosHora, normalizarTexto, obtener
 import { OperacionJumbo } from '../../../../../models/OperacionJumbo';
 import { MetrosPerforadosRangoHoraComponent } from '../../../../../Components/Dashboard/graficos/horizontal/horas/metros-perforados-rango-hora/metros-perforados-rango-hora.component';
 import { TablaMetrosPerforadosEquipoComponent } from '../../../../../Components/Dashboard/graficos/horizontal/horas/tabla-metros-perforados-equipo/tabla-metros-perforados-equipo.component';
+import { OperacionTLargos } from '../../../../../models/OperacionTLargos';
 
 @Component({
   selector: 'app-presentacion-tlargos-dialog',
@@ -102,7 +103,7 @@ export class PresentacionTlargosDialogComponent implements OnInit {
     //console.log('Cambiando a hoja:', hoja);
   }
 
-  private obtenerMetrosPerforadosRegistroPorJumbo(operacion: OperacionJumbo) {
+  private obtenerMetrosPerforadosRegistro(operacion: OperacionTLargos) {
     if (!operacion) return [];
 
     const resultado: {
@@ -110,16 +111,14 @@ export class PresentacionTlargosDialogComponent implements OnInit {
       metros: number;
     }[] = [];
 
-    const talProd = convertirNumero(operacion.tal_prod);
-    const talRimados = convertirNumero(operacion.tal_rimados);
-    const talAlivio = convertirNumero(operacion.tal_alivio);
-    const talRepaso = convertirNumero(operacion.tal_repaso);
+    const metros_perforados_alivio = convertirNumero(operacion.metros_perforados_alivio);
+    const metros_perforados_produccion = convertirNumero(operacion.metros_perforados_produccion);
+    const metros_perforados_repaso = convertirNumero(operacion.metros_perforados_repaso);
+    const metros_perforados_rimados = convertirNumero(operacion.metros_perforados_rimados);
 
-    const longBarras = convertirNumero(operacion.long_barras);
+    const totalTaladros = metros_perforados_produccion + metros_perforados_rimados + metros_perforados_alivio + metros_perforados_repaso;
 
-    const totalTaladros = talProd + talRimados + talAlivio + talRepaso;
-
-    const metrosPerforados = totalTaladros * longBarras * 0.3048;
+    const metrosPerforados = totalTaladros;
 
     const tipoPerforacion = normalizarTexto(operacion.tipo_perforacion);
     resultado.push({
@@ -151,7 +150,7 @@ export class PresentacionTlargosDialogComponent implements OnInit {
         if (estado !== 'OPERATIVO') continue;
         if (!registro.hora_inicio || !registro.hora_final) continue;
 
-        const detalleMetros = this.obtenerMetrosPerforadosRegistroPorJumbo(
+        const detalleMetros = this.obtenerMetrosPerforadosRegistro(
           registro.operacion,
         );
 
@@ -197,7 +196,7 @@ export class PresentacionTlargosDialogComponent implements OnInit {
         const operacionData = registro.operacion || {};
 
         const detalleMetros =
-          this.obtenerMetrosPerforadosRegistroPorJumbo(operacionData);
+          this.obtenerMetrosPerforadosRegistro(operacionData);
 
         if (!detalleMetros.length) continue;
 
@@ -326,7 +325,7 @@ export class PresentacionTlargosDialogComponent implements OnInit {
         const operacionData = registro.operacion || {};
 
         const detalleMetros =
-          this.obtenerMetrosPerforadosRegistroPorJumbo(operacionData);
+          this.obtenerMetrosPerforadosRegistro(operacionData);
 
         if (!detalleMetros.length) continue;
 

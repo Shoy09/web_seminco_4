@@ -52,6 +52,17 @@
     <app-grafica-pareto class="block w-full" [data]="dataParetoHorasMantenimiento" titulo="PARETO DE HORAS DE MANTENIMIENTO" data-page="2"></app-grafica-pareto>
   </div>
 
+  <!-- METROS PERFORADOS / DISPARO -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-metros-perforados-disparo
+      class="block w-full"
+      [data]="dataMetrosPerforadosDisparo"
+    >
+    </app-metros-perforados-disparo>
+  </div>
+
   <!-- MHR POR EQUIPO -->
   <div class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm">
     <app-mhr-equipo class="block w-full" [data]="dataMhrEquipo" data-page="2"></app-mhr-equipo>
@@ -111,17 +122,17 @@
 
   <!-- MEJORES OPERADORES -->
   <div class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm">
-    <app-mejores-operadores class="block w-full" [data]="dataFrPorOperadorTurno" data-page="5"></app-mejores-operadores>
+    <app-mejores-operadores class="block w-full" [data]="dataFrPorOperadorTurno"></app-mejores-operadores>
   </div>
 
   <!-- RANKING OPERADOR -->
   <div class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm">
-    <app-ranking-operador class="block w-full" [data]="dataFrPorOperadorTurno" data-page="5"></app-ranking-operador>
+    <app-ranking-operador class="block w-full" [data]="dataFrPorOperadorTurno"></app-ranking-operador>
   </div>
 
   <!-- OBSERVACIONES -->
   <div class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm">
-    <app-observaciones class="block w-full" [data]="dataObservaciones" data-page="5"></app-observaciones>
+    <app-observaciones class="block w-full" [data]="dataObservaciones"></app-observaciones>
   </div>
 
   <!-- MAPA DE CALOR -->

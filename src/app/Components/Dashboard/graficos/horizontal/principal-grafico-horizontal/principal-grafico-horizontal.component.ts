@@ -64,7 +64,6 @@ import {
   agregarPaginaConGraficos2x3,
   agregarPaginaGraficoCompleto,
   agregarTablaContinuaPDF,
-  agregarTablaPrimeraPerforacionPDF,
   configurarCabeceraPDF,
   obtenerImagenChart,
   PdfChartConfig,
@@ -185,7 +184,6 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   planesMensuales: PlanMensual[] = [];
 
   // 🔥 DATA FINAL PARA LOS GRAFICOS
-  dataAvanceFase: any[] = [];
   dataDisparosEquipo: DisparosEquipoChartItem[] = [];
   dataRendimientoEquipo: RendimientoEquipoChartItem[] = [];
   dataDisparosDia: DisparosDiaItem[] = [];
@@ -195,7 +193,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   dataHorasNoOperativas: any[] = [];
   dataHorasMantenimiento: any[] = [];
   DataParetoHorasMantenimiento: ParetoChartItem[] = [];
-  dataMetrosDisparoFR: MetrosPerforadosDisparoItem[] = [];
+  dataMetrosPerforadosDisparo: MetrosPerforadosDisparoItem[] = [];
   dataPerforadoEquipo: any[] = [];
   dataMhrEquipo: MhrEquipoItem[] = [];
   dataHorometrosJumbos: HorometroEquipoItem[] = [];
@@ -515,7 +513,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     this.dataHorasMantenimiento = this.procesarHorasMantenimiento();
     this.DataParetoHorasMantenimiento = this.ParetoHorasMantenimiento();
 
-    this.dataMetrosDisparoFR = this.procesarMetrosPorDisparoFR();
+    this.dataMetrosPerforadosDisparo = this.procesarMetrosPerforadosDisparo();
     this.dataPerforadoEquipo = this.procesarPerforadoEquipo();
     this.dataMhrEquipo = this.procesarMhrEquipo();
     this.dataHorometrosJumbos = this.procesarHorometrosJumbos();
@@ -1580,7 +1578,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     return Array.from(mapa.values());
   }
 
-  procesarMetrosPorDisparoFR() {
+  procesarMetrosPerforadosDisparo(): MetrosPerforadosDisparoItem[] {
     const mapa = new Map<
       string,
       {
@@ -1810,9 +1808,6 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     return result;
   }
 
-  // =========================================
-  //Grafico 13
-  // =========================================
 
   procesarPromedioPrimeraPerfDiaFRPorFecha() {
     const mapa = new Map<string, Map<string, number>>();
@@ -2657,6 +2652,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
       pdf.addPage();
       agregarCabeceraPDF(pdf, 'REPORTE OPERATIVO - TABLAS');
       let yTablas = 30;
+      yTablas = this.agregarTablaPrimeraPerforacion(pdf, yTablas);
       yTablas = this.agregarTablaDetallePerforacion(pdf, yTablas);
       yTablas = this.agregarTablaDetalleDisparos(pdf, yTablas);
       yTablas = this.agregarTablaMejoresOperadores(pdf, yTablas);
@@ -2723,18 +2719,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
       { x: marginX + cardWidth + gapX, y: startY + cardHeight + gapY },
 
       { x: marginX, y: startY + (cardHeight + gapY) * 2 },
-      { x: marginX + cardWidth + gapX, y: startY + (cardHeight + gapY) * 2 },
     ];
-
-    agregarTablaPrimeraPerforacionPDF(
-      pdf,
-      this.dataProcesoLaborFR || [],
-      'HORAS PRIMERA PERFORACIÓN',
-      posiciones[0].x,
-      posiciones[0].y,
-      cardWidth,
-      cardHeight,
-    );
 
     const horometrosJumboImage = obtenerImagenChart(this.horometrosJumbosChart);
     if (horometrosJumboImage) {
@@ -2742,8 +2727,8 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
         pdf,
         horometrosJumboImage,
         'HORÓMETROS JUMBOS',
-        posiciones[1].x,
-        posiciones[1].y,
+        posiciones[0].x,
+        posiciones[0].y,
         cardWidth,
         cardHeight,
       );
@@ -2755,20 +2740,8 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
         pdf,
         horometrosEquipoImage,
         'TOTAL HORÓMETROS',
-        posiciones[2].x,
-        posiciones[2].y,
-        cardWidth,
-        cardHeight,
-      );
-    }
-    const avanceFaseImage = obtenerImagenChart(this.avanceFaseChart);
-    if (avanceFaseImage) {
-      agregarGraficoEchartsPDFProporcional(
-        pdf,
-        avanceFaseImage,
-        'METROS PERFORADOS POR FASE',
-        posiciones[3].x,
-        posiciones[3].y,
+        posiciones[1].x,
+        posiciones[1].y,
         cardWidth,
         cardHeight,
       );
@@ -2781,8 +2754,8 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
         pdf,
         disparosTipoPerforacionImage,
         'DISPAROS POR TIPO DE PERFORACIÓN',
-        posiciones[4].x,
-        posiciones[4].y,
+        posiciones[2].x,
+        posiciones[2].y,
         cardWidth,
         cardHeight,
       );
@@ -2793,12 +2766,50 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
         pdf,
         promedioEstadosImage,
         'HORAS PROMEDIO POR ESTADO',
-        posiciones[5].x,
-        posiciones[5].y,
+        posiciones[3].x,
+        posiciones[3].y,
         cardWidth,
         cardHeight,
       );
     }
+  }
+  private agregarTablaPrimeraPerforacion(pdf: jsPDF, startY: number): number {
+    const data = this.dataProcesoLaborFR || [];
+
+    if (!Array.isArray(data) || data.length === 0) {
+      console.warn('Sin datos para PRIMERA PERFORACIÓN');
+      return startY;
+    }
+
+    const dataOrdenada = [...data].sort((a, b) => {
+      const equipoA = String(a.modelo_equipo || '');
+      const equipoB = String(b.modelo_equipo || '');
+      const diffEquipo = equipoA.localeCompare(equipoB);
+      if (diffEquipo !== 0) return diffEquipo;
+
+      const horaA = String(a.hora_inicio || '');
+      const horaB = String(b.hora_inicio || '');
+      return horaA.localeCompare(horaB);
+    });
+
+    const columnas = ['Equipo', 'Fecha', 'Hora', 'Labor'];
+
+    const filas = dataOrdenada.map((item: any) => [
+      this.valorPDF(item.modelo_equipo),
+      this.valorPDF(item.fecha),
+      this.valorPDF(item.hora_inicio),
+      this.valorPDF(item.labor_fr),
+    ]);
+
+    return agregarTablaContinuaPDF(pdf, {
+      tituloReporte: 'REPORTE OPERATIVO - TABLAS',
+      tituloTabla: 'HORAS PRIMERA PERFORACIÓN',
+      columnas,
+      filas,
+      startY,
+      marginLeft: 8,
+      marginRight: 8,
+    });
   }
   private agregarTablaDetallePerforacion(pdf: jsPDF, startY: number): number {
     const data = this.dataPercusionConMetrosJumbos || [];
