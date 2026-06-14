@@ -11,8 +11,8 @@ export interface OperacionTLargos {
   metros_perforados_alivio: number;
   n_taladros_repaso: number;
   metros_perforados_repaso: number;
-  long_barras: string;
-  num_barras: string;
+  long_barras: number;
+  num_barras: number;
   tipo_perforacion: string;
   tipo_perforacion_id: number;
   observaciones: string;

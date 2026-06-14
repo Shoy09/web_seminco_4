@@ -1,93 +1,70 @@
-<div class="table-container">
-  <h3 class="table-title">DETALLE DE SOSTENIMIENTO</h3>
-  
-  <div class="table-responsive">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Registros</th>
-          <th>Equipo</th>
-          <th>Labor</th>
-          <th>Sección Labor</th>
-          <th>Tipo Pernos</th>
-          <th>N° Pernos</th>
-          <th>Long Pernos</th>
-          <th>Malla</th>
-          <th>Metros Perforados</th>
-        </tr>
-      </thead>
-      <tbody>
-  <tr *ngFor="let item of paginatedData">
-    <td class="registros-cell">{{ item.registros | number:'1.0-0' }}</td>
-    <td class="equipo-cell">{{ item.modelo_equipo }}</td>
-    <td>{{ item.labor_sos }}</td>
-    <td>{{ item.seccion_labor }}</td>
-    <td>{{ item.tipo_pernos }}</td>
-
-    <td>{{ item.n_pernos | number:'1.0-0' }}</td>
-    <td>{{ item.log_pernos | number:'1.0-0' }}</td>
-    <td>{{ item.mt52_malla | number:'1.0-0' }}</td>
-    <td>{{ item.metros_perforados | number:'1.0-1' }}</td>
-  </tr>
-
-  <tr *ngIf="paginatedData.length === 0">
-    <td colspan="9" class="no-data">No hay datos disponibles</td>
-  </tr>
-</tbody>
-
-<tfoot *ngIf="displayedData.length > 0">
-  <tr class="total-row">
-    <td class="total-label"><strong>Total</strong></td>
-    <td colspan="4" class="total-empty"></td>
-
-    <td><strong>{{ totales.n_pernos | number:'1.0-0' }}</strong></td>
-    <td><strong>{{ totales.log_pernos | number:'1.0-0' }}</strong></td>
-    <td><strong>{{ totales.mt52_malla | number:'1.0-0' }}</strong></td>
-    <td><strong>{{ totales.metros_perforados | number:'1.0-1' }}</strong></td>
-  </tr>
-</tfoot>
-    </table>
-  </div>
-
-  <!-- Controles de paginación -->
-  <div class="pagination-controls" *ngIf="displayedData.length > 0">
-    <div class="rows-info">
-      Mostrando {{ startIndex + 1 }} - {{ endIndex }} de {{ displayedData.length }} registros
-    </div>
-    <div class="pagination-buttons">
-      <button 
-        class="pagination-btn" 
-        (click)="previousPage()" 
-        [disabled]="currentPage === 1">
-        ‹ Anterior
-      </button>
-      
-      <div class="page-numbers">
-        <button 
-          *ngFor="let page of pageNumbers" 
-          class="page-btn" 
-          [class.active]="page === currentPage"
-          (click)="goToPage(page)">
-          {{ page }}
-        </button>
+<div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+  <p-table
+    [value]="displayedData"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[5, 10, 20, 50]"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} registros"
+    [tableStyle]="{ 'min-width': '1100px' }"
+    styleClass="tabla-header-primary p-datatable-sm"
+    [rowHover]="true"
+  >
+    <ng-template pTemplate="caption">
+      <div class="flex items-center justify-between">
+        <span class="text-lg font-extrabold uppercase tracking-wide text-ink">
+          Detalle de Sostenimiento
+        </span>
       </div>
-      
-      <button 
-        class="pagination-btn" 
-        (click)="nextPage()" 
-        [disabled]="currentPage === totalPages">
-        Siguiente ›
-      </button>
-    </div>
-    
-    <div class="rows-per-page">
-      <label>Filas por página:</label>
-      <select (change)="onRowsPerPageChange($event)" class="rows-select">
-        <option value="5">5</option>
-        <option value="10">10</option>
-        <option value="20">20</option>
-        <option value="50">50</option>
-      </select>
-    </div>
-  </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th class="whitespace-nowrap text-left">Registros</th>
+        <th class="whitespace-nowrap text-left">Equipo</th>
+        <th class="whitespace-nowrap text-left">Labor</th>
+        <th class="whitespace-nowrap text-left">Sección Labor</th>
+        <th class="whitespace-nowrap text-left">Tipo Pernos</th>
+        <th class="whitespace-nowrap text-right">N° Pernos</th>
+        <th class="whitespace-nowrap text-right">Long Pernos</th>
+        <th class="whitespace-nowrap text-right">Malla</th>
+        <th class="whitespace-nowrap text-right">Metros Perforados</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-item>
+      <tr>
+        <td class="whitespace-nowrap font-bold">{{ item.registros | number : "1.0-0" }}</td>
+        <td class="whitespace-nowrap font-bold">{{ item.modelo_equipo }}</td>
+        <td class="whitespace-nowrap">{{ item.labor_sos }}</td>
+        <td class="whitespace-nowrap">{{ item.seccion_labor }}</td>
+        <td class="whitespace-nowrap">{{ item.tipo_pernos }}</td>
+        <td class="text-right">{{ item.n_pernos | number : "1.0-0" }}</td>
+        <td class="text-right">{{ item.log_pernos | number : "1.0-0" }}</td>
+        <td class="text-right">{{ item.mt52_malla | number : "1.0-0" }}</td>
+        <td class="text-right font-semibold">{{ item.metros_perforados | number : "1.0-1" }}</td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      @if (displayedData.length > 0) {
+        <tr class="bg-primary/10 font-extrabold">
+          <td class="whitespace-nowrap text-left">{{ totales.registros | number : "1.0-0" }}</td>
+          <td colspan="4"></td>
+          <td class="text-right">{{ totales.n_pernos | number : "1.0-0" }}</td>
+          <td class="text-right">{{ totales.log_pernos | number : "1.0-0" }}</td>
+          <td class="text-right">{{ totales.mt52_malla | number : "1.0-0" }}</td>
+          <td class="text-right">{{ totales.metros_perforados | number : "1.0-1" }}</td>
+        </tr>
+      }
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="9" class="py-8 text-center text-sm text-gray-500">
+          No hay registros para mostrar.
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
 </div>

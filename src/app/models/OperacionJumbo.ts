@@ -4,13 +4,13 @@ export interface OperacionJumbo {
   labor?: string;
   ala?: string;
 
-  tal_prod?: string;
-  tal_rimados?: string;
-  tal_alivio?: string;
-  tal_repaso?: string;
+  tal_prod?: number;
+  tal_rimados?: number;
+  tal_alivio?: number;
+  tal_repaso?: number;
 
-  long_barras?: string;
-  num_barras?: string;
+  long_barras?: number;
+  num_barras?: number;
 
   //material?: string;
   tipo_perforacion?: string;

@@ -2,10 +2,35 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import * as echarts from 'echarts/core';
 import { BarChart } from 'echarts/charts';
-import { TitleComponent, TooltipComponent, GridComponent, GraphicComponent } from 'echarts/components';
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  DataZoomComponent,
+} from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
+import {
+  CHART_THEME,
+  calcularZoomInicial,
+} from '../../../../../../../config/chart-theme';
 
-echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, GraphicComponent, CanvasRenderer]);
+echarts.use([
+  BarChart,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  DataZoomComponent,
+  CanvasRenderer,
+]);
+
+export interface PernosLaborItem {
+  labor: string;
+  seccion: string;
+  seccionLabor: string;
+  totalPernos: number;
+}
 
 @Component({
   selector: 'app-pernos-labor',
@@ -13,15 +38,27 @@ echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, GraphicC
   imports: [NgxEchartsDirective],
   providers: [provideEchartsCore({ echarts })],
   templateUrl: './pernos-labor.component.html',
-  styleUrl: './pernos-labor.component.css'
+  styleUrl: './pernos-labor.component.css',
 })
 export class PernosLaborComponent implements OnChanges {
-  
-  @Input() data: any[] = [];
+  @Input() data: PernosLaborItem[] = [];
 
   chartOptions: any = {};
+  private chartInstance: any;
 
-  readonly COLOR_BARRA = '#3498db'; // Azul medio para las barras
+  onChartInit(ec: any): void {
+    this.chartInstance = ec;
+  }
+
+  getChartImage(): string | null {
+    if (!this.chartInstance) return null;
+    return this.chartInstance.getDataURL({
+      type: 'jpeg',
+      pixelRatio: 1.2,
+      backgroundColor: '#FFFFFF',
+      excludeComponents: ['toolbox', 'dataZoom'],
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
@@ -30,32 +67,25 @@ export class PernosLaborComponent implements OnChanges {
   }
 
   actualizarGrafico(): void {
-    if (!this.data || this.data.length === 0) {
+    const normalizedData = this.normalizeData(this.data);
+
+    if (normalizedData.length === 0) {
       this.chartOptions = {};
       return;
     }
 
-    // Agrupar por labor y seccion (para evitar duplicados)
-    const itemsMap = new Map<string, any>();
-    
-    this.data.forEach(item => {
+    const itemsMap = new Map<string, PernosLaborItem>();
+
+    normalizedData.forEach((item) => {
       const key = `${item.labor}|${item.seccion}`;
       if (!itemsMap.has(key)) {
-        itemsMap.set(key, {
-          labor: item.labor,
-          seccion: item.seccion,
-          seccionLabor: item.seccionLabor,
-          totalPernos: 0
-        });
+        itemsMap.set(key, { ...item, totalPernos: 0 });
       }
-      const itemData = itemsMap.get(key);
-      itemData.totalPernos += item.totalPernos;
+      itemsMap.get(key)!.totalPernos += item.totalPernos;
     });
 
-    // Convertir mapa a array
     let itemsArray = Array.from(itemsMap.values());
-    
-    // Ordenar por labor y luego por seccion
+
     itemsArray.sort((a, b) => {
       if (a.labor !== b.labor) {
         return a.labor.localeCompare(b.labor);
@@ -63,103 +93,121 @@ export class PernosLaborComponent implements OnChanges {
       return a.seccion.localeCompare(b.seccion);
     });
 
-    // Preparar eje X con: labor (seccion)
-    const xAxisData: string[] = [];
-    const tooltipMap: Map<number, any> = new Map();
+    const xAxisData = itemsArray.map(
+      (item) => `${item.labor}\n(${item.seccion})`,
+    );
 
-    itemsArray.forEach((item, idx) => {
-      const label = `${item.seccionLabor}\n${item.labor}\n(${item.seccion})`;
-      xAxisData.push(label);
-      tooltipMap.set(idx, item);
-    });
+    const seriesData = itemsArray.map((item) => item.totalPernos);
 
-    // Datos para las barras (solo totales)
-    const seriesData = itemsArray.map(item => item.totalPernos);
-
-    // Calcular máximo para el eje Y
-    const maxValor = Math.max(...seriesData, 0);
+    const maxValor = Math.max(...seriesData, 1);
     const yAxisMax = Math.ceil(maxValor * 1.2);
 
     this.chartOptions = {
+      color: [CHART_THEME.colors.primary],
+
       title: {
+        ...CHART_THEME.title,
         text: 'PERNOS POR LABOR',
-        left: 'center',
-        top: 10,
-        textStyle: {
-          fontSize: 16,
-          fontWeight: 'bold',
-          color: '#333'
-        }
       },
+
       tooltip: {
+        ...CHART_THEME.tooltip,
         trigger: 'axis',
         axisPointer: { type: 'shadow' },
         formatter: (params: any) => {
-          const item = tooltipMap.get(params[0].dataIndex);
+          const item = itemsArray[params[0].dataIndex];
           if (!item) return '';
 
           return `<strong>Labor: ${item.labor}</strong><br/>
                   Sección: ${item.seccion || 'N/A'}<br/>
                   Sección Labor: ${item.seccionLabor || 'N/A'}<br/><br/>
                   <strong>Total Pernos: ${item.totalPernos}</strong>`;
-        }
+        },
       },
+
+      legend: {
+        ...CHART_THEME.legend,
+      },
+
+      dataZoom: [
+        {
+          ...CHART_THEME.dataZoom.inside,
+          start: 0,
+          end: calcularZoomInicial(itemsArray.length, 'categorias'),
+        },
+        {
+          ...CHART_THEME.dataZoom.slider,
+          start: 0,
+          end: calcularZoomInicial(itemsArray.length, 'categorias'),
+        },
+      ],
+
       grid: {
-        left: '10%',
-        right: '5%',
-        top: '15%',
-        bottom: '10%',
-        containLabel: true
+        ...CHART_THEME.grid,
+        bottom: 60,
       },
+
       xAxis: {
-        type: 'category',
+        ...CHART_THEME.xAxisCategory,
         data: xAxisData,
         axisLabel: {
+          ...CHART_THEME.xAxisCategory.axisLabel,
           fontSize: 11,
           fontWeight: 'bold',
           interval: 0,
-          rotate: 0
-        },
-        axisLine: {
-          lineStyle: { color: '#333' }
+          rotate: 0,
         },
         axisTick: {
-          alignWithLabel: true
-        }
+          alignWithLabel: true,
+        },
       },
+
       yAxis: {
-        type: 'value',
+        ...CHART_THEME.yAxisValue,
         name: 'Cantidad de Pernos Instalados',
         nameLocation: 'middle',
         nameGap: 45,
         min: 0,
         max: yAxisMax,
         interval: this.calcularIntervalo(yAxisMax),
-        axisLabel: { fontSize: 12 },
-        splitLine: {
-          lineStyle: { type: 'dashed' }
-        }
+        axisLabel: {
+          show: false,
+        },
       },
-      series: [{
-        name: 'Total Pernos',
-        type: 'bar',
-        data: seriesData,
-        itemStyle: {
-          color: this.COLOR_BARRA,
-          borderRadius: [5, 5, 0, 0],
-          shadowColor: 'rgba(0, 0, 0, 0.2)',
-          shadowBlur: 5
+
+      series: [
+        {
+          name: 'Total Pernos',
+          type: 'bar',
+          data: seriesData,
+          barWidth: CHART_THEME.bar.barWidth,
+          itemStyle: {
+            ...CHART_THEME.bar.itemStyle,
+            color: CHART_THEME.colors.primary,
+            borderRadius: [6, 6, 0, 0],
+          },
+          label: {
+            ...CHART_THEME.bar.label,
+            show: true,
+            position: 'top',
+            color: CHART_THEME.colors.primary,
+            fontWeight: 'bold',
+            fontSize: 11,
+            formatter: (params: any) =>
+              params.value > 0 ? params.value : '',
+          },
         },
-        label: {
-          show: true,
-          position: 'top',
-          fontWeight: 'bold',
-          fontSize: 11,
-          formatter: (params: any) => params.value > 0 ? params.value : ''
-        },
-        barWidth: '60%'
-      }]
+      ],
     };
+  }
+
+  private normalizeData(data: PernosLaborItem[]): PernosLaborItem[] {
+    return (data || []).filter(
+      (item) =>
+        item &&
+        typeof item.labor === 'string' &&
+        typeof item.totalPernos === 'number',
+    );
   }
 
   calcularIntervalo(max: number): number {

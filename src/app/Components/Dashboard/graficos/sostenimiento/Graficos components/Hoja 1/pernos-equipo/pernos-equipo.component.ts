@@ -2,10 +2,36 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import * as echarts from 'echarts/core';
 import { BarChart } from 'echarts/charts';
-import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, GraphicComponent } from 'echarts/components';
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  DataZoomComponent,
+} from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
+import {
+  CHART_THEME,
+  calcularZoomInicial,
+} from '../../../../../../../config/chart-theme';
 
-echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, GraphicComponent, CanvasRenderer]);
+echarts.use([
+  BarChart,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  DataZoomComponent,
+  CanvasRenderer,
+]);
+
+export interface PernosEquipoItem {
+  seccion: string;
+  modeloEquipo: string;
+  tipoPernos: string;
+  labor: string;
+  totalPernos: number;
+}
 
 @Component({
   selector: 'app-pernos-equipo',
@@ -13,24 +39,27 @@ echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendCo
   imports: [NgxEchartsDirective],
   providers: [provideEchartsCore({ echarts })],
   templateUrl: './pernos-equipo.component.html',
-  styleUrl: './pernos-equipo.component.css'
+  styleUrl: './pernos-equipo.component.css',
 })
 export class PernosEquipoComponent implements OnChanges {
-  
-  @Input() data: any[] = [];
+  @Input() data: Map<string, PernosEquipoItem> = new Map();
 
   chartOptions: any = {};
+  private chartInstance: any;
 
-  readonly PALETA_AZULES = [
-    '#85c1e9',
-    '#5dade2',
-    '#3498db',
-    '#2e86c1',
-    '#2874a6',
-    '#21618c',
-    '#1b4f72',
-    '#154360'
-  ];
+  onChartInit(ec: any): void {
+    this.chartInstance = ec;
+  }
+
+  getChartImage(): string | null {
+    if (!this.chartInstance) return null;
+    return this.chartInstance.getDataURL({
+      type: 'jpeg',
+      pixelRatio: 1.2,
+      backgroundColor: '#FFFFFF',
+      excludeComponents: ['toolbox', 'dataZoom'],
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
@@ -39,168 +68,212 @@ export class PernosEquipoComponent implements OnChanges {
   }
 
   actualizarGrafico(): void {
-    if (!this.data || this.data.length === 0) {
+    if (!this.data || this.data.size === 0) {
       this.chartOptions = {};
       return;
     }
 
-    // Agrupar por seccionLabor, modeloEquipo y seccion
-    const itemsMap = new Map<string, any>();
-    
-    this.data.forEach(item => {
-      const key = `${item.seccionLabor}|${item.modeloEquipo}|${item.seccion}`;
-      if (!itemsMap.has(key)) {
-        itemsMap.set(key, {
-          seccionLabor: item.seccionLabor,
+    const equipos = new Map<
+      string,
+      {
+        modeloEquipo: string;
+        tipos: Map<string, number>;
+        laborPorTipo: Map<string, Map<string, number>>;
+      }
+    >();
+
+    for (const item of this.data.values()) {
+      if (!equipos.has(item.modeloEquipo)) {
+        equipos.set(item.modeloEquipo, {
           modeloEquipo: item.modeloEquipo,
-          seccion: item.seccion,
-          tipos: {}
+          tipos: new Map(),
+          laborPorTipo: new Map(),
         });
       }
-      const itemData = itemsMap.get(key);
-      itemData.tipos[item.tipoPernos] = (itemData.tipos[item.tipoPernos] || 0) + item.totalPernos;
-    });
+      const eq = equipos.get(item.modeloEquipo)!;
 
-    // Convertir mapa a array
-    const itemsArray = Array.from(itemsMap.values());
-    
-    // Ordenar por seccionLabor y luego por modeloEquipo
-    itemsArray.sort((a, b) => {
-      if (a.seccionLabor !== b.seccionLabor) {
-        return a.seccionLabor.localeCompare(b.seccionLabor);
+      eq.tipos.set(
+        item.tipoPernos,
+        (eq.tipos.get(item.tipoPernos) || 0) + item.totalPernos,
+      );
+
+      if (!eq.laborPorTipo.has(item.tipoPernos)) {
+        eq.laborPorTipo.set(item.tipoPernos, new Map());
       }
-      return a.modeloEquipo.localeCompare(b.modeloEquipo);
-    });
+      const laborMap = eq.laborPorTipo.get(item.tipoPernos)!;
+      laborMap.set(
+        item.labor,
+        (laborMap.get(item.labor) || 0) + item.totalPernos,
+      );
+    }
 
-    // Preparar eje X con: seccionLabor - modeloEquipo (seccion)
-    const xAxisData: string[] = [];
-    const tooltipMap: Map<number, any> = new Map();
+    const equiposArray = Array.from(equipos.values()).sort((a, b) =>
+      a.modeloEquipo.localeCompare(b.modeloEquipo),
+    );
 
-    itemsArray.forEach((item, idx) => {
-      // Formato: SECCION_LABOR - modeloEquipo (seccion)
-      const label = `${item.seccionLabor}\n${item.modeloEquipo}\n(${item.seccion})`;
-      xAxisData.push(label);
-      tooltipMap.set(idx, item);
-    });
+    const xAxisData = equiposArray.map((eq) => eq.modeloEquipo);
 
-    // Detectar tipos de pernos
     const tiposSet = new Set<string>();
-    this.data.forEach(item => {
-      if (item.tipoPernos) {
-        tiposSet.add(item.tipoPernos);
+    for (const eq of equiposArray) {
+      for (const tipo of eq.tipos.keys()) {
+        tiposSet.add(tipo);
       }
-    });
+    }
     const tiposArray = Array.from(tiposSet);
 
-    // Crear series
+    const coloresBase = [
+      CHART_THEME.colors.primary,
+      CHART_THEME.colors.primary75,
+      CHART_THEME.colors.primary50,
+      CHART_THEME.colors.primary25,
+      ...((CHART_THEME.colors as any).primaryScale3 || []),
+    ].filter(Boolean);
+
+    const colorPorTipo: Record<string, string> = {};
+    tiposArray.forEach((tipo, i) => {
+      colorPorTipo[tipo] = coloresBase[i % coloresBase.length];
+    });
+
     const series = tiposArray.map((tipo, tipoIndex) => ({
       name: tipo,
       type: 'bar',
       stack: 'total',
-      barWidth: '50%',
-      data: itemsArray.map(item => item.tipos[tipo] || 0),
+      barWidth: CHART_THEME.bar.barWidth,
+      data: equiposArray.map((eq) => eq.tipos.get(tipo) || 0),
       itemStyle: {
-        color: this.PALETA_AZULES[tipoIndex % this.PALETA_AZULES.length],
-        borderRadius: tipoIndex === tiposArray.length - 1 ? [5, 5, 0, 0] : [0, 0, 0, 0],
-        shadowColor: 'rgba(0, 0, 0, 0.2)',
-        shadowBlur: 5
+        ...CHART_THEME.bar.itemStyle,
+        color: colorPorTipo[tipo],
+        borderRadius:
+          tipoIndex === tiposArray.length - 1 ? [6, 6, 0, 0] : [0, 0, 0, 0],
       },
       label: {
+        ...CHART_THEME.bar.label,
         show: true,
         position: 'inside',
+        color: '#FFFFFF',
         fontWeight: 'bold',
         fontSize: 11,
-        formatter: (params: any) => params.value > 0 ? params.value : ''
-      }
+        formatter: (params: any) => (params.value > 0 ? params.value : ''),
+      },
     }));
 
-    // Calcular máximo
-    const totales = itemsArray.map(item => {
-      return Object.values(item.tipos).reduce((sum: number, val: any) => sum + val, 0);
+    const totales = equiposArray.map((eq) => {
+      let sum = 0;
+      for (const val of eq.tipos.values()) sum += val;
+      return sum;
     });
-    const maxValor = Math.max(...totales, 0);
+    const maxValor = Math.max(...totales, 1);
     const yAxisMax = Math.ceil(maxValor * 1.2);
 
     this.chartOptions = {
+      color: tiposArray.map((t) => colorPorTipo[t]),
+
       title: {
+        ...CHART_THEME.title,
         text: 'PERNOS POR EQUIPO',
-        left: 'center',
-        top: 10,
-        textStyle: {
-          fontSize: 16,
-          fontWeight: 'bold',
-          color: '#333'
-        }
       },
+
       tooltip: {
+        ...CHART_THEME.tooltip,
         trigger: 'axis',
         axisPointer: { type: 'shadow' },
         formatter: (params: any) => {
-          const item = tooltipMap.get(params[0].dataIndex);
-          if (!item) return '';
+          const eq = equiposArray[params[0].dataIndex];
+          if (!eq) return '';
 
-          let detalle = '';
           let total = 0;
+          const tipoLines: string[] = [];
+          const laborLines: string[] = [];
+
           params.forEach((p: any) => {
             if (p.value > 0) {
-              detalle += `${p.marker} ${p.seriesName}: ${p.value}<br/>`;
               total += p.value;
+
+              const labs = eq.laborPorTipo.get(p.seriesName);
+              if (labs && labs.size > 0) {
+                const labDetalle = Array.from(labs.entries())
+                  .map(
+                    ([lab, cant]) =>
+                      `&nbsp;&nbsp;${lab}: <strong>${cant}</strong>`,
+                  )
+                  .join('<br/>');
+                tipoLines.push(
+                  `${p.marker} <strong>${p.seriesName}: ${p.value}</strong>`,
+                );
+                laborLines.push(labDetalle);
+              } else {
+                tipoLines.push(
+                  `${p.marker} ${p.seriesName}: <strong>${p.value}</strong>`,
+                );
+              }
             }
           });
 
-          return `<strong>${item.modeloEquipo}</strong><br/>
-                  Sección: ${item.seccion || 'N/A'}<br/>
-                  Sección Labor: ${item.seccionLabor || 'N/A'}<br/><br/>
+          let detalle = '';
+          for (let i = 0; i < tipoLines.length; i++) {
+            detalle += tipoLines[i] + '<br/>';
+            detalle += laborLines[i] + '<br/>';
+          }
+
+          return `<strong>${eq.modeloEquipo}</strong><br/><br/>
                   ${detalle}
                   <strong>Total: ${total}</strong>`;
-        }
+        },
       },
+
       legend: {
+        ...CHART_THEME.legend,
         bottom: 0,
-        left: 'center'
+        left: 'center',
       },
-      graphic: [], // ← Vacío, sin separadores
+
+      dataZoom: [
+        {
+          ...CHART_THEME.dataZoom.inside,
+          start: 0,
+          end: calcularZoomInicial(equiposArray.length, 'categorias'),
+        },
+        {
+          ...CHART_THEME.dataZoom.slider,
+          start: 0,
+          end: calcularZoomInicial(equiposArray.length, 'categorias'),
+        },
+      ],
+
       grid: {
-        left: '10%',
-        right: '5%',
-        top: '15%',
-        bottom: '15%',
-        containLabel: true
+        ...CHART_THEME.grid,
+        bottom: 60,
       },
+
       xAxis: {
-        type: 'category',
+        ...CHART_THEME.xAxisCategory,
         data: xAxisData,
         axisLabel: {
-          fontSize: 10,
+          ...CHART_THEME.xAxisCategory.axisLabel,
+          fontSize: 11,
           fontWeight: 'bold',
           interval: 0,
           rotate: 0,
-          formatter: (value: string) => {
-            // Si el texto es muy largo, se puede rotar o truncar
-            return value;
-          }
-        },
-        axisLine: {
-          lineStyle: { color: '#333' }
         },
         axisTick: {
-          alignWithLabel: true
-        }
+          alignWithLabel: true,
+        },
       },
+
       yAxis: {
-        type: 'value',
+        ...CHART_THEME.yAxisValue,
         name: 'Cantidad de Pernos Instalados',
         nameLocation: 'middle',
         nameGap: 45,
         min: 0,
         max: yAxisMax,
         interval: this.calcularIntervalo(yAxisMax),
-        axisLabel: { fontSize: 12 },
-        splitLine: {
-          lineStyle: { type: 'dashed' }
-        }
+        axisLabel: {
+          show: false,
+        },
       },
-      series
+
+      series,
     };
   }
 

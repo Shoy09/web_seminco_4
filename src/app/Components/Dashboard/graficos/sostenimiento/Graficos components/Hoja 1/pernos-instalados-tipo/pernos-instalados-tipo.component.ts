@@ -1,11 +1,27 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
 import * as echarts from 'echarts/core';
-import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components';
 import { PieChart } from 'echarts/charts';
+import {
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+} from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
+import { CHART_THEME } from '../../../../../../../config/chart-theme';
 
-echarts.use([TitleComponent, TooltipComponent, LegendComponent, PieChart, CanvasRenderer]);
+echarts.use([
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  PieChart,
+  CanvasRenderer,
+]);
+
+export interface PernosInstaladosTipoItem {
+  tipoPernos: string;
+  total: number;
+}
 
 @Component({
   selector: 'app-pernos-instalados-tipo',
@@ -13,104 +29,95 @@ echarts.use([TitleComponent, TooltipComponent, LegendComponent, PieChart, Canvas
   imports: [NgxEchartsDirective],
   providers: [provideEchartsCore({ echarts })],
   templateUrl: './pernos-instalados-tipo.component.html',
-  styleUrl: './pernos-instalados-tipo.component.css'
+  styleUrl: './pernos-instalados-tipo.component.css',
 })
 export class PernosInstaladosTipoComponent implements OnChanges {
-
-  @Input() data: any[] = [];
+  @Input() data: PernosInstaladosTipoItem[] = [];
 
   chartOptions: any = {};
+  private chartInstance: any;
 
-  // Paleta de colores azules
-  private readonly paletaAzules: string[] = [
-    '#1E88E5', // Azul intenso
-    '#42A5F5', // Azul medio
-    '#64B5F6', // Azul claro
-    '#1565C0', // Azul oscuro
-    '#1976D2', // Azul principal
-    '#2196F3', // Azul estándar
-    '#0D47A1', // Azul muy oscuro
-    '#90CAF9', // Azul muy claro
-    '#2C3E50', // Azul grisáceo
-    '#2980B9'  // Azul petróleo
-  ];
+  onChartInit(ec: any): void {
+    this.chartInstance = ec;
+  }
+
+  getChartImage(): string | null {
+    if (!this.chartInstance) return null;
+    return this.chartInstance.getDataURL({
+      type: 'jpeg',
+      pixelRatio: 1.2,
+      backgroundColor: '#FFFFFF',
+      excludeComponents: ['toolbox'],
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      if (Array.isArray(this.data)) {
-        setTimeout(() => {
-          this.generarGrafico();
-        }, 0);
-      }
+      this.actualizarGrafico();
     }
   }
 
-  generarGrafico() {
-    // Si no hay datos o está vacío, no mostrar nada (gráfico vacío)
-    if (!this.data || this.data.length === 0) {
+  actualizarGrafico(): void {
+    const normalizedData = this.normalizeData(this.data);
+
+    if (normalizedData.length === 0) {
       this.chartOptions = {};
       return;
     }
 
-    // Agrupar por tipo de perno
-    const agrupado: { [key: string]: number } = {};
+    const agrupado: Record<string, number> = {};
 
-    this.data.forEach(item => {
-      const tipo = item.tipoPernos || item.tipo || 'SIN TIPO';
-      const total = Number(item.total) || Number(item.cantidad) || 0;
-
-      if (!agrupado[tipo]) {
-        agrupado[tipo] = 0;
-      }
-      agrupado[tipo] += total;
+    normalizedData.forEach((item) => {
+      const tipo = item.tipoPernos || 'SIN TIPO';
+      agrupado[tipo] = (agrupado[tipo] || 0) + item.total;
     });
 
-    // Convertir a formato echarts
-    const dataGrafico = Object.keys(agrupado).map(tipo => ({
-      name: tipo,
-      value: agrupado[tipo]
+    const nombres = Object.keys(agrupado);
+    const dataGrafico = nombres.map((name) => ({
+      name,
+      value: agrupado[name],
     }));
 
-    this.chartOptions = this.getOpcionesGrafico(dataGrafico);
-  }
+    const coloresBase = [
+      CHART_THEME.colors.primary,
+      CHART_THEME.colors.primary75,
+      CHART_THEME.colors.primary50,
+      CHART_THEME.colors.primary25,
+      CHART_THEME.colors.secondary,
+      CHART_THEME.colors.secondary75,
+      CHART_THEME.colors.secondary50,
+      CHART_THEME.colors.success,
+      CHART_THEME.colors.warning,
+      CHART_THEME.colors.textMuted,
+    ].filter(Boolean);
 
-  getOpcionesGrafico(data: any[]) {
-    // Asignar color aleatorio de la paleta de azules a cada dato
-    const datosConColor = data.map((item, index) => ({
+    const datosConColor = dataGrafico.map((item, index) => ({
       ...item,
-      itemStyle: { 
-        color: this.paletaAzules[index % this.paletaAzules.length] 
-      }
+      itemStyle: {
+        color: coloresBase[index % coloresBase.length],
+        borderRadius: 8,
+        borderColor: '#fff',
+        borderWidth: 2,
+      },
     }));
 
-    return {
+    this.chartOptions = {
       title: {
-        text: 'Pernos Instalados',
-        left: 'center',
-        top: 20,
-        textStyle: {
-          fontSize: 16,
-          fontWeight: 'bold',
-          color: '#333'
-        }
+        ...CHART_THEME.title,
+        text: 'PERNOS INSTALADOS',
       },
+
       tooltip: {
+        ...CHART_THEME.tooltip,
         trigger: 'item',
-        formatter: '{b}: {c} pernos ({d}%)'
+        formatter: '{b}: {c} pernos ({d}%)',
       },
+
       legend: {
-        orient: 'horizontal',
-        bottom: 5,
-        left: 'center',
-        data: data.map(d => d.name),
-        itemWidth: 18,
-        itemHeight: 10,
-        textStyle: {
-          fontSize: 11,
-          fontWeight: 'bold',
-          color: '#2c3e50'
-        }
+        ...CHART_THEME.legend,
+        data: nombres,
       },
+
       series: [
         {
           name: 'Pernos',
@@ -122,24 +129,31 @@ export class PernosInstaladosTipoComponent implements OnChanges {
             show: true,
             formatter: '{b}\n{c} ({d}%)',
             fontSize: 12,
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            color: CHART_THEME.colors.text,
           },
           emphasis: {
             label: {
               show: true,
               fontSize: 14,
-              fontWeight: 'bold'
+              fontWeight: 'bold',
             },
             scale: true,
-            scaleSize: 10
+            scaleSize: 10,
           },
-          itemStyle: {
-            borderRadius: 8,
-            borderColor: '#fff',
-            borderWidth: 2
-          }
-        }
-      ]
+        },
+      ],
     };
+  }
+
+  private normalizeData(
+    data: PernosInstaladosTipoItem[],
+  ): PernosInstaladosTipoItem[] {
+    return (data || []).filter(
+      (item) =>
+        item &&
+        typeof item.tipoPernos === 'string' &&
+        typeof item.total === 'number',
+    );
   }
 }

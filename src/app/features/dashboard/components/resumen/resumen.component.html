@@ -1,0 +1,36 @@
+<div class="w-full rounded-2xl bg-surface p-6 shadow-sm border border-border/40">
+  <!-- Título del Dashboard -->
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h2 class="text-sm font-bold tracking-widest text-secondary/80 uppercase">
+        Resumen de Operaciones
+      </h2>
+      <div class="mt-1.5 h-1 w-12 rounded-full bg-primary/90"></div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+    @for (item of data; track item.label) {
+      <div class="group relative rounded-2xl border border-border bg-white p-6 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl">
+      <div class="flex items-start justify-between">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-ink-50/70 block mb-1">
+            {{ item.label }}
+          </span>
+          <div class="text-3xl font-black tracking-tight text-secondary transition-colors group-hover:text-primary">
+            {{ item.value }}
+          </div>
+        </div>
+        
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-white group-hover:scale-105 shadow-sm">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+    } @empty {
+    }
+  </div>
+</div>

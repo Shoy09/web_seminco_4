@@ -15,7 +15,7 @@ import {
 import { PlanMensual } from '../../../../../models/plan-mensual.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ResumenComponent } from '../Graficos components/Hoja 1/resumen/resumen.component';
+import { ResumenComponent } from '../../../../../features/dashboard/components/resumen/resumen.component';
 import { DisparosEquipoChartComponent } from '../../../../../features/dashboard/components/disparos-equipo-chart/disparos-equipo-chart.component';
 import {
   PerforadoEquipoChartComponent,
@@ -106,6 +106,7 @@ import {
   DisparosTipoPerforacionChartComponent,
   DisparosTipoPerforacionItem,
 } from '../../../../../features/dashboard/components/disparos-tipo-perforacion-chart/disparos-tipo-perforacion-chart.component';
+import { formatearFechaYYYYMMDD } from '../../../../../utils/fecha-utils';
 
 type OperacionTalLargoConTipo = OperacionTLargos & {
   tipo_perforacion?: string;
@@ -123,7 +124,7 @@ type OperacionTalLargoConTipo = OperacionTLargos & {
     HorometrosEquipoComponent,
     TotalHorometrosComponent,
     HorasPrimeraPerforacionComponent,
-    AvanceFaseComponent,
+    //AvanceFaseComponent,
     // DetallePerforacionComponent,
     //DetalleDisparosComponent,
     MejoresOperadoresComponent,
@@ -228,13 +229,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
   // Variables para el filtro de fechas
   turnoSeleccionado: string = '';
   turnoAplicado: string = '';
-  resumen = {
-    conteoEquipos: 0,
-    metrosPorDisparo: 0,
-    nDisparosTL: 0,
-    totalMetros: 0,
-  };
-
+  resumen: { label: string; value: number }[] = [];
   tiposFiltro: OpcionFiltroDashboard[] = [
     { label: 'Rango', value: 'rango' },
     { label: 'Año', value: 'anio' },
@@ -402,8 +397,8 @@ export class PrincipalGraficoLargoComponent implements OnInit {
 
     if (this.tipoFiltro === 'dia') {
       if (!this.diaSeleccionado) return false;
-      this.fechaInicio = this.formatearFecha(this.diaSeleccionado);
-      this.fechaFin = this.formatearFecha(this.diaSeleccionado);
+      this.fechaInicio = formatearFechaYYYYMMDD(this.diaSeleccionado);
+      this.fechaFin = formatearFechaYYYYMMDD(this.diaSeleccionado);
       return true;
     }
 
@@ -411,8 +406,8 @@ export class PrincipalGraficoLargoComponent implements OnInit {
       if (!this.mesSeleccionado) return false;
       const anio = this.mesSeleccionado.getFullYear();
       const mes = this.mesSeleccionado.getMonth();
-      this.fechaInicio = this.formatearFecha(new Date(anio, mes, 1));
-      this.fechaFin = this.formatearFecha(new Date(anio, mes + 1, 0));
+      this.fechaInicio = formatearFechaYYYYMMDD(new Date(anio, mes, 1));
+      this.fechaFin = formatearFechaYYYYMMDD(new Date(anio, mes + 1, 0));
       return true;
     }
 
@@ -423,8 +418,8 @@ export class PrincipalGraficoLargoComponent implements OnInit {
       inicio.setDate(inicio.getDate() - dia + 1);
       const fin = new Date(inicio);
       fin.setDate(inicio.getDate() + 6);
-      this.fechaInicio = this.formatearFecha(inicio);
-      this.fechaFin = this.formatearFecha(fin);
+      this.fechaInicio = formatearFechaYYYYMMDD(inicio);
+      this.fechaFin = formatearFechaYYYYMMDD(fin);
       return true;
     }
 
@@ -432,19 +427,12 @@ export class PrincipalGraficoLargoComponent implements OnInit {
       if (!this.rangoFechas || this.rangoFechas.length < 2) return false;
       const [inicio, fin] = this.rangoFechas;
       if (!inicio || !fin) return false;
-      this.fechaInicio = this.formatearFecha(inicio);
-      this.fechaFin = this.formatearFecha(fin);
+      this.fechaInicio = formatearFechaYYYYMMDD(inicio);
+      this.fechaFin = formatearFechaYYYYMMDD(fin);
       return true;
     }
 
     return false;
-  }
-
-  private formatearFecha(fecha: Date): string {
-    const anio = fecha.getFullYear();
-    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-    const dia = String(fecha.getDate()).padStart(2, '0');
-    return `${anio}-${mes}-${dia}`;
   }
 
   // =========================================
@@ -1838,13 +1826,12 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     });
 
     const metrosPorDisparo = nDisparosTL > 0 ? totalMetros / nDisparosTL : 0;
-
-    this.resumen = {
-      conteoEquipos: equiposSet.size,
-      metrosPorDisparo: Number(metrosPorDisparo.toFixed(0)),
-      nDisparosTL,
-      totalMetros: Number(totalMetros.toFixed(0)),
-    };
+    this.resumen = [
+      { label: 'EQUIPOS', value: equiposSet.size },
+      { label: 'TOTAL PERF. (m)', value: Number(totalMetros.toFixed(0)) },
+      { label: 'METROS PERF./LABOR', value: Number(metrosPorDisparo.toFixed(0)) },
+      { label: 'LABORES PERF.', value: nDisparosTL },
+    ];
   }
 
   //=========================================

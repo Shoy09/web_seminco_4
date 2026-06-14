@@ -15,7 +15,7 @@ import {
   PerforadoEquipoChartItem,
 } from '../../../../../features/dashboard/components/perforado-equipo-chart/perforado-equipo-chart.component';
 import { RendimientoEquipoChartComponent, RendimientoEquipoChartItem } from '../../../../../features/dashboard/components/rendimiento-equipo-chart/rendimiento-equipo-chart.component';
-import { ResumenComponent } from '../Graficos components/Hoja 1/resumen/resumen.component';
+import { ResumenComponent } from '../../../../../features/dashboard/components/resumen/resumen.component';
 
 import { OperacionesService } from '../../../../../services/operaciones.service';
 
@@ -60,9 +60,6 @@ import { MapaDeCalorComponent, MapaDeCalorItem } from '../../../../../features/d
 import {
   agregarCabeceraPDF,
   agregarGraficoEchartsPDFProporcional,
-  agregarGraficoEnPaginaActual,
-  agregarPaginaConGraficos2x3,
-  agregarPaginaGraficoCompleto,
   agregarTablaContinuaPDF,
   configurarCabeceraPDF,
   obtenerImagenChart,
@@ -211,12 +208,9 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
   turnoSeleccionado: string = '';
   turnoAplicado: string = '';
-  resumen = {
-    conteoEquipos: 0,
-    metrosPorDisparo: 0,
-    nFrentes: 0,
-    totalMetros: 0,
-  };
+  resumen: { label: string; value: number }[] = [];
+
+  
 
   datosGraficoEstados: PromedioEstadoItem[] = [];
 
@@ -922,12 +916,12 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
     const metrosPorDisparo = totalFrentes > 0 ? totalMetros / totalFrentes : 0;
 
-    this.resumen = {
-      conteoEquipos: equiposSet.size,
-      metrosPorDisparo: Number(metrosPorDisparo.toFixed(0)),
-      nFrentes: totalFrentes,
-      totalMetros: Number(totalMetros.toFixed(0)),
-    };
+    this.resumen = [
+      { label: 'EQUIPOS', value: equiposSet.size },
+      { label: 'METROS PERF/DISPARO', value: Number(metrosPorDisparo.toFixed(0)) },
+      { label: 'DISPAROS/DÍA', value: totalFrentes },
+      { label: 'TOTAL PERFORADO (M)', value:  Number(totalMetros.toFixed(0))},
+    ];
   }
 
   procesarIndicadoresEquipo() {
@@ -2617,39 +2611,31 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
       });
 
       const pdf = new jsPDF({
-        orientation: 'portrait',
+        orientation: 'landscape',
         unit: 'mm',
         format: 'a4',
         compress: true,
       });
 
+      // =========================
+      // PÁGINA 1 (landscape): HOJA DE RESUMEN
+      // =========================
       this.agregarPaginaResumenYGraficos(pdf);
 
-      agregarPaginaConGraficos2x3(
-        pdf,
-        'REPORTE OPERATIVO - INDICADORES PRINCIPALES',
-        [
-          {
-            component: this.disparosDiaChart,
-            title: 'DISPAROS POR DÍA',
-          },
-          ...this.obtenerParetosPDF().slice(0, 3),
-          {
-            component: this.perforadoEquipoChart,
-            title: 'PERFORADO POR EQUIPO',
-          },
-          {
-            component: this.mhrEquipoChart,
-            title: 'M/HR POR EQUIPO',
-          },
-        ],
-      );
-      // GRAFICOS HOROMETROS
-      this.agregarPaginaPerforadoHorometrosConTabla(pdf);
       // =========================
-      // PÁGINAS SIGUIENTES: TABLAS
+      // PÁGINA 2 (landscape): INDICADORES PRINCIPALES
       // =========================
-      pdf.addPage();
+      this.agregarPaginaIndicadoresPDF(pdf);
+
+      // =========================
+      // PÁGINA 3 (landscape): PERFORADO Y HORÓMETROS
+      // =========================
+      this.agregarPaginaPerforadoHorometrosPDF(pdf);
+
+      // =========================
+      // PÁGINAS SIGUIENTES (portrait): TABLAS
+      // =========================
+      pdf.addPage([210, 297], 'portrait');
       agregarCabeceraPDF(pdf, 'REPORTE OPERATIVO - TABLAS');
       let yTablas = 30;
       yTablas = this.agregarTablaPrimeraPerforacion(pdf, yTablas);
@@ -2683,96 +2669,6 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     });
   }
 
-  private agregarPaginaPerforadoHorometrosConTabla(pdf: jsPDF): void {
-    pdf.addPage();
-
-    agregarCabeceraPDF(pdf, 'REPORTE OPERATIVO - PERFORADO Y HORÓMETROS');
-
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
-    const marginX = 8;
-    const startY = 30;
-    const bottomMargin = 8;
-
-    const gapX = 6;
-    const gapY = 7;
-
-    const cardWidth = (pageWidth - marginX * 2 - gapX) / 2;
-
-    const availableHeight = pageHeight - startY - bottomMargin;
-    const maxCardHeight = (availableHeight - gapY * 2) / 3;
-
-    // Mientras más alto el ratio, más bajo queda el cuadro.
-    // 1.7 = más alto
-    // 1.9 = equilibrado
-    // 2.1 = más compacto
-    const chartRatio = 1.9;
-
-    const cardHeight = Math.min(maxCardHeight, cardWidth / chartRatio);
-
-    const posiciones = [
-      { x: marginX, y: startY },
-      { x: marginX + cardWidth + gapX, y: startY },
-
-      { x: marginX, y: startY + cardHeight + gapY },
-      { x: marginX + cardWidth + gapX, y: startY + cardHeight + gapY },
-
-      { x: marginX, y: startY + (cardHeight + gapY) * 2 },
-    ];
-
-    const horometrosJumboImage = obtenerImagenChart(this.horometrosJumbosChart);
-    if (horometrosJumboImage) {
-      agregarGraficoEchartsPDFProporcional(
-        pdf,
-        horometrosJumboImage,
-        'HORÓMETROS JUMBOS',
-        posiciones[0].x,
-        posiciones[0].y,
-        cardWidth,
-        cardHeight,
-      );
-    }
-
-    const horometrosEquipoImage = obtenerImagenChart(this.totalHorometrosChart);
-    if (horometrosEquipoImage) {
-      agregarGraficoEchartsPDFProporcional(
-        pdf,
-        horometrosEquipoImage,
-        'TOTAL HORÓMETROS',
-        posiciones[1].x,
-        posiciones[1].y,
-        cardWidth,
-        cardHeight,
-      );
-    }
-    const disparosTipoPerforacionImage = obtenerImagenChart(
-      this.disparosTipoPerforacionChart,
-    );
-    if (disparosTipoPerforacionImage) {
-      agregarGraficoEchartsPDFProporcional(
-        pdf,
-        disparosTipoPerforacionImage,
-        'DISPAROS POR TIPO DE PERFORACIÓN',
-        posiciones[2].x,
-        posiciones[2].y,
-        cardWidth,
-        cardHeight,
-      );
-    }
-    const promedioEstadosImage = obtenerImagenChart(this.promedioEstadosChart);
-    if (promedioEstadosImage) {
-      agregarGraficoEchartsPDFProporcional(
-        pdf,
-        promedioEstadosImage,
-        'HORAS PROMEDIO POR ESTADO',
-        posiciones[3].x,
-        posiciones[3].y,
-        cardWidth,
-        cardHeight,
-      );
-    }
-  }
   private agregarTablaPrimeraPerforacion(pdf: jsPDF, startY: number): number {
     const data = this.dataProcesoLaborFR || [];
 
@@ -3143,7 +3039,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
   private agregarResumenPDF(
     pdf: jsPDF,
-    resumen: any,
+    resumen: { label: string; value: number }[],
     posicion: {
       x: number;
       y: number;
@@ -3166,23 +3062,23 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
     const items = [
       {
-        label: 'EQUIPOS',
-        value: this.formatearNumero(resumen?.conteoEquipos, 0),
+        label: resumen[0].label,
+        value: this.formatearNumero(resumen[0].value, 0),
         unit: 'equipos',
       },
       {
-        label: 'M/DISP.',
-        value: this.formatearNumero(resumen?.metrosPorDisparo, 2),
+        label: resumen[1].label,
+        value: this.formatearNumero(resumen[1].value, 2),
         unit: 'm/disparo',
       },
       {
-        label: 'DISPAROS',
-        value: this.formatearNumero(resumen?.nFrentes, 0),
+        label: resumen[2].label,
+        value: this.formatearNumero(resumen[2].value, 0),
         unit: 'disparos',
       },
       {
-        label: 'TOTAL PERF.',
-        value: this.formatearNumero(resumen?.totalMetros, 0),
+        label: resumen[3].label,
+        value: this.formatearNumero(resumen[3].value, 0),
         unit: 'm',
       },
     ];
@@ -3229,36 +3125,35 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     const pageHeight = pdf.internal.pageSize.getHeight();
 
     const marginX = 8;
-    const startY = 30;
+    const startY = 28;
     const bottomMargin = 8;
 
     const gapX = 6;
     const gapY = 8;
 
-    const cardWidth = (pageWidth - marginX * 2 - gapX) / 2;
-
-    const availableHeight = pageHeight - startY - bottomMargin;
-    const maxCardHeight = (availableHeight - gapY * 2) / 3;
-
-    // Mientras más alto el ratio, más bajita queda la card
-    const chartRatio = 1.8;
-
-    const cardHeight = Math.min(maxCardHeight, cardWidth / chartRatio);
+    const cardWidth = (pageWidth - marginX * 2 - gapX * 2) / 3;
+    const cardHeight = (pageHeight - startY - bottomMargin - gapY) / 2;
 
     const posiciones = [
       { x: marginX, y: startY },
       { x: marginX + cardWidth + gapX, y: startY },
+      { x: marginX + (cardWidth + gapX) * 2, y: startY },
 
       { x: marginX, y: startY + cardHeight + gapY },
       { x: marginX + cardWidth + gapX, y: startY + cardHeight + gapY },
-
-      { x: marginX, y: startY + (cardHeight + gapY) * 2 },
-      { x: marginX + cardWidth + gapX, y: startY + (cardHeight + gapY) * 2 },
+      { x: marginX + (cardWidth + gapX) * 2, y: startY + cardHeight + gapY },
     ];
 
-    // =========================
+    const charts = [
+      null,
+      { image: this.disparosEquipoChart, title: 'DISPAROS POR EQUIPO' },
+      { image: this.rendimientoEquipoChart, title: 'RENDIMIENTO POR EQUIPO' },
+      { image: this.metrosDisparoChart, title: 'METROS PERFORADOS/DISPARO' },
+      { image: this.rankingOperadorChart, title: 'RANKING OPERADOR' },
+      { image: this.mapaDeCalorChart, title: 'MAPA DE CALOR - INICIACIÓN' },
+    ];
+
     // CELDA 1: RESUMEN COMPACTO
-    // =========================
     this.agregarResumenPDF(pdf, this.resumen, {
       x: posiciones[0].x,
       y: posiciones[0].y,
@@ -3266,91 +3161,134 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
       height: cardHeight,
     });
 
-    // =========================
-    // CELDA 2: DISPAROS POR EQUIPO
-    // =========================
-    const disparosEquipoImage = obtenerImagenChart(this.disparosEquipoChart);
+    // CELDAS 2-6: GRÁFICOS
+    for (let i = 1; i < charts.length; i++) {
+      const chart = charts[i];
+      if (!chart) continue;
 
-    if (disparosEquipoImage) {
+      const image = obtenerImagenChart(chart.image);
+      if (!image) continue;
+
+      const modo = chart.image === this.rankingOperadorChart ? 'proporcional' as const : 'proporcional' as const;
+
       agregarGraficoEchartsPDFProporcional(
         pdf,
-        disparosEquipoImage,
-        'DISPAROS POR EQUIPO',
-        posiciones[1].x,
-        posiciones[1].y,
-        cardWidth,
-        cardHeight,
-      );
-    }
-
-    // =========================
-    // CELDA 3: RENDIMIENTO POR EQUIPO
-    // =========================
-    const rendimientoImage = obtenerImagenChart(this.rendimientoEquipoChart);
-
-    if (rendimientoImage) {
-      agregarGraficoEchartsPDFProporcional(
-        pdf,
-        rendimientoImage,
-        'RENDIMIENTO POR EQUIPO',
-        posiciones[2].x,
-        posiciones[2].y,
-        cardWidth,
-        cardHeight,
-      );
-    }
-
-    // =========================
-    // CELDA 4: METROS PERFORADOS / DISPARO
-    // =========================
-    const metrosDisparoImage = obtenerImagenChart(this.metrosDisparoChart);
-
-    if (metrosDisparoImage) {
-      agregarGraficoEchartsPDFProporcional(
-        pdf,
-        metrosDisparoImage,
-        'METROS PERFORADOS/DISPARO',
-        posiciones[3].x,
-        posiciones[3].y,
-        cardWidth,
-        cardHeight,
-      );
-    }
-    // =========================
-    // CELDA 5: RANKING OPERADOR
-    // =========================
-    const rankingImage = obtenerImagenChart(this.rankingOperadorChart);
-
-    if (rankingImage) {
-      agregarGraficoEchartsPDFProporcional(
-        pdf,
-        rankingImage,
-        'RANKING OPERADOR',
-        posiciones[4].x,
-        posiciones[4].y,
+        image,
+        chart.title,
+        posiciones[i].x,
+        posiciones[i].y,
         cardWidth,
         cardHeight,
         0.3,
-        'rellenar',
+        modo,
       );
     }
+  }
 
-    // =========================
-    // CELDA 6: MAPA DE CALOR
-    // =========================
-    const mapaCalorImage = obtenerImagenChart(this.mapaDeCalorChart);
+  private agregarPaginaIndicadoresPDF(pdf: jsPDF): void {
+    pdf.addPage([297, 210]);
 
-    if (mapaCalorImage) {
+    agregarCabeceraPDF(pdf, 'REPORTE OPERATIVO - INDICADORES PRINCIPALES');
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const marginX = 8;
+    const startY = 28;
+    const bottomMargin = 8;
+
+    const gapX = 6;
+    const gapY = 8;
+
+    const cardWidth = (pageWidth - marginX * 2 - gapX * 2) / 3;
+    const cardHeight = (pageHeight - startY - bottomMargin - gapY) / 2;
+
+    const charts: PdfChartConfig[] = [
+      { component: this.disparosDiaChart, title: 'DISPAROS POR DÍA' },
+      ...this.obtenerParetosPDF().slice(0, 3),
+      { component: this.perforadoEquipoChart, title: 'PERFORADO POR EQUIPO' },
+      { component: this.mhrEquipoChart, title: 'M/HR POR EQUIPO' },
+    ];
+
+    const posiciones = [
+      { x: marginX, y: startY },
+      { x: marginX + cardWidth + gapX, y: startY },
+      { x: marginX + (cardWidth + gapX) * 2, y: startY },
+
+      { x: marginX, y: startY + cardHeight + gapY },
+      { x: marginX + cardWidth + gapX, y: startY + cardHeight + gapY },
+      { x: marginX + (cardWidth + gapX) * 2, y: startY + cardHeight + gapY },
+    ];
+
+    charts.slice(0, 6).forEach((chart, index) => {
+      if (!chart.component) return;
+
+      const image = obtenerImagenChart(chart.component);
+      if (!image) return;
+
       agregarGraficoEchartsPDFProporcional(
         pdf,
-        mapaCalorImage,
-        'MAPA DE CALOR - INICIACIÓN',
-        posiciones[5].x,
-        posiciones[5].y,
+        image,
+        chart.title,
+        posiciones[index].x,
+        posiciones[index].y,
         cardWidth,
         cardHeight,
       );
-    }
+    });
+  }
+
+  private agregarPaginaPerforadoHorometrosPDF(pdf: jsPDF): void {
+    pdf.addPage([297, 210]);
+
+    agregarCabeceraPDF(pdf, 'REPORTE OPERATIVO - PERFORADO Y HORÓMETROS');
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const marginX = 8;
+    const startY = 28;
+    const bottomMargin = 8;
+
+    const gapX = 6;
+    const gapY = 8;
+
+    const cardWidth = (pageWidth - marginX * 2 - gapX * 2) / 3;
+    const cardHeight = (pageHeight - startY - bottomMargin - gapY) / 2;
+
+    const charts: PdfChartConfig[] = [
+      { component: this.horometrosJumbosChart, title: 'HORÓMETROS JUMBOS' },
+      { component: this.totalHorometrosChart, title: 'TOTAL HORÓMETROS' },
+      { component: this.disparosTipoPerforacionChart, title: 'DISPAROS POR TIPO DE PERFORACIÓN' },
+      { component: this.promedioEstadosChart, title: 'HORAS PROMEDIO POR ESTADO' },
+    ];
+
+    const posiciones = [
+      { x: marginX, y: startY },
+      { x: marginX + cardWidth + gapX, y: startY },
+      { x: marginX + (cardWidth + gapX) * 2, y: startY },
+
+      { x: marginX, y: startY + cardHeight + gapY },
+      { x: marginX + cardWidth + gapX, y: startY + cardHeight + gapY },
+      { x: marginX + (cardWidth + gapX) * 2, y: startY + cardHeight + gapY },
+    ];
+
+    charts.slice(0, 6).forEach((chart, index) => {
+      if (!chart.component) return;
+
+      const image = obtenerImagenChart(chart.component);
+      if (!image) return;
+
+      agregarGraficoEchartsPDFProporcional(
+        pdf,
+        image,
+        chart.title,
+        posiciones[index].x,
+        posiciones[index].y,
+        cardWidth,
+        cardHeight,
+      );
+    });
   }
 
   private dibujarCardResumenCompacta(

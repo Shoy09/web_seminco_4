@@ -59,6 +59,7 @@ import {
   TipoFiltroDashboard,
 } from '../../../../../features/dashboard/models/dashboard-filtros.model';
 import { generarDiasEntreFechas, MESES_CORTOS, obtenerPeriodo, obtenerPeriodoDesdeKey, obtenerRangoSemanaISO, obtenerSemanaISO, parseFechaLocal, parseFechaSimple } from '../../../../../utils/fecha-utils';
+import { OperacionScoop } from '../../../../../models/OperacionScoop';
 
 
 
@@ -279,7 +280,7 @@ mapaEstados: Map<string, any> = new Map();
   cargarOperaciones() {
     const tipo = 'carguio';
 
-    this.operacionesService.getAllAprobados(tipo).subscribe({
+    this.operacionesService.getAllAprobados<OperacionScoop>(tipo).subscribe({
       next: (resp) => {
         this.operacionesOriginal = resp.data;
 

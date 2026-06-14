@@ -1,107 +1,156 @@
-<div class="filtro-fechas">
-  <div class="campo">
-    <label>Fecha inicio</label>
-    <input type="date" [(ngModel)]="fechaInicio">
-  </div>
-
-  <div class="campo">
-    <label>Fecha fin</label>
-    <input type="date" [(ngModel)]="fechaFin">
-  </div>
-
-  <div class="campo">
-  <label>Turno</label>
-  <select [(ngModel)]="turnoSeleccionado">
-    <option value="">Todos</option>
-    <option value="DÍA">Día</option>
-    <option value="NOCHE">Noche</option>
-  </select>
-</div>
-
-
-  <button class="btn-aplicar" (click)="aplicarFiltro()">
-    Aplicar
-  </button>
-
-  <button class="btn-aplicar" (click)="quitarFiltro()">
-    Quitar filtro
-  </button>
-
-  <button class="btn-aplicar">
-  Exportar PDF
-</button>
-
-<!-- <button class="btn-aplicar" (click)="toggleVista()">
-  {{ vistaPrincipal ? 'Ver gráfico de linea' : 'Gráficos principales' }}
-</button> -->
-
-</div>
-
-<div class="graficos-container" *ngIf="vistaPrincipal">
+<app-dashboard-filtros
+  [tiposFiltro]="tiposFiltro"
+  [mostrarPresentacion]="true"
+  [mostrarPdf]="true"
+  (aplicar)="aplicarFiltro($event)"
+  (quitar)="quitarFiltro()"
+  (presentacion)="Presentacion()"
+  (pdf)="generarPDF()"
+/>
+<div
+  *ngIf="vistaPrincipal"
+  class="grid grid-cols-1 gap-4 md:grid-cols-6 xl:grid-cols-12"
+>
   <!-- Hoja 1 pdf -->
-  <app-resumen class="full-width" [data]="resumen" data-page="1"></app-resumen>
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-resumen [data]="resumen" />
+  </div>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-pernos-equipo [data]="DataPernosPorEquipo" />
+  </div>
 
-  <app-pernos-equipo  [data]="DataPernosPorEquipo" data-page="1"></app-pernos-equipo>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-pernos-dia [data]="DataPernoDia" />
+  </div>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-pernos-labor [data]="DataPernosPorLabor" />
+  </div>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-pernos-instalados-tipo
+      [data]="DataPernosInstalados"
+    />
+  </div>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-rendimiento-equipo [data]="DataDMyUTI" />
+  </div>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-mhr-equipo [data]="dataMHREquipo" />
+  </div>
 
-  <app-pernos-dia [data]="dataPernoDia" data-page="1"></app-pernos-dia>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-perforado-equipo [data]="dataMetrosEquipo" />
+  </div>
 
-  <app-pernos-labor [data]="DataPernosPorLabor" data-page="1"></app-pernos-labor>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-horometros-equipo [data]="dataHorometrosEquipo" />
+  </div>
 
-  <app-rendimiento-equipo [data]="DataDMyUTI" data-page="1"></app-rendimiento-equipo>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-total-horometros [data]="dataHorometroGeneral" />
+  </div>
 
-  <app-demoras-operativas [data]="DataEstadosSOS" data-page="1"></app-demoras-operativas>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-grafica-pareto
+      [data]="DataEstadosSOS"
+      [titulo]="'PARETO - HORAS OPERATIVAS'"
+    />
+  </div>
 
-  <app-demoras-inoperativas [data]="dataDemoraIno" data-page="1"></app-demoras-inoperativas>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-grafica-pareto
+      [data]="dataDemoraIno"
+      [titulo]="'PARETO - HORAS NO OPERATIVAS'"
+    />
+  </div>
 
-  <app-horas-mantenimiento [data]="dataHoraMantenimiento" data-page="1"></app-horas-mantenimiento>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-grafica-pareto
+      [data]="dataHoraMantenimiento"
+      [titulo]="'PARETO - HORAS DE MANTENIMIENTO'"
+    />
+  </div>
 
-  <app-pernos-instalados-tipo [data]="dataPernosInstalados" data-page="1"></app-pernos-instalados-tipo>
+ <!--  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-pernos-minado-tipo
+      [data]="dataPernosMinadoTipo"
+    ></app-pernos-minado-tipo>
+  </div> -->
 
-  <app-mhr-equipo [data]="dataMHREquipo" data-page="1"></app-mhr-equipo>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-horas-primera-perforacion [data]="dataProcesoLaborFR" />
+  </div>
 
-  <app-metros-equipo [data]="dataMetrosEquipo" data-page="1"></app-metros-equipo>
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-detalle-equipo [data]="DataDetalleEquipo" />
+  </div>
 
-  <app-horometro-empernador [data]="dataHorometrosEquipo" data-page="1"></app-horometro-empernador>
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-detalle-sostenimiento
+      [data]="DataDetalleSostenimiento"
+    ></app-detalle-sostenimiento>
+  </div>
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-mejores-operadores [data]="dataFrPorOperadorTurno" />
+  </div>
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-ranking-operador [data]="dataFrPorOperadorTurno" />
+  </div>
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-observaciones [data]="dataLaborFRDetallado" />
+  </div>
 
-  <app-total-horometros [data]="dataHorometroGeneral" data-page="1"></app-total-horometros>
-
-   <!-- Hoja 2 pdf -->
-
-
-
-<app-pernos-minado-tipo [data]="dataPernosMinadoTipo" data-page="2"></app-pernos-minado-tipo>
-
-<app-horas-primera-perforacion [data]="dataProcesoLaborFR" data-page="3"></app-horas-primera-perforacion>
-
-<app-detalle-equipo class="full-width" [data]="dataIndicadores" data-page="4"></app-detalle-equipo>
-
-<app-detalle-sostenimiento class="full-width" [data]="dataIndicadoresLabor" data-page="5"></app-detalle-sostenimiento>
-
-<app-mejores-operadores class="full-width" [data]="dataFrPorOperadorTurno" data-page="5"></app-mejores-operadores>
-<app-ranking-operador [data]="dataFrPorOperadorTurno" data-page="5"></app-ranking-operador>
-
-  <app-observaciones class="full-width" [data]="dataLaborFRDetallado" data-page="5"></app-observaciones>
-
-     <app-scatter-turnos 
-  *ngIf="turnoAplicado === '' || turnoAplicado === 'DÍA'"
-  class="full-width"
-  [data]="dataHorasNumericas" data-page="6">
-</app-scatter-turnos>
-
-<app-scatter-turnos-noche 
-  *ngIf="turnoAplicado === '' || turnoAplicado === 'NOCHE'"
-  class="full-width"
-  [data]="dataHorasNumericas" data-page="6">
-</app-scatter-turnos-noche>
- 
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-mapa-de-calor [data]="dataMapaCalor" [turno]="turnoAplicado" />
+  </div>
 </div>
 
 <div class="graficos-container" *ngIf="!vistaPrincipal">
-
-<app-scheduler class="full-width" [data]="ganttData" data-page="6"></app-scheduler>
+  <app-scheduler [data]="ganttData" data-page="6"></app-scheduler>
 </div>
- 
+
 <div class="overlay" *ngIf="cargandoPDF">
   <div class="spinner"></div>
   <p>Generando PDF...</p>
-</div>  
+</div>
