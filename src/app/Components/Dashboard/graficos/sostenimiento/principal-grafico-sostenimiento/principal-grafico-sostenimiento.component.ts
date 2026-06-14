@@ -810,22 +810,24 @@ mapaEstados: Map<string, any> = new Map();
     return difDiesel + difElectrico;
   }
 
-  private calcularDuracionHoras(horaInicio: string, horaFinal: string): number {
-    if (!horaInicio || !horaFinal) return 0;
+  calcularDuracionHoras(horaInicio: string, horaFinal: string): number {
+  if (!horaInicio || !horaFinal) return 0;
 
-    const [h1, m1] = horaInicio.split(':').map(Number);
-    const [h2, m2] = horaFinal.split(':').map(Number);
+  const toMinutos = (hora: string): number => {
+    const [h, m] = hora.split(':').map(Number);
+    return h * 60 + m;
+  };
 
-    let inicio = h1 * 60 + m1;
-    let fin = h2 * 60 + m2;
+  let inicioMin = toMinutos(horaInicio);
+  let finalMin = toMinutos(horaFinal);
 
-    // 🔥 si cruza medianoche
-    if (fin < inicio) {
-      fin += 24 * 60;
-    }
-
-    return Number(((fin - inicio) / 60).toFixed(2));
+  // ✅ Si hora_final <= hora_inicio, significa que cruzó la medianoche
+  if (finalMin <= inicioMin) {
+    finalMin += 24 * 60; // sumamos 24h al final
   }
+
+  return (finalMin - inicioMin) / 60; // retorna en horas
+}
 
   //Grafico 5
   procesarDemorasOperativas() {

@@ -745,16 +745,23 @@ procesarIndicadoresEquipo() {
   });
 }
 
-calcularDuracionHoras(horaInicio: string, horaFinal: string): number {
+  calcularDuracionHoras(horaInicio: string, horaFinal: string): number {
   if (!horaInicio || !horaFinal) return 0;
 
-  const [h1, m1] = horaInicio.split(':').map(Number);
-  const [h2, m2] = horaFinal.split(':').map(Number);
+  const toMinutos = (hora: string): number => {
+    const [h, m] = hora.split(':').map(Number);
+    return h * 60 + m;
+  };
 
-  const inicio = h1 * 60 + m1;
-  const fin = h2 * 60 + m2;
+  let inicioMin = toMinutos(horaInicio);
+  let finalMin = toMinutos(horaFinal);
 
-  return (fin - inicio) / 60; // en horas
+  // ✅ Si hora_final <= hora_inicio, significa que cruzó la medianoche
+  if (finalMin <= inicioMin) {
+    finalMin += 24 * 60; // sumamos 24h al final
+  }
+
+  return (finalMin - inicioMin) / 60; // retorna en horas
 }
 
 calcularDuracionPorEstado(registros: any[], estadoBuscado: string, codigo?: string): number {
