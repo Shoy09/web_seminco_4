@@ -575,29 +575,28 @@ mapaEstados: Map<string, any> = new Map();
       };
     });
 
-    //console.log('📊 DM_SC + UTI_SC:', resultado);
+    console.log('📊 DM_SC + UTI_SC:', resultado);
     return resultado;
   }
 
-  calcularDuracionEstado(registros: any[], estado: string, codigo?: string) {
-    let total = 0;
+calcularDuracionEstado(registros: any[], estado: string, codigo?: string): number {
+  let total = 0;
 
-    for (const r of registros) {
-      if (r.estado !== estado) continue;
+  for (const r of registros) {
+    if (r.estado !== estado) continue;
+    if (codigo && r.codigo !== codigo) continue;
 
-      if (codigo && r.codigo !== codigo) continue;
+    const inicio = r.hora_inicio;
+    const fin = r.hora_final;
 
-      const inicio = r.hora_inicio;
-      const fin = r.hora_final;
+    if (!inicio || !fin) continue;
 
-      if (!inicio || !fin) continue;
-
-      const diff = this.calcularHoras(inicio, fin);
-      total += diff;
-    }
-
-    return total;
+    const diff = this.calcularDuracionHoras(inicio, fin); // ← era calcularHoras
+    total += diff;
   }
+
+  return total;
+}
 
   calcularHorasTrabajadas(op: any) {
     // ⚠️ IMPORTANTE: Las horas trabajadas son la diferencia de horometros
