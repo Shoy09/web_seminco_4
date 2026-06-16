@@ -1,0 +1,109 @@
+<form [formGroup]="createForm" (ngSubmit)="onSubmit()" class="form-container">
+  <div class="form-header">
+    <h2 class="form-title">📄 REGISTRO DE PDF</h2>
+    <div class="form-badge">Nuevo</div>
+  </div>
+
+  <div class="form-body">
+    <div class="form-group">
+      <label for="proceso">
+        <span class="label-icon">⚙️</span> PROCESO:
+        <span class="required">*</span>
+      </label>
+      <select id="proceso" formControlName="proceso" required class="form-select">
+        <option *ngFor="let proceso of procesos" [value]="proceso">
+          {{ proceso }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="mes">
+        <span class="label-icon">📅</span> MES:
+        <span class="required">*</span>
+      </label>
+      <select id="mes" formControlName="mes" required class="form-select">
+        <option *ngFor="let mes of meses" [value]="mes">
+          {{ mes }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="labor">
+        <span class="label-icon">🔍</span> LABOR:
+        <span class="required">*</span>
+      </label>
+      <div class="search-container">
+        <div class="input-group">
+          <input
+            id="labor"
+            type="text"
+            class="form-input search-input"
+            placeholder="Escribe o busca una labor..."
+            [(ngModel)]="searchTerm"
+            [ngModelOptions]="{standalone: true}"
+            (input)="onSearchInput($event)"
+            (focus)="onInputFocus()"
+            (blur)="onInputBlur()"
+            [disabled]="laboresCompletas.length === 0"
+            autocomplete="off"
+          />
+          <span class="input-icon">▼</span>
+        </div>
+        
+        <div *ngIf="showDropdown && laboresFiltradas.length > 0" class="dropdown-menu">
+          <div *ngFor="let labor of laboresFiltradas" 
+               class="dropdown-item"
+               (mousedown)="selectLabor(labor)">
+            <span class="labor-icon">📌</span>
+            {{ labor }}
+          </div>
+        </div>
+        
+        <div *ngIf="showDropdown && laboresFiltradas.length === 0 && laboresCompletas.length > 0" 
+             class="dropdown-menu no-results">
+          <span class="no-results-icon">🔍</span>
+          No se encontraron resultados
+        </div>
+      </div>
+      <small class="info-text">
+        💡 Puedes escribir manualmente o seleccionar de la lista
+      </small>
+    </div>
+
+    <div class="form-group">
+      <label for="pdf">
+        <span class="label-icon">📎</span> SELECCIONA PDF:
+        <span class="required">*</span>
+      </label>
+      <div class="file-upload-container">
+        <input
+          id="pdf"
+          type="file"
+          (change)="onFileSelected($event)"
+          accept="application/pdf"
+          required
+          class="form-file-input"
+        />
+        <label for="pdf" class="file-upload-label">
+          <span class="upload-icon">📤</span>
+          <span class="upload-text">Seleccionar archivo PDF</span>
+        </label>
+        <div *ngIf="pdfFile" class="file-info">
+          <span class="file-name">✅ {{ pdfFile.name }}</span>
+        </div>
+      </div>
+      <small *ngIf="createForm.get('pdf')?.hasError('invalidType')" class="error-message">
+        ⚠️ Por favor seleccione un archivo PDF válido
+      </small>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="button" class="btn-cancel" (click)="resetForm()">🗑️ LIMPIAR</button>
+    <button type="submit" class="btn-submit" [disabled]="!createForm.valid">
+      💾 GUARDAR
+    </button>
+  </div>
+</form>

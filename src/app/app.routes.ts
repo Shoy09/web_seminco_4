@@ -38,6 +38,7 @@ import { LineaPrincipalComponent } from './Components/Dashboard/graficos/Linea d
 import { PrincipalScissorComponents } from './Components/Jefe mina/aprobaciones/scissor_temp/principal/principal.component';
 import { PrincipalScalaminComponents } from './Components/Jefe mina/aprobaciones/scalamin/principal/principal.component';
 import { PrincipalAnfochargerComponents } from './Components/Jefe mina/aprobaciones/anfocharger/principal/principal.component';
+import { ListPdfComponent } from './Components/pdf/list-pdf/list-pdf.component';
 
 
 
@@ -99,6 +100,8 @@ export const routes: Routes = [
       { path: 'explosivos', component: ExplosivosComponent },
       { path: 'explosivos-graficos', component: ExplosivosGraficosComponent },
       { path: 'linea-de-tiempo', component: LineaPrincipalComponent },
+
+      { path: 'pdf', component: ListPdfComponent },
     ]
   },
 

@@ -53,6 +53,7 @@ export class MenuComponent {
         { title: 'Checklist', path: 'checklist' },
         { title: 'Checklist Carguio', path: 'checklist-telemando' },
         { title: 'Explosivos', path: 'explosivos' },
+        { title: 'PDF', path: 'pdf' },
       ],
     },
     {
