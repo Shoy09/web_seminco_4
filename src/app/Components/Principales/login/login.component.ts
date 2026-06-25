@@ -60,7 +60,7 @@ export class LoginComponent {
                 `${usuario.nombres || ''} ${usuario.apellidos || ''}`.trim();
 
               // Guardar datos en localStorage
-              localStorage.setItem('rol', usuario.rol || '');
+              localStorage.setItem('rol', usuario.rol_nombre || '');
               localStorage.setItem('nombre_completo', nombreCompleto);
 
               this.toast.success('Sesión iniciada con éxito');

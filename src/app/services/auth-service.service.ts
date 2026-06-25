@@ -47,5 +47,7 @@ getNombreCompleto(): string | null {
   // Método para eliminar el token (logout)
   logout(): void {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('rol');
+    localStorage.removeItem('nombre_completo');
   }
 }

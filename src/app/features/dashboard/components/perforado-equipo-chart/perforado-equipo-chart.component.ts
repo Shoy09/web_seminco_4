@@ -14,6 +14,7 @@ import {
   calcularZoomInicial,
   CHART_THEME,
 } from '../../../../config/chart-theme';
+import { exportarImagenChart, PdfExportOptions } from '../../../../config/config-pdf';
 
 echarts.use([
   BarChart,
@@ -57,16 +58,12 @@ export class PerforadoEquipoChartComponent implements OnChanges {
     this.chartInstance = ec;
   }
 
-  getChartImage(): string | null {
-    if (!this.chartInstance) return null;
-
-    return this.chartInstance.getDataURL({
-      type: 'jpeg',
-      pixelRatio: 1.2,
-      backgroundColor: '#FFFFFF',
-      excludeComponents: ['toolbox', 'dataZoom'],
-    });
-  }
+  getChartImage(options?: number | PdfExportOptions): string | null {
+      return exportarImagenChart(
+        this.chartInstance,
+        typeof options === 'number' ? { pixelRatio: options } : options,
+      );
+    }
 
   updateChart(): void {
     const normalizedData = this.normalizeData(this.data);

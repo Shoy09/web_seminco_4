@@ -348,7 +348,7 @@ export class LineaPrincipalComponent {
     data.forEach((op) => {
       const fecha = op.fecha || 'SIN_FECHA';
       const turno = op.turno || 'SIN_TURNO';
-      const equipoCodigo = `${op.equipo} - ${op.n_equipo}`;
+      const equipoCodigo = `${op.equipo.nombre} - ${op.equipo.modelo}`;
       const key = `${fecha}|${turno}`;
 
       if (!fechaMap[key]) {

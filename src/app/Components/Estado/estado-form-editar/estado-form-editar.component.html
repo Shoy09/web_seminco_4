@@ -3,11 +3,13 @@
   <!-- Header -->
   <div class="mb-6 border-b border-border pb-4">
     <h2 class="text-2xl font-extrabold text-secondary">
-      Editar Estado
+      {{ esEdicion ? 'Editar Estado' : 'Crear Estado' }}
     </h2>
 
     <p class="mt-1 text-sm text-ink-75">
-      Modifica la información del estado seleccionado.
+      {{ esEdicion
+        ? 'Modifica la información del estado seleccionado.'
+        : 'Registra un nuevo estado operativo.' }}
     </p>
   </div>
 
@@ -16,28 +18,6 @@
 
     <!-- Estado Principal / Código -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-
-      <div class="flex flex-col gap-2">
-        <label for="estado_principal" class="text-sm font-bold text-ink">
-          Estado Principal
-        </label>
-
-        <input
-          id="estado_principal"
-          pInputText
-          type="text"
-          formControlName="estado_principal"
-          placeholder="Ingrese estado principal"
-          class="w-full"
-        />
-
-        <small
-          class="text-danger"
-          *ngIf="estadoForm.get('estado_principal')?.invalid && estadoForm.get('estado_principal')?.touched"
-        >
-          El estado principal es obligatorio.
-        </small>
-      </div>
 
       <div class="flex flex-col gap-2">
         <label for="codigo" class="text-sm font-bold text-ink">
@@ -89,27 +69,53 @@
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="categoria" class="text-sm font-bold text-ink">
+        <label for="categoria_id" class="text-sm font-bold text-ink">
           Categoría
         </label>
 
-        <input
-          id="categoria"
-          pInputText
-          type="text"
-          formControlName="categoria"
-          placeholder="Ingrese categoría"
-          class="w-full"
-        />
+        <p-select
+          inputId="categoria_id"
+          [options]="categorias"
+          formControlName="categoria_id"
+          optionLabel="nombre"
+          optionValue="id"
+          placeholder="Seleccione categoría"
+          styleClass="w-full"
+          appendTo="body">
+        </p-select>
 
         <small
           class="text-danger"
-          *ngIf="estadoForm.get('categoria')?.invalid && estadoForm.get('categoria')?.touched"
+          *ngIf="estadoForm.get('categoria_id')?.invalid && estadoForm.get('categoria_id')?.touched"
         >
           La categoría es obligatoria.
         </small>
       </div>
 
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="proceso_id" class="text-sm font-bold text-ink">
+        Proceso
+      </label>
+
+      <p-select
+        inputId="proceso_id"
+        [options]="procesos"
+        formControlName="proceso_id"
+        optionLabel="nombre"
+        optionValue="id"
+        placeholder="Seleccione proceso"
+        styleClass="w-full"
+        appendTo="body">
+      </p-select>
+
+      <small
+        class="text-danger"
+        *ngIf="estadoForm.get('proceso_id')?.invalid && estadoForm.get('proceso_id')?.touched"
+      >
+        El proceso es obligatorio.
+      </small>
     </div>
 
     <!-- Botones -->
@@ -128,7 +134,7 @@
       <button
         pButton
         type="submit"
-        label="Guardar"
+        [label]="esEdicion ? 'Guardar' : 'Crear'"
         icon="pi pi-save"
         severity="success"
         [disabled]="estadoForm.invalid">

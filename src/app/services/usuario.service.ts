@@ -8,8 +8,7 @@ import { ApiService } from './api.service';
   providedIn: 'root'
 })
 export class UsuarioService {
-  private readonly endpoint = 'usuarios/usuarios'; // Define el endpoint específico para usuarios
-private readonly endpoint2 = 'usuarios'; 
+  private readonly endpoint = 'usuarios'; // Define el endpoint específico para usuarios
   constructor(private apiService: ApiService) {}
 
   obtenerUsuarios(): Observable<Usuario[]> {
@@ -20,7 +19,7 @@ private readonly endpoint2 = 'usuarios';
     return this.apiService.getDatos(`${this.endpoint}/${id}`);
   }
 
-  crearUsuario(usuario: Usuario): Observable<any> {
+  crearUsuario(usuario: Usuario): Observable<Usuario> {
     return this.apiService.postDatos(this.endpoint, usuario);
   }
 
@@ -51,7 +50,7 @@ actualizarOperacionesAutorizadas(id: number, operaciones: { [key: string]: boole
 }
 
 obtenerJefesGuardia(): Observable<Usuario[]> {
-    return this.apiService.getDatos(`${this.endpoint2}/guardia`);
+    return this.apiService.getDatos(`${this.endpoint}/guardia`);
   }
 
   

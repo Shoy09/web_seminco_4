@@ -79,7 +79,7 @@ export class MenuComponent {
           routerLink: ['/dashboard/grafico-sostenimiento'],
         },
         { label: 'Carguío', routerLink: ['/dashboard/grafico-scoops'] },
-        { label: 'Acarreo', routerLink: ['/dashboard/grafico-acarreo'] },
+        //{ label: 'Acarreo', routerLink: ['/dashboard/grafico-acarreo'] },
         { label: 'Explosivos', routerLink: ['/dashboard/explosivos-graficos'] },
         {
           label: 'Línea de tiempo',
@@ -108,6 +108,7 @@ export class MenuComponent {
       label: 'Carga de Datos',
       icon: 'pi pi-database',
       items: [
+        { label: 'Procesos', routerLink: ['/carga/procesos'] },
         { label: 'Estados', routerLink: ['/carga/estados'] },
         { label: 'Crear Data', routerLink: ['/carga/crear-data'] },
         { label: 'Checklist', routerLink: ['/carga/checklist'] },

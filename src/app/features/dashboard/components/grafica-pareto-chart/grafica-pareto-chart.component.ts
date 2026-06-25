@@ -24,6 +24,10 @@ import {
   CHART_THEME,
   CHART_TITLE_STYLE,
 } from '../../../../config/chart-theme';
+import {
+  exportarImagenChart,
+  PdfExportOptions,
+} from '../../../../config/config-pdf';
 
 echarts.use([
   BarChart,
@@ -69,15 +73,11 @@ export class GraficaParetoChartComponent implements OnChanges {
     this.chartInstance = ec;
   }
 
-  getChartImage(): string | null {
-    if (!this.chartInstance) return null;
-
-    return this.chartInstance.getDataURL({
-      type: 'jpeg',
-      pixelRatio: 1.2,
-      backgroundColor: '#FFFFFF',
-      excludeComponents: ['toolbox', 'dataZoom'],
-    });
+  getChartImage(options?: number | PdfExportOptions): string | null {
+    return exportarImagenChart(
+      this.chartInstance,
+      typeof options === 'number' ? { pixelRatio: options } : options,
+    );
   }
 
   getChartTitle(): string {
@@ -103,9 +103,7 @@ export class GraficaParetoChartComponent implements OnChanges {
         return Number(b.horasDemora || 0) - Number(a.horasDemora || 0);
       }
 
-      return String(a.actividad || '').localeCompare(
-        String(b.actividad || ''),
-      );
+      return String(a.actividad || '').localeCompare(String(b.actividad || ''));
     });
 
     const actividades = datosOrdenados.map(
@@ -116,9 +114,7 @@ export class GraficaParetoChartComponent implements OnChanges {
       Number(item.horasDemora || 0),
     );
 
-    const paretoAct = datosOrdenados.map((item) =>
-      Number(item.paretoAct || 0),
-    );
+    const paretoAct = datosOrdenados.map((item) => Number(item.paretoAct || 0));
 
     const maxHoras = Math.max(...horasDemora, 1);
     const escalaMaxHoras = Math.ceil(maxHoras / 5) * 5;
@@ -162,11 +158,8 @@ export class GraficaParetoChartComponent implements OnChanges {
       },
 
       grid: {
-        left: '8%',
-        right: '8%',
-        top: '22%',
-        bottom: '14%',
-        containLabel: true,
+        ...CHART_THEME.grid,
+        bottom: 80,
       },
 
       xAxis: {
@@ -250,30 +243,13 @@ export class GraficaParetoChartComponent implements OnChanges {
           name: 'Horas demora',
           type: 'bar',
           yAxisIndex: 0,
-          barWidth: CHART_THEME.bar.barWidth,
           data: horasDemora.map((valor) => ({
             value: valor,
             itemStyle: {
               color: CHART_THEME.colors.primary,
             },
           })),
-          itemStyle: {
-            borderRadius: [6, 6, 0, 0],
-            ...CHART_BAR_SHADOW,
-          },
-          label: {
-            show: true,
-            position: 'top',
-            formatter: (params: any) => {
-              return `${Number(params.value).toFixed(2)} h`;
-            },
-            fontWeight: 'bold',
-            fontSize: 10,
-            color: CHART_THEME.colors.secondary,
-          },
-          emphasis: {
-            focus: 'series',
-          },
+          ...CHART_THEME.barPareto,
         },
         {
           name: 'Pareto acumulado',
@@ -316,7 +292,10 @@ export class GraficaParetoChartComponent implements OnChanges {
   ): ParetoChartItem {
     const typedItem = item as ParetoChartItem;
 
-    if (typedItem.actividad !== undefined && typedItem.horasDemora !== undefined) {
+    if (
+      typedItem.actividad !== undefined &&
+      typedItem.horasDemora !== undefined
+    ) {
       return {
         actividad: typedItem.actividad,
         horasDemora: Number(typedItem.horasDemora || 0),
@@ -336,7 +315,9 @@ export class GraficaParetoChartComponent implements OnChanges {
       porcentajeHoras: Number(legacyItem['porcentajeHoras'] || 0),
       totalHorasDemora: Number(legacyItem['totalHorasDemora'] || 0),
       cantidadRegistros: Number(legacyItem['cantidadRegistros'] || 0),
-      codigos: Array.isArray(legacyItem['codigos']) ? legacyItem['codigos'] : [],
+      codigos: Array.isArray(legacyItem['codigos'])
+        ? legacyItem['codigos']
+        : [],
     };
   }
 }

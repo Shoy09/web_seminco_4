@@ -18,6 +18,10 @@ import {
   calcularZoomInicial,
   CHART_THEME,
 } from '../../../../config/chart-theme';
+import {
+  exportarImagenChart,
+  PdfExportOptions,
+} from '../../../../config/config-pdf';
 
 echarts.use([
   BarChart,
@@ -48,7 +52,9 @@ type LegacyRendimientoEquipoItem = Record<string, any>;
   styleUrl: './rendimiento-equipo-chart.component.css',
 })
 export class RendimientoEquipoChartComponent implements OnChanges {
-  @Input() data: Array<RendimientoEquipoChartItem | LegacyRendimientoEquipoItem> = [];
+  @Input() data: Array<
+    RendimientoEquipoChartItem | LegacyRendimientoEquipoItem
+  > = [];
 
   chartOptions: any = {};
   private chartInstance: any;
@@ -57,15 +63,11 @@ export class RendimientoEquipoChartComponent implements OnChanges {
     this.chartInstance = ec;
   }
 
-  getChartImage(): string | null {
-    if (!this.chartInstance) return null;
-
-    return this.chartInstance.getDataURL({
-      type: 'jpeg',
-      pixelRatio: 1.2,
-      backgroundColor: '#FFFFFF',
-      excludeComponents: ['toolbox', 'dataZoom'],
-    });
+  getChartImage(options?: number | PdfExportOptions): string | null {
+    return exportarImagenChart(
+      this.chartInstance,
+      typeof options === 'number' ? { pixelRatio: options } : options,
+    );
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -141,6 +143,7 @@ export class RendimientoEquipoChartComponent implements OnChanges {
 
       grid: {
         ...CHART_THEME.grid,
+        bottom: 80,
       },
 
       dataZoom:
@@ -190,44 +193,13 @@ export class RendimientoEquipoChartComponent implements OnChanges {
           name: 'DM',
           type: 'bar',
           data: dmData,
-          barWidth: CHART_THEME.bar.barWidth,
-          barGap: '20%',
-
-          itemStyle: {
-            ...CHART_THEME.bar.itemStyle,
-            color: CHART_THEME.colors.primary,
-            borderRadius: [6, 6, 0, 0],
-          },
-
-          label: {
-            ...CHART_THEME.bar.label,
-            show: true,
-            position: 'top',
-            color: CHART_THEME.colors.secondary,
-            formatter: '{c}%',
-            fontWeight: 'bold',
-          },
+          ...CHART_THEME.barDM,
         },
         {
           name: 'UTI',
           type: 'bar',
           data: utiData,
-          barWidth: CHART_THEME.bar.barWidth,
-
-          itemStyle: {
-            ...CHART_THEME.bar.itemStyle,
-            color: CHART_THEME.colors.secondary,
-            borderRadius: [6, 6, 0, 0],
-          },
-
-          label: {
-            ...CHART_THEME.bar.label,
-            show: true,
-            position: 'top',
-            color: CHART_THEME.colors.secondary,
-            formatter: '{c}%',
-            fontWeight: 'bold',
-          },
+          ...CHART_THEME.barDM,
         },
       ],
     };

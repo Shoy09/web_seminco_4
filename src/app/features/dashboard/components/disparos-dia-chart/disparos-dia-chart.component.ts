@@ -17,6 +17,10 @@ import {
   CHART_THEME,
   getTurnoColor,
 } from '../../../../config/chart-theme';
+import {
+  exportarImagenChart,
+  PdfExportOptions,
+} from '../../../../config/config-pdf';
 
 echarts.use([
   BarChart,
@@ -51,15 +55,11 @@ export class DisparosDiaChartComponent implements OnChanges {
     this.chartInstance = ec;
   }
 
-  getChartImage(): string | null {
-    if (!this.chartInstance) return null;
-
-    return this.chartInstance.getDataURL({
-      type: 'jpeg',
-      pixelRatio: 1.2,
-      backgroundColor: '#FFFFFF',
-      excludeComponents: ['toolbox', 'dataZoom'],
-    });
+  getChartImage(options?: number | PdfExportOptions): string | null {
+    return exportarImagenChart(
+      this.chartInstance,
+      typeof options === 'number' ? { pixelRatio: options } : options,
+    );
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -103,10 +103,7 @@ export class DisparosDiaChartComponent implements OnChanges {
         name: turno,
         type: 'bar',
         stack: 'total',
-        barWidth: CHART_THEME.bar.barWidth,
-        barMaxWidth: this.calcularAnchoMaximoBarra(fechas.length),
-        barMinWidth: 14,
-
+        barWidth: 40,
         data: fechas.map((fecha) => {
           const item = data.find(
             (d) => d.fecha === fecha && (d.turno || 'SIN TURNO') === turno,
@@ -114,7 +111,6 @@ export class DisparosDiaChartComponent implements OnChanges {
 
           return item ? Number(item.n_frentes || 0) : 0;
         }),
-
         itemStyle: {
           ...CHART_THEME.bar.itemStyle,
           color: getTurnoColor(turno),
@@ -265,9 +261,7 @@ export class DisparosDiaChartComponent implements OnChanges {
         {
           type: 'bar',
           data: seriesData,
-          barWidth: CHART_THEME.bar.barWidth,
-          barMaxWidth: this.calcularAnchoMaximoBarra(data.length),
-          barMinWidth: 14,
+          barWidth: 40,
           itemStyle: {
             ...CHART_THEME.bar.itemStyle,
             color: CHART_THEME.colors.primary,
@@ -310,15 +304,6 @@ export class DisparosDiaChartComponent implements OnChanges {
     ];
 
     return `${fecha.getDate()} ${meses[fecha.getMonth()]}`;
-  }
-
-  private calcularAnchoMaximoBarra(cantidadFechas: number): number {
-    if (cantidadFechas <= 1) return 55;
-    if (cantidadFechas <= 3) return 55;
-    if (cantidadFechas <= 7) return 55;
-    if (cantidadFechas <= 15) return 55;
-
-    return 60;
   }
 
   calcularIntervalo(max: number): number {

@@ -3,7 +3,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ReactiveFormsModule } from '@angular/forms';
-import { SeleccionProcesoDialogComponent } from '../seleccion-proceso-dialog/seleccion-proceso-dialog.component';
 import { CheckListItem } from '../../../../models/checklist-item.model';
 import { CheckListItemService } from '../../../../services/checklist-item.service';
 import { ConfirmDialogComponent } from '../../../Estado/confirm-dialog/confirm-dialog.component';
@@ -85,7 +84,7 @@ export class CheckListListaComponent implements OnInit {
   }
 
   abrirSeleccionProcesoDialogo() {
-    const dialogRef = this.dialog.open(SeleccionProcesoDialogComponent, {
+    /* const dialogRef = this.dialog.open(SeleccionProcesoDialogComponent, {
       width: '95vw',
       maxWidth: '1200px',
       maxHeight: '90vh',
@@ -96,7 +95,7 @@ export class CheckListListaComponent implements OnInit {
     dialogRef.afterClosed().subscribe((procesoSeleccionado) => {
       if (procesoSeleccionado) {
       }
-    });
+    }); */
   }
 
   // abrirDialogoOpciones() {

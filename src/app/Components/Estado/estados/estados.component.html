@@ -1,5 +1,6 @@
-<div class="mx-auto w-[95%] max-w-7xl rounded-2xl border border-border bg-surface p-5 shadow-sm">
-
+<div
+  class="mx-auto w-[95%] max-w-7xl rounded-2xl border border-border bg-surface p-5 shadow-sm"
+>
   <p-table
     #dt
     [value]="estados"
@@ -11,22 +12,20 @@
       'codigo',
       'tipo_estado',
       'categoria',
-      'proceso'
+      'proceso',
     ]"
     [tableStyle]="{ 'min-width': '950px' }"
     styleClass="p-datatable-sm"
     [showGridlines]="true"
   >
-
     <!-- HEADER / ACCIONES -->
     <ng-template pTemplate="caption">
       <div class="flex flex-col gap-4">
-
-        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div
+          class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+        >
           <div>
-            <h2 class="text-2xl font-extrabold text-secondary">
-              Estados
-            </h2>
+            <h2 class="text-2xl font-extrabold text-secondary">Estados</h2>
             <p class="mt-1 text-sm text-ink-75">
               Gestión de estados, códigos, categorías y procesos operativos.
             </p>
@@ -38,21 +37,54 @@
             label="Crear Nuevo"
             icon="pi pi-plus"
             class="p-button-success"
-            (click)="abrirSeleccionProcesoDialogo()">
-          </button>
+            (click)="abrirDialogoCrear()"
+          ></button>
         </div>
 
-        <!-- BUSCADOR -->
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <span class="p-input-icon-left w-full sm:max-w-md">
+        <div
+          class="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_220px_220px_auto] lg:items-center"
+        >
+          <span class="p-input-icon-left w-full">
             <input
               pInputText
               type="text"
               class="w-full"
               placeholder="Buscar por estado, código, categoría o proceso"
-              (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+              [(ngModel)]="filtroGlobal"
+              [ngModelOptions]="{ standalone: true }"
+              (input)="dt.filterGlobal(filtroGlobal, 'contains')"
             />
           </span>
+
+          <p-select
+            inputId="filtro-categoria"
+            [options]="categorias"
+            [(ngModel)]="categoriaSeleccionada"
+            [ngModelOptions]="{ standalone: true }"
+            optionLabel="nombre"
+            optionValue="nombre"
+            placeholder="Filtrar categoría"
+            styleClass="w-full"
+            appendTo="body"
+            [showClear]="true"
+            (onChange)="aplicarFiltroCategoria(dt)"
+          >
+          </p-select>
+
+          <p-select
+            inputId="filtro-proceso"
+            [options]="procesos"
+            [(ngModel)]="procesoSeleccionado"
+            [ngModelOptions]="{ standalone: true }"
+            optionLabel="nombre"
+            optionValue="nombre"
+            placeholder="Filtrar proceso"
+            styleClass="w-full"
+            appendTo="body"
+            [showClear]="true"
+            (onChange)="aplicarFiltroProceso(dt)"
+          >
+          </p-select>
 
           <button
             pButton
@@ -60,31 +92,19 @@
             label="Limpiar"
             icon="pi pi-filter-slash"
             class="p-button-outlined p-button-secondary"
-            (click)="dt.clear()">
-          </button>
+            (click)="limpiarFiltros(dt)"
+          ></button>
         </div>
-
       </div>
     </ng-template>
 
     <!-- CABECERA -->
     <ng-template pTemplate="header">
       <tr>
-        <th pSortableColumn="estado_principal">
-          Estado Principal
-          <p-sortIcon field="estado_principal"></p-sortIcon>
-        </th>
-
         <th pSortableColumn="codigo">
           Código
           <p-sortIcon field="codigo"></p-sortIcon>
         </th>
-
-        <th pSortableColumn="tipo_estado">
-          Tipo de Estado
-          <p-sortIcon field="tipo_estado"></p-sortIcon>
-        </th>
-
         <th pSortableColumn="categoria">
           Categoría
           <p-sortIcon field="categoria"></p-sortIcon>
@@ -94,10 +114,12 @@
           Proceso
           <p-sortIcon field="proceso"></p-sortIcon>
         </th>
-
-        <th class="text-center">
-          Acciones
+        <th pSortableColumn="tipo_estado">
+          Tipo de Estado
+          <p-sortIcon field="tipo_estado"></p-sortIcon>
         </th>
+
+        <th class="text-center">Acciones</th>
       </tr>
     </ng-template>
 
@@ -105,44 +127,38 @@
     <ng-template pTemplate="body" let-estado>
       <tr>
         <td>
-          <span class="font-semibold text-ink">
-            {{ estado.estado_principal }}
-          </span>
-        </td>
-
-        <td>
-          <span class="inline-flex rounded-full bg-primary-25 px-3 py-1 text-xs font-bold text-secondary">
+          <span
+            class="inline-flex rounded-full bg-primary-25 px-3 py-1 text-xs font-bold text-secondary"
+          >
             {{ estado.codigo }}
           </span>
         </td>
-
-        <td>
-          {{ estado.tipo_estado }}
-        </td>
-
         <td>
           <span class="text-sm text-ink-75">
             {{ estado.categoria }}
           </span>
         </td>
-
         <td>
-          <span class="inline-flex rounded-full border border-primary-50 bg-surface-soft px-3 py-1 text-xs font-bold text-secondary">
+          <span
+            class="inline-flex rounded-full border border-primary-50 bg-surface-soft px-3 py-1 text-xs font-bold text-secondary"
+          >
             {{ estado.proceso }}
           </span>
+        </td>
+        <td>
+          {{ estado.tipo_estado }}
         </td>
 
         <td>
           <div class="flex items-center justify-center gap-2">
-
             <button
               pButton
               type="button"
               icon="pi pi-pencil"
               class="p-button-rounded p-button-text p-button-info"
               title="Editar"
-              (click)="abrirDialogoEditar(estado)">
-            </button>
+              (click)="abrirDialogoEditar(estado)"
+            ></button>
 
             <button
               pButton
@@ -150,9 +166,8 @@
               icon="pi pi-trash"
               class="p-button-rounded p-button-text p-button-danger"
               title="Eliminar"
-              (click)="eliminarEstado(estado.id)">
-            </button>
-
+              (click)="eliminarEstado(estado.id)"
+            ></button>
           </div>
         </td>
       </tr>
@@ -162,14 +177,14 @@
     <ng-template pTemplate="emptymessage">
       <tr>
         <td colspan="6">
-          <div class="flex flex-col items-center justify-center gap-2 py-8 text-ink-75">
+          <div
+            class="flex flex-col items-center justify-center gap-2 py-8 text-ink-75"
+          >
             <i class="pi pi-info-circle text-2xl"></i>
             <span class="font-semibold">No hay estados registrados</span>
           </div>
         </td>
       </tr>
     </ng-template>
-
   </p-table>
-
 </div>

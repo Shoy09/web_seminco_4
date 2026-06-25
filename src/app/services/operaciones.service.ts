@@ -66,6 +66,19 @@ getAllAprobados<TOperacion = TipoOperacionRegistro>(
   );
 }
 
+getAprobadosPorFiltros<TOperacion = TipoOperacionRegistro>(
+  tipo: string,
+  fecha: string,
+  turno: string,
+): Observable<{ ok: boolean; data: OperacionBase<TOperacion>[] }> {
+  return this.apiService.getDatos<{
+    ok: boolean;
+    data: OperacionBase<TOperacion>[];
+  }>(
+    `${this.baseUrl}/filtros/${tipo}?fecha=${encodeURIComponent(fecha)}&turno=${encodeURIComponent(turno)}`,
+  );
+}
+
   getActualizados(): Observable<boolean> {
     return this.actualizados.asObservable();
   }

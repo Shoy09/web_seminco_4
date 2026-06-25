@@ -1,9 +1,9 @@
 export interface Horometros {
-    diesel:    Diesel;
-    electrico: Diesel;
-    percusion: Diesel;
+    diesel:    Horometro;
+    electrico: Horometro;
+    percusion: Horometro;
 }
-export interface Diesel {
+export interface Horometro {
     inicio: number;
     final:  number;
     op:     boolean;

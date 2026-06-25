@@ -14,6 +14,10 @@ import {
   CHART_THEME,
   calcularZoomInicial,
 } from '../../../../../../../config/chart-theme';
+import {
+  exportarImagenChart,
+  PdfExportOptions,
+} from '../../../../../../../config/config-pdf';
 
 echarts.use([
   BarChart,
@@ -51,14 +55,11 @@ export class PernosEquipoComponent implements OnChanges {
     this.chartInstance = ec;
   }
 
-  getChartImage(): string | null {
-    if (!this.chartInstance) return null;
-    return this.chartInstance.getDataURL({
-      type: 'jpeg',
-      pixelRatio: 1.2,
-      backgroundColor: '#FFFFFF',
-      excludeComponents: ['toolbox', 'dataZoom'],
-    });
+  getChartImage(options?: number | PdfExportOptions): string | null {
+    return exportarImagenChart(
+      this.chartInstance,
+      typeof options === 'number' ? { pixelRatio: options } : options,
+    );
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -267,9 +268,8 @@ export class PernosEquipoComponent implements OnChanges {
         nameGap: 45,
         min: 0,
         max: yAxisMax,
-        interval: this.calcularIntervalo(yAxisMax),
         axisLabel: {
-          show: false,
+          show: true,
         },
       },
 

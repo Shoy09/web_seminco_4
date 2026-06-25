@@ -16,6 +16,7 @@ import {
 
 import { CanvasRenderer } from 'echarts/renderers';
 
+import { PdfExportOptions, exportarImagenChart } from '../../../../config/config-pdf';
 import {
   CHART_LINE_STYLE,
   CHART_SPLIT_LINE,
@@ -60,15 +61,11 @@ export class RankingOperadorComponent implements OnChanges {
     this.chartInstance = ec;
   }
 
-  getChartImage(pixelRatio: number = 2): string | null {
-    if (!this.chartInstance) return null;
-
-    return this.chartInstance.getDataURL({
-      type: 'jpeg',
-      pixelRatio,
-      backgroundColor: '#FFFFFF',
-      excludeComponents: ['toolbox', 'dataZoom'],
-    });
+  getChartImage(options?: number | PdfExportOptions): string | null {
+    return exportarImagenChart(
+      this.chartInstance,
+      typeof options === 'number' ? { pixelRatio: options } : options,
+    );
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -152,8 +149,6 @@ export class RankingOperadorComponent implements OnChanges {
       legend: {
         ...CHART_THEME.legend,
         data: ['Metros', 'M/HR'],
-        top: 45,
-        bottom: undefined,
       },
 
       toolbox: {
@@ -247,7 +242,7 @@ export class RankingOperadorComponent implements OnChanges {
           type: 'bar',
           yAxisIndex: 0,
           data: metrosPerforados,
-          barWidth: '45%',
+          barWidth: CHART_THEME.bar.barWidth,
           z: 1,
 
           itemStyle: {
@@ -260,7 +255,7 @@ export class RankingOperadorComponent implements OnChanges {
             ...CHART_THEME.bar.label,
             show: true,
             position: 'top',
-            color: colores[0],
+            color: CHART_THEME.colors.secondary,
             fontSize: 11,
             formatter: (params: any) =>
               Number(params.value || 0).toLocaleString('en-US', {

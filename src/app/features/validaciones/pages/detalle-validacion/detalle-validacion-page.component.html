@@ -26,13 +26,6 @@
 
   <ng-container *ngIf="!loading && draft">
     <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm">
-      <div class="mb-4 flex items-center justify-between gap-3">
-        <div>
-          <h2 class="text-xl font-black text-secondary">Datos generales</h2>
-          <p class="text-sm text-ink-75">Cabecera del registro y contexto de la operacion.</p>
-        </div>
-      </div>
-
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div class="flex flex-col gap-2">
           <label class="text-sm font-bold text-ink">Fecha</label>
@@ -52,19 +45,15 @@
         </div>
         <div class="flex flex-col gap-2">
           <label class="text-sm font-bold text-ink">Equipo</label>
-          <input pInputText [(ngModel)]="draft.equipo" [disabled]="true" />
+          <input pInputText [(ngModel)]="draft.equipo.nombre" [disabled]="true" />
         </div>
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-bold text-ink">Codigo equipo</label>
-          <input pInputText [(ngModel)]="draft.n_equipo" [disabled]="true" />
+          <label class="text-sm font-bold text-ink">Modelo</label>
+          <input pInputText [(ngModel)]="draft.equipo.modelo" [disabled]="true" />
         </div>
         <div class="flex flex-col gap-2">
           <label class="text-sm font-bold text-ink">Seccion</label>
           <input pInputText [(ngModel)]="draft.seccion" [disabled]="true" />
-        </div>
-        <div class="flex flex-col gap-2">
-          <label class="text-sm font-bold text-ink">Modelo</label>
-          <input pInputText [(ngModel)]="draft.modelo_equipo" [disabled]="true" />
         </div>
       </div>
     </section>

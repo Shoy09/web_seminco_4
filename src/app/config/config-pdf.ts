@@ -16,6 +16,76 @@ export interface PdfChartConfig {
   title: string;
 }
 
+export interface PdfExportOptions {
+  pixelRatio?: number;
+  exportWidth?: number;
+  exportHeight?: number;
+  gridTop?: string;
+  gridBottom?: string;
+  gridLeft?: string;
+  gridRight?: string;
+}
+
+export function exportarImagenChart(
+  chartInstance: any,
+  options?: PdfExportOptions,
+): string | null {
+  if (!chartInstance) return null;
+
+  const pixelRatio = options?.pixelRatio ?? 2;
+  const exportWidth = options?.exportWidth;
+  const exportHeight = options?.exportHeight;
+  const gridTop = options?.gridTop;
+  const gridBottom = options?.gridBottom;
+  const gridLeft = options?.gridLeft;
+  const gridRight = options?.gridRight;
+
+  const needsResize = exportWidth !== undefined || exportHeight !== undefined;
+  let originalWidth: number | undefined;
+  let originalHeight: number | undefined;
+  let originalGrid: any;
+
+  if (needsResize) {
+    originalWidth = chartInstance.getWidth();
+    originalHeight = chartInstance.getHeight();
+
+    const currentOption = chartInstance.getOption();
+    originalGrid = currentOption.grid;
+
+    chartInstance.resize({
+      width: exportWidth ?? originalWidth,
+      height: exportHeight ?? originalHeight,
+    });
+
+    const gridUpdate: any = {};
+    if (gridTop) gridUpdate.top = gridTop;
+    if (gridBottom) gridUpdate.bottom = gridBottom;
+    if (gridLeft) gridUpdate.left = gridLeft;
+    if (gridRight) gridUpdate.right = gridRight;
+    chartInstance.setOption({ grid: gridUpdate });
+  }
+
+  const image = chartInstance.getDataURL({
+    type: 'jpeg',
+    pixelRatio,
+    backgroundColor: '#FFFFFF',
+    excludeComponents: ['toolbox', 'dataZoom'],
+  });
+
+  if (needsResize) {
+    chartInstance.resize({
+      width: originalWidth,
+      height: originalHeight,
+    });
+
+    if (originalGrid) {
+      chartInstance.setOption({ grid: originalGrid });
+    }
+  }
+
+  return image;
+}
+
 export interface PdfTablaContinuaConfig {
   tituloReporte: string;
   tituloTabla: string;
@@ -404,6 +474,7 @@ export function agregarGraficoEchartsPDFProporcional(
   height: number,
   padding: number = 1.5,
   modoAjuste: 'proporcional' | 'rellenar' = 'proporcional',
+  zoomProporcional: number = 1,
 ): void {
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(7);
@@ -440,6 +511,32 @@ export function agregarGraficoEchartsPDFProporcional(
 
     drawX = contentX + (contentWidth - drawWidth) / 2;
     drawY = contentY + (contentHeight - drawHeight) / 2;
+
+    if (zoomProporcional !== 1) {
+      const zoomSeguro = Math.max(zoomProporcional, 0.1);
+
+      drawWidth *= zoomSeguro;
+      drawHeight *= zoomSeguro;
+      drawX = contentX + (contentWidth - drawWidth) / 2;
+      drawY = contentY + (contentHeight - drawHeight) / 2;
+    }
+  }
+
+  const requiereClip =
+    drawX < contentX ||
+    drawY < contentY ||
+    drawX + drawWidth > contentX + contentWidth ||
+    drawY + drawHeight > contentY + contentHeight;
+
+  if (requiereClip) {
+    const internalPdf = pdf.internal as any;
+    const clipX = internalPdf.getCoordinateString(contentX);
+    const clipY = internalPdf.getVerticalCoordinateString(contentY);
+    const clipWidth = internalPdf.getCoordinateString(contentWidth);
+    const clipHeight = internalPdf.getCoordinateString(-contentHeight);
+
+    pdf.saveGraphicsState();
+    internalPdf.write(`${clipX} ${clipY} ${clipWidth} ${clipHeight} re W n`);
   }
 
   pdf.addImage(
@@ -452,6 +549,10 @@ export function agregarGraficoEchartsPDFProporcional(
     undefined,
     'MEDIUM',
   );
+
+  if (requiereClip) {
+    pdf.restoreGraphicsState();
+  }
 }
 
 export function agregarPaginaGraficoCompleto(

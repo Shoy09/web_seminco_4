@@ -5,12 +5,12 @@
   <div class="info-perfil">
     <div class="imagenes-perfil">
       <img src="usuario/user1.png" alt="Foto de perfil" class="foto-perfil" />
-      <img
+      <!-- <img
         [src]="usuario?.firma ? usuario?.firma : 'usuario/firma.png'"
         alt="Firma"
         class="firma"
         (click)="mostrarFirmaGrande = true"
-      />
+      /> -->
     </div>
 
     <div class="info-texto">
@@ -22,7 +22,7 @@
   </div>
 </div>
 
-<div
+<!-- <div
   class="modal-firma"
   *ngIf="mostrarFirmaGrande"
   (click)="mostrarFirmaGrande = false"
@@ -38,7 +38,7 @@
       <button (click)="eliminarFirma()">Eliminar firma</button>
     </div>
   </div>
-</div>
+</div> -->
 
 <!-- Información detallada -->
 <div class="contenedor-detalles-perfil">
@@ -74,8 +74,8 @@
     </div>
 
     <div class="detalle">
-      <strong>Equipo Autorizado</strong>
-      <span>{{ usuario?.autorizado_equipo }}</span>
+      <strong>Equipos</strong>
+      <!-- <span>{{ usuario?.equipos?.map((e) => e.nombre)?.join(', ') }}</span> -->
       <hr />
     </div>
 
@@ -87,15 +87,9 @@
   </div>
 </div>
 
-<div class="modal-exito" *ngIf="mensajeExito">
-  <div class="modal-content-exito">
-    <p>✅ Cambios guardados correctamente.</p>
-  </div>
-</div>
-
-<app-editar-perfil-dialog
+<!-- <app-editar-perfil-dialog
   [(visible)]="editando"
   [usuario]="usuario"
   (guardarPerfil)="guardarEdicionUsuario($event)"
 >
-</app-editar-perfil-dialog>
+</app-editar-perfil-dialog> -->

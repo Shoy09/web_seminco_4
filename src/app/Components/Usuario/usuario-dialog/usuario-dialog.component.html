@@ -1,39 +1,14 @@
-<div class="w-full rounded-2xl bg-surface p-6 shadow-xl">
-
-  <!-- Header -->
-  <div class="mb-6 flex items-center justify-between border-b border-border pb-4">
-    <div>
-      <h2 class="text-2xl font-extrabold text-secondary">
-        {{ editMode ? 'Editar Usuario' : 'Nuevo Usuario' }}
-      </h2>
-
-      <p class="mt-1 text-sm text-ink-75">
-        Complete la información del usuario y sus operaciones autorizadas.
-      </p>
-    </div>
-
-    <button
-      pButton
-      type="button"
-      icon="pi pi-times"
-      severity="secondary"
-      text="true"
-      rounded="true"
-      (click)="cancelar()">
-    </button>
-  </div>
-
-  <!-- Formulario -->
+<p-dialog
+  [header]="editMode ? 'Editar Usuario' : 'Nuevo Usuario'"
+  [modal]="true"
+  [(visible)]="dialogVisible"
+  (onHide)="onHide()"
+  [style]="{ width: '50rem' }"
+>
   <form [formGroup]="usuarioForm" class="space-y-5">
-
-    <!-- DNI / Nombre -->
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">
-          DNI
-        </label>
-
+        <label class="text-sm font-bold text-ink"> DNI </label>
         <input
           pInputText
           type="text"
@@ -44,10 +19,7 @@
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">
-          Nombre
-        </label>
-
+        <label class="text-sm font-bold text-ink"> Nombres </label>
         <input
           pInputText
           type="text"
@@ -57,16 +29,8 @@
         />
       </div>
 
-    </div>
-
-    <!-- Apellidos / Correo -->
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">
-          Apellidos
-        </label>
-
+        <label class="text-sm font-bold text-ink"> Apellidos </label>
         <input
           pInputText
           type="text"
@@ -75,177 +39,123 @@
           class="w-full"
         />
       </div>
-
-      <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">
-          Correo
-        </label>
-
-        <input
-          pInputText
-          type="email"
-          formControlName="correo"
-          placeholder="correo@empresa.com"
-          class="w-full"
-        />
-      </div>
-
     </div>
 
-    <!-- Cargo / Empresa -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">
-          Cargo
-        </label>
-
+        <label class="text-sm font-bold text-ink"> Cargo </label>
         <p-select
-          [options]="cargos"
-          formControlName="cargo"
+          [options]="cargosDisponibles"
+          optionLabel="nombre"
+          optionValue="id"
+          formControlName="cargo_id"
           placeholder="Seleccione cargo"
           styleClass="w-full"
-          appendTo="body">
-        </p-select>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">
-          Empresa
-        </label>
-
-        <input
-          pInputText
-          type="text"
-          formControlName="empresa"
-          placeholder="Ingrese empresa"
-          class="w-full"
-        />
-      </div>
-
-    </div>
-
-    <!-- Guardia / Autorizado Equipo -->
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-
-      <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">
-          Guardia
-        </label>
-
-        <input
-          pInputText
-          type="text"
-          formControlName="guardia"
-          placeholder="Ingrese guardia"
-          class="w-full"
+          appendTo="body"
         />
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">
-          Autorizado Equipo
-        </label>
-
-        <input
-          pInputText
-          type="text"
-          formControlName="autorizado_equipo"
-          placeholder="Equipo autorizado"
-          class="w-full"
-        />
-      </div>
-
-    </div>
-
-    <!-- Rol -->
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-
-      <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">
-          Rol
-        </label>
-
+        <label class="text-sm font-bold text-ink"> Rol </label>
         <p-select
-          [options]="roles"
-          formControlName="rol"
+          [options]="rolesDisponibles"
+          optionLabel="nombre"
+          optionValue="id"
+          formControlName="rol_id"
           placeholder="Seleccione rol"
           styleClass="w-full"
-          appendTo="body">
-        </p-select>
+          appendTo="body"
+        />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink"> Procesos </label>
+        <p-multiselect
+          [options]="procesosDisponibles"
+          optionLabel="nombre"
+          optionValue="id"
+          formControlName="proceso_ids"
+          placeholder="Seleccione procesos"
+          [maxSelectedLabels]="4"
+          styleClass="w-full"
+          appendTo="body"
+        />
       </div>
 
-    </div>
-
-    <!-- Operaciones Autorizadas -->
-    <div class="flex flex-col gap-2">
-      <label class="text-sm font-bold text-ink">
-        Operaciones Autorizadas
-      </label>
-
-      <p-multiselect
-        [options]="operacionesDisponibles"
-        formControlName="operaciones_autorizadas"
-        placeholder="Seleccione operaciones"
-        display="chip"
-        [maxSelectedLabels]="4"
-        styleClass="w-full"
-        appendTo="body">
-      </p-multiselect>
-    </div>
-
-    <!-- Contraseñas solo nuevo usuario -->
-    <div *ngIf="!editMode" class="grid grid-cols-1 gap-4 md:grid-cols-2">
-
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">
-          Contraseña
-        </label>
+        <label class="text-sm font-bold text-ink"> Equipos </label>
+        <p-multiselect
+          [options]="equiposDisponibles"
+          optionLabel="nombre"
+          optionValue="id"
+          formControlName="equipo_ids"
+          placeholder="Seleccione equipos"
+          [maxSelectedLabels]="4"
+          [filter]="true"
+          styleClass="w-full"
+          appendTo="body"
+        >
+          <ng-template pTemplate="option" let-equipo>
+            <span>{{ equipo.nombre }} - {{ equipo.modelo }}</span>
+          </ng-template>
+          <ng-template pTemplate="selectedItems" let-selectedItems>
+            @for (item of selectedItems; track item; let last = $last) {
+              <span>{{ item.nombre }} - {{ item.modelo }}{{ last ? '' : ', ' }}</span>
+            }
+          </ng-template>
+        </p-multiselect>
+      </div>
+    </div>
 
+    <div *ngIf="!editMode" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink"> Contraseña </label>
         <p-password
           formControlName="password"
           placeholder="Ingrese contraseña"
           [toggleMask]="true"
           [feedback]="false"
           styleClass="w-full"
-          inputStyleClass="w-full">
-        </p-password>
+          inputStyleClass="w-full"
+        />
 
         <small
           class="text-danger"
-          *ngIf="usuarioForm.get('password')?.invalid && usuarioForm.get('password')?.touched"
+          *ngIf="
+            usuarioForm.get('password')?.invalid &&
+            usuarioForm.get('password')?.touched
+          "
         >
           Debe tener al menos 6 caracteres.
         </small>
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">
-          Confirmar Contraseña
-        </label>
-
+        <label class="text-sm font-bold text-ink"> Confirmar Contraseña </label>
         <p-password
           formControlName="confirmPassword"
           placeholder="Repita la contraseña"
           [toggleMask]="true"
           [feedback]="false"
           styleClass="w-full"
-          inputStyleClass="w-full">
-        </p-password>
+          inputStyleClass="w-full"
+        />
 
         <small
           class="text-danger"
-          *ngIf="usuarioForm.hasError('noCoincide') && usuarioForm.get('confirmPassword')?.touched"
+          *ngIf="
+            usuarioForm.hasError('noCoincide') &&
+            usuarioForm.get('confirmPassword')?.touched
+          "
         >
           Las contraseñas no coinciden.
         </small>
       </div>
-
     </div>
 
-    <!-- Footer -->
     <div class="mt-6 flex justify-end gap-3 border-t border-border pt-5">
-
       <button
         pButton
         type="button"
@@ -253,8 +163,8 @@
         icon="pi pi-times"
         severity="danger"
         outlined="true"
-        (click)="cancelar()">
-      </button>
+        (click)="cancelar()"
+      ></button>
 
       <button
         pButton
@@ -263,11 +173,8 @@
         icon="pi pi-save"
         severity="success"
         [disabled]="usuarioForm.invalid"
-        (click)="guardar()">
-      </button>
-
+        (click)="guardar()"
+      ></button>
     </div>
-
   </form>
-
-</div>
+</p-dialog>

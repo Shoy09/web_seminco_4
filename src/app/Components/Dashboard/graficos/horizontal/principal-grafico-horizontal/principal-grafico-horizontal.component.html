@@ -82,9 +82,17 @@
       class="block w-full"
       [data]="DataParetoHorasMantenimiento"
       titulo="PARETO DE HORAS DE MANTENIMIENTO"
-      data-page="1"
     >
     </app-grafica-pareto>
+  </div>
+
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-grafica-pareto
+      [data]="DataParetoHorasDemora"
+      titulo="PARETO DE HORAS DE DEMORA"
+    />
   </div>
 
   <!-- METROS PERFORADOS / DISPARO -->
@@ -171,6 +179,25 @@
     </app-promedio-estados-echarts>
   </div>
 
+
+   <!-- RANKING OPERADOR -->
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-ranking-operador class="block w-full" [data]="dataFrPorOperadorTurno">
+    </app-ranking-operador>
+  </div>
+  <!-- MEJORES OPERADORES: ancho completo -->
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-mejores-operadores
+      class="block w-full"
+      [data]="dataFrPorOperadorTurno"
+    >
+    </app-mejores-operadores>
+  </div>
+
   <!-- DETALLE PERFORACIÓN: ancho completo -->
   <div
     class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
@@ -188,25 +215,6 @@
   >
     <app-detalle-disparos class="block w-full" [data]="datadetalleDisparos">
     </app-detalle-disparos>
-  </div>
-
-  <!-- MEJORES OPERADORES: ancho completo -->
-  <div
-    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
-  >
-    <app-mejores-operadores
-      class="block w-full"
-      [data]="dataFrPorOperadorTurno"
-    >
-    </app-mejores-operadores>
-  </div>
-
-  <!-- RANKING OPERADOR -->
-  <div
-    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
-  >
-    <app-ranking-operador class="block w-full" [data]="dataFrPorOperadorTurno">
-    </app-ranking-operador>
   </div>
 
   <!-- OBSERVACIONES: ancho completo -->

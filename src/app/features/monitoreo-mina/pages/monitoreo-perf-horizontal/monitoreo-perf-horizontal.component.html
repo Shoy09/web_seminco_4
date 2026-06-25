@@ -124,7 +124,7 @@
 
   <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
     <p-table
-      [value]="operacionesVista"
+      [value]="operaciones"
       [paginator]="true"
       [rows]="10"
       [rowsPerPageOptions]="[10, 20, 50]"
@@ -173,16 +173,6 @@
             Registros
           </th>
           <th
-            class="bg-primary px-3 py-3 text-left text-sm font-bold text-white"
-          >
-            Hora inicio
-          </th>
-          <th
-            class="bg-primary px-3 py-3 text-left text-sm font-bold text-white"
-          >
-            Hora final
-          </th>
-          <th
             class="bg-primary px-3 py-3 text-center text-sm font-bold text-white"
           >
             Observ.
@@ -206,7 +196,7 @@
           </td>
 
           <td class="px-3 py-3 text-sm font-bold text-secondary">
-            {{ item.equipo }}
+            {{ item.equipo.nombre }} {{ item.equipo.modelo }} 
           </td>
 
           <td class="px-3 py-3 text-sm text-ink">
@@ -214,19 +204,11 @@
           </td>
 
           <td class="px-3 py-3 text-center text-sm font-bold text-ink">
-            {{ item.registros }}
-          </td>
-
-          <td class="px-3 py-3 text-sm text-ink">
-            {{ item.horaInicio }}
-          </td>
-
-          <td class="px-3 py-3 text-sm text-ink">
-            {{ item.horaFinal }}
+            {{ item.registros.length  }}
           </td>
 
           <td class="px-3 py-3 text-center text-sm font-bold text-warning">
-            {{ item.observaciones }}
+            {{ item.observaciones_jefe }}
           </td>
 
           <td class="px-3 py-3 text-center">
@@ -285,7 +267,7 @@
     </p-tag>
   </div>
 
-  <div class="h-[520px] w-full min-w-0">
+  <div class="h-130 w-full min-w-0">
     <div echarts [options]="chartHoraHoraOptions" class="h-full w-full"></div>
   </div>
 </p-dialog>

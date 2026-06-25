@@ -1,7 +1,8 @@
-<div class="demoras-container">
-  <div 
-    echarts 
-    [options]="chartOptions" 
-    class="chart"
-  ></div>
+<div class="h-115 w-full min-w-0">
+  <div
+    echarts
+    [options]="chartOptions"
+    (chartInit)="onChartInit($event)"
+    class="h-full w-full">
+  </div>
 </div>

@@ -10,6 +10,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { CHART_THEME, colorPorRendimiento } from '../../../../config/chart-theme';
+import { exportarImagenChart, PdfExportOptions } from '../../../../config/config-pdf';
 
 echarts.use([
   BarChart,
@@ -45,16 +46,12 @@ export class MhrEquipoComponent implements OnChanges {
     this.chartInstance = ec;
   }
 
-  getChartImage(): string | null {
-    if (!this.chartInstance) return null;
-
-    return this.chartInstance.getDataURL({
-      type: 'jpeg',
-      pixelRatio: 1.2,
-      backgroundColor: '#FFFFFF',
-      excludeComponents: ['toolbox', 'dataZoom'],
-    });
-  }
+  getChartImage(options?: number | PdfExportOptions): string | null {
+      return exportarImagenChart(
+        this.chartInstance,
+        typeof options === 'number' ? { pixelRatio: options } : options,
+      );
+    }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
@@ -101,6 +98,7 @@ export class MhrEquipoComponent implements OnChanges {
       },
       grid: {
         ...CHART_THEME.grid,
+        bottom: 80,
       },
       xAxis: {
         type: 'category',

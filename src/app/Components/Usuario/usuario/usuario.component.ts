@@ -16,14 +16,17 @@ import { ToastService } from '../../../services/toast.service';
   standalone: true,
   templateUrl: './usuario.component.html',
   styleUrls: ['./usuario.component.css'],
-  imports: [CommonModule, ReactiveFormsModule, EditarPerfilDialogComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule, 
+    //EditarPerfilDialogComponent
+  ],
 })
 export class UsuarioComponent implements OnInit {
   usuario: Usuario | null = null;
   mostrarFirmaGrande: boolean = false;
   editando = false;
   mostrarContrasena = false;
-  mensajeExito = false;
   constructor(private usuarioService: UsuarioService) {}
 
   ngOnInit(): void {
@@ -115,16 +118,18 @@ export class UsuarioComponent implements OnInit {
         this.usuario = {
           id: data.id,
           codigo_dni: data.codigo_dni,
+          rol_nombre: data.rol_nombre,
           //fotoPerfil: data.firma ? data.firma : 'assets/usuario.png', // Si tiene firma, se usa como foto
           nombres: data.nombres || '',
           apellidos: data.apellidos || '',
-          cargo: data.cargo || '',
-          empresa: data.empresa || '',
-          guardia: data.guardia || '',
+          //cargo: data.cargo || '',
+          //empresa: data.empresa || '',
+          //guardia: data.guardia || '',
           //equipoAutorizado: data.autorizado_equipo || '',
-          correo: data.correo || '',
-          firma: data.firma || '',
-          password: data.password || '',
+          //correo: data.correo || '',
+          //firma: data.firma || '',
+          //password: data.password || '',
+          procesos: data.procesos || [],
         };
       },
       error: (err) => {

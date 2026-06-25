@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service'; // Importamos ApiService
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { Estado, Estado2 } from '../models/Estado';
+import { Estado } from '../models/Estado';
+import { CategoriaEstado } from '../models/CategoriaEstado';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,10 @@ export class EstadoService {
 
   getEstados(): Observable<Estado[]> {
     return this.apiService.getDatos(this.baseUrl);
+  }
+
+  getCategoriasEstados(): Observable<CategoriaEstado[]> {
+    return this.apiService.getDatos<CategoriaEstado[]>('categorias-estados');
   }
 
   getEstadosByProceso(proceso: string): Observable<Estado[]> {
@@ -35,7 +40,7 @@ export class EstadoService {
     return this.estadosActualizados.asObservable();
   }
 
-  createEstado2(estado: Estado2): Observable<Estado> {
+  createEstado2(estado: Estado): Observable<Estado> {
     return this.apiService.postDatos(`${this.baseUrl}/`, estado).pipe(
       tap(() => {
         this.estadosActualizados.next(true); // Notificar que se creó un nuevo estado
@@ -44,11 +49,19 @@ export class EstadoService {
   }
 
   updateEstado(id: number, estado: Estado): Observable<Estado> {
-    return this.apiService.putDatos(`${this.baseUrl}/${id}`, estado);
+    return this.apiService.putDatos(`${this.baseUrl}/${id}`, estado).pipe(
+      tap(() => {
+        this.estadosActualizados.next(true);
+      })
+    );
   }
 
   deleteEstado(id: number): Observable<any> {
-    return this.apiService.deleteDatos(`${this.baseUrl}/${id}`);
+    return this.apiService.deleteDatos(`${this.baseUrl}/${id}`).pipe(
+      tap(() => {
+        this.estadosActualizados.next(true);
+      })
+    );
   }
   
 }

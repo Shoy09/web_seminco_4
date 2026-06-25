@@ -22,6 +22,11 @@ import {
   getTurnoActual,
   normalizeAprobacionStatus,
 } from '../../utils/validacion-operacion.utils';
+import {
+  getOperacionEquipoCodigo,
+  getOperacionEquipoModelo,
+  getSeccionNombre,
+} from '../../../../utils/operacion-display.utils';
 
 @Component({
   selector: 'app-monitoreo-validaciones-page',
@@ -111,6 +116,7 @@ export class MonitoreoValidacionesPageComponent implements OnInit {
   aplicarFiltros(): void {
     const texto = this.busqueda.trim().toLowerCase();
 
+    console.log(this.operacionesOriginal);
     this.operacionesFiltradas = this.operacionesOriginal.filter((operacion) => {
       if (this.fechaInicio && operacion.fecha < this.fechaInicio) return false;
       if (this.fechaFin && operacion.fecha > this.fechaFin) return false;
@@ -130,10 +136,9 @@ export class MonitoreoValidacionesPageComponent implements OnInit {
       return [
         operacion.operador,
         operacion.jefe_guardia,
-        operacion.equipo,
-        operacion.n_equipo,
-        operacion.seccion,
-        operacion.modelo_equipo,
+        getOperacionEquipoCodigo(operacion),
+        getOperacionEquipoModelo(operacion),
+        getSeccionNombre(operacion.seccion),
       ]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(texto));

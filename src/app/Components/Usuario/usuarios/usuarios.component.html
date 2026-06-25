@@ -5,7 +5,7 @@
     [paginator]="true"
     [rows]="10"
     [rowsPerPageOptions]="[5, 10, 20]"
-    [globalFilterFields]="['codigo_dni', 'nombres', 'apellidos', 'rol']"
+    [globalFilterFields]="['codigo_dni', 'nombres', 'apellidos', 'rol_nombre']"
     [tableStyle]="{ 'min-width': '900px' }"
     styleClass="p-datatable-sm"
     showGridlines
@@ -60,7 +60,7 @@
       <tr>
         <th>DNI</th>
         <th>Nombre</th>
-        <th>Operaciones</th>
+        <th>Procesos</th>
         <th>Rol</th>
         <th>Acciones</th>
       </tr>
@@ -72,36 +72,25 @@
         <td>{{ usuario.nombres }} {{ usuario.apellidos }}</td>
         <td>
           <div class="flex flex-wrap items-center gap-2">
-            <ng-container *ngIf="usuario.operaciones_autorizadas">
-              <p-tag
-                *ngFor="
-                  let key of obtenerPrimerasOperaciones(
-                    usuario.operaciones_autorizadas
-                  )
-                "
-                [value]="key"
-                severity="success"
-              >
-              </p-tag>
-            </ng-container>
-
-            <button
-              pButton
-              type="button"
-              icon="pi pi-pencil"
-              class="p-button-rounded p-button-text"
-              (click)="
-                abrirDialogoEdicion(usuario.id, usuario.operaciones_autorizadas)
-              "
-            ></button>
+            @for (item of usuario.procesos; track item) {
+              <p-chip [label]="item.nombre_abreviado" />
+            }
           </div>
         </td>
 
         <td>
-          <p-tag [value]="usuario.rol" severity="info"></p-tag>
+          <p-tag [value]="usuario.rol_nombre" severity="info"></p-tag>
         </td>
 
         <td>
+            
+          <button
+            pButton
+            type="button"
+            icon="pi pi-pencil"
+            class="p-button-rounded p-button-info p-button-text"
+            (click)="abrirDialogoEditar(usuario)"
+          ></button>
           <button
             pButton
             type="button"
@@ -114,3 +103,10 @@
     </ng-template>
   </p-table>
 </div>
+
+<app-usuario-dialog
+  *ngIf="showDialog"
+  [data]="selectedUsuario"
+  (closed)="cerrarDialogo()"
+  (saved)="cerrarDialogo()"
+></app-usuario-dialog>

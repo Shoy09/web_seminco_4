@@ -26,6 +26,7 @@ import { MonitoreoPerfHorizontalComponent } from './features/monitoreo-mina/page
 import { SeleccionEquipoPageComponent } from './features/validaciones/pages/seleccion-equipo/seleccion-equipo-page.component';
 import { MonitoreoValidacionesPageComponent } from './features/validaciones/pages/monitoreo-validaciones/monitoreo-validaciones-page.component';
 import { DetalleValidacionPageComponent } from './features/validaciones/pages/detalle-validacion/detalle-validacion-page.component';
+import { ProcesosPageComponent } from './features/sistema/pages/procesos-page/procesos-page.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -98,6 +99,7 @@ export const routes: Routes = [
       {
         path: 'carga',
         children: [
+          { path: 'procesos', component: ProcesosPageComponent },
           { path: 'estados', component: EstadosComponent },
           { path: 'crear-data', component: CrearDataComponent },
           { path: 'checklist', component: CheckListListaComponent },

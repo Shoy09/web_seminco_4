@@ -10,17 +10,11 @@
         <p class="mt-2 text-sm leading-6 text-ink-75">{{ equipo.descripcion }}</p>
       </div>
 
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div class="rounded-2xl border border-border bg-surface-soft px-4 py-3">
           <span class="text-xs font-bold uppercase tracking-[0.18em] text-ink-75">Jefe de mina</span>
           <p class="mt-1 text-sm font-black text-secondary">{{ jefeGuardia || 'Sin sesion' }}</p>
         </div>
-
-        <div class="rounded-2xl border border-border bg-surface-soft px-4 py-3">
-          <span class="text-xs font-bold uppercase tracking-[0.18em] text-ink-75">Tipo API</span>
-          <p class="mt-1 text-sm font-black text-secondary">{{ equipo.tipoApi }}</p>
-        </div>
-
         <div class="rounded-2xl border border-border bg-surface-soft px-4 py-3">
           <span class="text-xs font-bold uppercase tracking-[0.18em] text-ink-75">Registros</span>
           <p class="mt-1 text-sm font-black text-secondary">{{ operacionesFiltradas.length }}</p>
@@ -130,7 +124,6 @@
           <th>Fecha</th>
           <th>Turno</th>
           <th>Equipo</th>
-          <th>Codigo</th>
           <th>Operador</th>
           <th>Seccion</th>
           <th>Revision</th>
@@ -143,8 +136,7 @@
         <tr>
           <td>{{ operacion.fecha }}</td>
           <td>{{ operacion.turno }}</td>
-          <td>{{ operacion.equipo || equipo.nombre }}</td>
-          <td>{{ operacion.n_equipo || '-' }}</td>
+          <td>{{ operacion.equipo.nombre  }} {{operacion.equipo.modelo}}</td>
           <td>{{ operacion.operador || '-' }}</td>
           <td>{{ operacion.seccion || '-' }}</td>
           <td>

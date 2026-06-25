@@ -1,11 +1,13 @@
 import { CheckList } from './check-list';
 import { ControlLlantas } from './control-llantas';
+import { Equipo } from './equipo.model';
 import { Horometros } from './horometro';
 import { OperacionJumbo } from './OperacionJumbo';
 import { OperacionScoop } from './OperacionScoop';
 import { OperacionSostenimiento } from './OperacionSostenimiento';
 import { OperacionTLargos } from './OperacionTLargos';
 import { OperacionVolquete } from './OperacionVolquete';
+import { Seccion } from './seccion.model';
 
 export interface OperacionBase<TOperacion = TipoOperacionRegistro> {
   id?: number;
@@ -13,8 +15,7 @@ export interface OperacionBase<TOperacion = TipoOperacionRegistro> {
   turno: string;
   operador: string;
   jefe_guardia: string;
-  equipo: string;
-  n_equipo: string;
+  equipo: Equipo;
 
   estado?: string;
   envio?: number;
@@ -27,12 +28,8 @@ export interface OperacionBase<TOperacion = TipoOperacionRegistro> {
   observaciones_jefe2?: any;
   observaciones_jefe3?: any;
 
-  // 🔥 opcionales (para todas las variantes)
-  seccion?: string;
-  modelo_equipo?: string;
-  tipo_equipo?: string;
+  seccion?: Seccion;
   capacidad?: string;
-
   horometros: Horometros;
   condiciones_equipo?: string;
   check_list: CheckList[];

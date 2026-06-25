@@ -1,19 +1,21 @@
+import { Cargo } from "./Cargo";
+import { Equipo } from "./equipo.model";
+import { Proceso } from "./Proceso";
+
 export interface Usuario {
   id?: number;
   codigo_dni: string;
   apellidos: string;
   nombres: string;
-  cargo?: string;
-  rol?: string;
-  area?: string;                // Nuevo campo opcional
-  clasificacion?: string;       // Nuevo campo opcional
-  empresa?: string;             // Opcional
-  guardia?: string;             // Opcional
-  autorizado_equipo?: string;   // Opcional
-  correo?: string;              // Opcional
-  password?: string;            // Solo necesario en la creación
-  firma?: string;
-  operaciones_autorizadas?: {   // Nuevo campo JSON opcional
-    [clave: string]: boolean;
-  };
+  correo?: string;
+  rol_nombre: string;
+  rol_id?: number;
+  cargo?: Cargo;
+  cargo_id?: number;
+  empresa?: string;
+  guardia?: string;
+  procesos: Proceso[];
+  proceso_ids?: number[];
+  //equipo_ids?: number[];
+  equipos?: Equipo[];
 }

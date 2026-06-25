@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { UsuarioDialogComponent } from '../usuario-dialog/usuario-dialog.component';
 import { CommonModule } from '@angular/common';
 import * as XLSX from 'xlsx';
 import { Usuario } from '../../../models/Usuario';
@@ -8,7 +7,7 @@ import { UsuarioService } from '../../../services/usuario.service';
 import { LoadingDialogComponent } from '../../Reutilizables/loading-dialog/loading-dialog.component';
 import { OperacionesDialogComponent } from '../operaciones-dialog.component';
 import { EditarOperacionesDialogComponent } from '../editar-operaciones-dialog/editar-operaciones-dialog.component';
-
+import { UsuarioDialogComponent } from '../usuario-dialog/usuario-dialog.component';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
@@ -16,6 +15,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FileUploadModule } from 'primeng/fileupload';
 import { ToastService } from '../../../services/toast.service';
 import { ConfirmService } from '../../../services/confirm.service';
+import { ChipModule } from 'primeng/chip';
 @Component({
   selector: 'app-usuarios',
   standalone: true,
@@ -26,12 +26,17 @@ import { ConfirmService } from '../../../services/confirm.service';
     TagModule,
     InputTextModule,
     FileUploadModule,
+    ChipModule,
+    UsuarioDialogComponent,
   ],
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.css',
 })
 export class UsuariosComponent implements OnInit {
   usuarios: Usuario[] = [];
+  showDialog = false;
+  selectedUsuario: Usuario | null = null;
+
   constructor(
     private usuarioService: UsuarioService,
     public dialog: MatDialog,
@@ -50,45 +55,19 @@ export class UsuariosComponent implements OnInit {
   }
 
   abrirDialogoCrear() {
-    const dialogRef = this.dialog.open(UsuarioDialogComponent, {
-      width: '95vw',
-      maxWidth: '1200px',
-      maxHeight: '90vh',
-      autoFocus: false,
-      panelClass: 'crear-usuario-dialog',
-      data: null,
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.obtenerUsuarios();
-      }
-    });
+    this.selectedUsuario = null;
+    this.showDialog = true;
   }
 
-  obtenerPrimerasOperaciones(operaciones: {
-    [clave: string]: boolean;
-  }): string[] {
-    return Object.keys(operaciones)
-      .filter((k) => operaciones[k])
-      .slice(0, 2);
+  cerrarDialogo() {
+    this.showDialog = false;
+    this.selectedUsuario = null;
+    this.obtenerUsuarios();
   }
 
   abrirDialogoEditar(usuario: Usuario) {
-    const dialogRef = this.dialog.open(UsuarioDialogComponent, {
-      width: '95vw',
-      maxWidth: '1200px',
-      maxHeight: '90vh',
-      autoFocus: false,
-      panelClass: 'editar-usuario-dialog',
-      data: usuario,
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.obtenerUsuarios();
-      }
-    });
+    this.selectedUsuario = usuario;
+    this.showDialog = true;
   }
 
   eliminarUsuario(id: number): void {
@@ -133,93 +112,7 @@ export class UsuariosComponent implements OnInit {
 
     reader.readAsArrayBuffer(archivo);
 
-    reader.onload = () => {
-      const data = new Uint8Array(reader.result as ArrayBuffer);
-      const workbook = XLSX.read(data, { type: 'array' });
-
-      const sheetName = 'Usuarios';
-      const sheet = workbook.Sheets[sheetName];
-
-      if (!sheet) {
-        alert("No se encontró la hoja 'Usuarios' en el archivo.");
-        return;
-      }
-
-      const datosExcel: any[] = XLSX.utils.sheet_to_json(sheet);
-
-      const usuariosValidos: Usuario[] = [];
-      const usuariosInvalidos: { nombre: string; dni: string }[] = [];
-
-      datosExcel.forEach((row) => {
-        const apellidos = row['APELLIDOS'];
-        const nombres = row['NOMBRES'];
-        const codigo_dni = row['DNI'];
-        const cargo = row['PUESTO ACTUAL QUE DESEMPEÑA'];
-        const rol = row['ROL'] || 'Trabajador';
-        const area = row['ÁREA'];
-        const clasificacion = row['CLASIFICACIÓN'];
-        const empresa = row['EMPRESA'];
-        const guardia = row['GUARDIA'];
-        const autorizado_equipo = row['AUTORIZADO EQUIPO'];
-        const correo = row['CORREO'];
-        const password = row['password'];
-        const firma = row['FIRMA'];
-        const operacionesString = row['OPERACIONES AUTORIZADAS'] || '';
-
-        if (
-          !apellidos ||
-          !nombres ||
-          !codigo_dni ||
-          !cargo ||
-          !area ||
-          !rol ||
-          !password
-        ) {
-          usuariosInvalidos.push({
-            nombre: nombres || 'Desconocido',
-            dni: codigo_dni || 'Sin DNI',
-          });
-          return;
-        }
-
-        const operacionesArray = operacionesString
-          .split(/[,;]+/)
-          .map((op: string) => op.trim())
-          .filter((op: string) => op.length > 0);
-
-        const operaciones_autorizadas: { [clave: string]: boolean } = {};
-
-        operacionesArray.forEach((op: string) => {
-          operaciones_autorizadas[op] = true;
-        });
-
-        const usuario: Usuario = {
-          apellidos,
-          nombres,
-          codigo_dni,
-          cargo,
-          rol,
-          area,
-          clasificacion,
-          password,
-          operaciones_autorizadas,
-        };
-
-        if (empresa) usuario.empresa = empresa;
-        if (guardia) usuario.guardia = guardia;
-        if (autorizado_equipo) usuario.autorizado_equipo = autorizado_equipo;
-        if (correo) usuario.correo = correo;
-        if (firma) usuario.firma = firma;
-
-        usuariosValidos.push(usuario);
-      });
-
-      if (usuariosValidos.length > 0) {
-        this.enviarUsuariosBulk(usuariosValidos, usuariosInvalidos);
-      } else {
-        alert('No hay usuarios válidos para enviar.');
-      }
-    };
+    //
 
     reader.onerror = () => {
       alert('No se pudo leer el archivo Excel.');

@@ -2,6 +2,7 @@
   <div 
     echarts 
     [options]="chartOptions" 
+    (chartInit)="onChartInit($event)"
     class="chart"
   ></div>
 </div>

@@ -17,6 +17,7 @@ import {
   calcularZoomInicial,
   CHART_THEME,
 } from '../../../../config/chart-theme';
+import { exportarImagenChart, PdfExportOptions } from '../../../../config/config-pdf';
 
 echarts.use([
   BarChart,
@@ -52,15 +53,11 @@ export class HorometrosEquipoComponent implements OnChanges {
     this.chartInstance = ec;
   }
 
-  getChartImage(): string | null {
-    if (!this.chartInstance) return null;
-
-    return this.chartInstance.getDataURL({
-      type: 'jpeg',
-      pixelRatio: 1.2,
-      backgroundColor: '#FFFFFF',
-      excludeComponents: ['toolbox', 'dataZoom'],
-    });
+  getChartImage(options?: number | PdfExportOptions): string | null {
+    return exportarImagenChart(
+      this.chartInstance,
+      typeof options === 'number' ? { pixelRatio: options } : options,
+    );
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -77,13 +74,22 @@ export class HorometrosEquipoComponent implements OnChanges {
 
     const xAxisData = this.data.map((item) => item.modelo_equipo || 'N/A');
 
-    const dieselData = this.data.map((item) => Number(item.diesel || 0));
+    const getValues = (field: 'diesel' | 'electrico' | 'percusion'): number[] =>
+      this.data.map((item) => Number(item[field] || 0));
 
-    const electricoData = this.data.map((item) => Number(item.electrico || 0));
+    const seriesConfig = [
+      { name: 'H. Diesel', field: 'diesel' as const, colorIdx: 0 },
+      { name: 'H. Eléctrico', field: 'electrico' as const, colorIdx: 1 },
+      { name: 'H. Percusión', field: 'percusion' as const, colorIdx: 2 },
+    ].map((s) => ({ ...s, data: getValues(s.field) }))
+     .filter((s) => s.data.some((v) => v > 0));
 
-    const percusionData = this.data.map((item) => Number(item.percusion || 0));
+    if (seriesConfig.length === 0) {
+      this.chartOptions = {};
+      return;
+    }
 
-    const allValues = [...dieselData, ...electricoData, ...percusionData];
+    const allValues = seriesConfig.flatMap((s) => s.data);
 
     const maxValor = Math.max(...allValues, 1);
     const yAxisMax = Math.ceil(maxValor * 1.2);
@@ -117,7 +123,7 @@ export class HorometrosEquipoComponent implements OnChanges {
 
       legend: {
         ...CHART_THEME.legend,
-        data: ['H. Diesel', 'H. Eléctrico', 'H. Percusión'],
+        data: seriesConfig.map((s) => s.name),
       },
 
       grid: {
@@ -166,86 +172,29 @@ export class HorometrosEquipoComponent implements OnChanges {
         },
       },
 
-      series: [
-        {
-          name: 'H. Diesel',
-          type: 'bar',
-          data: dieselData,
-
-          barWidth: '22%',
-          barGap: '20%',
-          barCategoryGap: '30%',
-
-          itemStyle: {
-            ...CHART_THEME.bar.itemStyle,
-            color: CHART_THEME.colors.primaryScale3[0],
-            borderRadius: [6, 6, 0, 0],
-          },
-
-          label: {
-            ...CHART_THEME.bar.label,
-            show: true,
-            position: 'top',
-            color: CHART_THEME.colors.primaryScale3[0],
-            formatter: (params: any) =>
-              `${Number(params.value || 0).toFixed(2)}`,
-            fontWeight: 'bold',
-            fontSize: 11,
-          },
+      series: seriesConfig.map((s) => ({
+        name: s.name,
+        type: 'bar',
+        data: s.data,
+        barWidth: '22%',
+        barGap: '20%',
+        barCategoryGap: '30%',
+        itemStyle: {
+          ...CHART_THEME.bar.itemStyle,
+          color: CHART_THEME.colors.primaryScale3[s.colorIdx],
+          borderRadius: [6, 6, 0, 0],
         },
-        {
-          name: 'H. Eléctrico',
-          type: 'bar',
-          data: electricoData,
-
-          barWidth: '22%',
-          barGap: '20%',
-          barCategoryGap: '30%',
-
-          itemStyle: {
-            ...CHART_THEME.bar.itemStyle,
-            color: CHART_THEME.colors.primaryScale3[1],
-            borderRadius: [6, 6, 0, 0],
-          },
-
-          label: {
-            ...CHART_THEME.bar.label,
-            show: true,
-            position: 'top',
-            color: CHART_THEME.colors.primaryScale3[1],
-            formatter: (params: any) =>
-              `${Number(params.value || 0).toFixed(2)}`,
-            fontWeight: 'bold',
-            fontSize: 11,
-          },
+        label: {
+          ...CHART_THEME.bar.label,
+          show: true,
+          position: 'top',
+          color: CHART_THEME.colors.primaryScale3[s.colorIdx],
+          formatter: (params: any) =>
+            `${Number(params.value || 0).toFixed(2)}`,
+          fontWeight: 'bold',
+          fontSize: 11,
         },
-        {
-          name: 'H. Percusión',
-          type: 'bar',
-          data: percusionData,
-
-          barWidth: '22%',
-          barGap: '20%',
-          barCategoryGap: '30%',
-
-          itemStyle: {
-            ...CHART_THEME.bar.itemStyle,
-            color: CHART_THEME.colors.primaryScale3[2],
-            borderRadius: [6, 6, 0, 0],
-          },
-
-          label: {
-            ...CHART_THEME.bar.label,
-            show: true,
-            position: 'top',
-            color: CHART_THEME.colors.primaryScale3[2],
-            formatter: (params: any) =>
-              `${Number(params.value || 0).toFixed(2)}`,
-            fontWeight: 'bold',
-            fontSize: 11,
-          },
-        },
-      ],
+      })),
     };
   }
 }

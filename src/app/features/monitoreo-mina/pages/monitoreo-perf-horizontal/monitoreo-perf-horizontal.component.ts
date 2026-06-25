@@ -40,19 +40,8 @@ import {
   DataZoomComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
+import { OperacionBase } from '../../../../models/OperacionBase.models';
 
-interface OperacionMonitor {
-  id?: string | number;
-  fecha: string;
-  turno: string;
-  equipo: string;
-  operador: string;
-  registros: number;
-  horaInicio: string;
-  horaFinal: string;
-  estado: string;
-  observaciones: number;
-}
 
 echarts.use([
   BarChart,
@@ -89,8 +78,7 @@ export class MonitoreoPerfHorizontalComponent implements OnInit, OnDestroy {
   readonly nombreOperacion = 'PERFORACIÓN HORIZONTAL';
   readonly intervaloMs = 30_000;
 
-  operacionesOriginal: any[] = [];
-  operacionesVista: OperacionMonitor[] = [];
+  operaciones: OperacionBase<OperacionJumbo>[] = [];
 
   cargando = false;
   monitoreoActivo = false;
@@ -132,8 +120,16 @@ export class MonitoreoPerfHorizontalComponent implements OnInit, OnDestroy {
           this.cargando = true;
           this.error = null;
         }),
-        exhaustMap(() =>
-          this.operacionesService.getAllAprobados(this.tipoOperacion).pipe(
+        exhaustMap(() => {
+          const contextoTurno = this.obtenerContextoTurnoActual();
+
+          return this.operacionesService
+            .getAprobadosPorFiltros(
+              this.tipoOperacion,
+              contextoTurno.fechaOperacion,
+              contextoTurno.turno,
+            )
+            .pipe(
             catchError((err) => {
               console.error('Error cargando operaciones:', err);
               this.error =
@@ -143,19 +139,19 @@ export class MonitoreoPerfHorizontalComponent implements OnInit, OnDestroy {
             finalize(() => {
               this.cargando = false;
             }),
-          ),
-        ),
+          );
+        }),
       )
       .subscribe((resp: any) => {
         this.aplicarDataMonitoreo(resp);
       });
   }
-  private obtenerTurnoActual(): { codigo: 'DIA' | 'NOCHE'; nombre: string } {
+  private obtenerTurnoActual(): { codigo: 'DÍA' | 'NOCHE'; nombre: string } {
     const hora = new Date().getHours();
 
     if (hora >= 7 && hora < 19) {
       return {
-        codigo: 'DIA',
+        codigo: 'DÍA',
         nombre: 'TURNO DÍA',
       };
     }
@@ -166,7 +162,7 @@ export class MonitoreoPerfHorizontalComponent implements OnInit, OnDestroy {
     };
   }
   private obtenerContextoTurnoActual(): {
-    turno: 'DIA' | 'NOCHE';
+    turno: 'DÍA' | 'NOCHE';
     fechaOperacion: string;
   } {
     const ahora = new Date();
@@ -175,7 +171,7 @@ export class MonitoreoPerfHorizontalComponent implements OnInit, OnDestroy {
     // Turno día: 07:00 a 18:59
     if (hora >= 7 && hora < 19) {
       return {
-        turno: 'DIA',
+        turno: 'DÍA',
         fechaOperacion: formatearFechaYYYYMMDD(ahora),
       };
     }
@@ -198,8 +194,8 @@ export class MonitoreoPerfHorizontalComponent implements OnInit, OnDestroy {
       fechaOperacion: formatearFechaYYYYMMDD(ayer),
     };
   }
-  private obtenerHorasTurno(turno: 'DIA' | 'NOCHE'): number[] {
-    if (turno === 'DIA') {
+  private obtenerHorasTurno(turno: 'DÍA' | 'NOCHE'): number[] {
+    if (turno === 'DÍA') {
       return this.rangoHoras(7, 18);
     }
 
@@ -207,9 +203,9 @@ export class MonitoreoPerfHorizontalComponent implements OnInit, OnDestroy {
   }
   private perteneceAlTurnoActual(
     hora: number,
-    turno: 'DIA' | 'NOCHE',
+    turno: 'DÍA' | 'NOCHE',
   ): boolean {
-    if (turno === 'DIA') {
+    if (turno === 'DÍA') {
       return hora >= 7 && hora < 19;
     }
 
@@ -273,14 +269,16 @@ export class MonitoreoPerfHorizontalComponent implements OnInit, OnDestroy {
     const acumulado = new Map<string, number>();
     const equiposSet = new Set<string>();
 
-    for (const op of this.operacionesOriginal || []) {
-      const equipo = op?.modelo_equipo || op?.equipo || 'SIN_EQUIPO';
+    for (const op of this.operaciones || []) {
+      const equipo = `${op?.equipo?.nombre || op?.equipo?.modelo || 'SIN_EQUIPO'}`;
       const registrosArray = Array.isArray(op?.registros) ? op.registros : [];
 
       for (const r of registrosArray) {
-        const operacion = r?.operacion || r;
+        const operacion = r.operacion;
 
-        const horaInicio = operacion?.hora_inicio || r?.hora_inicio;
+        if(!operacion) continue;
+
+        const horaInicio = r?.hora_inicio;
         if (!horaInicio) continue;
 
         const horaDecimal = this.convertirHoraDecimal(horaInicio);
@@ -456,23 +454,9 @@ export class MonitoreoPerfHorizontalComponent implements OnInit, OnDestroy {
   private aplicarDataMonitoreo(resp: any): void {
     if (!resp) return;
 
-    const dataBackend = Array.isArray(resp.data) ? resp.data : [];
+    this.operaciones = Array.isArray(resp.data) ? resp.data : [];
 
-    const contextoTurno = this.obtenerContextoTurnoActual();
-
-    const dataFiltrada = this.filtrarOperacionesTurnoActual(
-      dataBackend,
-      contextoTurno.fechaOperacion,
-      contextoTurno.turno,
-    );
-
-    this.operacionesOriginal = dataFiltrada;
-
-    this.operacionesVista = this.procesarOperacionesMonitor(
-      this.operacionesOriginal,
-    );
-
-    this.resumen = this.calcularResumen(this.operacionesOriginal);
+    this.resumen = this.calcularResumen(this.operaciones);
     this.ultimaActualizacion = new Date();
 
     this.actualizarGraficoHoraHora();
@@ -481,11 +465,17 @@ export class MonitoreoPerfHorizontalComponent implements OnInit, OnDestroy {
   refrescarAhora(): void {
     if (this.cargando) return;
 
+    const contextoTurno = this.obtenerContextoTurnoActual();
+
     this.cargando = true;
     this.error = null;
 
     this.operacionesService
-      .getAllAprobados(this.tipoOperacion)
+      .getAprobadosPorFiltros(
+        this.tipoOperacion,
+        contextoTurno.fechaOperacion,
+        contextoTurno.turno,
+      )
       .pipe(
         catchError((err) => {
           console.error('Error refrescando operaciones:', err);
@@ -500,75 +490,16 @@ export class MonitoreoPerfHorizontalComponent implements OnInit, OnDestroy {
         this.aplicarDataMonitoreo(resp);
       });
   }
-  private filtrarOperacionesTurnoActual(
-    data: any[],
-    fechaOperacion: string,
-    turnoActual: 'DIA' | 'NOCHE',
-  ): any[] {
-    return data.filter((op: any) => {
-      const fechaOp = String(op?.fecha || '').trim();
 
-      const turnoOp = normalizarTexto(op?.turno);
-
-      const coincideFecha = fechaOp === fechaOperacion;
-
-      const coincideTurno =
-        turnoActual === 'DIA' ? turnoOp === 'DIA' : turnoOp === 'NOCHE';
-
-      return coincideFecha && coincideTurno;
-    });
-  }
-
-  private procesarOperacionesMonitor(data: any[]): OperacionMonitor[] {
-    return data
-      .map((op: any) => {
-        const registrosArray = Array.isArray(op?.registros) ? op.registros : [];
-
-        const horasInicio = registrosArray
-          .map((r: any) => r?.hora_inicio || r?.operacion?.hora_inicio)
-          .filter(Boolean)
-          .sort();
-
-        const horasFinal = registrosArray
-          .map((r: any) => r?.hora_final || r?.operacion?.hora_final)
-          .filter(Boolean)
-          .sort();
-
-        const observaciones = registrosArray.filter((r: any) => {
-          const obs = r?.observaciones || r?.operacion?.observaciones;
-          return obs && String(obs).trim().length > 0;
-        }).length;
-
-        return {
-          id: op?.id || op?._id,
-          fecha: op?.fecha || 'SIN_FECHA',
-          turno: op?.turno || 'SIN_TURNO',
-          equipo: op?.modelo_equipo || op?.equipo || 'SIN_EQUIPO',
-          operador: op?.operador || 'SIN_OPERADOR',
-          registros: registrosArray.length,
-          horaInicio: horasInicio[0] || '-',
-          horaFinal: horasFinal[horasFinal.length - 1] || '-',
-          estado: op?.estado || 'APROBADO',
-          observaciones,
-        };
-      })
-      .sort((a, b) => {
-        const diffFecha = String(b.fecha).localeCompare(String(a.fecha));
-        if (diffFecha !== 0) return diffFecha;
-
-        return String(b.horaInicio).localeCompare(String(a.horaInicio));
-      });
-  }
-
-  private calcularResumen(data: any[]) {
+  private calcularResumen(data: OperacionBase<OperacionJumbo>[]) {
     const equipos = new Set<string>();
     const operadores = new Set<string>();
 
     let totalRegistros = 0;
     let totalObservaciones = 0;
 
-    data.forEach((op: any) => {
-      equipos.add(op?.modelo_equipo || op?.equipo || 'SIN_EQUIPO');
+    data.forEach((op) => {
+      equipos.add(`${op?.equipo?.nombre} ${op?.equipo?.modelo}` || 'SIN_EQUIPO');
       operadores.add(op?.operador || 'SIN_OPERADOR');
 
       const registrosArray = Array.isArray(op?.registros) ? op.registros : [];

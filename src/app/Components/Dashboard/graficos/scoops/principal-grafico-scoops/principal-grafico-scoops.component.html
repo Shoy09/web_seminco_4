@@ -15,63 +15,140 @@
   (pdf)="generarPDF()"
 />
 
-<div class="graficos-container" *ngIf="vistaPrincipal">
-  <!-- Hoja 1 pdf -->
-  <!-- <app-resumen class="full-width" [data]="resumenSC" data-page="1"></app-resumen>
+<div
+  *ngIf="vistaPrincipal"
+  class="grid grid-cols-1 gap-4 md:grid-cols-6 xl:grid-cols-12"
+>
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-resumen class="block w-full" [data]="resumen"></app-resumen>
+  </div>
 
-  <app-cucharas-labor [data]="DataCucharadasLabor" data-page="1"></app-cucharas-labor>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-rendimiento-equipo [data]="dataDmUtiPorEquipoReutilizable" />
+  </div>
 
-  <app-cucharas-equipo [data]="DataCucharadasLabor" data-page="1"></app-cucharas-equipo>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-grafica-pareto
+      [data]="DataParetoHorasOperativas"
+      titulo="PARETO DE HORAS OPERATIVAS"
+    />
+  </div>
 
-  <app-rendimiento-equipo [data]="DataDMyUTI" data-page="1"></app-rendimiento-equipo>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-grafica-pareto
+      [data]="DataParetoHorasNoOperativas"
+      titulo="PARETO DE HORAS NO OPERATIVAS"
+    />
+  </div>
 
-  <app-demoras-operativas [data]="DataEstadosSOS" data-page="o 1"></app-demoras-operativas>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-grafica-pareto
+      [data]="DataParetoHorasMantenimiento"
+      titulo="PARETO DE HORAS DE MANTENIMIENTO"
+    />
+  </div>
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-grafica-pareto
+      [data]="DataParetoHorasDemora"
+      titulo="PARETO DE HORAS DE DEMORA"
+    />
+  </div>
 
-  <app-demoras-inoperativas [data]="dataDemoraIno" data-page="1"></app-demoras-inoperativas>
+  <!-- HORÓMETROS EQUIPO -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-horometros-equipo class="block w-full" [data]="dataHorometros">
+    </app-horometros-equipo>
+  </div>
 
-  <app-horas-mantenimiento [data]="dataHoraMantenimiento" data-page="1"></app-horas-mantenimiento>
+  <!-- TOTAL HORÓMETROS -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-total-horometros class="block w-full" [data]="dataHorometros">
+    </app-total-horometros>
+  </div>
 
-  <app-tonelaje-equipo [data]="dataToneladas" data-page="1"></app-tonelaje-equipo>
+  <!-- TONELAJE POR EQUIPO -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-tonelaje-equipo class="block w-full" [data]="dataToneladasPorEquipo" />
+  </div>
 
-  <app-tn-hr-equipo [data]="dataTn_Hr" data-page="1"></app-tn-hr-equipo>
+  <!-- TN/HR POR EQUIPO -->
+  <div
+    class="col-span-1 md:col-span-3 xl:col-span-6 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-tn-hr-equipo class="block w-full" [data]="dataTnHrPorEquipo" />
+  </div>
 
-  <app-horometro-diesel [data]="dataDiferenciaDisel" data-page="1"></app-horometro-diesel>
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-resumen-equipos
+      class="full-width"
+      [data]="dataDetalleEquipo"
+      data-page="1"
+    ></app-resumen-equipos>
+  </div>
 
-  <app-horometro-diesel-total [data]="dataDiferenciaDiselTotal" ></app-horometro-diesel-total>
+  <!-- RANKING OPERADOR -->
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-mejores-operadores-grafico
+      class="block w-full"
+      [data]="dataFrPorOperadorTurno"
+    >
+    </app-mejores-operadores-grafico>
+  </div>
+  <!-- MEJORES OPERADORES: ancho completo -->
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-mejores-operadores
+      class="block w-full"
+      [data]="dataFrPorOperadorTurno"
+    >
+    </app-mejores-operadores>
+  </div>
 
-  <app-horas-primer-viaje class="full-width"  [data]="dataViajesSC" data-page="1"></app-horas-primer-viaje>
+  <div
+    class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+  >
+    <app-observaciones
+      class="full-width"
+      [data]="dataObservaciones"
+      data-page="5"
+    ></app-observaciones>
+    <!-- MAPA DE CALOR -->
+    <div
+      class="col-span-1 md:col-span-6 xl:col-span-12 min-w-0 rounded-2xl bg-surface p-4 shadow-sm"
+    >
+      <app-mapa-de-calor
+        class="block w-full"
+        [data]="dataMapaCalor"
+        [turno]="turnoAplicado"
+      />
+    </div>
+  </div>
 
-  <app-resumen-equipos class="full-width" [data]="dataDetalleEquipo" data-page="1"></app-resumen-equipos> -->
-
-
-
-
-  <!-- <app-mejores-operadores class="full-width"  [data]="dataMejoresOperadores" data-page="1"></app-mejores-operadores>
-
-  <app-mejores-operadores-grafico [data]="dataMejoresOperadores" data-page="1"></app-mejores-operadores-grafico>
-
-  <app-observaciones class="full-width" [data]="dataLaborFRDetallado" data-page="5"></app-observaciones>
-     
-  <app-scatter-turnos 
-  *ngIf="turnoAplicado === '' || turnoAplicado === 'DÍA'"
-  class="full-width"
-  [data]="dataHorasNumericas" data-page="6">
-</app-scatter-turnos>
-
-<app-scatter-turnos-noche 
-  *ngIf="turnoAplicado === '' || turnoAplicado === 'NOCHE'"
-  class="full-width"
-  [data]="dataHorasNumericas" data-page="6">
-</app-scatter-turnos-noche> -->
-
+  <div class="overlay" *ngIf="cargandoPDF">
+    <div class="spinner"></div>
+    <p>Generando PDF...</p>
+  </div>
 </div>
-
-<div class="graficos-container" *ngIf="!vistaPrincipal">
-
-<!-- <app-scheduler class="full-width" [data]="ganttData" data-page="6"></app-scheduler> -->
-</div>
- 
-<div class="overlay" *ngIf="cargandoPDF">
-  <div class="spinner"></div>
-  <p>Generando PDF...</p>
-</div> 

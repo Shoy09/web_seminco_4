@@ -20,8 +20,6 @@ import { TopEquiposComponent } from '../Graficos components/Rendimiento/top-equi
 import { RendimientoDiaMesComponent } from '../Graficos components/Rendimiento/rendimiento-dia-mes/rendimiento-dia-mes.component';
 import { RankingOperadorUtilizacionComponent } from '../Graficos components/Ranking operador/ranking-operador-utilizacion/ranking-operador-utilizacion.component';
 import { RankingOperadorRendimientoComponent } from '../Graficos components/Ranking operador/ranking-operador-rendimiento/ranking-operador-rendimiento.component';
-import { ParetoNoProgramadasComponent } from '../Graficos components/Dis_Pareto_Detalle/pareto-no-programada/pareto-no-programada.component';
-import { DiagramaParetoComponent } from '../Graficos components/Util_Pareto_Detalle/diagrama-pareto/diagrama-pareto.component';
 import { MtbfEquipoComponent } from '../Graficos components/MTBF-MTTR/MTBF/mtbf-equipo/mtbf-equipo.component';
 import { MtbfAnoComponent } from '../Graficos components/MTBF-MTTR/MTBF/mtbf-ano/mtbf-ano.component';
 import { MtbfSemanasComponent } from '../Graficos components/MTBF-MTTR/MTBF/mtbf-semanas/mtbf-semanas.component';
@@ -69,8 +67,6 @@ import { EstadoService } from '../../../../../services/estado.service';
     RendimientoDiaMesComponent,
     RankingOperadorUtilizacionComponent,
     RankingOperadorRendimientoComponent,
-    ParetoNoProgramadasComponent,
-    DiagramaParetoComponent,
     MtbfEquipoComponent,
     MtbfAnoComponent,
     MtbfSemanasComponent,

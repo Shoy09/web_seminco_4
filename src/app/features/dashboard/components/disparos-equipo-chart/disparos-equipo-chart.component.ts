@@ -13,6 +13,10 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 
 import { CHART_THEME } from '../../../../config/chart-theme';
+import {
+  exportarImagenChart,
+  PdfExportOptions,
+} from '../../../../config/config-pdf';
 
 echarts.use([
   BarChart,
@@ -61,15 +65,11 @@ export class DisparosEquipoChartComponent implements OnChanges {
     this.chartInstance = ec;
   }
 
-  getChartImage(): string | null {
-    if (!this.chartInstance) return null;
-
-    return this.chartInstance.getDataURL({
-      type: 'jpeg',
-      pixelRatio: 1.2,
-      backgroundColor: '#FFFFFF',
-      excludeComponents: ['toolbox', 'dataZoom'],
-    });
+  getChartImage(options?: number | PdfExportOptions): string | null {
+    return exportarImagenChart(
+      this.chartInstance,
+      typeof options === 'number' ? { pixelRatio: options } : options,
+    );
   }
 
   actualizarGrafico(): void {
@@ -81,7 +81,11 @@ export class DisparosEquipoChartComponent implements OnChanges {
     }
 
     const tiposArray = Array.from(
-      new Set(normalizedData.flatMap((item) => item.segmentos.map((segmento) => segmento.tipo))),
+      new Set(
+        normalizedData.flatMap((item) =>
+          item.segmentos.map((segmento) => segmento.tipo),
+        ),
+      ),
     );
 
     const xAxisData = normalizedData.map(
@@ -105,7 +109,7 @@ export class DisparosEquipoChartComponent implements OnChanges {
       label: {
         ...CHART_THEME.bar.label,
         show: true,
-        position: 'inside',
+        position: 'top',
         color: CHART_THEME.colors.secondary,
         fontWeight: 'bold',
         fontSize: 11,
@@ -113,7 +117,10 @@ export class DisparosEquipoChartComponent implements OnChanges {
       },
     }));
 
-    const maxValor = Math.max(...normalizedData.map((item) => item.totalDisparos), 1);
+    const maxValor = Math.max(
+      ...normalizedData.map((item) => item.totalDisparos),
+      1,
+    );
     const yAxisMax = Math.ceil(maxValor * 1.2);
 
     this.chartOptions = {
@@ -160,6 +167,7 @@ export class DisparosEquipoChartComponent implements OnChanges {
       },
       grid: {
         ...CHART_THEME.grid,
+        bottom: 80,
       },
       xAxis: {
         ...CHART_THEME.xAxisCategory,
@@ -194,14 +202,18 @@ export class DisparosEquipoChartComponent implements OnChanges {
     };
   }
 
-  private normalizeData(data: DisparosEquipoChartItem[]): DisparosEquipoChartItem[] {
+  private normalizeData(
+    data: DisparosEquipoChartItem[],
+  ): DisparosEquipoChartItem[] {
     return (data || []).filter(
       (item) => item && typeof item.modeloEquipo === 'string',
     );
   }
 
   private getSegmentValue(item: DisparosEquipoChartItem, tipo: string): number {
-    return item.segmentos.find((segmento) => segmento.tipo === tipo)?.valor || 0;
+    return (
+      item.segmentos.find((segmento) => segmento.tipo === tipo)?.valor || 0
+    );
   }
 
   private obtenerColoresPorTipo(tipos: string[]): Record<string, string> {
@@ -218,7 +230,8 @@ export class DisparosEquipoChartComponent implements OnChanges {
     const coloresPorTipo: Record<string, string> = {};
 
     tipos.forEach((tipo, index) => {
-      coloresPorTipo[tipo] = coloresBase[index % coloresBase.length] || fallback;
+      coloresPorTipo[tipo] =
+        coloresBase[index % coloresBase.length] || fallback;
     });
 
     return coloresPorTipo;

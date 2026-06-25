@@ -1,15 +1,27 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
+
 import * as echarts from 'echarts/core';
 import { BarChart, LineChart } from 'echarts/charts';
+
 import {
   TitleComponent,
   TooltipComponent,
   GridComponent,
   LegendComponent,
-  ToolboxComponent,
+  DataZoomComponent,
 } from 'echarts/components';
+
 import { CanvasRenderer } from 'echarts/renderers';
+import {
+  exportarImagenChart,
+  PdfExportOptions,
+} from '../../../../../../../config/config-pdf';
+import {
+  calcularZoomInicial,
+  CHART_LINE_STYLE,
+  CHART_THEME,
+} from '../../../../../../../config/chart-theme';
 
 echarts.use([
   BarChart,
@@ -18,9 +30,17 @@ echarts.use([
   TooltipComponent,
   GridComponent,
   LegendComponent,
-  ToolboxComponent,
+  DataZoomComponent,
   CanvasRenderer,
 ]);
+
+export interface MejorOperadorGraficoItem {
+  operador: string;
+  turno: string;
+  Tonelaje: number;
+  HorasOperativo: number;
+  TnxHr: number;
+}
 
 @Component({
   selector: 'app-mejores-operadores-grafico',
@@ -31,153 +51,124 @@ echarts.use([
   styleUrl: './mejores-operadores-grafico.component.css',
 })
 export class MejoresOperadoresGraficoComponent implements OnChanges {
-  @Input() data: any[] = [];
+  @Input() data: MejorOperadorGraficoItem[] = [];
 
   chartOptions: any = {};
+  private chartInstance: any;
+
+  onChartInit(ec: any): void {
+    this.chartInstance = ec;
+  }
+
+  getChartImage(options?: number | PdfExportOptions): string | null {
+    return exportarImagenChart(
+      this.chartInstance,
+      typeof options === 'number' ? { pixelRatio: options } : options,
+    );
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      console.log('Data Mejores Operadores Gráfico:', this.data);
-      this.actualizarGrafico();
+      this.updateChart();
     }
   }
 
-  formatearNombre(nombre: string): string {
+  private formatearNombre(nombre: string): string {
     if (!nombre || nombre === 'N/A') return 'N/A';
-    
     const partes = nombre.split(' ');
-    
-    if (partes.length === 1) {
-      return nombre;
-    }
-    
-    // Si tiene 2 o más palabras, unir las primeras dos con salto de línea
-    const primerApellido = partes[0];
-    const segundoNombre = partes[1] || '';
-    const resto = partes.slice(2).join(' ');
-    
-    if (resto) {
-      return `${primerApellido} ${segundoNombre}\n${resto}`;
-    }
-    return `${primerApellido}\n${segundoNombre}`;
+    if (partes.length === 1) return nombre;
+    const [a, b, ...resto] = partes;
+    const linea2 = resto.length ? resto.join(' ') : b;
+    return `${a}\n${linea2}`;
   }
 
-  actualizarGrafico(): void {
+  private updateChart(): void {
     if (!this.data || !this.data.length) {
       this.chartOptions = {};
       return;
     }
 
-    // Ordenar por Tonelaje (mayor a menor)
-    const datosOrdenados = [...this.data].sort((a, b) => {
-      return (b.Tonelaje || 0) - (a.Tonelaje || 0);
-    });
+    const sorted = [...this.data]
+      .sort((a, b) => Number(b.Tonelaje ?? 0) - Number(a.Tonelaje ?? 0))
+      .slice(0, 10);
 
-    // Tomar top 10 para mejor visualización
-    const topDatos = datosOrdenados.slice(0, 10);
+    const operadores = sorted.map((item) =>
+      this.formatearNombre(item.operador || 'N/A'),
+    );
+    const tonelajes = sorted.map((item) => Number(item.Tonelaje ?? 0));
+    const tnHr = sorted.map((item) => Number(item.TnxHr ?? 0));
 
-    // Categorías (nombres de operadores formateados con salto de línea)
-    const operadores = topDatos.map((item) => {
-      const nombre = item.operador || 'N/A';
-      return this.formatearNombre(nombre);
-    });
+    const maxTonn = Math.max(...tonelajes, 1);
+    const yMax = maxTonn * 1.2;
 
-    // Tonelaje para las barras
-    const tonelajes = topDatos.map((item) => Number(item.Tonelaje) || 0);
-
-    // Tn/Hr para la línea (redondeado a entero)
-    const tnHr = topDatos.map((item) => Math.round(Number(item.Tn_h_SC) || 0));
-
-    // Calcular maxTonelaje con 20% de margen
-    const maxTonelajeOriginal = Math.max(...tonelajes, 1);
-    const margenSuperior = 0.20;
-    let maxTonelaje = maxTonelajeOriginal * (1 + margenSuperior);
-
-    // Escalar la línea de Tn/Hr al eje Y (que está en escala de tonelaje)
     const maxTnHr = Math.max(...tnHr, 1);
-    const factorEscala = maxTonelaje / maxTnHr;
-    const tnHrEscalados = tnHr.map((valor) => valor * factorEscala);
+    const scaleFactor = yMax / maxTnHr;
+    const tnHrScaled = tnHr.map((v) => v * scaleFactor);
 
     this.chartOptions = {
       title: {
+        ...CHART_THEME.title,
         text: 'MEJORES OPERADORES',
-        left: 'center',
-        top: 10,
-        textStyle: {
-          fontSize: 16,
-          fontWeight: 'bold',
-          color: '#2c3e50',
-        },
       },
       tooltip: {
-        trigger: 'axis',
-        axisPointer: { type: 'shadow' },
+        ...CHART_THEME.tooltip,
         formatter: (params: any) => {
-          const operadorOriginal = topDatos[params[0].dataIndex]?.operador || 'N/A';
-          let result = `<strong>${operadorOriginal}</strong><br/>`;
-          
+          const item = sorted[params[0].dataIndex];
+          if (!item) return '';
+          let result = `<strong>${item.operador}</strong><br/>`;
           params.forEach((p: any) => {
             if (p.seriesName === 'Tonelaje') {
-              const valorOriginal = tonelajes[p.dataIndex];
-              result += `${p.marker} ${p.seriesName}: ${valorOriginal.toFixed(0)}<br/>`;
+              result += `${p.marker} ${p.seriesName}: <strong>${tonelajes[p.dataIndex].toFixed(0)}</strong><br/>`;
             } else if (p.seriesName === 'Tn/Hr') {
-              const tnHrOriginal = tnHr[p.dataIndex];
-              result += `${p.marker} ${p.seriesName}: ${tnHrOriginal}<br/>`;
+              result += `${p.marker} ${p.seriesName}: <strong>${tnHr[p.dataIndex].toFixed(1)}</strong><br/>`;
             }
           });
           return result;
         },
       },
       legend: {
+        ...CHART_THEME.legend,
         data: ['Tonelaje', 'Tn/Hr'],
-        bottom: 0,
-        left: 'center',
-        orient: 'horizontal',
       },
       grid: {
-        left: '10%',
-        right: '8%',
-        top: '15%',
-        bottom: '15%',
-        containLabel: true,
+        ...CHART_THEME.grid,
+        top: '18%',
+        bottom: '22%',
       },
+      dataZoom: [
+        {
+          ...CHART_THEME.dataZoom.inside,
+          start: 0,
+          end: 100,
+        },
+        {
+          ...CHART_THEME.dataZoom.slider,
+          start: 0,
+          end: 100,
+        },
+      ],
       xAxis: {
-        type: 'category',
+        ...CHART_THEME.xAxisCategory,
         data: operadores,
         axisLabel: {
-          rotate: 0,
+          ...CHART_THEME.xAxisCategory.axisLabel,
           interval: 0,
           fontSize: 10,
-          fontWeight: 'bold',
-          lineHeight: 16,
-          formatter: (value: string) => {
-            return value;
-          },
+          lineHeight: 14,
+          rotate: 25,
+          margin: 12,
         },
-        axisLine: {
-          lineStyle: { color: '#333' }
-        },
-        axisTick: {
-          alignWithLabel: true
-        }
       },
       yAxis: {
-        type: 'value',
-        name: '',
+        ...CHART_THEME.yAxisValue,
+        name: 'Tonelaje',
         nameLocation: 'middle',
         nameGap: 50,
         min: 0,
-        max: maxTonelaje,
+        max: yMax,
         axisLabel: {
-          formatter: (value: number) => `${Math.round(value)}`,
-        },
-        splitLine: {
-          show: true,
-          lineStyle: {
-            type: 'dashed',
-            width: 1,
-            color: '#e0e0e0',
-          },
+          ...CHART_THEME.yAxisValue.axisLabel,
+          formatter: (v: number) => `${Math.round(v)}`,
         },
       },
       series: [
@@ -186,18 +177,18 @@ export class MejoresOperadoresGraficoComponent implements OnChanges {
           type: 'bar',
           data: tonelajes,
           itemStyle: {
-            borderRadius: [5, 5, 0, 0],
-            color: '#3498db',
-            shadowColor: 'rgba(0, 0, 0, 0.2)',
+            color: CHART_THEME.colors.primaryScale3[0],
+            borderRadius: [6, 6, 0, 0],
+            shadowColor: 'rgba(0, 0, 0, 0.15)',
             shadowBlur: 5,
           },
           label: {
             show: true,
             position: 'top',
             formatter: (params: any) => `${Math.round(params.value)}`,
-            offset: [0, 3],
             fontWeight: 'bold',
             fontSize: 11,
+            color: CHART_THEME.colors.primaryScale3[0],
           },
           barCategoryGap: '30%',
           barGap: '30%',
@@ -205,29 +196,24 @@ export class MejoresOperadoresGraficoComponent implements OnChanges {
         {
           name: 'Tn/Hr',
           type: 'line',
-          data: tnHrEscalados,
+          data: tnHrScaled,
           symbol: 'circle',
           symbolSize: 8,
           lineStyle: {
-            color: '#e74c3c',
-            width: 3,
+            ...CHART_LINE_STYLE.lineStyle,
           },
+
           itemStyle: {
-            color: '#e74c3c',
-            borderColor: '#ffffff',
-            borderWidth: 2,
+            ...CHART_LINE_STYLE.itemStyle,
           },
           label: {
             show: true,
             position: 'top',
             offset: [0, -8],
-            formatter: (params: any) => {
-              const tnHrOriginal = tnHr[params.dataIndex];
-              return `${tnHrOriginal}`;
-            },
+            formatter: (params: any) => `${tnHr[params.dataIndex].toFixed(1)}`,
             fontWeight: 'bold',
             fontSize: 11,
-            color: '#e74c3c',
+            ...CHART_LINE_STYLE.label,
           },
           zlevel: 1,
           z: 10,

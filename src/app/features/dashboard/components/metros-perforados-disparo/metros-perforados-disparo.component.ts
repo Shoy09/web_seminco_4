@@ -17,6 +17,7 @@ import {
   calcularZoomInicial,
   CHART_THEME,
 } from '../../../../config/chart-theme';
+import { exportarImagenChart, PdfExportOptions } from '../../../../config/config-pdf';
 
 echarts.use([
   BarChart,
@@ -53,16 +54,12 @@ export class MetrosPerforadosDisparoComponent implements OnChanges {
     this.chartInstance = ec;
   }
 
-  getChartImage(): string | null {
-    if (!this.chartInstance) return null;
-
-    return this.chartInstance.getDataURL({
-      type: 'jpeg',
-      pixelRatio: 1.2,
-      backgroundColor: '#FFFFFF',
-      excludeComponents: ['toolbox', 'dataZoom'],
-    });
-  }
+  getChartImage(options?: number | PdfExportOptions): string | null {
+      return exportarImagenChart(
+        this.chartInstance,
+        typeof options === 'number' ? { pixelRatio: options } : options,
+      );
+    }
 
   getChartTitle(): string {
     return 'METROS PERFORADOS/DISPARO';
@@ -125,7 +122,7 @@ export class MetrosPerforadosDisparoComponent implements OnChanges {
 
       grid: {
         ...CHART_THEME.grid,
-        bottom: 60,
+        bottom: 80,
       },
 
       dataZoom: [

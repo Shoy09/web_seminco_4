@@ -240,7 +240,7 @@ export const CHART_THEME = {
   },
 
   bar: {
-    barWidth: 50,
+    barWidth: 40,
     itemStyle: {
       shadowColor: 'rgba(0, 0, 0, 0.15)',
       shadowBlur: 5,
@@ -251,6 +251,42 @@ export const CHART_THEME = {
       fontWeight: 'bold',
       fontSize: 11,
       color: '#FFFFFF',
+    },
+  },
+  barDM: {
+    barWidth: '30%',
+    barGap: '20%',
+    itemStyle: {
+      shadowColor: 'rgba(0, 0, 0, 0.15)',
+      shadowBlur: 5,
+      borderRadius: [6, 6, 0, 0],
+    },
+    label: {
+      show: true,
+      position: 'top',
+      fontWeight: 'bold',
+      fontSize: 11,
+      formatter: '{c}%',
+      color: CHART_TINTS.secondaryColor[100],
+    },
+  },
+  barPareto: {
+    barWidth: 40,
+    itemStyle: {
+      borderRadius: [6, 6, 0, 0],
+    },
+    label: {
+      show: true,
+      position: 'top',
+      formatter: (params: any) => {
+        return `${Number(params.value).toFixed(2)} h`;
+      },
+      fontWeight: 'bold',
+      fontSize: 10,
+      color: CHART_TINTS.secondaryColor[100],
+    },
+    emphasis: {
+      focus: 'series',
     },
   },
   pareto: {

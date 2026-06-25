@@ -8,20 +8,21 @@ import { PieChart } from 'echarts/charts';
 import {
   TitleComponent,
   TooltipComponent,
-  LegendComponent
+  LegendComponent,
 } from 'echarts/components';
 
 import { CanvasRenderer } from 'echarts/renderers';
 
 import { CHART_THEME } from '../../../../config/chart-theme';
 import { normalizarTexto } from '../../../../utils/fecha-utils';
+import { exportarImagenChart, PdfExportOptions } from '../../../../config/config-pdf';
 
 echarts.use([
   PieChart,
   TitleComponent,
   TooltipComponent,
   LegendComponent,
-  CanvasRenderer
+  CanvasRenderer,
 ]);
 
 export interface PromedioEstadoItem {
@@ -42,22 +43,24 @@ export interface PromedioEstadoItem {
   imports: [NgxEchartsDirective],
   providers: [provideEchartsCore({ echarts })],
   templateUrl: './promedio-estados-echarts.component.html',
-  styleUrl: './promedio-estados-echarts.component.css'
+  styleUrl: './promedio-estados-echarts.component.css',
 })
 export class PromedioEstadosEchartsComponent implements OnChanges {
-
   @Input() data: PromedioEstadoItem[] = [];
 
   chartOptions: any = {};
 
-  private tiposPorEstado: Map<string, Map<string, { horas: number; categoria: string | null }>> = new Map();
+  private tiposPorEstado: Map<
+    string,
+    Map<string, { horas: number; categoria: string | null }>
+  > = new Map();
 
   private readonly coloresPorEstado: Record<string, string> = {
     OPERATIVO: CHART_THEME.colors.primaryScale3?.[0] || '#38BDF8',
     DEMORA: CHART_THEME.colors.primaryScale3?.[1] || '#6DCCFA',
     MANTENIMIENTO: CHART_THEME.colors.primaryScale3?.[2] || '#9BDBFC',
     RESERVA: CHART_THEME.colors.primaryScale3?.[1] || '#6DCCFA',
-    'FUERA DE PLAN': CHART_THEME.colors.primaryScale3?.[0] || '#38BDF8'
+    'FUERA DE PLAN': CHART_THEME.colors.primaryScale3?.[0] || '#38BDF8',
   };
   private chartInstance: any;
 
@@ -65,17 +68,12 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
     this.chartInstance = ec;
   }
 
-  getChartImage(): string | null {
-    if (!this.chartInstance) return null;
-
-    return this.chartInstance.getDataURL({
-      type: 'jpeg',
-      pixelRatio: 1.2,
-      backgroundColor: '#FFFFFF',
-      excludeComponents: ['toolbox', 'dataZoom'],
-    });
+  getChartImage(options?: number | PdfExportOptions): string | null {
+    return exportarImagenChart(
+      this.chartInstance,
+      typeof options === 'number' ? { pixelRatio: options } : options,
+    );
   }
-
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
       this.buildChart();
@@ -92,7 +90,7 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
 
     this.tiposPorEstado.clear();
 
-    const datosConDuracion = normalizedData.map(item => {
+    const datosConDuracion = normalizedData.map((item) => {
       const inicio = this.parseHora(item.hora_inicio).getTime();
       const fin = this.parseHora(item.hora_final).getTime();
 
@@ -104,14 +102,14 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
 
       return {
         ...item,
-        duracion
+        duracion,
       };
     });
 
     const sumas = new Map<string, number>();
     const codigosOperacion = new Set<string>();
 
-    datosConDuracion.forEach(item => {
+    datosConDuracion.forEach((item) => {
       const estado = normalizarTexto(item.estado || 'SIN ESTADO');
       const tipoEstado = normalizarTexto(item.tipo_estado || 'SIN TIPO');
       const categoria = item.categoria || null;
@@ -130,7 +128,7 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
 
       const dataActual = tiposMap.get(tipoEstado) || {
         horas: 0,
-        categoria
+        categoria,
       };
 
       dataActual.horas += item.duracion;
@@ -147,9 +145,9 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
     const dataGrafico = Array.from(sumas.entries())
       .map(([estado, horas]) => ({
         name: estado,
-        value: Number((horas / totalCodigos).toFixed(2))
+        value: Number((horas / totalCodigos).toFixed(2)),
       }))
-      .filter(item => item.value > 0)
+      .filter((item) => item.value > 0)
       .sort((a, b) => b.value - a.value);
 
     if (dataGrafico.length === 0) {
@@ -173,9 +171,8 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
       ...item,
       itemStyle: {
         color:
-          this.coloresPorEstado[item.name] ||
-          colores[index % colores.length]
-      }
+          this.coloresPorEstado[item.name] || colores[index % colores.length],
+      },
     }));
 
     return {
@@ -184,7 +181,7 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
       title: {
         ...CHART_THEME.title,
         text: 'HORAS PROMEDIO POR ESTADO',
-        top: 10
+        top: 10,
       },
 
       tooltip: {
@@ -200,9 +197,8 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
           const y = point[1] - 50;
 
           const tooltipWidth = dom ? dom.clientWidth : 320;
-          const windowWidth = typeof window !== 'undefined'
-            ? window.innerWidth
-            : 1200;
+          const windowWidth =
+            typeof window !== 'undefined' ? window.innerWidth : 1200;
 
           if (x + tooltipWidth > windowWidth) {
             return [point[0] - tooltipWidth - 20, y];
@@ -228,11 +224,13 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
               .map(([tipo, { horas, categoria }]) => ({
                 tipo,
                 horas: Number(horas || 0).toFixed(2),
-                categoria
+                categoria,
               }))
               .sort((a, b) => Number(b.horas) - Number(a.horas));
 
-            const itemsHtml = tiposArray.map(item => `
+            const itemsHtml = tiposArray
+              .map(
+                (item) => `
               <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0f0;">
                 <div style="flex:1;">
                   <span style="display:inline-block;background:${color}20;color:${color};padding:4px 10px;border-radius:14px;font-size:11px;font-weight:700;margin-bottom:4px;">
@@ -243,7 +241,9 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
                   ${item.horas} hrs
                 </span>
               </div>
-            `).join('');
+            `,
+              )
+              .join('');
 
             const scrollHeight = tiposArray.length > 6 ? '200px' : 'auto';
 
@@ -300,7 +300,7 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
               </div>
             </div>
           `;
-        }
+        },
       },
 
       legend: {
@@ -309,9 +309,9 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
         orient: 'horizontal',
         bottom: 5,
         left: 'center',
-        data: dataGrafico.map(item => item.name),
+        data: dataGrafico.map((item) => item.name),
         itemWidth: 18,
-        itemHeight: 10
+        itemHeight: 10,
       },
 
       series: [
@@ -325,7 +325,7 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
           itemStyle: {
             borderRadius: 8,
             borderColor: '#FFFFFF',
-            borderWidth: 2
+            borderWidth: 2,
           },
 
           label: {
@@ -338,13 +338,13 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
               const porcentaje = Number(params.percent || 0).toFixed(1);
 
               return `${params.name}\n${valor} hrs (${porcentaje}%)`;
-            }
+            },
           },
 
           labelLine: {
             show: true,
             length: 12,
-            length2: 8
+            length2: 8,
           },
 
           emphasis: {
@@ -354,11 +354,11 @@ export class PromedioEstadosEchartsComponent implements OnChanges {
               show: true,
               fontSize: 14,
               fontWeight: 'bold',
-              color: CHART_THEME.colors.secondary
-            }
-          }
-        }
-      ]
+              color: CHART_THEME.colors.secondary,
+            },
+          },
+        },
+      ],
     };
   }
 

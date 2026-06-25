@@ -17,6 +17,10 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 
 import { CHART_THEME } from '../../../../config/chart-theme';
+import {
+  exportarImagenChart,
+  PdfExportOptions,
+} from '../../../../config/config-pdf';
 
 echarts.use([
   HeatmapChart,
@@ -60,15 +64,11 @@ export class MapaDeCalorComponent implements OnChanges {
     this.chartInstance = ec;
   }
 
-  getChartImage(pixelRatio: number = 2): string | null {
-    if (!this.chartInstance) return null;
-
-    return this.chartInstance.getDataURL({
-      type: 'jpeg',
-      pixelRatio,
-      backgroundColor: '#FFFFFF',
-      excludeComponents: ['toolbox', 'dataZoom'],
-    });
+  getChartImage(options?: number | PdfExportOptions): string | null {
+    return exportarImagenChart(
+      this.chartInstance,
+      typeof options === 'number' ? { pixelRatio: options } : options,
+    );
   }
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] || changes['turno']) {
