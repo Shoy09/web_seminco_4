@@ -1,0 +1,323 @@
+<div class="space-y-5">
+  <section class="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
+    <div class="bg-gradient-to-r from-secondary via-secondary-75 to-primary p-6 text-white">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="max-w-3xl">
+          <h1 class="mt-4 text-3xl font-black">Plan Produccion</h1>
+          <p class="mt-2 text-sm text-white/80">Administra el plan de produccion con sus variables geologicas y metalurgicas principales.</p>
+        </div>
+        <div class="flex items-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-sm">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15"><i class="pi pi-chart-bar text-xl text-white"></i></div>
+          <div><p class="text-xs font-bold uppercase tracking-[0.16em] text-white/75">Registros visibles</p><p class="text-2xl font-black">{{ planesFiltrados.length }}</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+ <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm">
+    <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+      <div class="grid flex-1 grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
+        <div class="flex flex-col gap-2 xl:col-span-2">
+          <label class="text-sm font-bold text-ink">Buscar</label>
+          <span class="relative">
+            <i class="pi pi-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-50"></i>
+            <input
+              pInputText
+              type="text"
+              [(ngModel)]="busqueda"
+              placeholder="Labor, ley, proceso, dia o valor"
+              class="w-full !rounded-2xl !border-border !pl-10"
+              (ngModelChange)="aplicarFiltros()"
+            />
+          </span>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-bold text-ink">Proceso</label>
+          <p-select
+            [options]="procesoFiltroOptions"
+            [(ngModel)]="procesoFiltro"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Todos los procesos"
+            styleClass="w-full"
+            appendTo="body"
+            (onChange)="aplicarFiltros()"
+          ></p-select>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-bold text-ink">Turno</label>
+          <p-select
+            [options]="turnoFiltroOptions"
+            [(ngModel)]="turnoFiltro"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Todos los turnos"
+            styleClass="w-full"
+            appendTo="body"
+            (onChange)="aplicarFiltros()"
+          ></p-select>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-bold text-ink">Periodo</label>
+          <p-select
+            [options]="periodoFiltroOptions"
+            [(ngModel)]="periodoFiltro"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Todos los periodos"
+            styleClass="w-full"
+            appendTo="body"
+            (onChange)="onPeriodoFiltroChange()"
+          ></p-select>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <p-button
+          pButton
+          type="button"
+          label="Limpiar"
+          icon="pi pi-filter-slash"
+          severity="secondary"
+          (click)="limpiarFiltros()"
+        />
+
+        <p-button
+          pButton
+          type="button"
+          label="Nuevo plan"
+          icon="pi pi-plus"
+          (click)="abrirNuevoPlan()"
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm">
+    <div *ngIf="loading" class="flex min-h-64 items-center justify-center">
+      <p-progressSpinner strokeWidth="4" ariaLabel="Cargando planes"></p-progressSpinner>
+    </div>
+
+    <p-table
+      *ngIf="!loading"
+      [value]="planesFiltrados"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} registros"
+      responsiveLayout="scroll"
+      [tableStyle]="{ 'min-width': '88rem' }"
+      styleClass="tabla-header-primary rounded-xl overflow-hidden"
+      [rowHover]="true"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="w-24 text-left">ID</th>
+          <th class="text-left">Labor</th>
+          <th class="text-left">Periodo</th>
+          <th class="text-left">Turno</th>
+          <th class="text-left">Ley</th>
+          <th class="text-left">Proceso</th>
+          <th class="text-left">Dia</th>
+          <th class="text-left">Valor</th>
+          <th class="text-left">Actualizado</th>
+          <th class="w-40 text-center">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-plan>
+        <tr>
+          <td class="font-semibold text-secondary">{{ plan.planMetrajeTlId }}</td>
+          <td>
+            <div class="flex flex-col">
+              <span class="font-bold text-secondary">{{ plan.labor_nombre }}</span>
+              <span class="text-xs text-ink-75">Labor ID {{ plan.labor_id }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="inline-flex rounded-full bg-primary-25 px-3 py-1 text-xs font-bold text-secondary">
+              {{ getPeriodoLabel(plan.periodo_id) }}
+            </span>
+          </td>
+          <td>{{ plan.turno_nombre }}</td>
+          <td>{{ plan.ley_nombre }}</td>
+          <td>{{ plan.proceso_nombre }}</td>
+          <td>{{ plan.dia }}</td>
+          <td class="font-semibold text-ink">{{ plan.valor }}</td>
+          <td>{{ getFechaLabel(plan.updated_at) }}</td>
+          <td class="text-center">
+            <div class="flex justify-center gap-2">
+              <p-button
+                type="button"
+                icon="pi pi-pencil"
+                severity="info"
+                [rounded]="true"
+                (click)="editarPlan(plan)"
+              />
+
+              <p-button
+                type="button"
+                icon="pi pi-trash"
+                severity="danger"
+                [rounded]="true"
+                (click)="eliminarPlan(plan)"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="10" class="py-12 text-center text-sm text-ink-75">
+            No hay planes de metraje TL registrados para los filtros actuales.
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+</div>
+
+<p-dialog
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="false"
+  [style]="{ width: 'min(58rem, 96vw)' }"
+  (onHide)="cerrarDialog()"
+>
+  <ng-template pTemplate="header">
+    <div>
+      <h2 class="text-xl font-extrabold text-secondary">{{ tituloDialog }}</h2>
+      <p class="mt-1 text-sm text-ink-75">
+        {{ editingPlanId === null ? 'Registra un nuevo plan de metraje TL.' : 'Actualiza la configuracion del plan seleccionado.' }}
+      </p>
+    </div>
+  </ng-template>
+
+  <form class="space-y-5" (ngSubmit)="guardarPlan()">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Labor</label>
+        <p-select
+          [options]="laborOptions"
+          [(ngModel)]="form.labor_id"
+          name="labor_id"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Seleccione una labor"
+          styleClass="w-full"
+          appendTo="body"
+          [loading]="loadingCatalogos"
+        ></p-select>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Periodo</label>
+        <p-select
+          [options]="periodoOptions"
+          [(ngModel)]="form.periodo_id"
+          name="periodo_id"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Seleccione un periodo"
+          styleClass="w-full"
+          appendTo="body"
+          [loading]="loadingCatalogos"
+        ></p-select>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Turno</label>
+        <p-select
+          [options]="turnoOptions"
+          [(ngModel)]="form.turno_id"
+          name="turno_id"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Seleccione un turno"
+          styleClass="w-full"
+          appendTo="body"
+          [loading]="loadingCatalogos"
+        ></p-select>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Ley</label>
+        <p-select
+          [options]="leyOptions"
+          [(ngModel)]="form.ley_id"
+          name="ley_id"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Seleccione una ley"
+          styleClass="w-full"
+          appendTo="body"
+          [loading]="loadingCatalogos"
+        ></p-select>
+      </div>
+
+      <div class="flex flex-col gap-2 md:col-span-2">
+        <label class="text-sm font-bold text-ink">Proceso</label>
+        <p-select
+          [options]="procesoOptions"
+          [(ngModel)]="form.proceso_id"
+          name="proceso_id"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Seleccione un proceso"
+          styleClass="w-full"
+          appendTo="body"
+          [loading]="loadingCatalogos"
+        ></p-select>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Dia</label>
+        <input
+          pInputText
+          type="number"
+          name="dia"
+          [(ngModel)]="form.dia"
+          placeholder="Ingrese el dia"
+        />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Valor</label>
+        <input
+          pInputText
+          type="number"
+          step="0.01"
+          name="valor"
+          [(ngModel)]="form.valor"
+          placeholder="Ingrese el valor"
+        />
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-2 border-t border-border pt-4">
+      <button
+        pButton
+        type="button"
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (click)="cerrarDialog()"
+      ></button>
+
+      <button
+        pButton
+        type="submit"
+        [label]="editingPlanId === null ? 'Guardar' : 'Actualizar'"
+        icon="pi pi-save"
+        [loading]="saving"
+      ></button>
+    </div>
+  </form>
+</p-dialog>

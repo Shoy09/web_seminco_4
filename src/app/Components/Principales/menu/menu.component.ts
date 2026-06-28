@@ -96,8 +96,8 @@ export class MenuComponent {
       label: 'Planes',
       icon: 'pi pi-calendar',
       items: [
-        { label: 'Plan de Avance', routerLink: ['/planes/plan-avance'] },
-        { label: 'Plan de Metraje', routerLink: ['/planes/plan-metraje'] },
+        { label: 'Plan Avance TH', routerLink: ['/planes/plan-avance-th'] },
+        { label: 'Plan Metraje TL', routerLink: ['/planes/plan-metraje-tl'] },
         {
           label: 'Plan de Producción',
           routerLink: ['/planes/plan-produccion'],
@@ -109,7 +109,10 @@ export class MenuComponent {
       icon: 'pi pi-database',
       items: [
         { label: 'Equipos', routerLink: ['/carga/equipos'] }, 
+        { label: 'Labores', routerLink: ['/carga/labores'] },
+        { label: 'Periodos', routerLink: ['/carga/periodos'] },
         { label: 'Procesos', routerLink: ['/carga/procesos'] },
+        { label: 'Turnos', routerLink: ['/carga/turnos'] },
         { label: 'Tipos de Perforación', routerLink: ['/carga/tipo-perforaciones'] },
         { label: 'Estados', routerLink: ['/carga/estados'] },
         { label: 'Crear Data', routerLink: ['/carga/crear-data'] },

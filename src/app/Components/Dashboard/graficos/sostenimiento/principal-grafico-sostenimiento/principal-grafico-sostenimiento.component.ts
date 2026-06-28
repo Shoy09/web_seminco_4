@@ -55,7 +55,6 @@ import {
   TotalHorometrosComponent,
   TotalHorometroItem,
 } from '../../../../../features/dashboard/components/total-horometros/total-horometros.component';
-import { PlanMensualService } from '../../../../../services/plan-mensual.service';
 import { PernosMinadoTipoComponent } from '../Graficos components/Hoja 2/pernos-minado-tipo/pernos-minado-tipo.component';
 import {
   HorasPrimeraPerforacionComponent,
@@ -229,7 +228,6 @@ export class PrincipalGraficoSostenimientoComponent implements OnInit {
   mapaEstados: Map<string, any> = new Map();
 
   constructor(
-    private planMensualService: PlanMensualService,
     private fechasPlanMensualService: FechasPlanMensualService,
     private operacionesService: OperacionesService,
     private estadoService: EstadoService,

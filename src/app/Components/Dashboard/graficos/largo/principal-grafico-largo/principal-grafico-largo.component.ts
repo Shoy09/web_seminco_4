@@ -65,8 +65,6 @@ import {
   RendimientoEquipoChartComponent,
   RendimientoEquipoChartItem,
 } from '../../../../../features/dashboard/components/rendimiento-equipo-chart/rendimiento-equipo-chart.component';
-import { PlanProduccionService } from '../../../../../services/plan-produccion.service';
-import { PlanProduccion } from '../../../../../models/plan_produccion.model';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { SchedulerComponent } from '../../Linea de tiempo/scheduler/scheduler.component';

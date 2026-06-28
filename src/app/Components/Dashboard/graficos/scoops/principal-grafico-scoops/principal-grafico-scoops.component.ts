@@ -1,7 +1,6 @@
 import { Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { OperacionBaseScoop } from '../../../../../models/OperacionBase.models';
 import { PlanProduccion } from '../../../../../models/plan_produccion.model';
-import { PlanMensualService } from '../../../../../services/plan-mensual.service';
 import { FechasPlanMensualService } from '../../../../../services/fechas-plan-mensual.service';
 import { OperacionesService } from '../../../../../services/operaciones.service';
 import html2canvas from 'html2canvas';

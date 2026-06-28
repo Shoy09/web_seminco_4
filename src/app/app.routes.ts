@@ -4,9 +4,6 @@ import { HomeComponent } from './Components/Principales/home/home.component';
 import { EstadosComponent } from './Components/Estado/estados/estados.component';
 import { UsuariosComponent } from './Components/Usuario/usuarios/usuarios.component';
 import { CrearDataComponent } from './Components/Crear datos/crear-data/crear-data.component';
-import { PlanMensualListComponent } from './Components/Planes mensuales/Plan mensual avance/plan-mensual-list/plan-mensual-list.component';
-import { PlanMetrajeListComponent } from './Components/Planes mensuales/Plan mensual metraje/plan-metraje-list/plan-metraje-list.component';
-import { PlanProduccionListComponent } from './Components/Planes mensuales/Plan mensual produccion/plan-produccion-list/plan-produccion-list.component';
 import { UsuarioComponent } from './Components/Usuario/usuario/usuario.component';
 import { AutocadMineroComponent } from './Components/autocad-minero/autocad-minero.component';
 import { CheckListListaComponent } from './Components/Crear datos/check list/check-list-lista/check-list-lista.component';
@@ -29,6 +26,12 @@ import { DetalleValidacionPageComponent } from './features/validaciones/pages/de
 import { ProcesosPageComponent } from './features/sistema/pages/procesos-page/procesos-page.component';
 import { TipoPerforacionesPageComponent } from './features/sistema/pages/tipo-perforaciones-page/tipo-perforaciones-page.component';
 import { EquiposPageComponent } from './features/sistema/pages/equipos-page/equipos-page.component';
+import { LaboresPageComponent } from './features/sistema/pages/labores-page/labores-page.component';
+import { PeriodosPageComponent } from './features/sistema/pages/periodos-page/periodos-page.component';
+import { TurnosPageComponent } from './features/sistema/pages/turnos-page/turnos-page.component';
+import { PlanMetrajeTlPageComponent } from './features/planes/pages/plan-metraje-tl-page/plan-metraje-tl-page.component';
+import { PlanAvanceThPageComponent } from './features/planes/pages/plan-avance-th-page/plan-avance-th-page.component';
+import { PlanProduccionPageComponent } from './features/planes/pages/plan-produccion-page/plan-produccion-page.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -93,16 +96,19 @@ export const routes: Routes = [
       {
         path: 'planes',
         children: [
-          { path: 'plan-avance', component: PlanMensualListComponent },
-          { path: 'plan-metraje', component: PlanMetrajeListComponent },
-          { path: 'plan-produccion', component: PlanProduccionListComponent },
+          { path: 'plan-avance-th', component: PlanAvanceThPageComponent },
+          { path: 'plan-metraje-tl', component: PlanMetrajeTlPageComponent },
+          { path: 'plan-produccion', component: PlanProduccionPageComponent },
         ],
       },
       {
         path: 'carga',
         children: [
           { path: 'equipos', component: EquiposPageComponent },
+          { path: 'labores', component: LaboresPageComponent },
+          { path: 'periodos', component: PeriodosPageComponent },
           { path: 'procesos', component: ProcesosPageComponent },
+          { path: 'turnos', component: TurnosPageComponent },
           { path: 'tipo-perforaciones', component: TipoPerforacionesPageComponent },
           { path: 'estados', component: EstadosComponent },
           { path: 'crear-data', component: CrearDataComponent },

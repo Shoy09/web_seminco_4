@@ -1,0 +1,84 @@
+<div class="space-y-5">
+  <section class="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
+    <div class="bg-gradient-to-r from-secondary via-secondary-75 to-primary p-6 text-white">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="max-w-3xl">
+          <h1 class="mt-4 text-3xl font-black">Turnos</h1>
+          <p class="mt-2 text-sm text-white/80">Administra los turnos operativos con sus horarios y codigos.</p>
+        </div>
+        <div class="flex items-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-sm">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15"><i class="pi pi-clock text-xl text-white"></i></div>
+          <div><p class="text-xs font-bold uppercase tracking-[0.16em] text-white/75">Registros visibles</p><p class="text-2xl font-black">{{ turnosFiltrados.length }}</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm">
+    <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+      <div class="flex-1">
+        <label class="text-sm font-bold text-ink">Buscar</label>
+        <span class="relative mt-2 block">
+          <i class="pi pi-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-50"></i>
+          <input pInputText type="text" [(ngModel)]="busqueda" placeholder="Nombre, codigo, horario o descripcion" class="w-full !rounded-2xl !border-border !pl-10" (ngModelChange)="aplicarFiltros()" />
+        </span>
+      </div>
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <p-button pButton type="button" label="Limpiar" icon="pi pi-filter-slash" severity="secondary" (click)="limpiarFiltros()" />
+        <p-button pButton type="button" label="Nuevo turno" icon="pi pi-plus" (click)="abrirNuevoTurno()" />
+      </div>
+    </div>
+  </section>
+
+  <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm">
+    <div *ngIf="loading" class="flex min-h-64 items-center justify-center"><p-progressSpinner strokeWidth="4" ariaLabel="Cargando turnos"></p-progressSpinner></div>
+    <p-table *ngIf="!loading" [value]="turnosFiltrados" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5,10,20]" [showCurrentPageReport]="true" currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} registros" responsiveLayout="scroll" [tableStyle]="{ 'min-width': '72rem' }" styleClass="tabla-header-primary rounded-xl overflow-hidden" [rowHover]="true">
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="w-20 text-left">ID</th>
+          <th class="text-left">Nombre</th>
+          <th class="text-left">Codigo</th>
+          <th class="text-left">Horario inicio</th>
+          <th class="text-left">Horario fin</th>
+          <th class="text-left">Descripcion</th>
+          <th class="w-40 text-center">Acciones</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-turno>
+        <tr>
+          <td class="font-semibold text-secondary">{{ turno.turnoId }}</td>
+          <td><span class="font-bold text-secondary">{{ turno.nombre }}</span></td>
+          <td>{{ turno.codigo }}</td>
+          <td>{{ turno.horario_inicio }}</td>
+          <td>{{ turno.horario_fin }}</td>
+          <td>{{ turno.descripcion || 'Sin descripcion' }}</td>
+          <td class="text-center"><div class="flex justify-center gap-2"><p-button type="button" icon="pi pi-pencil" severity="info" [rounded]="true" (click)="editarTurno(turno)" /><p-button type="button" icon="pi pi-trash" severity="danger" [rounded]="true" (click)="eliminarTurno(turno)" /></div></td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage"><tr><td colspan="7" class="py-12 text-center text-sm text-ink-75">No hay turnos registrados para los filtros actuales.</td></tr></ng-template>
+    </p-table>
+  </section>
+</div>
+
+<p-dialog [(visible)]="dialogVisible" [modal]="true" [draggable]="false" [resizable]="false" [dismissableMask]="false" [style]="{ width: 'min(52rem, 96vw)' }" (onHide)="cerrarDialog()">
+  <ng-template pTemplate="header">
+    <div>
+      <h2 class="text-xl font-extrabold text-secondary">{{ tituloDialog }}</h2>
+      <p class="mt-1 text-sm text-ink-75">{{ editingTurnoId === null ? 'Registra un nuevo turno.' : 'Actualiza el turno seleccionado.' }}</p>
+    </div>
+  </ng-template>
+
+  <form class="space-y-5" (ngSubmit)="guardarTurno()">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="flex flex-col gap-2"><label class="text-sm font-bold text-ink">Nombre</label><input pInputText type="text" name="nombre" [(ngModel)]="form.nombre" /></div>
+      <div class="flex flex-col gap-2"><label class="text-sm font-bold text-ink">Codigo</label><input pInputText type="text" name="codigo" [(ngModel)]="form.codigo" /></div>
+      <div class="flex flex-col gap-2"><label class="text-sm font-bold text-ink">Horario inicio</label><input pInputText type="text" name="horario_inicio" [(ngModel)]="form.horario_inicio" placeholder="Ejemplo: 07:00:00" /></div>
+      <div class="flex flex-col gap-2"><label class="text-sm font-bold text-ink">Horario fin</label><input pInputText type="text" name="horario_fin" [(ngModel)]="form.horario_fin" placeholder="Ejemplo: 19:00:00" /></div>
+      <div class="flex flex-col gap-2 md:col-span-2"><label class="text-sm font-bold text-ink">Descripcion</label><input pInputText type="text" name="descripcion" [(ngModel)]="form.descripcion" placeholder="Descripcion opcional" /></div>
+    </div>
+    <div class="flex justify-end gap-2 border-t border-border pt-4">
+      <button pButton type="button" label="Cancelar" severity="secondary" [outlined]="true" (click)="cerrarDialog()"></button>
+      <button pButton type="submit" [label]="editingTurnoId === null ? 'Guardar' : 'Actualizar'" icon="pi pi-save" [loading]="saving"></button>
+    </div>
+  </form>
+</p-dialog>

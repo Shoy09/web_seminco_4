@@ -1,0 +1,95 @@
+<div class="space-y-5">
+  <section class="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
+    <div class="bg-gradient-to-r from-secondary via-secondary-75 to-primary p-6 text-white">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="max-w-3xl">
+          <h1 class="mt-4 text-3xl font-black">Periodos</h1>
+          <p class="mt-2 text-sm text-white/80">Administra periodos mensuales y semanales con su rango de fechas.</p>
+        </div>
+        <div class="flex items-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-sm">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15"><i class="pi pi-calendar text-xl text-white"></i></div>
+          <div><p class="text-xs font-bold uppercase tracking-[0.16em] text-white/75">Registros visibles</p><p class="text-2xl font-black">{{ periodosFiltrados.length }}</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm">
+    <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+      <div class="grid flex-1 grid-cols-1 gap-4 lg:grid-cols-2">
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-bold text-ink">Buscar</label>
+          <span class="relative">
+            <i class="pi pi-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-50"></i>
+            <input pInputText type="text" [(ngModel)]="busqueda" placeholder="Tipo, numero o año" class="w-full !rounded-2xl !border-border !pl-10" (ngModelChange)="aplicarFiltros()" />
+          </span>
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-bold text-ink">Tipo</label>
+          <p-select [options]="tipoFiltroOptions" [(ngModel)]="tipoFiltro" optionLabel="label" optionValue="value" placeholder="Todos los tipos" styleClass="w-full" appendTo="body" (onChange)="aplicarFiltros()"></p-select>
+        </div>
+      </div>
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <p-button pButton type="button" label="Limpiar" icon="pi pi-filter-slash" severity="secondary" (click)="limpiarFiltros()" />
+        <p-button pButton type="button" label="Nuevo periodo" icon="pi pi-plus" (click)="abrirNuevoPeriodo()" />
+      </div>
+    </div>
+  </section>
+
+  <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm">
+    <div *ngIf="loading" class="flex min-h-64 items-center justify-center"><p-progressSpinner strokeWidth="4" ariaLabel="Cargando periodos"></p-progressSpinner></div>
+    <p-table *ngIf="!loading" [value]="periodosFiltrados" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5,10,20]" [showCurrentPageReport]="true" currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} registros" responsiveLayout="scroll" [tableStyle]="{ 'min-width': '80rem' }" styleClass="tabla-header-primary rounded-xl overflow-hidden" [rowHover]="true">
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="w-20 text-left">ID</th>
+          <th class="text-left">Periodo</th>
+          <th class="text-left">Tipo</th>
+          <th class="text-left">Numero</th>
+          <th class="text-left">Año</th>
+          <th class="text-left">Inicio</th>
+          <th class="text-left">Fin</th>
+          <th class="w-40 text-center">Acciones</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-periodo>
+        <tr>
+          <td class="font-semibold text-secondary">{{ periodo.periodoId }}</td>
+          <td><span class="font-bold text-secondary">{{ getPeriodoLabel(periodo) }}</span></td>
+          <td>{{ periodo.tipo }}</td>
+          <td>{{ periodo.numero }}</td>
+          <td>{{ periodo.anno }}</td>
+          <td>{{ getFechaLabel(periodo.fecha_inicio) }}</td>
+          <td>{{ getFechaLabel(periodo.fecha_fin) }}</td>
+          <td class="text-center"><div class="flex justify-center gap-2"><p-button type="button" icon="pi pi-pencil" severity="info" [rounded]="true" (click)="editarPeriodo(periodo)" /><p-button type="button" icon="pi pi-trash" severity="danger" [rounded]="true" (click)="eliminarPeriodo(periodo)" /></div></td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage"><tr><td colspan="8" class="py-12 text-center text-sm text-ink-75">No hay periodos registrados para los filtros actuales.</td></tr></ng-template>
+    </p-table>
+  </section>
+</div>
+
+<p-dialog [(visible)]="dialogVisible" [modal]="true" [draggable]="false" [resizable]="false" [dismissableMask]="false" [style]="{ width: 'min(56rem, 96vw)' }" (onHide)="cerrarDialog()">
+  <ng-template pTemplate="header">
+    <div>
+      <h2 class="text-xl font-extrabold text-secondary">{{ tituloDialog }}</h2>
+      <p class="mt-1 text-sm text-ink-75">{{ editingPeriodoId === null ? 'Registra un nuevo periodo.' : 'Actualiza el periodo seleccionado.' }}</p>
+    </div>
+  </ng-template>
+
+  <form class="space-y-5" (ngSubmit)="guardarPeriodo()">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Tipo</label>
+        <p-select [options]="tipoOptions" [(ngModel)]="form.tipo" name="tipo" optionLabel="label" optionValue="value" placeholder="Seleccione un tipo" styleClass="w-full" appendTo="body"></p-select>
+      </div>
+      <div class="flex flex-col gap-2"><label class="text-sm font-bold text-ink">Numero</label><input pInputText type="number" name="numero" [(ngModel)]="form.numero" /></div>
+      <div class="flex flex-col gap-2"><label class="text-sm font-bold text-ink">Año</label><input pInputText type="number" name="anno" [(ngModel)]="form.anno" /></div>
+      <div class="flex flex-col gap-2"><label class="text-sm font-bold text-ink">Fecha de inicio</label><p-datepicker [(ngModel)]="form.fecha_inicio" name="fecha_inicio" dateFormat="dd/mm/yy" [showIcon]="true" iconDisplay="input" [readonlyInput]="true" placeholder="Seleccione una fecha" styleClass="w-full" /></div>
+      <div class="flex flex-col gap-2"><label class="text-sm font-bold text-ink">Fecha de fin</label><p-datepicker [(ngModel)]="form.fecha_fin" name="fecha_fin" dateFormat="dd/mm/yy" [showIcon]="true" iconDisplay="input" [readonlyInput]="true" placeholder="Seleccione una fecha" styleClass="w-full" /></div>
+    </div>
+    <div class="flex justify-end gap-2 border-t border-border pt-4">
+      <button pButton type="button" label="Cancelar" severity="secondary" [outlined]="true" (click)="cerrarDialog()"></button>
+      <button pButton type="submit" [label]="editingPeriodoId === null ? 'Guardar' : 'Actualizar'" icon="pi pi-save" [loading]="saving"></button>
+    </div>
+  </form>
+</p-dialog>
