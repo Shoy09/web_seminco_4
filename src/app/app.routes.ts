@@ -27,6 +27,8 @@ import { SeleccionEquipoPageComponent } from './features/validaciones/pages/sele
 import { MonitoreoValidacionesPageComponent } from './features/validaciones/pages/monitoreo-validaciones/monitoreo-validaciones-page.component';
 import { DetalleValidacionPageComponent } from './features/validaciones/pages/detalle-validacion/detalle-validacion-page.component';
 import { ProcesosPageComponent } from './features/sistema/pages/procesos-page/procesos-page.component';
+import { TipoPerforacionesPageComponent } from './features/sistema/pages/tipo-perforaciones-page/tipo-perforaciones-page.component';
+import { EquiposPageComponent } from './features/sistema/pages/equipos-page/equipos-page.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -99,7 +101,9 @@ export const routes: Routes = [
       {
         path: 'carga',
         children: [
+          { path: 'equipos', component: EquiposPageComponent },
           { path: 'procesos', component: ProcesosPageComponent },
+          { path: 'tipo-perforaciones', component: TipoPerforacionesPageComponent },
           { path: 'estados', component: EstadosComponent },
           { path: 'crear-data', component: CrearDataComponent },
           { path: 'checklist', component: CheckListListaComponent },

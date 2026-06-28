@@ -7,14 +7,14 @@ import { TipoPerforacion } from '../models/tipo-perforacion.model';
   providedIn: 'root'
 })
 export class TipoPerforacionService {
-  private baseUrl = 'TipoPerfpo'; // Debe coincidir con la ruta del backend
+  private baseUrl = 'tipo-perforaciones';
   private tiposActualizados = new BehaviorSubject<boolean>(false); // Para notificar cambios
 
   constructor(private apiService: ApiService) {}
 
   // Obtener todos los tipos de perforación
   getTiposPerforacion(): Observable<TipoPerforacion[]> {
-    return this.apiService.getDatos(this.baseUrl + '/');
+    return this.apiService.getDatos(`${this.baseUrl}/`);
   }
 
   // Obtener un tipo de perforación por ID
@@ -23,7 +23,7 @@ export class TipoPerforacionService {
   }
 
   // Crear un nuevo tipo de perforación
-  createTipoPerforacion(tipo: TipoPerforacion): Observable<TipoPerforacion> {
+  createTipoPerforacion(tipo: Omit<TipoPerforacion, 'id' | 'proceso'>): Observable<TipoPerforacion> {
     return this.apiService.postDatos(`${this.baseUrl}/`, tipo).pipe(
       tap(() => {
         this.tiposActualizados.next(true); // Notificar actualización
@@ -32,7 +32,7 @@ export class TipoPerforacionService {
   }
 
   // Actualizar un tipo de perforación
-  updateTipoPerforacion(id: number, tipo: TipoPerforacion): Observable<TipoPerforacion> {
+  updateTipoPerforacion(id: number, tipo: Omit<TipoPerforacion, 'id' | 'proceso'>): Observable<TipoPerforacion> {
     return this.apiService.putDatos(`${this.baseUrl}/${id}`, tipo);
   }
 

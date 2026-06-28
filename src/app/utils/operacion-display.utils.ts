@@ -1,4 +1,4 @@
-import { Equipo } from '../models/equipo.model';
+import { Equipo } from '../models/Equipo';
 import { OperacionBase } from '../models/OperacionBase.models';
 import { Seccion } from '../models/seccion.model';
 

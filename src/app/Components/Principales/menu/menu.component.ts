@@ -108,7 +108,9 @@ export class MenuComponent {
       label: 'Carga de Datos',
       icon: 'pi pi-database',
       items: [
+        { label: 'Equipos', routerLink: ['/carga/equipos'] }, 
         { label: 'Procesos', routerLink: ['/carga/procesos'] },
+        { label: 'Tipos de Perforación', routerLink: ['/carga/tipo-perforaciones'] },
         { label: 'Estados', routerLink: ['/carga/estados'] },
         { label: 'Crear Data', routerLink: ['/carga/crear-data'] },
         { label: 'Checklist', routerLink: ['/carga/checklist'] },

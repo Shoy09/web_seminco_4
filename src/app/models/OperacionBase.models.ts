@@ -1,6 +1,6 @@
 import { CheckList } from './check-list';
 import { ControlLlantas } from './control-llantas';
-import { Equipo } from './equipo.model';
+import { Equipo } from './Equipo';
 import { Horometros } from './horometro';
 import { OperacionJumbo } from './OperacionJumbo';
 import { OperacionScoop } from './OperacionScoop';

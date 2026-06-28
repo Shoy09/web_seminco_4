@@ -44,7 +44,6 @@ import { MttrAnoComponent } from '../Graficos components/MTBF-MTTR/MTTR/mttr-ano
 import { MttrSemanasComponent } from '../Graficos components/MTBF-MTTR/MTTR/mttr-semanas/mttr-semanas.component';
 import { MttrMesComponent } from '../Graficos components/MTBF-MTTR/MTTR/mttr-mes/mttr-mes.component';
 import { EquipoService } from '../../../../../services/equipo.service';
-import { Equipo } from '../../../../../models/equipo.model';
 import { MatDialog } from '@angular/material/dialog';
 import { PresentacionDialogComponent } from '../presentacion-dialog/presentacion-dialog.component';
 import { DashboardFiltrosComponent } from '../../../../../features/dashboard/components/dashboard-filtros/dashboard-filtros.component';
@@ -104,6 +103,7 @@ import {
   getOperacionEquipoNombre,
   getSeccionNombre,
 } from '../../../../../utils/operacion-display.utils';
+import { Equipo } from '../../../../../models/Equipo';
 
 @Component({
   selector: 'app-principal-grafico-scoops',

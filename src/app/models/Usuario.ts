@@ -1,5 +1,5 @@
 import { Cargo } from "./Cargo";
-import { Equipo } from "./equipo.model";
+import { Equipo } from "./Equipo";
 import { Proceso } from "./Proceso";
 
 export interface Usuario {

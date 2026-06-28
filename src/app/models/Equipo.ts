@@ -8,6 +8,7 @@ export interface Equipo {
     serie:           string;
     anioFabricacion: number;
     fechaIngreso:    Date;
-    capacidadYd3:    number;
-    capacidadM3:     null;
+    capacidadYd3?:    number | null;
+    capacidadM3?:     number | null;
+    proceso_id:        number;
 }

@@ -22,8 +22,8 @@ import { Cargo } from '../../../models/Cargo';
 import { RolesService } from '../../../services/roles.service';
 import { Rol } from '../../../models/Rol';
 import { EquipoService } from '../../../services/equipo.service';
-import { Equipo } from '../../../models/equipo.model';
 import { ToastService } from '../../../services/toast.service';
+import { Equipo } from '../../../models/Equipo';
 
 @Component({
   selector: 'app-usuario-dialog',
