@@ -235,11 +235,11 @@ export class PrincipalGraficoSostenimientoComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarOperaciones();
-    this.obtenerEstadosPorProceso('EMPERNADOR');
+    this.obtenerEstadosPorProceso(8);
   }
 
-  obtenerEstadosPorProceso(proceso: string) {
-    this.estadoService.getEstadosByProceso(proceso).subscribe({
+  obtenerEstadosPorProceso(procesoId: number) {
+    this.estadoService.getEstadosByProcesoId(procesoId).subscribe({
       next: (data) => {
         this.estadosProceso = data;
         //console.log('Estados por proceso:', data);
@@ -437,7 +437,6 @@ export class PrincipalGraficoSostenimientoComponent implements OnInit {
 
     this.operacionesFiltradas.forEach((op) => {
       equiposSet.add(this.obtenerEquipoKey(op));
-
       const registrosArray = op.registros;
 
       if (Array.isArray(registrosArray)) {
@@ -461,6 +460,9 @@ export class PrincipalGraficoSostenimientoComponent implements OnInit {
         }
       }
     });
+
+      console.log(equiposSet);
+
 
     const dias =
       this.fechaFin && this.fechaInicio

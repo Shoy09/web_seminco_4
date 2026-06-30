@@ -312,7 +312,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     this.fechaFin = hoy;
     this.turnoSeleccionado = this.getTurnoActual();
     this.cargarOperaciones();
-    this.obtenerEstadosPorProceso('PERFORACIÓN HORIZONTAL');
+    this.obtenerEstadosPorProceso(5);
   }
 
   toggleVista() {
@@ -384,8 +384,8 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     });
   }
 
-  obtenerEstadosPorProceso(proceso: string) {
-    this.estadoService.getEstadosByProceso(proceso).subscribe({
+  obtenerEstadosPorProceso(procesoId: number) {
+    this.estadoService.getEstadosByProcesoId(procesoId).subscribe({
       next: (data) => {
         this.estadosProceso = data;
         //console.log('Estados por proceso:', data);

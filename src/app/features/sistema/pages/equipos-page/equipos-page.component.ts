@@ -6,13 +6,15 @@ import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
-import { Equipo } from '../../../../models/Equipo';
+import { Equipo, EquipoHorometro } from '../../../../models/Equipo';
 import { Proceso } from '../../../../models/Proceso';
 import { ConfirmService } from '../../../../services/confirm.service';
 import { EquipoService } from '../../../../services/equipo.service';
+import { HorometroService } from '../../../../services/horometro.service';
 import { ProcesosService } from '../../../../services/procesos.service';
 import { ToastService } from '../../../../services/toast.service';
 
@@ -33,6 +35,7 @@ type EquipoForm = {
   capacidadYd3: number | null;
   capacidadM3: number | null;
   proceso_id: number | null;
+  horometro_ids: number[];
 };
 
 @Component({
@@ -45,6 +48,7 @@ type EquipoForm = {
     DatePickerModule,
     DialogModule,
     InputTextModule,
+    MultiSelectModule,
     ProgressSpinnerModule,
     SelectModule,
     TableModule,
@@ -54,6 +58,7 @@ type EquipoForm = {
 })
 export class EquiposPageComponent implements OnInit {
   private readonly equipoService = inject(EquipoService);
+  private readonly horometroService = inject(HorometroService);
   private readonly procesosService = inject(ProcesosService);
   private readonly toastService = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
@@ -61,8 +66,10 @@ export class EquiposPageComponent implements OnInit {
   equipos: EquipoView[] = [];
   equiposFiltrados: EquipoView[] = [];
   procesos: Proceso[] = [];
+  horometrosDisponibles: EquipoHorometro[] = [];
 
   loading = false;
+  loadingHorometros = false;
   loadingProcesos = false;
   saving = false;
   dialogVisible = false;
@@ -79,7 +86,23 @@ export class EquiposPageComponent implements OnInit {
 
   cargarCatalogos(): void {
     this.cargarProcesos();
+    this.cargarHorometros();
     this.cargarEquipos();
+  }
+
+  cargarHorometros(): void {
+    this.loadingHorometros = true;
+    this.horometroService
+      .getHorometros()
+      .pipe(finalize(() => (this.loadingHorometros = false)))
+      .subscribe({
+        next: (horometros) => {
+          this.horometrosDisponibles = horometros;
+        },
+        error: () => {
+          this.toastService.error('No se pudieron cargar los horometros');
+        },
+      });
   }
 
   cargarProcesos(): void {
@@ -133,6 +156,7 @@ export class EquiposPageComponent implements OnInit {
       capacidadYd3: equipo.capacidadYd3 ?? null,
       capacidadM3: equipo.capacidadM3 ?? null,
       proceso_id: equipo.proceso_id ?? this.obtenerProcesoIdPorNombre(equipo.proceso),
+      horometro_ids: (equipo.horometros ?? []).map((horometro) => horometro.id),
     };
     this.dialogVisible = true;
   }
@@ -163,6 +187,7 @@ export class EquiposPageComponent implements OnInit {
       capacidadYd3: this.normalizarDecimal(this.form.capacidadYd3),
       capacidadM3: this.normalizarDecimal(this.form.capacidadM3),
       proceso_id: procesoId,
+      horometro_ids: this.form.horometro_ids,
     };
 
     this.saving = true;
@@ -220,8 +245,9 @@ export class EquiposPageComponent implements OnInit {
       }
 
       return [equipo.nombre, equipo.codigo, equipo.marca, equipo.modelo, proceso]
+        .concat((equipo.horometros ?? []).map((horometro) => horometro.nombre))
         .filter(Boolean)
-        .some((valor) => valor.toLowerCase().includes(texto));
+        .some((valor) => String(valor).toLowerCase().includes(texto));
     });
   }
 
@@ -279,6 +305,14 @@ export class EquiposPageComponent implements OnInit {
     return valor === null || valor === undefined ? `Sin ${unidad}` : `${valor} ${unidad}`;
   }
 
+  getHorometrosLabel(horometros: EquipoHorometro[] | undefined): string {
+    if (!horometros?.length) {
+      return 'Sin horometros';
+    }
+
+    return horometros.map((horometro) => horometro.nombre).join(', ');
+  }
+
   private crearFormularioInicial(): EquipoForm {
     return {
       nombre: '',
@@ -291,6 +325,7 @@ export class EquiposPageComponent implements OnInit {
       capacidadYd3: null,
       capacidadM3: null,
       proceso_id: null,
+      horometro_ids: [],
     };
   }
 
@@ -308,6 +343,12 @@ export class EquiposPageComponent implements OnInit {
       capacidadYd3: this.normalizarDecimal(equipo.capacidadYd3),
       capacidadM3: this.normalizarDecimal(equipo.capacidadM3),
       proceso_id: this.normalizarNumero(equipo.proceso_id) ?? this.obtenerProcesoIdPorNombre(equipo.proceso),
+      horometros: Array.isArray(equipo.horometros)
+        ? equipo.horometros.map((horometro) => ({
+            id: Number(horometro.id),
+            nombre: String(horometro.nombre ?? ''),
+          }))
+        : [],
     };
   }
 

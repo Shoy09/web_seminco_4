@@ -5,7 +5,7 @@ import { Estado } from '../models/Estado';
 import { CategoriaEstado } from '../models/CategoriaEstado';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class EstadoService {
   private baseUrl = 'estado'; // Asegúrate de que coincide con tu backend
@@ -21,8 +21,11 @@ export class EstadoService {
   }
 
   getEstadosByProceso(proceso: string): Observable<Estado[]> {
-  return this.apiService.getDatos(`${this.baseUrl}/proceso/${proceso}`);
-}
+    return this.apiService.getDatos(`${this.baseUrl}/proceso/${proceso}`);
+  }
+  getEstadosByProcesoId(proceso: number): Observable<Estado[]> {
+    return this.apiService.getDatos(`${this.baseUrl}/proceso-id/${proceso}`);
+  }
 
   getEstadoById(id: number): Observable<Estado> {
     return this.apiService.getDatos(`${this.baseUrl}/${id}`);
@@ -32,7 +35,7 @@ export class EstadoService {
     return this.apiService.postDatos(`${this.baseUrl}/`, estado).pipe(
       tap(() => {
         this.estadosActualizados.next(true); // Notificar que se creó un nuevo estado
-      })
+      }),
     );
   }
 
@@ -44,7 +47,7 @@ export class EstadoService {
     return this.apiService.postDatos(`${this.baseUrl}/`, estado).pipe(
       tap(() => {
         this.estadosActualizados.next(true); // Notificar que se creó un nuevo estado
-      })
+      }),
     );
   }
 
@@ -52,7 +55,7 @@ export class EstadoService {
     return this.apiService.putDatos(`${this.baseUrl}/${id}`, estado).pipe(
       tap(() => {
         this.estadosActualizados.next(true);
-      })
+      }),
     );
   }
 
@@ -60,8 +63,7 @@ export class EstadoService {
     return this.apiService.deleteDatos(`${this.baseUrl}/${id}`).pipe(
       tap(() => {
         this.estadosActualizados.next(true);
-      })
+      }),
     );
   }
-  
 }

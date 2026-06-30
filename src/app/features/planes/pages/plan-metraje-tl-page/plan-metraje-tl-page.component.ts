@@ -10,14 +10,15 @@ import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { PlanMetrajeTL } from '../../../../models/PlanMetrajeTL';
 import { Proceso } from '../../../../models/Proceso';
+import { Periodo } from '../../../../models/Periodo';
 import { ProcesosService } from '../../../../services/procesos.service';
 import { ConfirmService } from '../../../../services/confirm.service';
 import { ToastService } from '../../../../services/toast.service';
-import { Labor } from '../../../../models/Labor';
-import { Periodo } from '../../../../models/Periodo';
-import { Turno } from '../../../../models/Turno';
-import { Ley } from '../../../../models/Ley';
-import { PlanesService, PlanMetrajeTlPayload } from '../../../../services/planes.service';
+import {
+  PlanesService,
+  PlanImportResult,
+  PlanMetrajeTlPayload,
+} from '../../../../services/planes.service';
 
 type PlanMetrajeTlView = Omit<PlanMetrajeTL, 'created_at' | 'updated_at'> & {
   created_at: Date | string | null;
@@ -25,13 +26,21 @@ type PlanMetrajeTlView = Omit<PlanMetrajeTL, 'created_at' | 'updated_at'> & {
 };
 
 type PlanMetrajeTlForm = {
-  labor_id: number | null;
-  periodo_id: number | null;
-  turno_id: number | null;
-  ley_id: number | null;
-  proceso_id: number | null;
-  dia: number | null;
-  valor: number | null;
+  anio: number | null;
+  mes: string;
+  semana: string;
+  mina: string;
+  zona: string;
+  area: string;
+  fase: string;
+  tipo_minado: string;
+  tipo_labor: string;
+  estructura_mineralizada: string;
+  nivel: string;
+  nombre_labor: string;
+  ala: string;
+  ancho_veta_metros: number | null;
+  ancho_minado_sem_metros: number | null;
 };
 
 @Component({
@@ -48,7 +57,7 @@ type PlanMetrajeTlForm = {
     TableModule,
   ],
   templateUrl: './plan-metraje-tl-page.component.html',
-  styleUrl: './plan-metraje-tl-page.component.css'
+  styleUrl: './plan-metraje-tl-page.component.css',
 })
 export class PlanMetrajeTlPageComponent implements OnInit {
   private readonly planMetrajeTlService = inject(PlanesService);
@@ -59,21 +68,21 @@ export class PlanMetrajeTlPageComponent implements OnInit {
   planes: PlanMetrajeTlView[] = [];
   planesFiltrados: PlanMetrajeTlView[] = [];
   procesos: Proceso[] = [];
-  labores: Labor[] = [];
   periodos: Periodo[] = [];
-  turnos: Turno[] = [];
-  leyes: Ley[] = [];
 
   loading = false;
   loadingCatalogos = false;
   saving = false;
+  uploadingExcel = false;
   dialogVisible = false;
   editingPlanId: number | null = null;
 
   busqueda = '';
   procesoFiltro = '';
-  turnoFiltro = '';
   periodoFiltro: number | '' = '';
+
+  excelSeleccionado: File | null = null;
+  resultadoImportacion: PlanImportResult | null = null;
 
   form: PlanMetrajeTlForm = this.crearFormularioInicial();
 
@@ -91,19 +100,13 @@ export class PlanMetrajeTlPageComponent implements OnInit {
 
     forkJoin({
       procesos: this.procesosService.getProcesos(),
-      labores: this.planMetrajeTlService.getLabores(),
       periodos: this.planMetrajeTlService.getPeriodos(),
-      turnos: this.planMetrajeTlService.getTurnos(),
-      leyes: this.planMetrajeTlService.getLeyes(),
     })
       .pipe(finalize(() => (this.loadingCatalogos = false)))
       .subscribe({
-        next: ({ procesos, labores, periodos, turnos, leyes }) => {
+        next: ({ procesos, periodos }) => {
           this.procesos = procesos;
-          this.labores = labores;
           this.periodos = periodos;
-          this.turnos = turnos;
-          this.leyes = leyes;
           this.aplicarFiltros();
         },
         error: () => {
@@ -119,13 +122,13 @@ export class PlanMetrajeTlPageComponent implements OnInit {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (planes) => {
-          this.planes = planes;
+          this.planes = planes.map((plan) => this.normalizarPlan(plan));
           this.aplicarFiltros();
         },
         error: () => {
           this.toastService.error(
             'No se pudieron cargar los planes de metraje TL',
-            'Revisa la conexion con el backend.'
+            'Revisa la conexion con el backend.',
           );
         },
       });
@@ -140,13 +143,21 @@ export class PlanMetrajeTlPageComponent implements OnInit {
   editarPlan(plan: PlanMetrajeTlView): void {
     this.editingPlanId = plan.planMetrajeTlId;
     this.form = {
-      labor_id: plan.labor_id,
-      periodo_id: plan.periodo_id,
-      turno_id: plan.turno_id,
-      ley_id: plan.ley_id,
-      proceso_id: plan.proceso_id,
-      dia: plan.dia,
-      valor: plan.valor,
+      anio: null,
+      mes: '',
+      semana: '',
+      mina: plan.mina_nombre,
+      zona: plan.zona_nombre,
+      area: plan.area_nombre,
+      fase: plan.fase_nombre,
+      tipo_minado: '',
+      tipo_labor: plan.tipo_labor_nombre,
+      estructura_mineralizada: plan.estructura_mineral_nombre,
+      nivel: plan.nivel_nombre,
+      nombre_labor: plan.labor_nombre,
+      ala: plan.ala_nombre ?? '',
+      ancho_veta_metros: this.normalizarNumero(plan.ancho_veta_metros),
+      ancho_minado_sem_metros: this.normalizarNumero(plan.ancho_minado_sem_metros),
     };
     this.dialogVisible = true;
   }
@@ -157,7 +168,7 @@ export class PlanMetrajeTlPageComponent implements OnInit {
     if (!payload) {
       this.toastService.warn(
         'Campos requeridos',
-        'Completa labor, periodo, turno, ley, proceso, dia y valor antes de guardar.'
+        'Completa año, mes, semana, mina, zona, area, fase, tipo minado, tipo labor, estructura mineralizada, nivel, nombre de labor, ala, ancho de veta y ancho de minado semanal antes de guardar.',
       );
       return;
     }
@@ -173,16 +184,16 @@ export class PlanMetrajeTlPageComponent implements OnInit {
         this.toastService.success(
           this.editingPlanId === null
             ? 'Plan de metraje TL creado'
-            : 'Plan de metraje TL actualizado'
+            : 'Plan de metraje TL actualizado',
         );
         this.dialogVisible = false;
-        this.cargarPlanes();
+        this.cargarPlanes(this.periodoFiltro === '' ? null : this.periodoFiltro);
       },
       error: () => {
         this.toastService.error(
           this.editingPlanId === null
             ? 'No se pudo crear el plan de metraje TL'
-            : 'No se pudo actualizar el plan de metraje TL'
+            : 'No se pudo actualizar el plan de metraje TL',
         );
       },
     });
@@ -196,7 +207,7 @@ export class PlanMetrajeTlPageComponent implements OnInit {
           next: () => {
             this.toastService.success('Plan de metraje TL eliminado');
             this.planes = this.planes.filter(
-              (item) => item.planMetrajeTlId !== plan.planMetrajeTlId
+              (item) => item.planMetrajeTlId !== plan.planMetrajeTlId,
             );
             this.aplicarFiltros();
           },
@@ -204,7 +215,7 @@ export class PlanMetrajeTlPageComponent implements OnInit {
             this.toastService.error('No se pudo eliminar el plan de metraje TL');
           },
         });
-      }
+      },
     );
   }
 
@@ -213,16 +224,9 @@ export class PlanMetrajeTlPageComponent implements OnInit {
 
     this.planesFiltrados = this.planes.filter((plan) => {
       const proceso = plan.proceso_nombre;
-      const turno = plan.turno_nombre;
       const periodo = this.getPeriodoLabel(plan.periodo_id);
-      const labor = plan.labor_nombre;
-      const ley = plan.ley_nombre;
 
       if (this.procesoFiltro && proceso !== this.procesoFiltro) {
-        return false;
-      }
-
-      if (this.turnoFiltro && turno !== this.turnoFiltro) {
         return false;
       }
 
@@ -230,22 +234,103 @@ export class PlanMetrajeTlPageComponent implements OnInit {
         return true;
       }
 
-      return [labor, periodo, turno, ley, proceso, String(plan.dia), String(plan.valor)]
+      return [
+        plan.labor_nombre,
+        plan.mina_nombre,
+        plan.zona_nombre,
+        plan.area_nombre,
+        plan.fase_nombre,
+        plan.tipo_labor_nombre,
+        plan.estructura_mineral_nombre,
+        plan.nivel_nombre,
+        plan.ala_nombre ?? '',
+        proceso,
+        periodo,
+        String(plan.ancho_veta_metros),
+        String(plan.ancho_minado_sem_metros),
+        String(plan.ancho_minado_mes_metros),
+      ]
         .filter(Boolean)
-        .some((valor) => valor.toLowerCase().includes(texto));
+        .some((valor) => String(valor).toLowerCase().includes(texto));
     });
   }
 
   limpiarFiltros(): void {
     this.busqueda = '';
     this.procesoFiltro = '';
-    this.turnoFiltro = '';
     this.periodoFiltro = '';
     this.cargarPlanes();
   }
 
   onPeriodoFiltroChange(): void {
     this.cargarPlanes(this.periodoFiltro === '' ? null : this.periodoFiltro);
+  }
+
+  abrirSelectorExcel(input: HTMLInputElement): void {
+    input.value = '';
+    input.click();
+  }
+
+  onExcelSeleccionado(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const archivo = input.files?.[0] ?? null;
+
+    if (!archivo) {
+      this.excelSeleccionado = null;
+      return;
+    }
+
+    const extensionValida = /\.(xlsx|xls)$/i.test(archivo.name);
+
+    if (!extensionValida) {
+      this.excelSeleccionado = null;
+      input.value = '';
+      this.toastService.warn(
+        'Archivo no valido',
+        'Selecciona un archivo Excel con extension .xlsx o .xls.',
+      );
+      return;
+    }
+
+    this.excelSeleccionado = archivo;
+    this.resultadoImportacion = null;
+    this.toastService.success('Excel seleccionado', archivo.name);
+  }
+
+  enviarExcel(): void {
+    if (!this.excelSeleccionado) {
+      this.toastService.warn(
+        'Archivo requerido',
+        'Primero selecciona un archivo Excel para continuar.',
+      );
+      return;
+    }
+
+    this.uploadingExcel = true;
+
+    this.planMetrajeTlService
+      .importarExcelPlanMetrajeTl(this.excelSeleccionado)
+      .pipe(finalize(() => (this.uploadingExcel = false)))
+      .subscribe({
+        next: (resultado) => {
+          this.resultadoImportacion = resultado;
+          this.procesarResultadoImportacion(resultado);
+          this.cargarPlanes(this.periodoFiltro === '' ? null : this.periodoFiltro);
+        },
+        error: (error) => {
+          this.resultadoImportacion = {
+            processed_rows: 0,
+            updated_rows: 0,
+            skipped_rows: 0,
+            errors: this.extraerErroresImportacion(error),
+          };
+
+          this.toastService.error(
+            'No se pudo importar el Excel',
+            'Verifica el archivo y la respuesta del backend.',
+          );
+        },
+      });
   }
 
   cerrarDialog(): void {
@@ -259,40 +344,10 @@ export class PlanMetrajeTlPageComponent implements OnInit {
       : 'Editar plan de metraje TL';
   }
 
-  get laborOptions(): Array<{ label: string; value: number }> {
-    return this.labores.map((labor) => ({ label: labor.nombre_labor, value: labor.laborId }));
-  }
-
-  get periodoOptions(): Array<{ label: string; value: number }> {
-    return this.periodos.map((periodo) => ({
-      label: this.formatearPeriodoLabel(periodo),
-      value: periodo.periodoId,
-    }));
-  }
-
-  get turnoOptions(): Array<{ label: string; value: number }> {
-    return this.turnos.map((turno) => ({ label: turno.nombre, value: turno.turnoId }));
-  }
-
-  get leyOptions(): Array<{ label: string; value: number }> {
-    return this.leyes.map((ley) => ({ label: ley.nombre, value: ley.leyId }));
-  }
-
-  get procesoOptions(): Array<{ label: string; value: number }> {
-    return this.procesos.map((proceso) => ({ label: proceso.nombre, value: proceso.id }));
-  }
-
   get procesoFiltroOptions(): Array<{ label: string; value: string }> {
     return [
       { label: 'Todos los procesos', value: '' },
       ...this.procesos.map((proceso) => ({ label: proceso.nombre, value: proceso.nombre })),
-    ];
-  }
-
-  get turnoFiltroOptions(): Array<{ label: string; value: string }> {
-    return [
-      { label: 'Todos los turnos', value: '' },
-      ...this.turnos.map((turno) => ({ label: turno.nombre, value: turno.nombre })),
     ];
   }
 
@@ -305,7 +360,6 @@ export class PlanMetrajeTlPageComponent implements OnInit {
       })),
     ];
   }
-
 
   getPeriodoLabel(periodoId: number): string {
     const periodo = this.periodos.find((p) => p.periodoId === periodoId);
@@ -326,48 +380,112 @@ export class PlanMetrajeTlPageComponent implements OnInit {
     return parsed.toLocaleString('es-PE');
   }
 
+  getUbicacionLabel(plan: PlanMetrajeTlView): string {
+    return [plan.mina_nombre, plan.zona_nombre, plan.area_nombre, plan.fase_nombre]
+      .filter(Boolean)
+      .join(' / ');
+  }
+
+  getClasificacionLabel(plan: PlanMetrajeTlView): string {
+    return [
+      plan.tipo_labor_nombre,
+      plan.estructura_mineral_nombre,
+      plan.nivel_nombre,
+      plan.ala_nombre ?? '',
+    ]
+      .filter(Boolean)
+      .join(' / ');
+  }
+
   private crearFormularioInicial(): PlanMetrajeTlForm {
     return {
-      labor_id: null,
-      periodo_id: null,
-      turno_id: null,
-      ley_id: null,
-      proceso_id: null,
-      dia: null,
-      valor: null,
+      anio: null,
+      mes: '',
+      semana: '',
+      mina: '',
+      zona: '',
+      area: '',
+      fase: '',
+      tipo_minado: '',
+      tipo_labor: '',
+      estructura_mineralizada: '',
+      nivel: '',
+      nombre_labor: '',
+      ala: '',
+      ancho_veta_metros: null,
+      ancho_minado_sem_metros: null,
     };
   }
 
   private construirPayload(): PlanMetrajeTlPayload | null {
-    const labor_id = this.form.labor_id;
-    const periodo_id = this.form.periodo_id;
-    const turno_id = this.form.turno_id;
-    const ley_id = this.form.ley_id;
-    const proceso_id = this.form.proceso_id;
-    const dia = this.form.dia;
-    const valor = this.form.valor;
+    const anio = this.normalizarNumero(this.form.anio);
+    const ancho_veta_metros = this.normalizarNumero(this.form.ancho_veta_metros);
+    const ancho_minado_sem_metros = this.normalizarNumero(this.form.ancho_minado_sem_metros);
 
     if (
-      labor_id === null ||
-      periodo_id === null ||
-      turno_id === null ||
-      ley_id === null ||
-      proceso_id === null ||
-      dia === null ||
-      valor === null
+      anio === null ||
+      ancho_veta_metros === null ||
+      ancho_minado_sem_metros === null ||
+      !this.form.mes.trim() ||
+      !this.form.semana.trim() ||
+      !this.form.mina.trim() ||
+      !this.form.zona.trim() ||
+      !this.form.area.trim() ||
+      !this.form.fase.trim() ||
+      !this.form.tipo_minado.trim() ||
+      !this.form.tipo_labor.trim() ||
+      !this.form.estructura_mineralizada.trim() ||
+      !this.form.nivel.trim() ||
+      !this.form.nombre_labor.trim() ||
+      !this.form.ala.trim()
     ) {
       return null;
     }
 
     return {
-      labor_id,
-      periodo_id,
-      turno_id,
-      ley_id,
-      proceso_id,
-      dia,
-      valor,
+      anio,
+      mes: this.form.mes.trim(),
+      semana: this.form.semana.trim(),
+      mina: this.form.mina.trim(),
+      zona: this.form.zona.trim(),
+      area: this.form.area.trim(),
+      fase: this.form.fase.trim(),
+      tipo_minado: this.form.tipo_minado.trim(),
+      tipo_labor: this.form.tipo_labor.trim(),
+      estructura_mineralizada: this.form.estructura_mineralizada.trim(),
+      nivel: this.form.nivel.trim(),
+      nombre_labor: this.form.nombre_labor.trim(),
+      ala: this.form.ala.trim(),
+      ancho_veta_metros,
+      ancho_minado_sem_metros,
     };
+  }
+
+  private procesarResultadoImportacion(resultado: PlanImportResult): void {
+    const resumen = `Procesadas: ${resultado.processed_rows}, actualizadas: ${resultado.updated_rows}, omitidas: ${resultado.skipped_rows}`;
+
+    if (resultado.errors.length > 0) {
+      this.toastService.warn('Importacion completada con observaciones', resumen);
+      return;
+    }
+
+    this.toastService.success('Importacion completada', resumen);
+  }
+
+  private extraerErroresImportacion(error: unknown): string[] {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'error' in error &&
+      error.error &&
+      typeof error.error === 'object' &&
+      'errors' in error.error &&
+      Array.isArray(error.error.errors)
+    ) {
+      return error.error.errors.filter((item): item is string => typeof item === 'string');
+    }
+
+    return ['No se pudo procesar la importacion del Excel.'];
   }
 
   private formatearPeriodoLabel(periodo: Periodo): string {
@@ -381,7 +499,7 @@ export class PlanMetrajeTlPageComponent implements OnInit {
       .filter((valor) => valor !== null && valor !== undefined && valor !== '')
       .join(' ');
 
-    return inicio && fin ? `${encabezado} (${inicio} - ${fin})` : encabezado;
+    return inicio && fin ? `${encabezado} \n (${inicio} - ${fin})` : encabezado;
   }
 
   private formatearFechaCorta(fecha: Date | string | null | undefined): string {
@@ -412,5 +530,34 @@ export class PlanMetrajeTlPageComponent implements OnInit {
 
     const parsed = new Date(valor);
     return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  private normalizarPlan(plan: PlanMetrajeTL): PlanMetrajeTlView {
+    return {
+      ...plan,
+      created_at: this.normalizarFecha(plan.created_at),
+      updated_at: this.normalizarFecha(plan.updated_at),
+    };
+  }
+
+  private normalizarFecha(valor: unknown): Date | string | null {
+    if (!valor) {
+      return null;
+    }
+
+    if (valor instanceof Date) {
+      return Number.isNaN(valor.getTime()) ? null : valor;
+    }
+
+    return typeof valor === 'string' ? valor : null;
+  }
+
+  private normalizarNumero(valor: unknown): number | null {
+    if (valor === null || valor === undefined || valor === '') {
+      return null;
+    }
+
+    const numero = Number(valor);
+    return Number.isNaN(numero) ? null : numero;
   }
 }

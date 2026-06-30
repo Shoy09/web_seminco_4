@@ -66,7 +66,6 @@ import {
   RendimientoEquipoChartItem,
 } from '../../../../../features/dashboard/components/rendimiento-equipo-chart/rendimiento-equipo-chart.component';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { SchedulerComponent } from '../../Linea de tiempo/scheduler/scheduler.component';
 import { EstadoService } from '../../../../../services/estado.service';
 import { ApiService } from '../../../../../services/api.service';
@@ -118,10 +117,6 @@ import {
   getOperacionEquipoModelo,
   getSeccionNombre,
 } from '../../../../../utils/operacion-display.utils';
-
-type OperacionTalLargoConTipo = OperacionTLargos & {
-  tipo_perforacion?: string;
-};
 
 @Component({
   selector: 'app-principal-grafico-largo',
@@ -279,7 +274,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     this.turnoSeleccionado = this.getTurnoActual();
 
     this.cargarOperaciones();
-    this.obtenerEstadosPorProceso('PERFORACIÓN TALADROS LARGOS');
+    this.obtenerEstadosPorProceso(4);
     this.cargarTiposPerforacion();
   }
   limpiarFechasPorTipo(): void {
@@ -345,8 +340,8 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     });
   }
 
-  obtenerEstadosPorProceso(proceso: string) {
-    this.estadoService.getEstadosByProceso(proceso).subscribe({
+  obtenerEstadosPorProceso(procesoId: number) {
+    this.estadoService.getEstadosByProcesoId(procesoId).subscribe({
       next: (data) => {
         this.estadosProceso = data;
         //console.log('Estados por proceso:', data);
@@ -651,7 +646,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
       'Tal. rimados',
     ];
 
-    const filas = dataOrdenada.map((item: any) => [
+    const filas = dataOrdenada.map((item) => [
       this.valorPDF(item.modelo_equipo),
       this.numeroPDF(item.metros_perforados, 2),
       this.numeroPDF(item.percusion, 2),
@@ -706,6 +701,8 @@ export class PrincipalGraficoLargoComponent implements OnInit {
       this.numeroPDF(totalTalRepaso, 0),
       this.numeroPDF(totalTalRimados, 0),
     ]);
+
+    console.log(filas);
 
     return agregarTablaContinuaPDF(pdf, {
       tituloReporte: 'REPORTE OPERATIVO - TABLAS',
@@ -1694,18 +1691,13 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     }
 
     const tipo = this.normalizarTipoPerforacion(
-      this.obtenerTipoPerforacionTalLargo(registro.operacion),
+      this.obtenerTipoPerforacionTalLargo(registro.operacion!),
     );
     return this.tiposDisparoTalLargo.has(tipo);
   }
 
-  private obtenerTipoPerforacionTalLargo(
-    operacion: OperacionTLargos | undefined | null,
-  ): string {
-    return (
-      (operacion as OperacionTalLargoConTipo | undefined | null)
-        ?.tipo_perforacion || ''
-    ).trim();
+  private obtenerTipoPerforacionTalLargo(operacion: OperacionTLargos): string {
+    return (operacion.tipo_perforacion || '').trim();
   }
 
   private normalizarTipoPerforacion(tipo?: string): string {
@@ -2940,20 +2932,14 @@ export class PrincipalGraficoLargoComponent implements OnInit {
       if (!mapa.has(key)) {
         mapa.set(key, {
           modelo_equipo: key,
-
           metros_perforados: 0,
           percusion: 0,
-
-          // 🔥 acumuladores
           sum_long_barras: 0,
           count_long_barras: 0,
-
           tal_alivio: 0,
           tal_prod: 0,
           tal_repaso: 0,
           tal_rimados: 0,
-
-          // 🔥 resultados finales
           long_barras: 0,
           fr_mhr_hp: 0,
         });
@@ -2969,7 +2955,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
       // =========================
       if (Array.isArray(registrosArray)) {
         registrosArray.forEach((r) => {
-          const opData = r?.operacion || r;
+          const opData = r.operacion!;
 
           //const lb = Number(opData?.long_barras);
           const lb = 1;
@@ -2979,10 +2965,10 @@ export class PrincipalGraficoLargoComponent implements OnInit {
             item.count_long_barras += 1;
           }
 
-          /* item.tal_alivio += Number(opData?.metros_perforados_alivio) || 0;
-          item.tal_prod += Number(opData?.metros_perforados_produccion) || 0;
-          item.tal_repaso += Number(opData?.metros_perforados_repaso) || 0;
-          item.tal_rimados += Number(opData?.metros_perforados_rimados) || 0; */
+          item.tal_alivio += Number(opData?.n_taladros_alivio) || 0;
+          item.tal_prod += Number(opData?.n_taladros_produccion) || 0;
+          item.tal_repaso += Number(opData?.n_taladros_repaso) || 0;
+          item.tal_rimados += Number(opData?.n_taladros_rimados) || 0;
         });
       }
     });

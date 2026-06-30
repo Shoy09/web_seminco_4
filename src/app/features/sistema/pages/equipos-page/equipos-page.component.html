@@ -101,6 +101,7 @@
           <th class="text-left">Proceso</th>
           <th class="text-left">Codigo</th>
           <th class="text-left">Detalle tecnico</th>
+          <th class="text-left">Horometros</th>
           <th class="text-left">Ingreso</th>
           <th class="text-left">Capacidades</th>
           <th class="w-40 text-center">Acciones</th>
@@ -129,6 +130,9 @@
               <span class="font-medium text-ink">{{ equipo.marca || 'Sin marca' }} / {{ equipo.modelo || 'Sin modelo' }}</span>
               <span class="text-xs text-ink-75">Año {{ equipo.anioFabricacion ?? 'Sin registro' }}</span>
             </div>
+          </td>
+          <td>
+            <span class="text-sm text-ink">{{ getHorometrosLabel(equipo.horometros) }}</span>
           </td>
           <td>
             <span class="text-sm text-ink">{{ getFechaIngresoLabel(equipo.fechaIngreso) }}</span>
@@ -163,7 +167,7 @@
 
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="8" class="py-12 text-center text-sm text-ink-75">
+          <td colspan="9" class="py-12 text-center text-sm text-ink-75">
             No hay equipos registrados para los filtros actuales.
           </td>
         </tr>
@@ -227,6 +231,23 @@
           appendTo="body"
           [loading]="loadingProcesos"
         ></p-select>
+      </div>
+
+      <div class="flex flex-col gap-2 md:col-span-2">
+        <label class="text-sm font-bold text-ink">Horometros</label>
+        <p-multiselect
+          [options]="horometrosDisponibles"
+          [(ngModel)]="form.horometro_ids"
+          name="horometro_ids"
+          optionLabel="nombre"
+          optionValue="id"
+          placeholder="Seleccione horometros"
+          [maxSelectedLabels]="4"
+          [filter]="true"
+          [loading]="loadingHorometros"
+          styleClass="w-full"
+          appendTo="body"
+        ></p-multiselect>
       </div>
 
       <div class="flex flex-col gap-2">

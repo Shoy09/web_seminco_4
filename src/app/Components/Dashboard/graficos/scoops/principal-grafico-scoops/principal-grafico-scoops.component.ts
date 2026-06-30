@@ -290,8 +290,8 @@ export class PrincipalGraficoScoopsComponent implements OnInit {
     this.turnoSeleccionado = this.getTurnoActual();
 
     this.cargarOperaciones();
-    this.obtenerEstadosPorProceso('SCOOPTRAM');
-    this.obtenerEquiposPorProceso('SCOOPTRAM');
+    this.obtenerEstadosPorProceso(6);
+    this.obtenerEquiposPorProceso(6);
   }
 
   toggleDataZoom(): void {
@@ -324,8 +324,8 @@ export class PrincipalGraficoScoopsComponent implements OnInit {
     });
   }
 
-  obtenerEquiposPorProceso(proceso: string) {
-    this.equipoService.getEquiposByProceso(proceso).subscribe({
+  obtenerEquiposPorProceso(procesoId: number) {
+    this.equipoService.getEquiposByProcesoId(procesoId).subscribe({
       next: (data) => {
         this.equiposProceso = data;
 
@@ -337,8 +337,8 @@ export class PrincipalGraficoScoopsComponent implements OnInit {
     });
   }
 
-  obtenerEstadosPorProceso(proceso: string) {
-    this.estadoService.getEstadosByProceso(proceso).subscribe({
+  obtenerEstadosPorProceso(procesoId: number) {
+    this.estadoService.getEstadosByProcesoId(procesoId).subscribe({
       next: (data) => {
         this.estadosProceso = data;
         //console.log('Estados por proceso:', data);
@@ -3355,8 +3355,9 @@ export class PrincipalGraficoScoopsComponent implements OnInit {
       const seccion = getSeccionNombre(op.seccion);
       const key = `${modeloEquipo}|${seccion}`;
 
+      console.log(this.equiposProceso);
       const equipoData = this.equiposProceso.find(
-        (e: any) =>
+        (e) =>
           e.nombre === op.equipo?.nombre &&
           e.codigo === getOperacionEquipoCodigo(op),
       );

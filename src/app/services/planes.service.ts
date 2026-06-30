@@ -9,38 +9,68 @@ import { Ley } from '../models/Ley';
 import { PlanProduccion } from '../models/PlanProduccion';
 import { PlanAvanceTH } from '../models/PlanAvanceTH';
 
-export type PlanMetrajeTlPayload = Pick<
-  PlanMetrajeTL,
-  | 'labor_id'
-  | 'periodo_id'
-  | 'turno_id'
-  | 'ley_id'
-  | 'proceso_id'
-  | 'dia'
-  | 'valor'
->;
+export type PlanMetrajeTlPayload = {
+  anio: number;
+  mes: string;
+  semana: string;
+  mina: string;
+  zona: string;
+  area: string;
+  fase: string;
+  tipo_minado: string;
+  tipo_labor: string;
+  estructura_mineralizada: string;
+  nivel: string;
+  nombre_labor: string;
+  ala: string;
+  ancho_veta_metros: number;
+  ancho_minado_sem_metros: number;
+};
+
+export interface PlanImportResult {
+  processed_rows: number;
+  updated_rows: number;
+  skipped_rows: number;
+  errors: string[];
+}
 
 export type PlanAvanceTHPayload = Pick<
   PlanAvanceTH,
   | 'labor_id'
   | 'periodo_id'
-  | 'turno_id'
-  | 'ley_id'
   | 'proceso_id'
-  | 'dia'
-  | 'valor'
+  | 'avance_metros'
+  | 'ancho_metros'
+  | 'alto_metros'
+  | 'tms'
 >;
 
-export type PlanProduccionPayload = Pick<
-  PlanProduccion,
-  | 'labor_id'
-  | 'periodo_id'
-  | 'turno_id'
-  | 'ley_id'
-  | 'proceso_id'
-  | 'dia'
-  | 'valor'
->;
+export type PlanProduccionPayload = {
+  anio: number;
+  mes: string;
+  semana: string;
+  mina: string;
+  zona: string;
+  area: string;
+  fase: string;
+  tipo_minado: string;
+  tipo_labor: string;
+  estructura_mineralizada: string;
+  nivel: string;
+  nombre_labor: string;
+  ala: string;
+  ancho_veta_metros: number;
+  ancho_minado_sem_metros: number;
+  ancho_minado_mes_metros: number;
+  ag_gr: number;
+  porcentaje_cu: number;
+  porcentaje_pb: number;
+  porcentaje_zn: number | null;
+  vpt_actual: number;
+  vpt_final: number;
+  cut_off_1: number;
+  cut_off_2: number;
+};
 
 @Injectable({
   providedIn: 'root',
@@ -74,6 +104,22 @@ export class PlanesService {
 
   deletePlanMetrajeTl(id: number): Observable<void> {
     return this.apiService.deleteDatos(`${this.baseUrlMetrajeTL}/${id}`);
+  }
+
+  importarExcelPlanMetrajeTl(file: File): Observable<PlanImportResult> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.apiService.postFormData(`${this.baseUrlMetrajeTL}/import`, formData);
+  }
+  importarExcelPlanAvanceTH(file: File): Observable<PlanImportResult> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.apiService.postFormData(`${this.baseUrlAvanceTH}/import`, formData);
+  }
+  importarExcelPlanProduccion(file: File): Observable<PlanImportResult> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.apiService.postFormData(`${this.baseUrlProduccion}/import`, formData);
   }
 
   getPlanesAvanceTH(periodoId?: number | null): Observable<PlanAvanceTH[]> {

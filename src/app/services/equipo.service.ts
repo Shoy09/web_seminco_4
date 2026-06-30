@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Equipo } from '../models/Equipo';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class EquipoService {
   private baseUrl = 'Equipo';
@@ -21,27 +21,30 @@ export class EquipoService {
   }
 
   createEquipo(equipo: Equipo): Observable<Equipo> {
-    return this.apiService.postDatos(`${this.baseUrl}/`, equipo).pipe(
-      tap(() => this.equiposActualizados.next(true))
-    );
+    return this.apiService
+      .postDatos(`${this.baseUrl}/`, equipo)
+      .pipe(tap(() => this.equiposActualizados.next(true)));
   }
 
   updateEquipo(id: number, equipo: Equipo): Observable<Equipo> {
-    return this.apiService.putDatos(`${this.baseUrl}/${id}`, equipo).pipe(
-      tap(() => this.equiposActualizados.next(true))
-    );
+    return this.apiService
+      .putDatos(`${this.baseUrl}/${id}`, equipo)
+      .pipe(tap(() => this.equiposActualizados.next(true)));
   }
 
   deleteEquipo(id: number): Observable<any> {
-    return this.apiService.deleteDatos(`${this.baseUrl}/${id}`).pipe(
-      tap(() => this.equiposActualizados.next(true))
-    );
+    return this.apiService
+      .deleteDatos(`${this.baseUrl}/${id}`)
+      .pipe(tap(() => this.equiposActualizados.next(true)));
   }
 
   getEquiposActualizados(): Observable<boolean> {
     return this.equiposActualizados.asObservable();
   }
   getEquiposByProceso(proceso: string): Observable<Equipo[]> {
-  return this.apiService.getDatos(`${this.baseUrl}/proceso/${proceso}`);
-}
+    return this.apiService.getDatos(`${this.baseUrl}/proceso/${proceso}`);
+  }
+  getEquiposByProcesoId(procesoId: number): Observable<Equipo[]> {
+    return this.apiService.getDatos(`${this.baseUrl}/proceso-id/${procesoId}`);
+  }
 }

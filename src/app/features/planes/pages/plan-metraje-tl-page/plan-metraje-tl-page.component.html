@@ -5,7 +5,7 @@
         <div class="max-w-3xl">
           <h1 class="mt-4 text-3xl font-black">Plan Metraje TL</h1>
           <p class="mt-2 text-sm text-white/80">
-            Administra el plan diario de metraje TL por labor, periodo, turno, ley y proceso.
+            Administra el plan de metraje TL con su ubicacion, clasificacion y anchos de minado.
           </p>
         </div>
 
@@ -33,7 +33,7 @@
               pInputText
               type="text"
               [(ngModel)]="busqueda"
-              placeholder="Labor, ley, proceso, dia o valor"
+              placeholder="Labor, mina, zona, fase, tipo labor o estructura"
               class="w-full !rounded-2xl !border-border !pl-10"
               (ngModelChange)="aplicarFiltros()"
             />
@@ -48,20 +48,6 @@
             optionLabel="label"
             optionValue="value"
             placeholder="Todos los procesos"
-            styleClass="w-full"
-            appendTo="body"
-            (onChange)="aplicarFiltros()"
-          ></p-select>
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <label class="text-sm font-bold text-ink">Turno</label>
-          <p-select
-            [options]="turnoFiltroOptions"
-            [(ngModel)]="turnoFiltro"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Todos los turnos"
             styleClass="w-full"
             appendTo="body"
             (onChange)="aplicarFiltros()"
@@ -87,6 +73,26 @@
         <p-button
           pButton
           type="button"
+          label="Seleccionar Excel"
+          icon="pi pi-file-excel"
+          severity="success"
+          (click)="abrirSelectorExcel(excelInput)"
+        />
+
+        <p-button
+          pButton
+          type="button"
+          label="Enviar Excel"
+          icon="pi pi-upload"
+          severity="contrast"
+          [disabled]="!excelSeleccionado || uploadingExcel"
+          [loading]="uploadingExcel"
+          (click)="enviarExcel()"
+        />
+
+        <p-button
+          pButton
+          type="button"
           label="Limpiar"
           icon="pi pi-filter-slash"
           severity="secondary"
@@ -100,6 +106,38 @@
           icon="pi pi-plus"
           (click)="abrirNuevoPlan()"
         />
+      </div>
+    </div>
+
+    <input
+      #excelInput
+      type="file"
+      accept=".xlsx,.xls"
+      class="hidden"
+      (change)="onExcelSeleccionado($event)"
+    />
+
+    <p *ngIf="excelSeleccionado" class="mt-4 text-sm text-ink-75">
+      Archivo seleccionado: <span class="font-semibold text-ink">{{ excelSeleccionado.name }}</span>
+    </p>
+
+    <div *ngIf="resultadoImportacion" class="mt-4 rounded-2xl border border-border bg-primary-25 p-4">
+      <div class="flex flex-col gap-2 text-sm text-ink">
+        <p class="font-bold text-secondary">Resultado de importacion</p>
+        <p>
+          Procesadas: <span class="font-semibold">{{ resultadoImportacion.processed_rows }}</span>
+          | Actualizadas: <span class="font-semibold">{{ resultadoImportacion.updated_rows }}</span>
+          | Omitidas: <span class="font-semibold">{{ resultadoImportacion.skipped_rows }}</span>
+        </p>
+      </div>
+
+      <div *ngIf="resultadoImportacion.errors.length > 0" class="mt-4">
+        <p class="text-sm font-bold text-danger">Errores detectados</p>
+        <div class="mt-2 max-h-64 overflow-auto rounded-xl border border-border bg-surface p-3">
+          <ul class="space-y-2 text-sm text-ink-75">
+            <li *ngFor="let error of resultadoImportacion.errors">{{ error }}</li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
@@ -118,21 +156,19 @@
       [showCurrentPageReport]="true"
       currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} registros"
       responsiveLayout="scroll"
-      [tableStyle]="{ 'min-width': '88rem' }"
+      [tableStyle]="{ 'min-width': '90rem' }"
       styleClass="tabla-header-primary rounded-xl overflow-hidden"
       [rowHover]="true"
     >
       <ng-template pTemplate="header">
         <tr>
           <th class="w-24 text-left">ID</th>
-          <th class="text-left">Labor</th>
+          <th class="w-px whitespace-nowrap text-left">Labor</th>
           <th class="text-left">Periodo</th>
-          <th class="text-left">Turno</th>
-          <th class="text-left">Ley</th>
-          <th class="text-left">Proceso</th>
-          <th class="text-left">Dia</th>
-          <th class="text-left">Valor</th>
-          <th class="text-left">Actualizado</th>
+          <th class="text-left">Ubicacion</th>
+          <th class="text-left">Clasificacion</th>
+          <th class="text-left">Anchos</th>
+          <!-- <th class="text-left">Actualizado</th> -->
           <th class="w-40 text-center">Acciones</th>
         </tr>
       </ng-template>
@@ -147,16 +183,20 @@
             </div>
           </td>
           <td>
-            <span class="inline-flex rounded-full bg-primary-25 px-3 py-1 text-xs font-bold text-secondary">
+            <span class="inline-flex rounded-xl bg-primary-25 px-3 py-1 text-xs font-bold text-secondary whitespace-pre-line">
               {{ getPeriodoLabel(plan.periodo_id) }}
             </span>
           </td>
-          <td>{{ plan.turno_nombre }}</td>
-          <td>{{ plan.ley_nombre }}</td>
-          <td>{{ plan.proceso_nombre }}</td>
-          <td>{{ plan.dia }}</td>
-          <td class="font-semibold text-ink">{{ plan.valor }}</td>
-          <td>{{ getFechaLabel(plan.updated_at) }}</td>
+          <td>{{ getUbicacionLabel(plan) || 'Sin ubicacion' }}</td>
+          <td>{{ getClasificacionLabel(plan) || 'Sin clasificacion' }}</td>
+          <td>
+            <div class="flex flex-col gap-1 text-sm">
+              <span>Veta: {{ plan.ancho_veta_metros }}</span>
+              <span>Sem: {{ plan.ancho_minado_sem_metros }}</span>
+              <span>Mes: {{ plan.ancho_minado_mes_metros }}</span>
+            </div>
+          </td>
+          <!-- <td>{{ getFechaLabel(plan.updated_at) }}</td> -->
           <td class="text-center">
             <div class="flex justify-center gap-2">
               <p-button
@@ -181,7 +221,7 @@
 
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="10" class="py-12 text-center text-sm text-ink-75">
+          <td colspan="9" class="py-12 text-center text-sm text-ink-75">
             No hay planes de metraje TL registrados para los filtros actuales.
           </td>
         </tr>
@@ -196,7 +236,7 @@
   [draggable]="false"
   [resizable]="false"
   [dismissableMask]="false"
-  [style]="{ width: 'min(58rem, 96vw)' }"
+  [style]="{ width: 'min(72rem, 96vw)' }"
   (onHide)="cerrarDialog()"
 >
   <ng-template pTemplate="header">
@@ -209,103 +249,80 @@
   </ng-template>
 
   <form class="space-y-5" (ngSubmit)="guardarPlan()">
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">Labor</label>
-        <p-select
-          [options]="laborOptions"
-          [(ngModel)]="form.labor_id"
-          name="labor_id"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Seleccione una labor"
-          styleClass="w-full"
-          appendTo="body"
-          [loading]="loadingCatalogos"
-        ></p-select>
+        <label class="text-sm font-bold text-ink">Año</label>
+        <input pInputText type="number" name="anio" [(ngModel)]="form.anio" placeholder="Ingrese el año" />
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">Periodo</label>
-        <p-select
-          [options]="periodoOptions"
-          [(ngModel)]="form.periodo_id"
-          name="periodo_id"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Seleccione un periodo"
-          styleClass="w-full"
-          appendTo="body"
-          [loading]="loadingCatalogos"
-        ></p-select>
+        <label class="text-sm font-bold text-ink">Mes</label>
+        <input pInputText type="text" name="mes" [(ngModel)]="form.mes" placeholder="Ejemplo: JUNIO" />
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">Turno</label>
-        <p-select
-          [options]="turnoOptions"
-          [(ngModel)]="form.turno_id"
-          name="turno_id"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Seleccione un turno"
-          styleClass="w-full"
-          appendTo="body"
-          [loading]="loadingCatalogos"
-        ></p-select>
+        <label class="text-sm font-bold text-ink">Semana</label>
+        <input pInputText type="text" name="semana" [(ngModel)]="form.semana" placeholder="Ejemplo: 24" />
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">Ley</label>
-        <p-select
-          [options]="leyOptions"
-          [(ngModel)]="form.ley_id"
-          name="ley_id"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Seleccione una ley"
-          styleClass="w-full"
-          appendTo="body"
-          [loading]="loadingCatalogos"
-        ></p-select>
-      </div>
-
-      <div class="flex flex-col gap-2 md:col-span-2">
-        <label class="text-sm font-bold text-ink">Proceso</label>
-        <p-select
-          [options]="procesoOptions"
-          [(ngModel)]="form.proceso_id"
-          name="proceso_id"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Seleccione un proceso"
-          styleClass="w-full"
-          appendTo="body"
-          [loading]="loadingCatalogos"
-        ></p-select>
+        <label class="text-sm font-bold text-ink">Mina</label>
+        <input pInputText type="text" name="mina" [(ngModel)]="form.mina" placeholder="Ingrese la mina" />
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">Dia</label>
-        <input
-          pInputText
-          type="number"
-          name="dia"
-          [(ngModel)]="form.dia"
-          placeholder="Ingrese el dia"
-        />
+        <label class="text-sm font-bold text-ink">Zona</label>
+        <input pInputText type="text" name="zona" [(ngModel)]="form.zona" placeholder="Ingrese la zona" />
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-bold text-ink">Valor</label>
-        <input
-          pInputText
-          type="number"
-          step="0.01"
-          name="valor"
-          [(ngModel)]="form.valor"
-          placeholder="Ingrese el valor"
-        />
+        <label class="text-sm font-bold text-ink">Area</label>
+        <input pInputText type="text" name="area" [(ngModel)]="form.area" placeholder="Ingrese el area" />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Fase</label>
+        <input pInputText type="text" name="fase" [(ngModel)]="form.fase" placeholder="Ingrese la fase" />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Tipo minado</label>
+        <input pInputText type="text" name="tipo_minado" [(ngModel)]="form.tipo_minado" placeholder="Ingrese el tipo de minado" />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Tipo labor</label>
+        <input pInputText type="text" name="tipo_labor" [(ngModel)]="form.tipo_labor" placeholder="Ingrese el tipo de labor" />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Estructura mineralizada</label>
+        <input pInputText type="text" name="estructura_mineralizada" [(ngModel)]="form.estructura_mineralizada" placeholder="Ingrese la estructura mineralizada" />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Nivel</label>
+        <input pInputText type="text" name="nivel" [(ngModel)]="form.nivel" placeholder="Ingrese el nivel" />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Nombre de labor</label>
+        <input pInputText type="text" name="nombre_labor" [(ngModel)]="form.nombre_labor" placeholder="Ingrese el nombre de la labor" />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Ala</label>
+        <input pInputText type="text" name="ala" [(ngModel)]="form.ala" placeholder="Ingrese el ala" />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Ancho de veta (m)</label>
+        <input pInputText type="number" step="0.01" name="ancho_veta_metros" [(ngModel)]="form.ancho_veta_metros" placeholder="Ingrese el ancho de veta" />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-ink">Ancho de minado sem (m)</label>
+        <input pInputText type="number" step="0.01" name="ancho_minado_sem_metros" [(ngModel)]="form.ancho_minado_sem_metros" placeholder="Ingrese el ancho de minado semanal" />
       </div>
     </div>
 

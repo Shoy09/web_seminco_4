@@ -108,7 +108,8 @@ export class MenuComponent {
       label: 'Carga de Datos',
       icon: 'pi pi-database',
       items: [
-        { label: 'Equipos', routerLink: ['/carga/equipos'] }, 
+        { label: 'Horómetros', routerLink: ['/carga/horometros'] },
+        { label: 'Equipos', routerLink: ['/carga/equipos'] },
         { label: 'Labores', routerLink: ['/carga/labores'] },
         { label: 'Periodos', routerLink: ['/carga/periodos'] },
         { label: 'Procesos', routerLink: ['/carga/procesos'] },
@@ -116,6 +117,7 @@ export class MenuComponent {
         { label: 'Tipos de Perforación', routerLink: ['/carga/tipo-perforaciones'] },
         { label: 'Estados', routerLink: ['/carga/estados'] },
         { label: 'Crear Data', routerLink: ['/carga/crear-data'] },
+        { label: 'Checklist categorias', routerLink: ['/carga/checklist-categorias'] },
         { label: 'Checklist', routerLink: ['/carga/checklist'] },
         {
           label: 'Checklist Carguío',
