@@ -108,7 +108,7 @@ export class MenuComponent {
       label: 'Carga de Datos',
       icon: 'pi pi-database',
       items: [
-        { label: 'Horómetros', routerLink: ['/carga/horometros'] },
+        { label: 'Horómetros', routerLink: ['/carga/tipo-horometros'] },
         { label: 'Equipos', routerLink: ['/carga/equipos'] },
         { label: 'Labores', routerLink: ['/carga/labores'] },
         { label: 'Periodos', routerLink: ['/carga/periodos'] },

@@ -417,3 +417,21 @@ export function distribuirValorPorRangosHora(
 
   return distribucion;
 }
+
+
+export function calcularDuracionHoras(horaInicio: string, horaFinal: string): number {
+    if (!horaInicio || !horaFinal) return 0;
+
+    const [h1, m1] = horaInicio.split(':').map(Number);
+    const [h2, m2] = horaFinal.split(':').map(Number);
+
+    const inicio = h1 * 60 + m1;
+    let fin = h2 * 60 + m2;
+
+    // cruzo la medianoche (ej. 19:00 → 05:30)
+    if (fin < inicio) {
+      fin += 24 * 60;
+    }
+
+    return (fin - inicio) / 60; // en horas
+  }

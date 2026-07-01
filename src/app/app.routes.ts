@@ -33,7 +33,7 @@ import { PlanMetrajeTlPageComponent } from './features/planes/pages/plan-metraje
 import { PlanAvanceThPageComponent } from './features/planes/pages/plan-avance-th-page/plan-avance-th-page.component';
 import { PlanProduccionPageComponent } from './features/planes/pages/plan-produccion-page/plan-produccion-page.component';
 import { ChecklistCategoriasPageComponent } from './features/sistema/pages/checklist-categorias-page/checklist-categorias-page.component';
-import { HorometrosPageComponent } from './features/sistema/pages/horometros-page/horometros-page.component';
+import { TiposHorometrosPageComponent } from './features/sistema/pages/tipos-horometros-page/tipos-horometros-page.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -106,7 +106,7 @@ export const routes: Routes = [
       {
         path: 'carga',
         children: [
-          { path: 'horometros', component: HorometrosPageComponent },
+          { path: 'tipo-horometros', component: TiposHorometrosPageComponent },
           { path: 'equipos', component: EquiposPageComponent },
           { path: 'labores', component: LaboresPageComponent },
           { path: 'periodos', component: PeriodosPageComponent },

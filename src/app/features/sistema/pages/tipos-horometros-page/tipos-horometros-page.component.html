@@ -1,0 +1,179 @@
+<div class="space-y-5">
+  <section class="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
+    <div class="bg-gradient-to-r from-secondary via-secondary-75 to-primary p-6 text-white">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="max-w-3xl">
+          <h1 class="mt-4 text-3xl font-black">Tipos de Horómetro</h1>
+          <p class="mt-2 text-sm text-white/80">
+            Administra el catalogo de tipos de horometro disponibles para los equipos.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-sm">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
+            <i class="pi pi-wrench text-xl text-white"></i>
+          </div>
+          <div>
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-white/75">Registros</p>
+            <p class="text-2xl font-black">{{ horometrosFiltrados.length }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm">
+    <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+      <div class="flex-1">
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-bold text-ink">Buscar</label>
+          <span class="relative">
+            <i class="pi pi-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-50"></i>
+            <input
+              pInputText
+              type="text"
+              [(ngModel)]="busqueda"
+              placeholder="Nombre del tipo de horometro"
+              class="w-full !rounded-2xl !border-border !pl-10"
+              (ngModelChange)="aplicarFiltros()"
+            />
+          </span>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <p-button
+          pButton
+          type="button"
+          label="Limpiar"
+          icon="pi pi-filter-slash"
+          severity="secondary"
+          (click)="limpiarFiltros()"
+        />
+
+        <p-button
+          pButton
+          type="button"
+          label="Nuevo tipo"
+          icon="pi pi-plus"
+          (click)="abrirNuevo()"
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="rounded-3xl border border-border bg-surface p-5 shadow-sm">
+    <div *ngIf="loading" class="flex min-h-64 items-center justify-center">
+      <p-progressSpinner strokeWidth="4" ariaLabel="Cargando tipos de horometro"></p-progressSpinner>
+    </div>
+
+    <p-table
+      *ngIf="!loading"
+      [value]="horometrosFiltrados"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} registros"
+      responsiveLayout="scroll"
+      [tableStyle]="{ 'min-width': '40rem' }"
+      styleClass="tabla-header-primary rounded-xl overflow-hidden"
+      [rowHover]="true"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="w-20 text-left">ID</th>
+          <th class="text-left">Nombre</th>
+          <th class="w-40 text-center">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-item>
+        <tr>
+          <td class="font-semibold text-secondary">{{ item.id }}</td>
+          <td>
+            <span class="font-medium text-ink">{{ item.nombre }}</span>
+          </td>
+          <td class="text-center">
+            <div class="flex justify-center gap-2">
+              <p-button
+                type="button"
+                icon="pi pi-pencil"
+                severity="info"
+                [rounded]="true"
+                (click)="editar(item)"
+              />
+
+              <p-button
+                type="button"
+                icon="pi pi-trash"
+                severity="danger"
+                [rounded]="true"
+                (click)="eliminar(item)"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="3" class="py-12 text-center text-sm text-ink-75">
+            No hay tipos de horometro registrados.
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+</div>
+
+<p-dialog
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="false"
+  [style]="{ width: 'min(32rem, 96vw)' }"
+  (onHide)="cerrarDialog()"
+>
+  <ng-template pTemplate="header">
+    <div>
+      <h2 class="text-xl font-extrabold text-secondary">{{ tituloDialog }}</h2>
+      <p class="mt-1 text-sm text-ink-75">
+        {{ editingId === null ? 'Registra un nuevo tipo de horometro.' : 'Actualiza el nombre del tipo de horometro.' }}
+      </p>
+    </div>
+  </ng-template>
+
+  <form class="space-y-5" (ngSubmit)="guardar()">
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-bold text-ink">Nombre</label>
+      <input
+        pInputText
+        type="text"
+        name="nombre"
+        [(ngModel)]="nombre"
+        placeholder="Ingrese el nombre del tipo de horometro"
+      />
+    </div>
+
+    <div class="flex justify-end gap-2 border-t border-border pt-4">
+      <button
+        pButton
+        type="button"
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (click)="cerrarDialog()"
+      ></button>
+
+      <button
+        pButton
+        type="submit"
+        [label]="editingId === null ? 'Guardar' : 'Actualizar'"
+        icon="pi pi-save"
+        [loading]="saving"
+      ></button>
+    </div>
+  </form>
+</p-dialog>

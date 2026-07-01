@@ -1,3 +1,5 @@
+import { TipoHorometro } from "./TipoHorometro";
+
 export interface Equipo {
   id: number;
   nombre: string;
@@ -11,10 +13,7 @@ export interface Equipo {
   capacidadYd3?: number | null;
   capacidadM3?: number | null;
   proceso_id: number;
-  horometros?: EquipoHorometro[];
+  horometros?: TipoHorometro[];
   horometro_ids?: number[];
 }
-export interface EquipoHorometro {
-  id: number;
-  nombre: string;
-}
+

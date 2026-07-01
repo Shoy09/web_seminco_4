@@ -111,7 +111,7 @@ import {
   DisparosTipoPerforacionChartComponent,
   DisparosTipoPerforacionItem,
 } from '../../../../../features/dashboard/components/disparos-tipo-perforacion-chart/disparos-tipo-perforacion-chart.component';
-import { formatearFechaYYYYMMDD } from '../../../../../utils/fecha-utils';
+import { calcularDuracionHoras, formatearFechaYYYYMMDD } from '../../../../../utils/fecha-utils';
 import {
   getOperacionEquipoCodigo,
   getOperacionEquipoModelo,
@@ -1361,7 +1361,36 @@ export class PrincipalGraficoLargoComponent implements OnInit {
   // 🔥 PROCESAMIENTO TOTAL
   // =========================================
   procesarTodo() {
-    if (!this.operacionesFiltradas.length) return;
+    if (!this.operacionesFiltradas.length) {
+      this.dataDisparosEquipo = [];
+      this.dataDisparosDia = [];
+      this.dataIndicadoresEquipo = [];
+      this.dataDemorasOperativas = [];
+      this.dataHorasNoOperativas = [];
+      this.dataHorasMantenimiento = [];
+      this.dataParetoHorasOperativas = [];
+      this.dataParetoHorasNoOperativas = [];
+      this.dataParetoHorasMantenimiento = [];
+      this.dataMetrosPerforadosDisparo = [];
+      this.dataPerforadoEquipo = [];
+      this.dataRendimientoEquipo = [];
+      this.dataMhrEquipo = [];
+      this.dataHorometrosJumbos = [];
+      this.dataPromedioPrimeraPerfDiaFR = [];
+      this.dataPromedioPrimeraPerfDiaFRPorFecha = [];
+      this.dataPromedioUltimaPerfDiaFR = [];
+      this.dataPromedioUltimaPerfDiaFRPorFecha = [];
+      this.dataProcesoLaborFR = [];
+      this.dataPercusionConMetrosJumbos = [];
+      this.dataFrPorOperadorTurno = [];
+      this.dataTipoPerforacion = [];
+      this.datadetalleDisparos = [];
+      this.dataHorasNumericas = [];
+      this.dataObservaciones = [];
+      this.resumen = [];
+      this.datosGraficoEstados = [];
+      return;
+    }
 
     this.dataDisparosEquipo = this.procesarDisparosEquipo(); // 👈 NUEVO
     this.dataDisparosDia = this.procesarDisparosDia();
@@ -1569,7 +1598,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
         for (const r of registrosArray) {
           if (!r.hora_inicio || !r.hora_final) continue;
 
-          const duracion = this.calcularDuracionHoras(
+          const duracion = calcularDuracionHoras(
             r.hora_inicio,
             r.hora_final,
           );
@@ -1647,19 +1676,6 @@ export class PrincipalGraficoLargoComponent implements OnInit {
         UTI_FR: Number(utilizacionOperativa.toFixed(3)),
       };
     });
-  }
-
-  private calcularHorasEfectivas(
-    registrosArray: Registro<OperacionTLargos>[],
-  ): number {
-    if (!Array.isArray(registrosArray)) return 0;
-    let total = 0;
-    for (const r of registrosArray) {
-      if (r.estado !== 'OPERATIVO') continue;
-      if (!r.hora_inicio || !r.hora_final) continue;
-      total += this.calcularDuracionHoras(r.hora_inicio, r.hora_final);
-    }
-    return total;
   }
 
   private obtenerMetrosPerforadosRegistro(operacion: OperacionTLargos): number {
@@ -1913,18 +1929,6 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     });
   }
 
-  calcularDuracionHoras(horaInicio: string, horaFinal: string): number {
-    if (!horaInicio || !horaFinal) return 0;
-
-    const [h1, m1] = horaInicio.split(':').map(Number);
-    const [h2, m2] = horaFinal.split(':').map(Number);
-
-    const inicio = h1 * 60 + m1;
-    const fin = h2 * 60 + m2;
-
-    return (fin - inicio) / 60; // en horas
-  }
-
   calcularDuracionPorEstado(
     registros: any[],
     estadoBuscado: string,
@@ -1936,7 +1940,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
       if (r.estado === estadoBuscado) {
         if (codigo && r.codigo !== codigo) continue;
 
-        total += this.calcularDuracionHoras(r.hora_inicio, r.hora_final);
+        total += calcularDuracionHoras(r.hora_inicio, r.hora_final);
       }
     }
 
@@ -1973,7 +1977,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
         const tipo = tiposEstados[r.codigo];
         if (!tipo) return;
 
-        const duracion = this.calcularDuracionHoras(
+        const duracion = calcularDuracionHoras(
           r.hora_inicio,
           r.hora_final!,
         );
@@ -2069,7 +2073,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
         const tipo = tiposEstados[r.codigo];
         if (!tipo) return;
 
-        const duracion = this.calcularDuracionHoras(
+        const duracion = calcularDuracionHoras(
           r.hora_inicio,
           r.hora_final!,
         );
@@ -2165,7 +2169,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
         const tipo = tiposEstados[r.codigo];
         if (!tipo) return;
 
-        const duracion = this.calcularDuracionHoras(
+        const duracion = calcularDuracionHoras(
           r.hora_inicio,
           r.hora_final!,
         );
@@ -2270,7 +2274,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
         if (!filterFn(codigo)) continue;
         if (!registro.hora_inicio || !registro.hora_final) continue;
 
-        const horas = this.calcularDuracionHoras(
+        const horas = calcularDuracionHoras(
           registro.hora_inicio,
           registro.hora_final,
         );
@@ -2433,7 +2437,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
       }
 
       // 🔥 FIX AQUÍ
-      const perc = (op as any)?.horometros?.percusion;
+      const perc = op?.horometros?.percusion;
 
       const inicio = Number(perc?.inicio);
       const final = Number(perc?.final);

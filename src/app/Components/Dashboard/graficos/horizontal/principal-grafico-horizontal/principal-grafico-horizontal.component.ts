@@ -84,6 +84,7 @@ import {
   OpcionFiltroDashboard,
 } from '../../../../../features/dashboard/models/dashboard-filtros.model';
 import {
+  calcularDuracionHoras,
   convertirNumero,
   formatearFecha,
 } from '../../../../../utils/fecha-utils';
@@ -267,7 +268,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
   vistaPrincipal: boolean = true;
   estadosProceso: any[] = [];
 
-  ESTADOS_OPERATIVOS = ['201', '202', '203', '204', '205', '207', '208', '211'];
+  ESTADOS_OPERATIVOS = ['101', '102', '111', '112', '120'];
   ESTADOS_NO_OPERATIVOS = [
     '209',
     '210',
@@ -647,12 +648,12 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
     this.operacionesFiltradas.forEach((op) => {
       try {
-        const registrosArray = op.registros as
-          | Registro<OperacionJumbo>[]
-          | undefined;
+        const registrosArray = op.registros;
 
         if (Array.isArray(registrosArray) && registrosArray.length > 0) {
+          console.log(registrosArray);
           const conteoTipos = this.contarFrentesPorTipo(registrosArray);
+          console.log(conteoTipos);
           const totalFrentes = Object.values(conteoTipos).reduce(
             (a, b) => a + b,
             0,
@@ -716,7 +717,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
         for (const r of registrosArray) {
           if (!r.hora_inicio || !r.hora_final) continue;
 
-          const duracion = this.calcularDuracionHoras(
+          const duracion = calcularDuracionHoras(
             r.hora_inicio,
             r.hora_final,
           );
@@ -794,17 +795,6 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
         UTI_FR: Number(utilizacionOperativa.toFixed(3)),
       };
     });
-  }
-
-  private calcularHorasEfectivas(registrosArray: any[]): number {
-    if (!Array.isArray(registrosArray)) return 0;
-    let total = 0;
-    for (const r of registrosArray) {
-      if (r.estado !== 'OPERATIVO') continue;
-      if (!r.hora_inicio || !r.hora_final) continue;
-      total += this.calcularDuracionHoras(r.hora_inicio, r.hora_final);
-    }
-    return total;
   }
 
   private esDisparoHorizontal(registro: Registro<OperacionJumbo>): boolean {
@@ -1068,18 +1058,6 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
     });
   }
 
-  calcularDuracionHoras(horaInicio: string, horaFinal: string): number {
-    if (!horaInicio || !horaFinal) return 0;
-
-    const [h1, m1] = horaInicio.split(':').map(Number);
-    const [h2, m2] = horaFinal.split(':').map(Number);
-
-    const inicio = h1 * 60 + m1;
-    const fin = h2 * 60 + m2;
-
-    return (fin - inicio) / 60; // en horas
-  }
-
   calcularDuracionPorEstado(
     registros: any[],
     estadoBuscado: string,
@@ -1091,7 +1069,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
       if (r.estado === estadoBuscado) {
         if (codigo && r.codigo !== codigo) continue;
 
-        total += this.calcularDuracionHoras(r.hora_inicio, r.hora_final);
+        total += calcularDuracionHoras(r.hora_inicio, r.hora_final);
       }
     }
 
@@ -1126,7 +1104,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
         if (!registro.hora_inicio || !registro.hora_final) continue;
 
-        const horas = this.calcularDuracionHoras(
+        const horas = calcularDuracionHoras(
           registro.hora_inicio,
           registro.hora_final,
         );
@@ -1216,7 +1194,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
         if (!registro.hora_inicio || !registro.hora_final) continue;
 
-        const horas = this.calcularDuracionHoras(
+        const horas = calcularDuracionHoras(
           registro.hora_inicio,
           registro.hora_final,
         );
@@ -1347,7 +1325,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
         const tipo = tiposEstados[r.codigo];
         if (!tipo) return;
 
-        const duracion = this.calcularDuracionHoras(
+        const duracion = calcularDuracionHoras(
           r.hora_inicio,
           r.hora_final!,
         );
@@ -1441,7 +1419,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
         if (!registro.hora_inicio || !registro.hora_final) continue;
 
-        const horas = this.calcularDuracionHoras(
+        const horas = calcularDuracionHoras(
           registro.hora_inicio,
           registro.hora_final,
         );
@@ -1530,7 +1508,7 @@ export class PrincipalGraficoHorizontalComponent implements OnInit {
 
         if (!registro.hora_inicio || !registro.hora_final) continue;
 
-        const horas = this.calcularDuracionHoras(
+        const horas = calcularDuracionHoras(
           registro.hora_inicio,
           registro.hora_final,
         );

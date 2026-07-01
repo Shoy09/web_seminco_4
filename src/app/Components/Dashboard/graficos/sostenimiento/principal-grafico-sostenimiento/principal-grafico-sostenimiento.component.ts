@@ -91,7 +91,7 @@ import {
   FiltrosDashboard,
   OpcionFiltroDashboard,
 } from '../../../../../features/dashboard/models/dashboard-filtros.model';
-import { formatearFechaYYYYMMDD } from '../../../../../utils/fecha-utils';
+import { calcularDuracionHoras, formatearFechaYYYYMMDD } from '../../../../../utils/fecha-utils';
 import { OperacionSostenimiento } from '../../../../../models/OperacionSostenimiento';
 import jsPDF from 'jspdf';
 import { getSeccionNombre } from '../../../../../utils/operacion-display.utils';
@@ -517,14 +517,6 @@ export class PrincipalGraficoSostenimientoComponent implements OnInit {
     return eq && nEq ? `${eq}-${nEq}` : 'SIN_EQUIPO';
   }
 
-  private calcularDuracionHoras(horaInicio: string, horaFinal: string): number {
-    if (!horaInicio || !horaFinal) return 0;
-    const [h1, m1] = horaInicio.split(':').map(Number);
-    const [h2, m2] = horaFinal.split(':').map(Number);
-    const inicio = h1 * 60 + m1;
-    const fin = h2 * 60 + m2;
-    return (fin - inicio) / 60;
-  }
 
   private obtenerActividadPorCodigo(codigo: string): string {
     const estado = this.mapaEstados.get(codigo);
@@ -851,7 +843,7 @@ export class PrincipalGraficoSostenimientoComponent implements OnInit {
         for (const r of registrosArray) {
           if (!r.hora_inicio || !r.hora_final) continue;
 
-          const duracion = this.calcularDuracionHoras(
+          const duracion = calcularDuracionHoras(
             r.hora_inicio,
             r.hora_final,
           );
@@ -947,7 +939,7 @@ export class PrincipalGraficoSostenimientoComponent implements OnInit {
         if (!codigo || !codigosValidos.includes(codigo)) continue;
         if (!registro.hora_inicio || !registro.hora_final) continue;
 
-        const horas = this.calcularDuracionHoras(
+        const horas = calcularDuracionHoras(
           registro.hora_inicio,
           registro.hora_final,
         );
