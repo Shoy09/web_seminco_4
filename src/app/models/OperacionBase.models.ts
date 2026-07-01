@@ -13,6 +13,7 @@ export interface OperacionBase<TOperacion = TipoOperacionRegistro> {
   id?: number;
   fecha: string;
   turno: string;
+  turno_id: number;
   operador: string;
   jefe_guardia: string;
   equipo: Equipo;

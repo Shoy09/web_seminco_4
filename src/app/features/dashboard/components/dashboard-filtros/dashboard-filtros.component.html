@@ -95,12 +95,13 @@
     <div class="flex flex-col gap-2">
       <label class="text-sm font-bold text-ink">Turno</label>
       <p-select
-        [options]="turnos"
-        [(ngModel)]="turnoSeleccionado"
+        [options]="turnoOptions"
+        [(ngModel)]="turnoIdSeleccionado"
         optionLabel="label"
         optionValue="value"
         placeholder="Todos"
         [showClear]="true"
+        [loading]="loadingTurnos"
         appendTo="body"
         styleClass="w-full"
       />

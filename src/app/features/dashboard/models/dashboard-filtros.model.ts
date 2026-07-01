@@ -13,4 +13,5 @@ export interface FiltrosDashboard {
   diaSeleccionado: Date | null;
   rangoFechas: Date[] | null;
   turnoSeleccionado: string | null;
+  turnoIdSeleccionado: number | null;
 }

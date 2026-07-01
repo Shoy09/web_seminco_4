@@ -233,7 +233,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
   dataMetrosPerforadosDisparo: MetrosPerforadosDisparoItem[] = [];
 
   // Variables para el filtro de fechas
-  turnoSeleccionado: string = '';
+  turnoIdSeleccionado: number | null = null;
   turnoAplicado: string = '';
   resumen: { label: string; value: number }[] = [];
   tiposFiltro: OpcionFiltroDashboard[] = [
@@ -271,7 +271,6 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     const hoy = this.getFechaHoy();
     this.fechaInicio = hoy;
     this.fechaFin = hoy;
-    this.turnoSeleccionado = this.getTurnoActual();
 
     this.cargarOperaciones();
     this.obtenerEstadosPorProceso(4);
@@ -295,19 +294,17 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     this.semanaSeleccionada = filtros.semanaSeleccionada;
     this.diaSeleccionado = filtros.diaSeleccionado;
     this.rangoFechas = filtros.rangoFechas;
-    this.turnoSeleccionado = filtros.turnoSeleccionado ?? '';
+    this.turnoIdSeleccionado = filtros.turnoIdSeleccionado ?? null;
 
     if (!this.calcularRangoFechas()) {
       return;
     }
 
-    this.turnoAplicado = this.turnoSeleccionado;
-
     this.operacionesFiltradas = this.operacionesOriginal.filter((op) => {
       if (this.fechaInicio && op.fecha < this.fechaInicio) return false;
       if (this.fechaFin && op.fecha > this.fechaFin) return false;
 
-      if (this.turnoAplicado && op.turno !== this.turnoAplicado) return false;
+      if (this.turnoIdSeleccionado !== null && op.turno_id !== this.turnoIdSeleccionado) return false;
 
       return true;
     });
@@ -371,18 +368,6 @@ export class PrincipalGraficoLargoComponent implements OnInit {
   }
 
   mapaEstados: Map<string, any> = new Map();
-
-  private getTurnoActual(): string {
-    const hora = new Date().getHours();
-
-    // Día: 07:00 - 18:59
-    if (hora >= 7 && hora < 19) {
-      return 'DÍA';
-    }
-
-    // Noche: 19:00 - 06:59
-    return 'NOCHE';
-  }
 
   private getFechaHoy(): string {
     const hoy = new Date();
@@ -467,7 +452,7 @@ export class PrincipalGraficoLargoComponent implements OnInit {
     this.fechaInicio = '';
     this.fechaFin = '';
     this.turnoAplicado = '';
-    this.turnoSeleccionado = '';
+    this.turnoIdSeleccionado = null;
 
     this.procesarTodo();
   }
